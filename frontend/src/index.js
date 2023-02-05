@@ -5,7 +5,6 @@ import { Provider } from "react-redux";
 import store from "./app/store";
 import App from "./app/App";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-// import './styles/css/index.css'
 import "./styles/sass/index.scss";
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
