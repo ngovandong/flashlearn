@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { createSearchParams, Link, useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 
-import authService from "../../api-service/authService";
-import cloudinaryService from "../../api-service/cloudinaryService";
+import authService from "../api-service/authService";
+import cloudinaryService from "../api-service/cloudinaryService";
 
 function SignUp() {
   const [firstName, setFirstName] = useState("");

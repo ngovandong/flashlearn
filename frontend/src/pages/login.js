@@ -8,8 +8,8 @@ import {
   selectError,
   setToken,
   setError,
-} from "../../app/store/authSlice";
-import GoogleLoginBT from "../../components/googleLoginBT";
+} from "../app/store/authSlice";
+import GoogleLoginBT from "../components/googleLoginBT";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

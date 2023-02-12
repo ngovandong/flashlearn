@@ -13,3 +13,50 @@
 @import "components/_login-register";
 
 @import "base/media_queries";
+
+
+.main-container {
+    background-color: $app-background;
+    min-height: calc(100vh - $nav-height - 0.5px);
+}
+
+.nav-item {
+    text-decoration: none;
+    color: $main-text-color;
+    font-weight: 600;
+    margin: 0 $normal-font-size;
+    height: 100%;
+    line-height: $nav-height;
+    position: relative;
+}
+
+.nav-item:hover::after {
+    height: 0.25rem;
+    width: 100%;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    bottom: 0;
+    content: " ";
+    left: 0;
+    position: absolute;
+    background-color: $hover-purple;
+}
+
+
+.nav-item--active::after {
+    height: 0.25rem;
+    width: 100%;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    bottom: 0;
+    content: " ";
+    left: 0;
+    position: absolute;
+    background-color: $hover-purple;
+}
+
+.flash-learn-icon{
+    width: 140px;
+    height: 50px;
+    object-fit: cover;
+}

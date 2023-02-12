@@ -5,8 +5,10 @@ import PrivateRoute from "./privateRoute";
 export default function MainContainer() {
   return (
     <PrivateRoute>
-      <NavBar/>
-      <Outlet />
+      <NavBar />
+      <div className="main-container">
+        <Outlet />
+      </div>
     </PrivateRoute>
   );
 }

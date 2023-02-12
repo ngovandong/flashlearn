@@ -2,7 +2,23 @@
 $dark-gray: rgb(55, 53, 47);
 $medium-gray: rgba($dark-gray, 0.4);
 $home-gray: #B6B6B6;
+$yellow: #ffcd1f;
+$orange: #fe984a;
 
+$app-background: #f6f7fb;
+
+$main-purple: #4255ff;
+$dark-purple: #423ed8;
+$hover-purple: #a8b1ff;
+
+// Text colors
+$main-text-color: #282e3e;
+$minor-text-color: #646f90;
+$grey-text-color: #939bb4;
+
+// Shadow
+
+$shadow: 0 0.125rem 0.5rem 0 #30354514;
 
 // Padding
 
@@ -10,3 +26,7 @@ $home-gray: #B6B6B6;
 $normal-font-size: 0.875rem;
 $menu-font-weight: 600;
 $back-up-fonts: "Helvetica, sans-serif";
+
+//size
+
+$nav-height: 64px;

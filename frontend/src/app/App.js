@@ -5,6 +5,8 @@ import Login from "../pages/login";
 import SignUp from "../pages/signup";
 import NotFound from "../pages/notfound";
 import MainContainer from "../components/mainContainer";
+import StudySet from "../pages/studySet";
+import Recent from "../pages/recent";
 
 function App() {
   return (
@@ -12,10 +14,8 @@ function App() {
       <Routes>
         <Route path="" element={<MainContainer />}>
           <Route path="" element={<Home />} />
-          {/* <Route path="workspaces/:workspaceId" element={<Workspace />}>
-            <Route path="" element={<PageNotExist />} />
-            <Route path="pages/:pageId" element={<Page />} />
-          </Route> */}
+          <Route path="study-set" element={<StudySet />} />
+          <Route path="recent" element={<Recent />} />
         </Route>
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignUp />} />

@@ -1,6 +1,7 @@
 import { googleLogout } from "@react-oauth/google";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authService from "../../api-service/authService";
+import { decodeUser } from "../../utils/jwt";
 
 export const login = createAsyncThunk("auth/login", async (user) => {
   const { email, password } = user;
@@ -25,17 +26,21 @@ export const getUser = createAsyncThunk("auth/getUser", async () => {
   const res = await authService.getUser();
   return res;
 });
+
 let tokenString = null;
+let currentWorkspace = null;
+let localUser = null;
 try {
   tokenString = JSON.parse(localStorage.getItem("token"));
+  localUser = decodeUser(tokenString.access).user;
 } catch {}
-let currentWorkspace = null;
+
 try {
   currentWorkspace = JSON.parse(localStorage.getItem("currentWorkspace"));
 } catch {}
 
 const initialState = {
-  user: null,
+  user: localUser,
   token: tokenString,
   error: "",
   currentWorkspace,
@@ -50,6 +55,7 @@ const userSlice = createSlice({
     },
     setToken: (state, action) => {
       state.token = action.payload;
+      state.user = decodeUser(action.payload.access).user;
       localStorage.setItem("token", JSON.stringify(action.payload));
     },
     setCurrentWorkspace: (state, action) => {
