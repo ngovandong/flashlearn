@@ -1,8 +1,8 @@
 import { useGoogleOneTapLogin } from "@react-oauth/google";
 import React from "react";
 import { useDispatch } from "react-redux";
-import { setError, setToken } from "../app/store/authSlice";
-import authService from "../api-service/authService";
+import { setError, setToken } from "@app/store/authSlice";
+import authService from "@api-services/authService";
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 function CustomPopupGoogleLoginBT() {

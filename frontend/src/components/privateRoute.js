@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import history from './history';
-import { selectToken } from '../app/store/authSlice';
+import { selectToken } from '@app/store/authSlice';
 
 function PrivateRoute({ children })
 {

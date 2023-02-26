@@ -1,6 +1,6 @@
 import axios from 'axios';
-import store from '../app/store'
-import { setToken, logout } from '../app/store/authSlice';
+import store from '@app/store'
+import { setToken, logout } from '@app/store/authSlice';
 
 const getCurrentToken = () =>
 {

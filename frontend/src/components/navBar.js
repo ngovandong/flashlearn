@@ -10,14 +10,14 @@ import Container from "@mui/material/Container";
 import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
-import { COLORS } from "../constants/colors";
+import { COLORS } from "@constants/colors";
 
 import { styled } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
-import { logout, selectUser } from "../app/store/authSlice";
+import { logout, selectUser } from "@app/store/authSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { ListItemIcon, ListItemText } from "@mui/material";
 import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
 import AutoAwesomeMotionOutlinedIcon from "@mui/icons-material/AutoAwesomeMotionOutlined";
@@ -72,13 +72,14 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 const links = [
   { link: "", name: "Home" },
-  { link: "recent", name: "Recent" },
-  { link: "study-set", name: "Study Set" },
+  // { link: "folder", name: "Folder" },
+  { link: "deck", name: "Deck" },
 ];
 
 function ResponsiveAppBar() {
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [ancharElCreate, setAncharElCreate] = useState(null);
+  const navigate = useNavigate();
   const open = Boolean(ancharElCreate);
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
@@ -90,6 +91,11 @@ function ResponsiveAppBar() {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+  const handleClickDeck=()=>{
+    setAncharElCreate(null);
+    navigate('create-deck');
+  }
 
   return (
     <AppBar
@@ -160,11 +166,12 @@ function ResponsiveAppBar() {
                   padding: ".25rem 3rem .25rem 1rem",
                   fontSize: "0.875",
                 }}
+                onClick={handleClickDeck}
               >
                 <ListItemIcon sx={{ color: COLORS.GRAY_TEXT }}>
                   <AutoAwesomeMotionOutlinedIcon />
                 </ListItemIcon>
-                <ListItemText>Study set</ListItemText>
+                <ListItemText>Deck</ListItemText>
               </MenuItem>
               <MenuItem
                 sx={{

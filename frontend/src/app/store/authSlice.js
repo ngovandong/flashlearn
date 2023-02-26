@@ -1,7 +1,7 @@
 import { googleLogout } from "@react-oauth/google";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import authService from "../../api-service/authService";
-import { decodeUser } from "../../utils/jwt";
+import authService from "@api-services/authService";
+import { decodeUser } from "@utils/jwt";
 
 export const login = createAsyncThunk("auth/login", async (user) => {
   const { email, password } = user;
@@ -73,6 +73,7 @@ const userSlice = createSlice({
     builder
       .addCase(login.fulfilled, (state, action) => {
         state.token = action.payload;
+        state.user = decodeUser(action.payload.access).user;
         localStorage.setItem("token", JSON.stringify(action.payload));
       })
       .addCase(login.rejected, (state, action) => {

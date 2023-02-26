@@ -1,0 +1,97 @@
+.main-container {
+    background-color: $app-background;
+    min-height: calc(100vh - $nav-height - 0.5px);
+    padding-bottom: 20px;
+}
+
+.nav-item {
+    display: inline-block;
+    text-decoration: none;
+    color: $main-text-color;
+    font-weight: 600;
+    margin: 0 $normal-font-size;
+    height: 100%;
+    line-height: $nav-height;
+    position: relative;
+}
+
+.nav-item:hover::after {
+    height: 0.25rem;
+    width: 100%;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    bottom: 0;
+    content: " ";
+    left: 0;
+    position: absolute;
+    background-color: $hover-purple;
+}
+
+
+.nav-item--active::after {
+    height: 0.25rem;
+    width: 100%;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    bottom: 0;
+    content: " ";
+    left: 0;
+    position: absolute;
+    background-color: $hover-purple;
+}
+
+.flash-learn-icon {
+    width: 140px;
+    height: 50px;
+    object-fit: cover;
+}
+
+.custom-input {
+    padding: 0.5rem;
+
+    input {
+        width: 100%;
+        border: none;
+        border-bottom: 3px solid #303545;
+        font-size: 1rem;
+        height: 2.5rem;
+        margin-bottom: 0.2rem;
+        padding-left: .1rem;
+
+        &:focus {
+            border-bottom: 4px solid $yellow;
+        }
+    }
+
+    textarea {
+        width: 100%;
+        border: none;
+        border-bottom: 3px solid #303545;
+        font-size: 1rem;
+        height: 2.5rem;
+        margin-bottom: 0.2rem;
+        padding-left: .1rem;
+        resize: none;
+
+        &:focus {
+            border-bottom: 4px solid $yellow;
+        }
+    }
+
+    span {
+        padding-left: .1rem;
+        font-size: .75rem;
+        font-weight: 600;
+        color: $gray-text-color;
+    }
+}
+
+.display-none {
+    display: none;
+}
+
+.upload-button {
+    input[type='file'] {
+        display: none;
+    }
+}

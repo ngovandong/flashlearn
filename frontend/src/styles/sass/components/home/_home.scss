@@ -1,85 +1,99 @@
 .home-page {
+    height: 100%;
+    padding: 40px;
 
-    .header-container {
+    .welcome-text {
         display: flex;
-        justify-content: space-between;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
 
-        .left {
-            width: 500px;
-
-            h1 {
-                font-size: 42px;
-                font-weight: 400;
-            }
-
-            p {
-                margin: 30px 0;
-            }
-
-            .search {
-                width: 300px;
-                height: 42px;
-                padding: 8px 10px;
-                background: #FFFFFF;
-                border: 1px solid $home-gray;
-                border-radius: 5px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-
-                .search_icon {
-                    color: $home-gray;
-                    width: 10%;
-                    padding-top: 4px;
-                    margin-left: 4px;
-                }
-
-                .search_input {
-                    width: 80%;
-                    font-style: normal;
-                    font-weight: 400;
-                    font-size: 16px;
-                    line-height: 24px;
-
-                    color: black;
-                    border: none;
-                }
-            }
-        }
-
-        .right {
-            width: 200px;
-            display: flex;
-            flex-direction: row-reverse;
-
-            .add-workspace-btn {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                background-color: black;
-                width: 140px;
-                height: 40px;
-                color: white;
-                padding: 10px 6px;
-                border-radius: 5px;
-                font-size: 14px;
-                cursor: pointer;
-            }
+        h2 {
+            font-weight: 500;
+            color: $main-text-color;
+            font-size: 1.875rem;
         }
     }
 
-    .myworkspace {
-        .workspace-container {
-            display: flex;
-            column-gap: 30px;
-            row-gap: 30px;
-            flex-wrap: wrap;
+    section {
+        .section-header {
+            margin-bottom: 1rem;
+
+            h5 {
+                font-size: 1rem;
+                font-weight: 700;
+                color: $main-text-color;
+            }
         }
 
-        .title {
-            font-size: 26px;
-            font-weight: 400;
-            margin: 15px 0;
+        .section-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            row-gap: 1rem;
+
+            .set-card {
+                @include app_radius;
+                padding: 0.75rem 1rem;
+                width: 32.5%;
+                height: 10rem;
+                background-color: white;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                border-bottom: 0.3125rem solid #fff;
+
+                &:hover {
+                    border-bottom: 0.3125rem solid $hover-purple;
+                    transition: all .12s cubic-bezier(.47, 0, .745, .715);
+                }
+
+
+                .set-card__header {
+                    display: flex;
+                    justify-content: space-between;
+                    padding-top: 0.75rem;
+
+                    .card-info {
+                        padding-right: 1rem;
+
+                        .card-info__title {
+                            overflow-wrap: break-word;
+                            font-size: 1rem;
+                            font-weight: 600;
+                            color: $main-text-color;
+                        }
+
+                        .card-info__meta {
+                            padding-top: 0.5rem;
+                            color: $minor-text-color;
+                            font-weight: 600;
+                            font-size: 0.875rem;
+                        }
+                    }
+
+                    .card-thumbnail {
+                        max-width: 5rem;
+                    }
+                }
+
+                .set-card__footer {
+                    display: flex;
+
+                    .footer-user {
+                        display: flex;
+                        align-items: center;
+
+                        span{
+                            padding: 0 0.5rem;
+                            color: $main-text-color;
+                            font-size: 0.875rem;
+                            font-weight: 600;
+                        }
+                    }
+                }
+            }
         }
     }
 }
