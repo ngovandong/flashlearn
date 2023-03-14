@@ -1,16 +1,17 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from base.models import CustomAbstractUser
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
 from ..managers import CustomUserManager
+from base.models import UUIDModel
 
 
-class User(AbstractUser):
+class User(UUIDModel, CustomAbstractUser):
     name = models.CharField(max_length=255, blank=False, null=False)
     email = models.EmailField(_("email address"), unique=True)
-    image_url = models.URLField(_("image url"), blank=True, null=True)
-    username = None
+    image_url = models.URLField(
+        _("image url"), max_length=255, blank=True, null=True)
     is_validated_email = models.BooleanField(default=False)
 
     objects = CustomUserManager()
@@ -29,7 +30,8 @@ class User(AbstractUser):
         return not self.has_usable_password()
 
     def set_default_image(self):
-        self.image_url = settings.BASE_URL + settings.MEDIA_URL + 'default/default_avatar.jpg'
+        self.image_url = settings.BASE_URL + \
+                         settings.MEDIA_URL + 'default/default_avatar.jpg'
 
     def save(self, *args, **kwargs):
         if not self.image_url:
