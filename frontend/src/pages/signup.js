@@ -4,6 +4,7 @@ import Alert from "@mui/material/Alert";
 
 import authService from "@api-services/authService";
 import cloudinaryService from "@api-services/cloudinaryService";
+import { getFirstError } from "@utils/errorHandler";
 
 function SignUp() {
   const [firstName, setFirstName] = useState("");
@@ -46,11 +47,7 @@ function SignUp() {
         } else {
           // handle error
           const data = res.response.data;
-          const firstKeyError = Object.keys(data)[0];
-          const error = Array.isArray(data[firstKeyError])
-            ? data[firstKeyError][0]
-            : data[firstKeyError];
-          const errorMessage = firstKeyError + ": " + error;
+          const errorMessage = getFirstError(data);
           setError(errorMessage);
         }
       } catch (error) {

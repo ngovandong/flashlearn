@@ -1,12 +1,13 @@
 from django.urls import include, path, re_path
 from rest_framework import routers
-from .views import UserViewSet, FolderViewSet, DeckViewSet, RoleViewSet
+from .views import UserViewSet, FolderViewSet, DeckViewSet, RoleViewSet, TermViewSet
 from django.conf import settings
 
 router = routers.DefaultRouter()
+router.register(r'decks', DeckViewSet, basename='deck')
+router.register(r'terms', TermViewSet, basename='term')
 router.register(r'users', UserViewSet, basename='user')
 router.register(r'folders', FolderViewSet, basename='folder')
-router.register(r'decks', DeckViewSet, basename='deck')
 router.register(r'roles', RoleViewSet, basename='role')
 
 # Wire up our API using automatic URL routing.

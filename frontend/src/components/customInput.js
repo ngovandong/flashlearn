@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
 export function CustomInput({
   value,
@@ -20,6 +20,7 @@ export function CustomInput({
           ref={inputEl}
           placeholder={placeholder}
           onKeyDown={handleKeyPress}
+          onBlur={() => onEnter(inputEl.current.value)}
         ></input>
       ) : (
         <input

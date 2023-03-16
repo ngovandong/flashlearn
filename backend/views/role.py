@@ -4,14 +4,14 @@ from rest_framework.response import Response
 from base.views import FlexibleViewSet
 from ..serializers import UserDeckRoleSerializer, UpdateRoleSerializer
 from ..models import UserDeckRole
-from ..permissions import OwnerOfDeck
+from ..permissions import IsOwnerOfRolePermission
 
 
-class RoleViewSet(viewsets.ModelViewSet, FlexibleViewSet):
+class RoleViewSet(FlexibleViewSet):
     serializer_class = UserDeckRoleSerializer
     queryset = UserDeckRole.objects.all()
 
-    permission_classes = (permissions.IsAuthenticated, OwnerOfDeck)
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOfRolePermission)
 
     serializer_map = {"update_role": UpdateRoleSerializer}
 

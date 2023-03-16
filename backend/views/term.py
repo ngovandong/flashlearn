@@ -1,0 +1,58 @@
+from rest_framework import viewsets, status, permissions, mixins
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from base.views import FlexibleViewSet
+from ..serializers import TermSerializer, AddTermsToDeckSerializer
+from ..models import Term, Deck
+from ..permissions import EditableTerm
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+import cloudinary.uploader
+
+
+class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet):
+    serializer_class = TermSerializer
+    queryset = Term.objects.all()
+
+    permission_classes = (permissions.IsAuthenticated, EditableTerm)
+    serializer_map = {"add_terms": AddTermsToDeckSerializer}
+
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('deck_id', openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Filter by deck")])
+    def list(self, request, *args, **kwargs):
+        deck_id = request.query_params.get("deck_id")
+        if deck_id:
+            self.queryset = self.queryset.filter(deck_id=deck_id)
+        return super().list(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        deck_id = data.get('deck')
+        if not deck_id:
+            return Response({"errors": "deck is required"}, status=status.HTTP_400_BAD_REQUEST)
+        deck = Deck.objects.filter(pk=deck_id).first()
+        if deck and not deck.user_can_edit_deck(request.user):
+            return Response({"errors": "user has no permission."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if 'image' in request.FILES:
+            image = request.FILES['image']
+            uploaded_image = cloudinary.uploader.upload(image)
+            data['image'] = uploaded_image.get('url')
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @action(detail=False, methods=["POST"])
+    def add_terms(self, request, *args, **kwargs):
+        deck_id = request.data.get("deck_id")
+        if not deck_id:
+            return Response({"errors": "deck_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+        deck = Deck.objects.filter(pk=deck_id).first()
+        if deck and not deck.user_can_edit_deck(request.user):
+            return Response({"errors": "user has no permission."}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'message': 'Terms created successfully'})

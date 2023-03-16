@@ -4,8 +4,11 @@ from . import Deck
 
 
 class Term(UUIDModel):
-    term = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
     description = models.TextField()
-    image_url = models.CharField(max_length=255, blank=True)
+    image = models.CharField(max_length=255, blank=True)
     deck = models.ForeignKey(
         Deck, on_delete=models.CASCADE, related_name='terms')
+
+    def can_edit_term(self, user):
+        return self.deck.owner == user or self.deck.user_roles.filter(user=user, role='E').first() is not None

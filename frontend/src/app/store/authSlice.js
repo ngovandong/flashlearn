@@ -28,22 +28,18 @@ export const getUser = createAsyncThunk("auth/getUser", async () => {
 });
 
 let tokenString = null;
-let currentWorkspace = null;
 let localUser = null;
 try {
   tokenString = JSON.parse(localStorage.getItem("token"));
   localUser = decodeUser(tokenString.access).user;
 } catch {}
 
-try {
-  currentWorkspace = JSON.parse(localStorage.getItem("currentWorkspace"));
-} catch {}
 
 const initialState = {
   user: localUser,
   token: tokenString,
   error: "",
-  currentWorkspace,
+  loading: false,
 };
 
 const userSlice = createSlice({
@@ -58,15 +54,14 @@ const userSlice = createSlice({
       state.user = decodeUser(action.payload.access).user;
       localStorage.setItem("token", JSON.stringify(action.payload));
     },
-    setCurrentWorkspace: (state, action) => {
-      state.currentWorkspace = action.payload;
-      localStorage.setItem("currentWorkspace", JSON.stringify(action.payload));
-    },
     logout: (state) => {
       state.token = null;
       state.user = null;
       localStorage.setItem("token", null);
       googleLogout();
+    },
+    setLoading: (state, action) => {
+      state.loading = action.payload;
     },
   },
   extraReducers(builder) {
@@ -88,8 +83,8 @@ const userSlice = createSlice({
 export const selectUser = (state) => state.auth.user;
 export const selectToken = (state) => state.auth.token;
 export const selectError = (state) => state.auth.error;
-export const selectCurrentWorkspace = (state) => state.auth.currentWorkspace;
+export const selectLoading = (state) => state.auth.loading;
 
-export const { logout, setToken, setCurrentWorkspace, setError } =
+export const { logout, setToken, setError, setLoading } =
   userSlice.actions;
 export default userSlice.reducer;

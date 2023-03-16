@@ -10,6 +10,7 @@ from ..permissions import IsOwnerPermission
 class FolderViewSet(viewsets.ModelViewSet, FlexibleViewSet):
     serializer_class = FolderSerializer
     queryset = Folder.objects.all()
+    pagination_class = None
 
     permission_classes = (permissions.IsAuthenticated, IsOwnerPermission)
 

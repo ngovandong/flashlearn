@@ -8,8 +8,12 @@ import StudySet from "@pages/studySet";
 import Folder from "@pages/folder";
 import Home from "@pages/home";
 import CreateDeck from "@pages/home/createDeck";
+import { useSelector } from "react-redux";
+import { selectLoading } from "./store/authSlice";
+import { GlobalLoadingWrapper } from "@components/loading";
 
 function App() {
+  const loading = useSelector(selectLoading);
   return (
     <BrowserRouter>
       <Routes>
@@ -21,8 +25,10 @@ function App() {
         </Route>
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignUp />} />
+        <Route path="notfound" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      {loading && <GlobalLoadingWrapper />}
     </BrowserRouter>
   );
 }

@@ -1,18 +1,5 @@
 @media (max-width: 725px) {}
 
-@media (max-width: 1050px) {
-    .create-deck {
-        .create-deck__info {
-            .info-visible-card {
-                flex-direction: column;
-
-                .visible-select {
-                    display: block;
-                }
-            }
-        }
-    }
-}
 
 @media (max-width: 850px) {
 
