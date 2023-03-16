@@ -22,12 +22,6 @@ class UpdateRoleSerializer(serializers.ModelSerializer):
         model = UserDeckRole
         fields = ('role',)
 
-    def validate_role(self, value):
-        if value == 'O':
-            raise serializers.ValidationError("Can not update user to owner")
-        return value
-
-
 class AddUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
 

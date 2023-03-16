@@ -14,4 +14,4 @@ class Deck(DateTimeUUIDModel):
         return user in self.users
 
     def user_can_edit_deck(self, user):
-        return self.owner == user or self.user_roles.filter(user=user, role='E').first()
+        return self.owner == user or self.user_roles.filter(user=user, role='E').first() is not None

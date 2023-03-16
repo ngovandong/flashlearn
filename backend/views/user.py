@@ -30,13 +30,13 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
     serializer_map = {
         'login': CustomTokenObtainPairSerializer,
         'refresh': TokenRefreshSerializer,
-        'set_password': SetPasswordSerializer,
+        'change_password': SetPasswordSerializer,
         'google_login': GoogleCallbackSerializer,
         'init': GoogleUserSerializer,
         'active_account': AcctiveAccountSerializer
     }
 
-    permission_map = {'set_password': [permissions.IsAuthenticated]}
+    permission_map = {'change_password': [permissions.IsAuthenticated]}
 
     @action(detail=False, methods=['POST'])
     def login(self, request, *args, **kwargs):

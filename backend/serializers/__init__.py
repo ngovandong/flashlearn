@@ -3,6 +3,6 @@ from .user import UserSerializer, GoogleUserSerializer, SetPasswordSerializer, G
 from .token import CustomTokenObtainPairSerializer, AcctiveAccountSerializer
 from .folder import FolderSerializer
 from .role import UserDeckRoleSerializer, AddUserSerializer, UpdateRoleSerializer, RemoveUserSerializer
-from .deck import DeckSerializer
-from .term import TermSerializer
+from .term import TermSerializer, AddTermsToDeckSerializer, TermNestInDeckSerializer
+from .deck import DeckSerializer, MyDeckSerializer, DeckDetailSerializer
 from .learning_progress import UserLearningProgressSerializer
