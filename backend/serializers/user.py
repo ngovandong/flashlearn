@@ -2,6 +2,8 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import PasswordField
 
 from ..models import User
+
+
 # from ..services import MailService
 
 
@@ -11,7 +13,6 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'email', 'name', 'password', 'first_name', 'last_name', 'image_url']
-
 
     # def validate_email(self, value):
     #     if not MailService.validate_email(value):
@@ -60,3 +61,8 @@ class SetPasswordSerializer(serializers.Serializer):
 class GoogleCallbackSerializer(serializers.Serializer):
     code = serializers.CharField(required=False)
     error = serializers.CharField(required=False)
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)

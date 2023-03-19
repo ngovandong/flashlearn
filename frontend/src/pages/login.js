@@ -8,8 +8,8 @@ import {
   selectError,
   setToken,
   setError,
-} from "../../app/store/authSlice";
-import GoogleLoginBT from "../../components/GoogleLoginBT";
+} from "@app/store/authSlice";
+import GoogleLoginBT from "@components/googleLoginBT";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,7 +50,7 @@ function Login() {
   }, []);
 
   return (
-    <div className="login-page">
+    <div className="signup-login-page">
       {error && (
         <Alert
           severity="error"

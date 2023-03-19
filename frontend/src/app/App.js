@@ -1,21 +1,23 @@
 import React from "react";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
-import Home from "../pages/home";
-import Login from "../pages/login";
-import SignUp from "../pages/signup";
-import NotFound from "../pages/notfound";
-import PrivateContainer from "../components/privateContainer";
+import Login from "@pages/login";
+import SignUp from "@pages/signup";
+import NotFound from "@pages/notfound";
+import MainContainer from "@components/mainContainer";
+import StudySet from "@pages/studySet";
+import Folder from "@pages/folder";
+import Home from "@pages/home";
+import CreateDeck from "@pages/home/createDeck";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="" element={<PrivateContainer />}>
+        <Route path="" element={<MainContainer />}>
           <Route path="" element={<Home />} />
-          {/* <Route path="workspaces/:workspaceId" element={<Workspace />}>
-            <Route path="" element={<PageNotExist />} />
-            <Route path="pages/:pageId" element={<Page />} />
-          </Route> */}
+          <Route path="deck" element={<StudySet />} />
+          <Route path="folder" element={<Folder />} />
+          <Route path="create-deck" element={<CreateDeck />} />
         </Route>
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignUp />} />

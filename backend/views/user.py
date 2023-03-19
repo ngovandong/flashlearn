@@ -13,7 +13,7 @@ from django.shortcuts import redirect
 
 from ..serializers import CustomTokenObtainPairSerializer, AcctiveAccountSerializer, UserSerializer, \
     SetPasswordSerializer, \
-    GoogleCallbackSerializer, GoogleUserSerializer
+    GoogleCallbackSerializer, GoogleUserSerializer, ChangePasswordSerializer
 from ..models import User
 from base.views import FlexibleViewSet
 
@@ -25,19 +25,18 @@ login_url = f'{settings.BASE_FRONTEND_URL}/login'
 class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-
     permission_classes = ()
 
     serializer_map = {
         'login': CustomTokenObtainPairSerializer,
         'refresh': TokenRefreshSerializer,
-        'set_password': SetPasswordSerializer,
+        'change_password': SetPasswordSerializer,
         'google_login': GoogleCallbackSerializer,
         'init': GoogleUserSerializer,
         'active_account': AcctiveAccountSerializer
     }
 
-    permission_map = {'set_password': [permissions.IsAuthenticated]}
+    permission_map = {'change_password': [permissions.IsAuthenticated]}
 
     @action(detail=False, methods=['POST'])
     def login(self, request, *args, **kwargs):
@@ -79,14 +78,19 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
             user.email, 'emails/confirm_email.html', context)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=False, methods=['POST'])
-    def set_password(self, request, *args, **kwargs):
-        user = request.user
-        serializer = self.get_serializer(
-            data=request.data, context={'user': user})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({'status': 'password set'})
+    @action(detail=True, methods=['post'])
+    def change_password(self, request, pk=None):
+        user = self.get_object()
+        serializer = ChangePasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            # Check old password
+            if not user.check_password(serializer.data.get("old_password")):
+                return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+            # Set new password
+            user.set_password(serializer.data.get("new_password"))
+            user.save()
+            return Response({"status": "password changed"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['GET'])
     def google_login(self, request, *args, **kwargs):
@@ -115,7 +119,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
             'first_name': user_data.get('given_name', ''),
             'last_name': user_data.get('family_name', ''),
             'name': user_data.get('name', ''),
-            'image_url': user_data.get('image_url', ''),
+            'image_url': user_data.get('picture', ''),
         }
 
         # We use get-or-create logic here for the sake of the example.
@@ -132,7 +136,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
 
         params = urlencode(token)
         return redirect(f'{login_url}?{params}')
-
+    
     @action(detail=False, methods=['GET'])
     def init(self, request, *args, **kwargs):
         id_token = request.headers.get('Authorization')

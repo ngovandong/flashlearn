@@ -1,17 +1,37 @@
 // Colors
 $dark-gray: rgb(55, 53, 47);
 $medium-gray: rgba($dark-gray, 0.4);
-$med-light-gray: rgba(25, 23, 17, 0.6);
-$hover-color: rgba($dark-gray, 0.08);
-$border-color: rgb(223, 223, 222);
+$home-gray: #B6B6B6;
+$yellow: #ffcd1f;
+$orange: #fe984a;
+$blue: #3ccfcf;
+$error-red: #ff7873;
+
+$app-background: #f6f7fb;
+
+$main-purple: #4255ff;
+$dark-purple: #423ed8;
+$hover-purple: #a8b1ff;
+$minor-purple: #658EFF;
+
+
+
+// Text colors
+$main-text-color: #282e3e;
+$minor-text-color: #646f90;
+$gray-text-color: #939bb4;
+
+// Shadow
+
+$shadow: 0 0.125rem 0.5rem 0 #30354514;
 
 // Padding
-$menu-padding: 0px 15px 0px 15px;
 
 // Font
 $normal-font-size: 0.875rem;
 $menu-font-weight: 600;
 $back-up-fonts: "Helvetica, sans-serif";
 
-$home-gray: #B6B6B6;
-$light-gray: #F8F8F8;
+//size
+
+$nav-height: 64px;

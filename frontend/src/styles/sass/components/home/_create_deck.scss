@@ -1,0 +1,190 @@
+.create-deck {
+    padding: 0rem 4rem;
+    max-width: 81.25rem;
+    margin: auto;
+
+
+    .create-deck__header {
+        height: 6.875rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: $main-text-color;
+        }
+
+        .create-btn {
+            @include purple_btn;
+        }
+
+    }
+
+    .create-deck__tab {
+        &.next {
+            animation: slide-in-right 0.4s;
+
+            &[tab='1'] {
+                display: none;
+            }
+
+            &[start='1'] {
+                animation: fade-in 0.4s;
+            }
+        }
+
+        &.back {
+            animation: slide-in-left 0.4s;
+
+            &[tab='0'] {
+                display: none;
+            }
+        }
+
+        .create-deck__info {
+            display: flex;
+
+            .info-input-card {
+                width: 50%;
+
+                .info-row {
+                    padding: 0.25rem 0;
+
+                    .css-1ig4r69-MuiInputBase-root-MuiInput-root::before,
+                    .css-17j4800-MuiInputBase-root-MuiInput-root::before {
+                        border-bottom-width: 1.5px;
+                    }
+
+                    .css-1ig4r69-MuiInputBase-root-MuiInput-root::after,
+                    .css-17j4800-MuiInputBase-root-MuiInput-root::after {
+                        border-bottom-width: 2px;
+                    }
+                }
+            }
+
+            .info-visible-card {
+                display: flex;
+                width: 50%;
+                padding-left: 100px;
+                align-items: center;
+
+
+                .visible-select {
+                    display: inline-block;
+                    padding-right: 2rem;
+                }
+            }
+
+        }
+
+        .upload-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            .selected-image {
+                max-width: 100%;
+                max-height: 200px;
+                border-radius: 6px;
+                border: 4px solid $blue;
+                margin-top: 2rem;
+            }
+        }
+    }
+
+
+    .term-card {
+        width: 100%;
+        background-color: white;
+        border-radius: 0.5rem;
+        margin-bottom: 20px;
+
+
+        .term-toolbar {
+            padding: 0.75rem;
+            border-bottom: 2px solid $app-background;
+            display: flex;
+            transition: all .12s ease;
+
+            .index {
+                color: $gray-text-color;
+                font-size: 1rem;
+                font-weight: 700;
+                width: 2.5rem;
+                padding-left: 0.5rem;
+
+            }
+
+            .toolbar {
+                display: flex;
+                flex-grow: 1;
+            }
+        }
+
+        .term-content {
+            display: flex;
+            height: 120px;
+
+            .term {
+                width: 45%;
+                padding: 1rem;
+            }
+
+            .desc {
+                width: 45%;
+                padding: 1rem;
+            }
+
+            .img {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 10%;
+
+                .upload-btn {
+                    border: 0.125rem dashed #d9dde8;
+                    border-radius: .25rem;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    height: 4rem;
+                    width: 5rem;
+
+
+                    div {
+                        font-size: 0.7rem;
+                        color: $minor-text-color;
+                        font-weight: 600;
+                    }
+                }
+
+                .avatar-image {
+                    height: auto;
+                    max-width: 80%;
+                }
+            }
+        }
+
+        .term-image {
+            border-top: 2px solid $app-background;
+            padding: .5rem;
+            display: flex;
+
+            .image-url {
+                width: 60%;
+            }
+
+            .local-upload {
+                width: 40%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+    }
+
+
+}

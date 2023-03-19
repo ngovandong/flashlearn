@@ -6,17 +6,21 @@ import store from "./app/store";
 import App from "./app/App";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import "./styles/sass/index.scss";
+import { ThemeProvider } from "@emotion/react";
+import theme from "./utils/theme";
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <GoogleOAuthProvider clientId={clientId}>
-        <App />
-      </GoogleOAuthProvider>
-    </Provider>
+    <ThemeProvider theme={theme}>
+      <Provider store={store}>
+        <GoogleOAuthProvider clientId={clientId}>
+          <App />
+        </GoogleOAuthProvider>
+      </Provider>
+    </ThemeProvider>
   </React.StrictMode>
 );
 

@@ -5,14 +5,13 @@
 @import "base/_variables";
 
 // Components
-@import "components/_dropdown";
-@import "components/_loader";
 @import "components/home/_home";
-@import "components/home/workspacecard";
+@import "components/custom";
+@import "components/home/create_deck";
 
 
 
 // Login and Register
-@import "components/_login-register";
+@import "components/_login_register";
 
 @import "base/media_queries";
