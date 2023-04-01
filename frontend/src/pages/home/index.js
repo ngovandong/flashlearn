@@ -4,22 +4,30 @@ import { Alert, Snackbar } from "@mui/material";
 import { getFirstError } from "@utils/errorHandler";
 import React, { useEffect, useState } from "react";
 import DeckCard from "./deckCard";
+import { useSelector } from "react-redux";
+import { selectUser } from "@app/store/authSlice";
 function Home() {
   const [mydecks, setMydecks] = useState();
   const [error, setError] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const user = useSelector(selectUser);
   const fetchDeck = async () => {
     setIsLoading(true);
-    const res = await deckService.getMyDecks();
-    if (res.data) {
-      setMydecks(res.data);
-    } else if (res.response) {
-      const responseError = getFirstError(res.response.data);
-      setError(responseError);
-    } else {
-      setError("Network fail!");
+    try {
+      const res = await deckService.getMyDecks();
+      if (res.data) {
+        setMydecks(res.data);
+      } else if (res.response) {
+        const responseError = getFirstError(res.response.data);
+        setError(responseError);
+      } else {
+        setError("Network fail!");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
   useEffect(() => {
     fetchDeck();
@@ -41,7 +49,7 @@ function Home() {
         </Alert>
       </Snackbar>
       <div className="welcome-text">
-        <h2>Hi, Dong Ngo</h2>
+        <h2>Hi, {user.name}</h2>
       </div>
       <section>
         <div className="section-header">
@@ -52,6 +60,7 @@ function Home() {
             mydecks.map((d) => (
               <DeckCard
                 key={d.id}
+                id={d.id}
                 name={d.name}
                 owner={d.owner}
                 terms={d.number_of_term}

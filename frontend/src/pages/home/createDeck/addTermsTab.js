@@ -1,11 +1,10 @@
 import { Alert, Button, Snackbar } from "@mui/material";
 import TermCard from "./termCard";
 import AddIcon from "@mui/icons-material/Add";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { termService } from "@api-services/termService";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { LocalLoadingWrapper } from "@components/loading";
-import { getFirstError } from "@utils/errorHandler";
 
 const emptyTerm = {
   name: "",
@@ -17,7 +16,7 @@ const emptyTerm = {
 
 function AddTerms({ handleClickBack }) {
   const [terms, setTerms] = useState([emptyTerm, emptyTerm, emptyTerm]);
-  let [searchParams, setSearchParams] = useSearchParams();
+  let [searchParams, _] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
   const navigate = useNavigate();

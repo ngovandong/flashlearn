@@ -7,7 +7,7 @@ function GlobalLoadingWrapper({ open }) {
     <Backdrop
       sx={{
         // bgcolor: "transparent",
-        bgcolor: "rgba(0,0,0,0.1)",
+        bgcolor: "rgba(0,0,0,0.2)",
         zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
       open={open}

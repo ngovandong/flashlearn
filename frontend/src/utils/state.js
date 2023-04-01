@@ -15,3 +15,22 @@ export function isChangeState(obj1, obj2) {
 
   return false;
 }
+
+function isTermEqual(obj1, obj2) {
+  return (
+    obj1.name === obj2.name &&
+    obj1.description === obj2.description &&
+    obj1.image === obj2.image
+  );
+}
+
+export function filterChangedTerms(previousList, updatedList) {
+  const changedTerms = updatedList.filter((term) => {
+    if (!term.id) return false;
+    // Find the corresponding term in the previous list
+    const previousTerm = previousList.find((t) => t.id === term.id);
+    // Check if the term is new or has changed
+    return previousTerm && !isTermEqual(previousTerm, term);
+  });
+  return changedTerms;
+}

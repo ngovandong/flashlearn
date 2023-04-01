@@ -28,6 +28,11 @@
             display: flex;
             justify-content: space-between;
 
+            .group-btns {
+                display: flex;
+                column-gap: 1rem;
+            }
+
             .back-btn {
                 font-weight: 600;
                 cursor: pointer;
@@ -48,6 +53,16 @@
 
             .main-btn {
                 @include purple_btn;
+            }
+
+            .save-btn {
+                @include purple_btn;
+                background-color: $blue;
+
+                &:hover {
+                    background-color: $yellow;
+                    color: black;
+                }
             }
         }
 

@@ -51,7 +51,8 @@ class AddTermsToDeckSerializer(serializers.ModelSerializer):
                         image_bytes = value.read()
                         # Post the bytes to Cloudinary and get the URL
                         result = cloudinary.uploader.upload(image_bytes)
-                        parsed_dict['terms'][term_index]['image'] = result.get('url')
+                        parsed_dict['terms'][term_index]['image'] = result.get(
+                            'url')
                     else:
                         parsed_dict['terms'][term_index]['image'] = value
         data = super().to_internal_value(parsed_dict)

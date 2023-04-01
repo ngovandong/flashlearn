@@ -1,19 +1,21 @@
-from rest_framework import viewsets, status, permissions, mixins
+from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from base.views import FlexibleViewSet
-from ..serializers import TermSerializer, AddTermsToDeckSerializer
-from ..models import Term, Deck
-from ..permissions import EditableTerm
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import cloudinary.uploader
+from ..serializers import TermSerializer, AddTermsToDeckSerializer
+from ..models import Term, Deck
+from ..permissions import EditableTerm
+from ..services import TermService
 
 
 class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet):
     serializer_class = TermSerializer
     queryset = Term.objects.all()
 
+    pagination_class = None
     permission_classes = (permissions.IsAuthenticated, EditableTerm)
     serializer_map = {"add_terms": AddTermsToDeckSerializer}
 
@@ -56,3 +58,8 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'message': 'Terms created successfully'})
+
+    @action(detail=False, methods=["PUT"])
+    def update_terms(self, request, *args, **kwargs):
+        TermService.bulk_update_terms(request.data)
+        return Response({'message': 'Terms updated successfully'})

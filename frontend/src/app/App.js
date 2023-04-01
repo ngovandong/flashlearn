@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, BrowserRouter } from "react-router-dom";
+import { Routes, Route, BrowserRouter, Outlet } from "react-router-dom";
 import Login from "@pages/login";
 import SignUp from "@pages/signup";
 import NotFound from "@pages/notfound";
@@ -11,6 +11,8 @@ import CreateDeck from "@pages/home/createDeck";
 import { useSelector } from "react-redux";
 import { selectLoading } from "./store/authSlice";
 import { GlobalLoadingWrapper } from "@components/loading";
+import DeckDetail from "@pages/home/deckDetail";
+import EditDeck from "@pages/home/deckDetail/editDeck";
 
 function App() {
   const loading = useSelector(selectLoading);
@@ -22,6 +24,10 @@ function App() {
           <Route path="deck" element={<StudySet />} />
           <Route path="folder" element={<Folder />} />
           <Route path="create-deck" element={<CreateDeck />} />
+          <Route path="deck/:deckID" element={<Outlet />}>
+            <Route path="" element={<DeckDetail />} />
+            <Route path="edit" element={<EditDeck />} />
+          </Route>
         </Route>
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignUp />} />
