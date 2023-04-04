@@ -1,7 +1,7 @@
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { COLORS } from "@constants/colors";
-import { CustomArea, CustomInput } from "@components/customInput";
+import { CustomInput } from "@components/customInput";
 import PhotoIcon from "@mui/icons-material/Photo";
 import UploadButton from "@components/uploadButton";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";

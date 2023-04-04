@@ -83,32 +83,6 @@ function AddTermsTab({ handleClickBack }) {
     }
   };
 
-  const handleClickDone = async () => {
-    if (terms.length < 4) {
-      setError("You must add at least four terms!");
-    } else {
-      const [success, result] = validate();
-      if (success === true) {
-        setIsLoading(true);
-        try {
-          const res = await termService.addTermsToDeck(deckID, result);
-          if (!res.error) {
-            const errorMessage = getFirstError(res.error);
-            setError(errorMessage);
-          } else {
-            navigate("/");
-          }
-        } catch (error) {
-          console.log(error);
-          setError("Something wrong!");
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        setTerms(result);
-      }
-    }
-  };
   const handleClickSave = async () => {
     if (terms.length < 4) {
       setError("You must add at least four terms!");
@@ -218,9 +192,6 @@ function AddTermsTab({ handleClickBack }) {
         <div className="group-btns">
           <div className="save-btn" onClick={handleClickSave}>
             Save
-          </div>
-          <div className="main-btn" onClick={handleClickDone}>
-            Done
           </div>
         </div>
       </div>
