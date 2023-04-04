@@ -14,19 +14,12 @@ function CustomPopupGoogleLoginBT() {
     "https://www.googleapis.com/auth/userinfo.profile",
   ].join(" ");
   const handleUserInit = (res) => {
-    if (res.data) {
+    if (!res.error) {
       const { access, refresh } = res.data;
       dispatch(setToken({ access, refresh }));
-    } else if (res.response) {
-      const data = res.response.data;
-      if (data.message) {
-        throw new Error(data.message);
-      } else {
-        const errorMessage = getFirstError(data);
-        dispatch(setError(errorMessage));
-      }
     } else {
-      dispatch(setError("Network fail!"));
+      const errorMessage = getFirstError(res.error);
+      dispatch(setError(errorMessage));
     }
   };
   const onPopupSuccess = async (response) => {

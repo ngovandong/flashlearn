@@ -48,13 +48,10 @@ function SignUp() {
               info,
             }).toString(),
           });
-        } else if (res.response) {
+        } else if (res.error) {
           // handle error
-          const data = res.response.data;
-          const errorMessage = getFirstError(data);
+          const errorMessage = getFirstError(res.error);
           setError(errorMessage);
-        } else {
-          setError("Network Fail!");
         }
       } catch (error) {
         console.log(error);

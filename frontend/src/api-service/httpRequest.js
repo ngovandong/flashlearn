@@ -24,6 +24,9 @@ const appendHeader = (request) => {
 let refresh = false;
 
 const refreshToken = async (error) => {
+  if (error.code === "ERR_NETWORK") {
+    return { error: "Server Error" };
+  }
   const token = getCurrentToken();
   if (error.response?.status === 401 && !refresh && token) {
     try {
@@ -36,6 +39,8 @@ const refreshToken = async (error) => {
     } catch {
       store.dispatch(logout());
     }
+  } else if (error.response.data) {
+    return { error: error.response.data };
   }
   refresh = false;
   return error;

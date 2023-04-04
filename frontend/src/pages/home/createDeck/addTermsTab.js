@@ -5,6 +5,7 @@ import { useState } from "react";
 import { termService } from "@api-services/termService";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { LocalLoadingWrapper } from "@components/loading";
+import { getFirstError } from "@utils/errorHandler";
 
 const emptyTerm = {
   name: "",
@@ -78,12 +79,11 @@ function AddTerms({ handleClickBack }) {
         setIsLoading(true);
         try {
           const res = await termService.addTermsToDeck(deck_id, result);
-          if (res.data) {
+          if (!res.error) {
             navigate("/");
-          } else if (res.response) {
-            setError("Image URL is wrong!");
           } else {
-            setError("Network fail!");
+            const errorMessage = getFirstError(res.error);
+            setError(errorMessage);
           }
         } catch (error) {
           console.log(error);

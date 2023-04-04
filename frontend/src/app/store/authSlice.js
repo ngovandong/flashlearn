@@ -7,18 +7,11 @@ import { getFirstError } from "@utils/errorHandler";
 export const login = createAsyncThunk("auth/login", async (user) => {
   const { email, password } = user;
   const res = await authService.login(email, password);
-  if (res.data) return res.data;
-  else if (res.response) {
-    const data = res.response.data;
-    if (data.message) {
-      throw new Error(data.message);
-    } else {
-      const data = res.response.data;
-      const errorMessage = getFirstError(data);
-      throw new Error(errorMessage);
-    }
+  if (!res.error) {
+    return res.data;
   } else {
-    throw new Error("Network fail!");
+    const errorMessage = getFirstError(res.error);
+    throw new Error(errorMessage);
   }
 });
 export const getUser = createAsyncThunk("auth/getUser", async () => {
@@ -38,6 +31,7 @@ const initialState = {
   token: tokenString,
   error: "",
   loading: false,
+  globalError: null,
 };
 
 const userSlice = createSlice({
@@ -46,6 +40,9 @@ const userSlice = createSlice({
   reducers: {
     setError: (state, action) => {
       state.error = action.payload;
+    },
+    setGlobalError: (state, action) => {
+      state.globalError = action.payload;
     },
     setToken: (state, action) => {
       state.token = action.payload;
@@ -81,6 +78,7 @@ const userSlice = createSlice({
         state.loading = true;
       })
       .addCase(getUser.rejected, (state, _) => {
+        state.error = "Get user failed";
         state.loading = false;
       })
       .addCase(getUser.fulfilled, (state, action) => {
@@ -94,6 +92,8 @@ export const selectUser = (state) => state.auth.user;
 export const selectToken = (state) => state.auth.token;
 export const selectError = (state) => state.auth.error;
 export const selectLoading = (state) => state.auth.loading;
+export const selectGlobalError = (state) => state.auth.globalError;
 
-export const { logout, setToken, setError, setLoading } = userSlice.actions;
+export const { logout, setToken, setError, setLoading, setGlobalError } =
+  userSlice.actions;
 export default userSlice.reducer;

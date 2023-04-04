@@ -92,13 +92,11 @@ function AddTermsTab({ handleClickBack }) {
         setIsLoading(true);
         try {
           const res = await termService.addTermsToDeck(deckID, result);
-          if (res.data) {
-            navigate("/");
-          } else if (res.response) {
-            const errorMessage = getFirstError(res.response.data);
+          if (!res.error) {
+            const errorMessage = getFirstError(res.error);
             setError(errorMessage);
           } else {
-            setError("Network fail!");
+            navigate("/");
           }
         } catch (error) {
           console.log(error);
@@ -118,28 +116,27 @@ function AddTermsTab({ handleClickBack }) {
       const [success, result] = validate();
       if (success === true) {
         setIsLoading(true);
-
         try {
-          let res;
           if (isUpdate) {
             const notCreated = result.filter((t) => !t.id);
             if (notCreated.length > 0) {
-              res = await termService.addTermsToDeck(deckID, notCreated);
+              const res = await termService.addTermsToDeck(deckID, notCreated);
+              if (res.error) {
+                setError(res.error);
+              }
             }
             const updatedTerms = filterChangedTerms(oldTerms, result);
             if (updatedTerms.length > 0) {
-              res = await termService.updateTerms(updatedTerms);
+              const res = await termService.updateTerms(updatedTerms);
+              if (res.error) {
+                setError(res.error);
+              }
             }
           } else {
-            res = await termService.addTermsToDeck(deckID, result);
-          }
-          if (res.data) {
-            setIsSuccess(true);
-          } else if (res.response) {
-            const errorMessage = getFirstError(res.response.data);
-            setError(errorMessage);
-          } else {
-            setError("Network fail!");
+            const res = await termService.addTermsToDeck(deckID, result);
+            if (res.error) {
+              setError(res.error);
+            }
           }
         } catch (error) {
           console.log(error);
@@ -157,7 +154,7 @@ function AddTermsTab({ handleClickBack }) {
     setIsLoading(true);
     try {
       const res = await termService.getTermsByDeck(deckID);
-      if (res.data) {
+      if (!res.error) {
         if (res.data.length) {
           const fetchedTerms = res.data.map((t) => ({
             ...t,
@@ -167,13 +164,9 @@ function AddTermsTab({ handleClickBack }) {
           oldTerms = fetchedTerms;
           setTerms(fetchedTerms);
         } else {
-          setTerms(initTerms);
+          const errorMessage = getFirstError(res.error);
+          setError(errorMessage);
         }
-      } else if (res.response) {
-        const errorMessage = getFirstError(res.response.data);
-        setError(errorMessage);
-      } else {
-        setError("Network fail!");
       }
     } catch (error) {
       console.log(error);

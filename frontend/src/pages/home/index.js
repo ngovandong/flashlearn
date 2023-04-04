@@ -15,13 +15,11 @@ function Home() {
     setIsLoading(true);
     try {
       const res = await deckService.getMyDecks();
-      if (res.data) {
+      if (!res.error) {
         setMydecks(res.data);
-      } else if (res.response) {
-        const responseError = getFirstError(res.response.data);
-        setError(responseError);
       } else {
-        setError("Network fail!");
+        const responseError = getFirstError(res.error);
+        setError(responseError);
       }
     } catch (error) {
       console.log(error);

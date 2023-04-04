@@ -27,14 +27,11 @@ function CreateDeck() {
       setIsLoading(true);
       try {
         const res = await deckService.create(formData);
-        setIsLoading(false);
-        if (res.data) {
+        if (!res.error) {
           navigate(`/deck/${res.data.id}/edit?tab=1`);
-        } else if (res.response) {
-          const responseError = getFirstError(res.response.data);
-          setError(responseError);
         } else {
-          setError("Network error!");
+          const responseError = getFirstError(res.error);
+          setError(responseError);
         }
       } catch (error) {
         console.log(error);

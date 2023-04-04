@@ -41,16 +41,14 @@ function EditDeck() {
         setIsLoading(true);
         try {
           const res = await deckService.partial_update(deckID, formData);
-          if (res.data) {
+          if (!res.error) {
             setDeck(res.data);
             oldDeck = res.data;
             setCurrentTab({ tab: 1, start: 0 });
             setSearchParams({ tab: "1" });
-          } else if (res.response) {
-            const responseError = getFirstError(res.response.data);
-            setError(responseError);
           } else {
-            setError("Network Fail!");
+            const responseError = getFirstError(res.error);
+            setError(responseError);
           }
         } catch (error) {
           console.log(error);
@@ -82,14 +80,12 @@ function EditDeck() {
     setIsLoading(true);
     try {
       const res = await deckService.retrieve(deckID);
-      if (res.data) {
+      if (!res.error) {
         setDeck(res.data);
         oldDeck = res.data;
-      } else if (res.response) {
-        const responseError = getFirstError(res.response.data);
-        setError(responseError);
       } else {
-        setError("Network Fail!");
+        const responseError = getFirstError(res.error);
+        setError(responseError);
       }
     } catch (error) {
       console.log(error);

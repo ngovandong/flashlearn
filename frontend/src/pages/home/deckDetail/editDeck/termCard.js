@@ -91,12 +91,12 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
           />
         </div>
         <div className="desc">
-          <CustomArea
+          <CustomInput
             value={term.description}
             setValue={(value) =>
               handleTermChange(index, { ...term, description: value })
             }
-            placeholder="Enter term"
+            placeholder="Enter desc"
             helpText="DESCRIPTION"
           />
         </div>

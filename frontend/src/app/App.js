@@ -8,14 +8,21 @@ import StudySet from "@pages/studySet";
 import Folder from "@pages/folder";
 import Home from "@pages/home";
 import CreateDeck from "@pages/home/createDeck";
-import { useSelector } from "react-redux";
-import { selectLoading } from "./store/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectGlobalError,
+  selectLoading,
+  setGlobalError,
+} from "./store/authSlice";
 import { GlobalLoadingWrapper } from "@components/loading";
 import DeckDetail from "@pages/home/deckDetail";
 import EditDeck from "@pages/home/deckDetail/editDeck";
+import { Alert, Snackbar } from "@mui/material";
 
 function App() {
   const loading = useSelector(selectLoading);
+  const error = useSelector(selectGlobalError);
+  const dispatch = useDispatch();
   return (
     <BrowserRouter>
       <Routes>
@@ -35,6 +42,24 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       {loading && <GlobalLoadingWrapper />}
+      {error && (
+        <Snackbar
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          open={error != null}
+          autoHideDuration={6000}
+          onClose={() => dispatch(setGlobalError(null))}
+        >
+          <Alert
+            onClose={() => dispatch(setGlobalError(null))}
+            severity="error"
+          >
+            {error}
+          </Alert>
+        </Snackbar>
+      )}
     </BrowserRouter>
   );
 }
