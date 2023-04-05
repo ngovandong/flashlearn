@@ -18,6 +18,9 @@ import { GlobalLoadingWrapper } from "@components/loading";
 import DeckDetail from "@pages/home/deckDetail";
 import EditDeck from "@pages/home/deckDetail/editDeck";
 import { Alert, Snackbar } from "@mui/material";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import PermissionDenied from "@pages/permissionDenied";
 
 function App() {
   const loading = useSelector(selectLoading);
@@ -38,9 +41,11 @@ function App() {
         </Route>
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignUp />} />
+        <Route path="denied" element={<PermissionDenied />} />
         <Route path="notfound" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <ToastContainer />
       {loading && <GlobalLoadingWrapper />}
       {error && (
         <Snackbar

@@ -36,6 +36,7 @@
 
             .set-card {
                 @include app_radius;
+                @include border_bottom_purple;
                 padding: 0.75rem 1rem;
                 width: 32.5%;
                 height: 10rem;
@@ -43,12 +44,8 @@
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
-                border-bottom: 0.3125rem solid #fff;
+                
 
-                &:hover {
-                    border-bottom: 0.3125rem solid $hover-purple;
-                    transition: all .12s cubic-bezier(.47, 0, .745, .715);
-                }
 
 
                 .set-card__header {

@@ -1,4 +1,16 @@
-@media (max-width: 725px) {}
+@media (max-width: 725px) {
+    .deck-page {
+
+        .deck-menu {
+            flex-wrap: wrap;
+            row-gap: 1rem;
+
+            .menu-btn {
+                width: 45%;
+            }
+        }
+    }
+}
 
 
 @media (max-width: 850px) {

@@ -92,10 +92,10 @@ function ResponsiveAppBar() {
     setAnchorElUser(null);
   };
 
-  const handleClickDeck=()=>{
+  const handleClickDeck = () => {
     setAncharElCreate(null);
-    navigate('create-deck');
-  }
+    navigate("create-deck");
+  };
 
   return (
     <AppBar
@@ -106,10 +106,10 @@ function ResponsiveAppBar() {
       <Container maxWidth="xxl">
         <Toolbar disableGutters>
           <img
-            src="icons/flashlearn.svg"
+            src="/icons/flashlearn.svg"
             alt="flash learn logo"
             className="flash-learn-icon"
-          ></img>
+          />
 
           <Box
             sx={{

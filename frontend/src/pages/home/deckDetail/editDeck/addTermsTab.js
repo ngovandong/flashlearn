@@ -137,10 +137,11 @@ function AddTermsTab({ handleClickBack }) {
           }));
           oldTerms = fetchedTerms;
           setTerms(fetchedTerms);
-        } else {
-          const errorMessage = getFirstError(res.error);
-          setError(errorMessage);
         }
+      } else {
+        console.log(res.error);
+        const errorMessage = getFirstError(res.error);
+        setError(errorMessage);
       }
     } catch (error) {
       console.log(error);
