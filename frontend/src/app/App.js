@@ -21,6 +21,7 @@ import { Alert, Snackbar } from "@mui/material";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PermissionDenied from "@pages/permissionDenied";
+import Invite from "@pages/invite";
 
 function App() {
   const loading = useSelector(selectLoading);
@@ -38,6 +39,7 @@ function App() {
             <Route path="" element={<DeckDetail />} />
             <Route path="edit" element={<EditDeck />} />
           </Route>
+          <Route path="invite" element={<Invite />} />
         </Route>
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignUp />} />

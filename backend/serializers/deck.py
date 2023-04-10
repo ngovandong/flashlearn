@@ -20,6 +20,15 @@ class DeckDetailSerializer(DeckSerializer):
     class Meta(DeckSerializer.Meta):
         fields = (*DeckSerializer.Meta.fields, 'user_roles')
 
+    def to_representation(self, instance):
+        user = self.context['request'].user
+        ret = super().to_representation(instance)
+        if instance.owner == user:
+            ret["my_permission"] = "O"
+        else:
+            ret["my_permission"] = instance.user_roles.get(user=user).role
+        return ret
+
 
 class MyDeckSerializer(DeckSerializer):
     def to_representation(self, instance):

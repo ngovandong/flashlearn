@@ -2,8 +2,6 @@ import requests
 import io
 from typing import Dict, Any
 
-import jwt
-
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.auth.models import update_last_login
@@ -15,6 +13,7 @@ from rest_framework.parsers import JSONParser
 from ..constants import GOOGLE_ID_TOKEN_INFO_URL, GOOGLE_ACCESS_TOKEN_OBTAIN_URL, GOOGLE_USER_INFO_URL
 from ..serializers import UserSerializer
 from ..models import User
+from ..token import JWTToken
 
 
 class AuthService:
@@ -38,6 +37,11 @@ class AuthService:
         if api_settings.UPDATE_LAST_LOGIN:
             update_last_login(None, user)
         return token
+
+    @classmethod
+    def get_invite_token(cls, deck_id, role):
+        payload = {"deck_id": deck_id, "role": role}
+        return JWTToken.generate_token(payload)
 
     @classmethod
     def google_validate_id_token(cls, id_token: str) -> Dict:

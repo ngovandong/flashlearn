@@ -97,7 +97,7 @@ function ResponsiveAppBar() {
     navigate("create-deck");
   };
 
-  return (
+  return user ? (
     <AppBar
       position="static"
       color="white"
@@ -229,6 +229,8 @@ function ResponsiveAppBar() {
         </Toolbar>
       </Container>
     </AppBar>
+  ) : (
+    <></>
   );
 }
 export default ResponsiveAppBar;

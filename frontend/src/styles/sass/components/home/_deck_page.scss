@@ -19,7 +19,7 @@
         .menu-btn {
             @include app_radius;
             @include border_bottom_purple;
-
+            cursor: pointer;
             display: flex;
             justify-content: left;
             align-items: center;

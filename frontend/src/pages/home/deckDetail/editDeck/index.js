@@ -14,7 +14,7 @@ function EditDeck() {
   const [error, setError] = useState();
   const [currentTab, setCurrentTab] = useState({ tab: 0, start: 1 });
   const [isLoading, setIsLoading] = useState(false);
-  let [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [deck, setDeck] = useState({
     is_public: false,
     name: "",
@@ -69,7 +69,7 @@ function EditDeck() {
     const tab = searchParams.get("tab");
 
     if (tab == null) {
-      setSearchParams((pre) => ({ ...pre, tab: "0" }));
+      setSearchParams({ tab: "0" });
     }
     if (tab === "1") {
       setCurrentTab({ tab: 1, start: 0 });

@@ -9,47 +9,14 @@ import CollectionsBookmarkIcon from "@mui/icons-material/CollectionsBookmark";
 import TimerIcon from "@mui/icons-material/Timer";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import CircularProgressWithLabel from "@components/progress";
-import EditIcon from "@mui/icons-material/Edit";
-import CircleButton from "@components/circleButton";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import IosShareIcon from "@mui/icons-material/IosShare";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Menu,
-  MenuItem,
-} from "@mui/material";
+import FooterBTNs from "./footerButtons";
+
 function DeckDetail() {
   const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const { deckID } = useParams();
-  const [anchorEl, setAnchorEl] = useState();
-  const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
-  const open = Boolean(anchorEl);
 
   const navigate = useNavigate();
-
-  const handleDeleteDeck = async () => {
-    try {
-      setIsLoading(true);
-      const res = await deckService.delete(deckID);
-      if (!res.error) {
-        toast.success("Delete deck success!");
-        navigate("/deck");
-      } else {
-        const errorMessage = getFirstError(res.error);
-        toast.error(errorMessage);
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const fetchDeck = async () => {
     try {
@@ -79,7 +46,7 @@ function DeckDetail() {
       fetchDeck();
     }
   }, []);
-  return (
+  return deck ? (
     <>
       <LocalLoadingWrapper open={isLoading} />
       {deck && (
@@ -129,66 +96,12 @@ function DeckDetail() {
               </div>
             </div>
           </div>
-          <div className="footer-group-btn">
-            <CircleButton onClick={() => navigate("edit")}>
-              <EditIcon />
-            </CircleButton>
-            <CircleButton onClick={() => {}}>
-              <IosShareIcon />
-            </CircleButton>
-            <CircleButton
-              id="more-button"
-              onClick={(e) => {
-                setAnchorEl(e.currentTarget);
-              }}
-            >
-              <MoreHorizIcon />
-            </CircleButton>
-            <Menu
-              id="basic-menu"
-              anchorEl={anchorEl}
-              open={open}
-              onClose={() => setAnchorEl(null)}
-              MenuListProps={{
-                "aria-labelledby": "more-button",
-              }}
-            >
-              <MenuItem
-                onClick={() => {
-                  setIsOpenDeleteDialog(true);
-                }}
-              >
-                Delete
-              </MenuItem>
-              <MenuItem onClick={() => {}}>Reset</MenuItem>
-            </Menu>
-          </div>
-          <Dialog
-            open={isOpenDeleteDialog}
-            onClose={() => setIsOpenDeleteDialog(false)}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-          >
-            <DialogTitle id="alert-dialog-title">
-              {"Comfirm delete deck"}
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText id="alert-dialog-description">
-                Are you sure you want to delete the deck?
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setIsOpenDeleteDialog(false)}>
-                Disagree
-              </Button>
-              <Button onClick={handleDeleteDeck} autoFocus>
-                Agree
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <FooterBTNs setIsLoading={setIsLoading} deck={deck} />
         </div>
       )}
     </>
+  ) : (
+    <></>
   );
 }
 

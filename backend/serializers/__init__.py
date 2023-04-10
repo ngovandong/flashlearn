@@ -2,7 +2,7 @@ from .user import UserSerializer, GoogleUserSerializer, SetPasswordSerializer, G
     ChangePasswordSerializer
 from .token import CustomTokenObtainPairSerializer, AcctiveAccountSerializer
 from .folder import FolderSerializer
-from .role import UserDeckRoleSerializer, AddUserSerializer, UpdateRoleSerializer, RemoveUserSerializer
+from .role import UserDeckRoleSerializer, AddUserSerializer, UpdateRoleSerializer, RemoveUserSerializer, InviteSerializer
 from .term import TermSerializer, AddTermsToDeckSerializer, TermNestInDeckSerializer
 from .deck import DeckSerializer, MyDeckSerializer, DeckDetailSerializer
 from .learning_progress import UserLearningProgressSerializer

@@ -1,10 +1,9 @@
 import { Avatar } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function DeckCard({ id, name, owner, terms, background }) {
-  const navigate = useNavigate();
   return (
-    <div className="set-card" onClick={() => navigate(`deck/${id}`)}>
+    <Link className="set-card" to={`deck/${id}`}>
       <div className="set-card__header">
         <div className="card-info">
           <div className="card-info__title">{name}</div>
@@ -29,7 +28,7 @@ function DeckCard({ id, name, owner, terms, background }) {
           <span>{owner.email}</span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

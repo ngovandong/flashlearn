@@ -1,11 +1,15 @@
+from urllib.parse import urlencode
 from rest_framework import viewsets, status, permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.conf import settings
+from django.urls import reverse
 from ..serializers import DeckSerializer, AddUserSerializer, RemoveUserSerializer, MyDeckSerializer, \
-    DeckDetailSerializer
+    DeckDetailSerializer, InviteSerializer
 from ..models import Deck, User
 from base.views import FlexibleViewSet
 from ..permissions import EditableDeck, IsOwnerPermission
+from ..services import AuthService
 
 
 class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
@@ -20,13 +24,15 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         "add_user_to_deck": owner_permission,
         "destroy": owner_permission,
         "remove_user_to_deck": owner_permission,
+        "get_invite_url": owner_permission,
     }
 
     serializer_map = {
         "add_user_to_deck": AddUserSerializer,
         "remove_user_to_deck": RemoveUserSerializer,
         "my_decks": MyDeckSerializer,
-        "retrieve": DeckDetailSerializer
+        "retrieve": DeckDetailSerializer,
+        "get_invite_url": InviteSerializer
     }
 
     def list(self, request, *args, **kwargs):
@@ -82,6 +88,17 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
             return Response({"errors": "user isn't in deck"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"errors": "user not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=["POST"])
+    def get_invite_url(self, request, pk=None, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        role = serializer.validated_data['role']
+        token = AuthService.get_invite_token(pk, role)
+        params = urlencode({'token': token})
+        invite_url = f'{settings.BASE_FRONTEND_URL}/invite?{params}'
+        return Response(invite_url, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

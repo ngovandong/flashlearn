@@ -1,4 +1,3 @@
-import { request } from "./httpRequest";
 import BaseService from "./baseService";
 
 class DeckService extends BaseService {
@@ -12,13 +11,18 @@ class DeckService extends BaseService {
   getMyOwnDecks = () => {
     return this.request.get(this.action("my_own_decks"));
   };
+  getInviteUrl = (id, role) => {
+    return this.request.post(this.detailAction(id, "get_invite_url"), { role });
+  };
 
   addUserToDeck = (id, user) => {
     return this.request.post(this.detailAction(id, "add_user_to_deck"), user);
   };
 
   removeUserFromDeck = (id, email) => {
-    return this.request.post(this.detailAction(id, "add_user_from_deck"), { email });
+    return this.request.post(this.detailAction(id, "add_user_from_deck"), {
+      email,
+    });
   };
 }
 
