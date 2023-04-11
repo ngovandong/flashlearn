@@ -51,6 +51,21 @@ function Home() {
       </div>
       <section>
         <div className="section-header">
+          <h5>Achievements</h5>
+          <div className="streak-container">
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/1869/1869397.png"
+              alt="streak-calendar"
+            />
+            <div className="streak-text">
+              <div>You have a 4-day streak of learning</div>
+              <span>Keep studying hard to maintain your streak!</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div className="section-header">
           <h5>Recents</h5>
         </div>
         <div className="section-cards">
