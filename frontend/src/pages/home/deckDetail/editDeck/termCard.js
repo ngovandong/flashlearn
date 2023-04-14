@@ -9,9 +9,10 @@ import { isImageUrl } from "@utils/imageURL";
 function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
   const handleOnEnter = async (url) => {
     try {
-      if (await isImageUrl(url)) {
+      if (isImageUrl(url)) {
         handleTermChange(index, {
           ...term,
+          error: term.error === "Not a valid image URL" ? null : term.error,
           open: false,
           image: url,
         });
@@ -40,6 +41,7 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
   const handleUploadAvatar = (file) => {
     handleTermChange(index, {
       ...term,
+      error: term.error === "Not a valid image URL" ? null : term.error,
       image: file,
       open: !term.open,
     });

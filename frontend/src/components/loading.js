@@ -1,6 +1,6 @@
 import { COLORS } from "@constants/colors";
 import { Backdrop } from "@mui/material";
-import { HashLoader, FadeLoader } from "react-spinners";
+import { HashLoader } from "react-spinners";
 
 function GlobalLoadingWrapper({ open }) {
   return (

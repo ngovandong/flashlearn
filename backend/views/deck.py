@@ -3,7 +3,6 @@ from rest_framework import viewsets, status, permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.conf import settings
-from django.urls import reverse
 from ..serializers import DeckSerializer, AddUserSerializer, RemoveUserSerializer, MyDeckSerializer, \
     DeckDetailSerializer, InviteSerializer
 from ..models import Deck, User

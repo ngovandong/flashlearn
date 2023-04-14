@@ -4,7 +4,6 @@ import Login from "@pages/login";
 import SignUp from "@pages/signup";
 import NotFound from "@pages/notfound";
 import MainContainer from "@components/mainContainer";
-import StudySet from "@pages/studySet";
 import Folder from "@pages/folder";
 import Home from "@pages/home";
 import CreateDeck from "@pages/home/createDeck";
@@ -22,6 +21,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PermissionDenied from "@pages/permissionDenied";
 import Invite from "@pages/invite";
+import LearnPage from "@pages/home/deckDetail/learn";
+import DeckPage from "@pages/home/deckPage";
 
 function App() {
   const loading = useSelector(selectLoading);
@@ -32,12 +33,13 @@ function App() {
       <Routes>
         <Route path="" element={<MainContainer />}>
           <Route path="" element={<Home />} />
-          <Route path="deck" element={<StudySet />} />
+          <Route path="deck" element={<DeckPage />} />
           <Route path="folder" element={<Folder />} />
           <Route path="create-deck" element={<CreateDeck />} />
           <Route path="deck/:deckID" element={<Outlet />}>
             <Route path="" element={<DeckDetail />} />
             <Route path="edit" element={<EditDeck />} />
+            <Route path="learn" element={<LearnPage />} />
           </Route>
           <Route path="invite" element={<Invite />} />
         </Route>

@@ -21,7 +21,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
 
 
-class AcctiveAccountSerializer(TokenRefreshSerializer):
+class ActiveAccountSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         refresh = self.token_class(attrs["refresh"])
         # create new property

@@ -20,6 +20,11 @@ class TermNestInDeckSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'description', 'image')
 
 
+class LearningTermSerializer(serializers.Serializer):
+    last_learned_index = serializers.IntegerField(required=False)
+    terms = TermSerializer(many=True)
+
+
 class AddTermsToDeckSerializer(serializers.ModelSerializer):
     deck_id = serializers.UUIDField()
     terms = TermNestInDeckSerializer(many=True)

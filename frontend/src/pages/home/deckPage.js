@@ -4,13 +4,10 @@ import { Alert, Snackbar } from "@mui/material";
 import { getFirstError } from "@utils/errorHandler";
 import React, { useEffect, useState } from "react";
 import DeckCard from "./deckCard";
-import { useSelector } from "react-redux";
-import { selectUser } from "@app/store/authSlice";
-function Home() {
+function DeckPage() {
   const [mydecks, setMydecks] = useState();
   const [error, setError] = useState();
   const [isLoading, setIsLoading] = useState(false);
-  const user = useSelector(selectUser);
   const fetchDeck = async () => {
     setIsLoading(true);
     try {
@@ -30,7 +27,7 @@ function Home() {
   useEffect(() => {
     fetchDeck();
   }, []);
-  return user ? (
+  return (
     <div className="home-page">
       <LocalLoadingWrapper open={isLoading} />
       <Snackbar
@@ -46,28 +43,7 @@ function Home() {
           {error}
         </Alert>
       </Snackbar>
-      <div className="welcome-text">
-        <h2>Hi, {user.name}</h2>
-      </div>
       <section>
-        <div className="section-header">
-          <h5>Achievements</h5>
-          <div className="streak-container">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/1869/1869397.png"
-              alt="streak-calendar"
-            />
-            <div className="streak-text">
-              <div>You have a 4-day streak of learning</div>
-              <span>Keep studying hard to maintain your streak!</span>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section>
-        <div className="section-header">
-          <h5>Recents</h5>
-        </div>
         <div className="section-cards">
           {mydecks &&
             mydecks.map((d) => (
@@ -83,9 +59,7 @@ function Home() {
         </div>
       </section>
     </div>
-  ) : (
-    <></>
   );
 }
 
-export default Home;
+export default DeckPage;

@@ -3,10 +3,10 @@ import TermCard from "./termCard";
 import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useState } from "react";
 import { termService } from "@api-services/termService";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { LocalLoadingWrapper } from "@components/loading";
 import { getFirstError } from "@utils/errorHandler";
-import { filterChangedTerms } from "@utils/state";
+import { filterChangedTerms, isChangeState } from "@utils/state";
 
 const emptyTerm = {
   name: "",
@@ -17,16 +17,25 @@ const emptyTerm = {
 };
 
 const initTerms = [emptyTerm, emptyTerm, emptyTerm, emptyTerm];
-let oldTerms = null;
+let oldTerms = initTerms;
 
 function AddTermsTab({ handleClickBack }) {
   const [terms, setTerms] = useState(initTerms);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
   const [isSuccess, setIsSuccess] = useState(false);
-  const navigate = useNavigate();
   const { deckID } = useParams();
   const isUpdate = terms[0].id;
+  const isSateChanged = isChangeState(oldTerms, terms);
+  console.log(isSateChanged);
+
+  const convertTerms = (terms) => {
+    return terms.map((t) => ({
+      ...t,
+      open: false,
+      error: null,
+    }));
+  };
 
   const handleTermChange = (i, term) => {
     const newTerms = terms.map((t, index) => {
@@ -84,6 +93,7 @@ function AddTermsTab({ handleClickBack }) {
   };
 
   const handleClickSave = async () => {
+    let ischangedState = false;
     if (terms.length < 4) {
       setError("You must add at least four terms!");
     } else {
@@ -95,6 +105,7 @@ function AddTermsTab({ handleClickBack }) {
             const notCreated = result.filter((t) => !t.id);
             if (notCreated.length > 0) {
               const res = await termService.addTermsToDeck(deckID, notCreated);
+              ischangedState = true;
               if (res.error) {
                 setError(res.error);
               }
@@ -102,12 +113,14 @@ function AddTermsTab({ handleClickBack }) {
             const updatedTerms = filterChangedTerms(oldTerms, result);
             if (updatedTerms.length > 0) {
               const res = await termService.updateTerms(updatedTerms);
+              ischangedState = true;
               if (res.error) {
                 setError(res.error);
               }
             }
           } else {
             const res = await termService.addTermsToDeck(deckID, result);
+            ischangedState = true;
             if (res.error) {
               setError(res.error);
             }
@@ -116,6 +129,7 @@ function AddTermsTab({ handleClickBack }) {
           console.log(error);
           setError("Something wrong!");
         } finally {
+          if (ischangedState) fetchTerms();
           setIsLoading(false);
         }
       } else {
@@ -130,11 +144,7 @@ function AddTermsTab({ handleClickBack }) {
       const res = await termService.getTermsByDeck(deckID);
       if (!res.error) {
         if (res.data.length) {
-          const fetchedTerms = res.data.map((t) => ({
-            ...t,
-            open: false,
-            error: null,
-          }));
+          const fetchedTerms = convertTerms(res.data);
           oldTerms = fetchedTerms;
           setTerms(fetchedTerms);
         }
@@ -191,9 +201,17 @@ function AddTermsTab({ handleClickBack }) {
           Back to previous
         </div>
         <div className="group-btns">
-          <div className="save-btn" onClick={handleClickSave}>
+          <div
+            className={`save-btn ${!isSateChanged ? "disabled" : ""}`}
+            onClick={handleClickSave}
+          >
             Save
           </div>
+          {isUpdate && (
+            <Link to={`/deck/${deckID}`} className="main-btn">
+              Done
+            </Link>
+          )}
         </div>
       </div>
       <div className="add-terms-tab">

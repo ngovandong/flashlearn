@@ -107,6 +107,17 @@
     &:hover {
         background-color: #d9dde8;
     }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+}
+
+.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 

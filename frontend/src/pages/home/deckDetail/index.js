@@ -2,7 +2,7 @@ import { deckService } from "@api-services/deckService";
 import { LocalLoadingWrapper } from "@components/loading";
 import { getFirstError } from "@utils/errorHandler";
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import CollectionsBookmarkIcon from "@mui/icons-material/CollectionsBookmark";
@@ -55,10 +55,10 @@ function DeckDetail() {
             <h2>{deck.name}</h2>
           </div>
           <div className="deck-menu">
-            <div className="menu-btn">
+            <Link to="learn"  className="menu-btn" >
               <LocalLibraryIcon color="purple" />
               <span>Learn</span>
-            </div>
+            </Link>
             <div className="menu-btn">
               <CollectionsBookmarkIcon color="purple" />
               <span>Revise </span>

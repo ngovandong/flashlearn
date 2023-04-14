@@ -53,6 +53,7 @@
 
             .main-btn {
                 @include purple_btn;
+                text-decoration: none;
             }
 
             .save-btn {
@@ -62,6 +63,13 @@
                 &:hover {
                     background-color: $yellow;
                     color: black;
+                }
+            }
+
+            .disabled.save-btn {
+                &:hover {
+                    color: white;
+                    background-color: $blue;
                 }
             }
         }

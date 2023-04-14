@@ -11,7 +11,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.shortcuts import redirect
 
-from ..serializers import CustomTokenObtainPairSerializer, AcctiveAccountSerializer, UserSerializer, \
+from ..serializers import CustomTokenObtainPairSerializer, ActiveAccountSerializer, UserSerializer, \
     SetPasswordSerializer, \
     GoogleCallbackSerializer, GoogleUserSerializer, ChangePasswordSerializer
 from ..models import User
@@ -33,10 +33,16 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
         'change_password': SetPasswordSerializer,
         'google_login': GoogleCallbackSerializer,
         'init': GoogleUserSerializer,
-        'active_account': AcctiveAccountSerializer
+        'active_account': ActiveAccountSerializer
     }
 
-    permission_map = {'change_password': [permissions.IsAuthenticated]}
+    permission_map = {'change_password': [
+        permissions.IsAuthenticated], 'get_profile': [permissions.IsAuthenticated]}
+
+    @action(detail=False, methods=['GET'])
+    def get_profile(self, request, *args, **kwargs):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
 
     @action(detail=False, methods=['POST'])
     def login(self, request, *args, **kwargs):
@@ -136,7 +142,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
 
         params = urlencode(token)
         return redirect(f'{login_url}?{params}')
-    
+
     @action(detail=False, methods=['GET'])
     def init(self, request, *args, **kwargs):
         id_token = request.headers.get('Authorization')
@@ -155,7 +161,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
             'image_url': user_data.get('picture', ''),
         }
 
-        user, _ = UserService.user_get_or_create_validated_email_user(**profile_data)
+        user, _ = UserService.user_get_or_create_validated_email_user(
+            **profile_data)
 
         if not user.is_google_account:
             return Response({'error': 'It looks like you already have an account with that email'},

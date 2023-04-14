@@ -6,4 +6,7 @@ class UserLearningProgress(UUIDModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='learning_progress')
     term = models.ForeignKey(Term, on_delete=models.CASCADE, related_name='learning_progress')
     last_learned_at = models.DateTimeField(auto_now=True)
-    score = models.IntegerField()
+    score = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ('last_learned_at',)

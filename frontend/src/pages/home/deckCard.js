@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 function DeckCard({ id, name, owner, terms, background }) {
   return (
-    <Link className="set-card" to={`deck/${id}`}>
+    <Link className="set-card" to={`/deck/${id}`}>
       <div className="set-card__header">
         <div className="card-info">
           <div className="card-info__title">{name}</div>
