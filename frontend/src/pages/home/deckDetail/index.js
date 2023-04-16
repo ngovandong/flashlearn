@@ -55,7 +55,7 @@ function DeckDetail() {
             <h2>{deck.name}</h2>
           </div>
           <div className="deck-menu">
-            <Link to="learn"  className="menu-btn" >
+            <Link to="learn" className="menu-btn">
               <LocalLibraryIcon color="purple" />
               <span>Learn</span>
             </Link>
@@ -82,15 +82,31 @@ function DeckDetail() {
             <div className="progress-card">
               <h4>Learning progress</h4>
               <div className="result-card">
-                <CircularProgressWithLabel value={70} size={120} />
+                <CircularProgressWithLabel
+                  value={parseInt(
+                    (deck.learning_progress.completed / deck.number_of_term) *
+                      100
+                  )}
+                  size={120}
+                />
                 <div className="progress-detail">
                   <div className="detail-row">
-                    <div className="completed">Completed:</div>
-                    <div className="completed-number">34</div>
+                    <div className="progress-title c-b">Learning:</div>
+                    <div className="detail-number c-b">
+                      {deck.learning_progress.learning}
+                    </div>
                   </div>
                   <div className="detail-row">
-                    <div className="left">Left:</div>
-                    <div className="left-number">20</div>
+                    <div className="progress-title c-p">Completed:</div>
+                    <div className="detail-number c-p">
+                      {deck.learning_progress.completed}
+                    </div>
+                  </div>
+                  <div className="detail-row">
+                    <div className="progress-title c-y">Left:</div>
+                    <div className="detail-number c-y">
+                      {deck.learning_progress.left}
+                    </div>
                   </div>
                 </div>
               </div>

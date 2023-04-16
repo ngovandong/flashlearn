@@ -4,5 +4,5 @@ from .token import CustomTokenObtainPairSerializer, ActiveAccountSerializer
 from .folder import FolderSerializer
 from .role import UserDeckRoleSerializer, AddUserSerializer, UpdateRoleSerializer, RemoveUserSerializer, InviteSerializer
 from .term import TermSerializer, AddTermsToDeckSerializer, TermNestInDeckSerializer, LearningTermSerializer
+from .learning_progress import UserLearningProgressSerializer, CreateLearningProgressSerializer, ProgressSerializer
 from .deck import DeckSerializer, MyDeckSerializer, DeckDetailSerializer
-from .learning_progress import UserLearningProgressSerializer, CreateLearningProgressSerializer

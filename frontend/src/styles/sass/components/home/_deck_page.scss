@@ -75,36 +75,41 @@
                         font-weight: 500;
                         justify-content: space-between;
 
-
-                        .completed {
-                            color: $main-purple;
+                        .progress-title {
                             margin-right: 2rem;
                             align-self: center;
                         }
 
-                        .completed-number {
-                            padding: .2rem .6rem;
-                            border: 1px solid $main-purple;
+                        .c-b {
+                            color: $blue;
+                        }
+
+                        .c-p {
                             color: $main-purple;
+                        }
+
+                        .c-y {
+                            color: $yellow;
+                        }
+
+                        .detail-number {
+                            padding: .2rem .6rem;
                             border-radius: 1rem;
                         }
 
-                        .left-number {
-                            padding: .2rem .6rem;
+                        .detail-number.c-b {
                             border: 1px solid $blue;
-                            color: $blue;
-                            border-radius: 1rem;
                         }
 
-                        .left {
-                            color: $blue;
-                            margin-right: 2rem;
-                            align-self: center;
-
+                        .detail-number.c-p {
+                            border: 1px solid $main-purple;
                         }
+
+                        .detail-number.c-y {
+                            border: 1px solid $yellow;
+                        }
+
                     }
-
-
 
                 }
             }

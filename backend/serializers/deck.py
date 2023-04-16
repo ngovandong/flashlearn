@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from ..models import Deck
-from . import UserDeckRoleSerializer, UserSerializer
-from django.conf import settings
+from . import AddUserSerializer, UserSerializer, ProgressSerializer
+from ..constants import FULL_ROLE_CHOICES
+from ..services import LearningService
 
 
 class DeckSerializer(serializers.ModelSerializer):
@@ -15,18 +16,24 @@ class DeckSerializer(serializers.ModelSerializer):
 
 
 class DeckDetailSerializer(DeckSerializer):
-    user_roles = UserDeckRoleSerializer(read_only=True, many=True, )
+    user_roles = AddUserSerializer(read_only=True, many=True)
+    learning_progress = ProgressSerializer(read_only=True)
+    my_permission = serializers.ChoiceField(
+        choices=FULL_ROLE_CHOICES, read_only=True)
 
     class Meta(DeckSerializer.Meta):
-        fields = (*DeckSerializer.Meta.fields, 'user_roles')
+        fields = (*DeckSerializer.Meta.fields, 'user_roles',
+                  'my_permission', 'learning_progress')
 
     def to_representation(self, instance):
-        user = self.context['request'].user
         ret = super().to_representation(instance)
-        if instance.owner == user:
-            ret["my_permission"] = "O"
-        else:
-            ret["my_permission"] = instance.user_roles.get(user=user).role
+        request = self.context['request']
+        user = request.user
+        permission = instance.get_user_permission(user)
+        if permission is not None:
+            ret["my_permission"] = permission
+        ret['learning_progress'] = LearningService.get_learning_progress(
+            instance.id, user)
         return ret
 
 
@@ -34,8 +41,7 @@ class MyDeckSerializer(DeckSerializer):
     def to_representation(self, instance):
         user = self.context['request'].user
         ret = super().to_representation(instance)
-        if instance.owner == user:
-            ret["my_permission"] = "O"
-        else:
-            ret["my_permission"] = instance.user_roles.get(user=user).role
+        permission = instance.get_user_permission(user)
+        if permission:
+            ret["my_permission"] = permission
         return ret

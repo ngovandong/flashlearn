@@ -19,3 +19,9 @@ class CreateLearningProgressSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserLearningProgress
         fields = ('term_id', "user_id")
+
+
+class ProgressSerializer(serializers.Serializer):
+    learning = serializers.IntegerField()
+    completed = serializers.IntegerField()
+    left = serializers.IntegerField()

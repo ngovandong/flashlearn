@@ -3,12 +3,12 @@ from rest_framework import viewsets, status, permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from base.views import FlexibleViewSet
-from django.db.models import Q
 from django.utils import timezone
+from django.http import Http404
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from ..serializers import TermSerializer, LearningTermSerializer, CreateLearningProgressSerializer
-from ..models import Deck, Term, UserLearningProgress
+from ..serializers import LearningTermSerializer, CreateLearningProgressSerializer
+from ..models import Term, UserLearningProgress
 from ..permissions import EditableDeck, IsOwnerPermission
 
 
@@ -19,13 +19,11 @@ class LearningViewSet(FlexibleViewSet):
 
     permission_classes = (permissions.IsAuthenticated)
 
-    permission_map = {
-
-    }
+    permission_map = {}
 
     serializer_map = {
         "get_learning_terms": LearningTermSerializer,
-        "create": CreateLearningProgressSerializer
+        "create": CreateLearningProgressSerializer,
     }
 
     def perform_create(self, serializer):
@@ -50,11 +48,12 @@ class LearningViewSet(FlexibleViewSet):
         openapi.Parameter('deck_id', openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Filter by deck")])
     @action(detail=False, methods=["GET"], )
     def get_learning_terms(self, request, *args, **kwargs):
-        deck_id = request.query_params.get("deck_id")
-        deck_terms = Term.objects.filter(deck_id=deck_id)
-        learned_terms = Term.objects.filter(
-            Q(learning_progress__user=request.user) & Q(deck_id=deck_id)).order_by('learning_progress__last_learned_at')
-        last_learned_term = learned_terms.last()
+        deck_id = request.query_params.get("deck_id", None)
+        if deck_id is None:
+            raise Http404("deck_id parameter is required")
+        deck_terms = Term.objects.get_terms_for_deck(deck_id=deck_id)
+        last_learned_term = Term.objects.get_last_learned_term(
+            request.user, deck_id)
 
         if last_learned_term:
             last_learned_index = last_learned_term.id
@@ -63,7 +62,7 @@ class LearningViewSet(FlexibleViewSet):
                     last_learned_index = index
 
         else:
-            last_learned_index = 1
+            last_learned_index = 0
 
         instance = {"terms": deck_terms, "last_learned_index": last_learned_index
                     }

@@ -16,7 +16,7 @@ class IsOwnerOfRolePermission(permissions.BasePermission):
 class EditableDeck(permissions.BasePermission):
     def has_object_permission(self, request, view, obj: Deck):
         if request.method in permissions.SAFE_METHODS:
-            return obj.is_public or obj.user_is_in_deck(request.user)
+            return obj.user_is_in_deck(request.user)
 
         return obj.user_can_edit_deck(request.user)
 

@@ -121,7 +121,7 @@ function FooterBTNs({ deck, setIsLoading }) {
           id="basic-menu"
           anchorEl={anchorShareEl}
           open={Boolean(anchorShareEl)}
-          onClose={() => setAnchorEl(null)}
+          onClose={() => setAnchorShareEl(null)}
           MenuListProps={{
             "aria-labelledby": "share-button",
           }}

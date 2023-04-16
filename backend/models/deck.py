@@ -2,6 +2,7 @@ from django.db import models
 from base.models import DateTimeUUIDModel
 from cloudinary.models import CloudinaryField
 from . import User
+from ..constants import FULL_ROLE_CLASS
 
 
 class Deck(DateTimeUUIDModel):
@@ -20,11 +21,18 @@ class Deck(DateTimeUUIDModel):
     def number_of_term(self):
         return self.terms.count()
 
-    def user_has_permission_in_deck(self, user):
-        return user in self.users
+    def get_user_permission(self, user):
+        if user == self.owner:
+            return FULL_ROLE_CLASS.OWNER
+        else:
+            role = self.user_roles.filter(user=user).first()
+            return role.role if role else (FULL_ROLE_CLASS.VIEW_ONLY if self.is_public else None)
 
     def user_can_edit_deck(self, user):
-        return self.owner == user or self.user_roles.filter(user=user, role='E').first() is not None
+        user_role = self.get_user_permission(user)
+        if user_role is None:
+            return False
+        return user_role in [FULL_ROLE_CLASS.EDIT, FULL_ROLE_CLASS.OWNER]
 
     def user_is_in_deck(self, user):
-        return self.owner == user or self.user_roles.filter(user=user).first() is not None
+        return self.get_user_permission(user) is not None
