@@ -39,6 +39,9 @@ function LearnPage() {
   const handleBack = async () => {
     setCurrentState((pre) => ({ index: pre.index - 1, isFlipped: false }));
   };
+  const handleRestart = async () => {
+    setCurrentState((pre) => ({ index: 0, isFlipped: false }));
+  };
 
   const fetchWords = async () => {
     try {
@@ -139,7 +142,7 @@ function LearnPage() {
               </CircleButton>
             </div>
             <div className="site-btn">
-              <IconButton component="label">
+              <IconButton component="label" onClick={handleRestart}>
                 <RestartAltIcon />
               </IconButton>
             </div>
