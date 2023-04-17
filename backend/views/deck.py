@@ -8,7 +8,7 @@ from ..serializers import DeckSerializer, AddUserSerializer, RemoveUserSerialize
 from ..models import Deck, User
 from base.views import FlexibleViewSet
 from ..permissions import EditableDeck, IsOwnerPermission
-from ..services import AuthService
+from ..services import AuthService, LearningService
 
 
 class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
@@ -24,6 +24,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         "destroy": owner_permission,
         "remove_user_to_deck": owner_permission,
         "get_invite_url": owner_permission,
+        "clear_learning_process": permissions.IsAuthenticated
     }
 
     serializer_map = {
@@ -98,6 +99,11 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         params = urlencode({'token': token})
         invite_url = f'{settings.BASE_FRONTEND_URL}/invite?{params}'
         return Response(invite_url, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["PUT"])
+    def clear_learning_process(self, request, pk=None, *args, **kwargs):
+        LearningService.clear_learning_progress(pk, request.user)
+        return Response({"message": "clear learning progress success"}, status=status.HTTP_204_NO_CONTENT)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

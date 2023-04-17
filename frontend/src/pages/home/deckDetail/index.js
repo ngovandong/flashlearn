@@ -112,7 +112,7 @@ function DeckDetail() {
               </div>
             </div>
           </div>
-          <FooterBTNs setIsLoading={setIsLoading} deck={deck} />
+          <FooterBTNs setIsLoading={setIsLoading} fetchDeck={fetchDeck} deck={deck} />
         </div>
       )}
     </>

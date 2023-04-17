@@ -1,4 +1,4 @@
-from ..models import Term
+from ..models import Term, UserLearningProgress
 
 
 class LearningService:
@@ -12,3 +12,7 @@ class LearningService:
             user=user, deck_id=deck_id).count()
 
         return {"learning": learning, "completed": completed, "left": left}
+
+    def clear_learning_progress(deck_id, user):
+        UserLearningProgress.objects.filter(
+            term__deck_id=deck_id, user=user).delete()

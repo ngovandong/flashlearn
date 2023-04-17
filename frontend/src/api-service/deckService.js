@@ -24,6 +24,9 @@ class DeckService extends BaseService {
       email,
     });
   };
+  clearLearningProgress = (id) => {
+    return this.request.put(this.detailAction(id, "clear_learning_process"));
+  };
 }
 
 export const deckService = new DeckService();

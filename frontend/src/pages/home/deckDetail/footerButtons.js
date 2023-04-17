@@ -18,7 +18,7 @@ import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
 import { deckService } from "@api-services/deckService";
 import { getFirstError } from "@utils/errorHandler";
-function FooterBTNs({ deck, setIsLoading }) {
+function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
   const [anchorEl, setAnchorEl] = useState();
   const [anchorShareEl, setAnchorShareEl] = useState();
   const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
@@ -26,6 +26,25 @@ function FooterBTNs({ deck, setIsLoading }) {
 
   const { deckID } = useParams();
   const navigate = useNavigate();
+
+  const handleReset = async () => {
+    setAnchorEl(null);
+    try {
+      setIsLoading(true);
+      const res = await deckService.clearLearningProgress(deckID);
+      if (!res.error) {
+        toast.success("Reset learning progress success!");
+        fetchDeck();
+      } else {
+        const errorMessage = getFirstError(res.error);
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleDeleteDeck = async () => {
     setIsOpenDeleteDialog(false);
@@ -109,13 +128,7 @@ function FooterBTNs({ deck, setIsLoading }) {
           >
             {role === ROLES.OWNER ? "Delete" : "Remove"}
           </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setAnchorEl(null);
-            }}
-          >
-            Reset
-          </MenuItem>
+          <MenuItem onClick={handleReset}>Reset</MenuItem>
         </Menu>
         <Menu
           id="basic-menu"
