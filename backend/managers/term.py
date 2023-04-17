@@ -38,15 +38,19 @@ class TermManager(Manager):
         """
         Returns the terms that the given user has completed for the given deck.
         """
-        filter = Q(learning_progress__score__lt=2)
-        return self.get_learned_terms(user, deck_id).filter(filter)
+        filter = Q(deck_id=deck_id)
+        filter &= Q(learning_progress__user=user)
+        filter &= Q(learning_progress__score__lt=2)
+        return self.filter(filter)
 
     def get_completed_terms(self, user, deck_id: int) -> QuerySet:
         """
         Returns the terms that the given user has completed for the given deck.
         """
-        filter = Q(learning_progress__score__gte=2)
-        return self.get_learned_terms(user, deck_id).filter(filter)
+        filter = Q(deck_id=deck_id)
+        filter &= Q(learning_progress__user=user)
+        filter &= Q(learning_progress__score__gte=2)
+        return self.filter(filter)
 
     def get_unlearned_terms(self, user, deck_id: int) -> QuerySet:
         """
