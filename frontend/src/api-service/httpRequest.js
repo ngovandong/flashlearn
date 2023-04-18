@@ -29,6 +29,7 @@ const refreshToken = async (error) => {
   }
   const token = getCurrentToken();
   if (error.response?.status === 401 && !refresh && token) {
+    refresh = true;
     try {
       const { data } = await axios.post("users/refresh/", {
         refresh: token.refresh,

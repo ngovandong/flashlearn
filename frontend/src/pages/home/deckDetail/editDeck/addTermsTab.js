@@ -27,7 +27,6 @@ function AddTermsTab({ handleClickBack }) {
   const { deckID } = useParams();
   const isUpdate = terms[0].id;
   const isSateChanged = isChangeState(oldTerms, terms);
-  console.log(isSateChanged);
 
   const convertTerms = (terms) => {
     return terms.map((t) => ({
