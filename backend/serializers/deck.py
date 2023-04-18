@@ -30,8 +30,7 @@ class DeckDetailSerializer(DeckSerializer):
         request = self.context['request']
         user = request.user
         permission = instance.get_user_permission(user)
-        if permission is not None:
-            ret["my_permission"] = permission
+        ret["my_permission"] = permission
         ret['learning_progress'] = LearningService.get_learning_progress(
             instance.id, user)
         return ret

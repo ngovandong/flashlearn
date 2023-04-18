@@ -2,7 +2,10 @@ from urllib.parse import urlencode
 from rest_framework import viewsets, status, permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.db.models import Q, Count
 from django.conf import settings
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from ..serializers import DeckSerializer, AddUserSerializer, RemoveUserSerializer, MyDeckSerializer, \
     DeckDetailSerializer, InviteSerializer
 from ..models import Deck, User
@@ -35,8 +38,27 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         "get_invite_url": InviteSerializer
     }
 
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('search', openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Search by Deck name, user name, or email")])
     def list(self, request, *args, **kwargs):
-        self.queryset = self.queryset.filter(is_public=True)
+        search_query = request.query_params.get('search')
+        queryset = self.get_queryset().filter(
+            is_public=True).select_related('owner').prefetch_related('terms')
+
+        if search_query:
+            # Filter by search query and term count
+            queryset = queryset.annotate(term_count=Count('terms'))
+            filtered_queryset = queryset.filter(
+                Q(name__icontains=search_query) |
+                Q(owner__name__icontains=search_query) |
+                Q(owner__email__icontains=search_query),
+                term_count__gt=0
+            )
+        else:
+            # Return the original queryset if no search query is specified
+            filtered_queryset = queryset
+
+        self.queryset = filtered_queryset
         return super().list(request, *args, **kwargs)
 
     @action(detail=False, methods=["GET"])

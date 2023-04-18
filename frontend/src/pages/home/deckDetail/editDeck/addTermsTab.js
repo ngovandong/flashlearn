@@ -27,7 +27,6 @@ function AddTermsTab({ handleClickBack }) {
   const { deckID } = useParams();
   const isUpdate = terms[0].id;
   const isSateChanged = isChangeState(oldTerms, terms);
-  console.log(isSateChanged);
 
   const convertTerms = (terms) => {
     return terms.map((t) => ({
@@ -48,25 +47,29 @@ function AddTermsTab({ handleClickBack }) {
     setTerms(newTerms);
   };
   const handleDeleteTerm = async (i) => {
-    const term = terms[i];
-    if (term.id) {
-      try {
-        setIsLoading(true);
-        const res = await termService.delete(term.id);
-        if (res.status === 204) {
-          fetchTerms();
-        } else {
-          setError("Delete Fail!");
+    if (terms.length > 5) {
+      const term = terms[i];
+      if (term.id) {
+        try {
+          setIsLoading(true);
+          const res = await termService.delete(term.id);
+          if (res.status === 204) {
+            fetchTerms();
+          } else {
+            setError("Delete Fail!");
+          }
+        } catch (error) {
+          console.log(error);
+          setError("Something Wrong!");
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.log(error);
-        setError("Something Wrong!");
-      } finally {
-        setIsLoading(false);
+      } else {
+        const newTerms = terms.filter((_, index) => index !== i);
+        setTerms(newTerms);
       }
     } else {
-      const newTerms = terms.filter((_, index) => index !== i);
-      setTerms(newTerms);
+      setError("Decks must have more than 4 terms");
     }
   };
   const handleAddTerm = () => {

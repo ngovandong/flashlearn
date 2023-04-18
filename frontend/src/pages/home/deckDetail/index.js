@@ -45,7 +45,13 @@ function DeckDetail() {
     if (deckID) {
       fetchDeck();
     }
-  }, []);
+  }, [deckID]);
+
+  useEffect(() => {
+    if (deck && deck.number_of_term === 0) {
+      navigate("edit?tab=1");
+    }
+  }, [deck]);
   return deck ? (
     <>
       <LocalLoadingWrapper open={isLoading} />
@@ -112,7 +118,11 @@ function DeckDetail() {
               </div>
             </div>
           </div>
-          <FooterBTNs setIsLoading={setIsLoading} fetchDeck={fetchDeck} deck={deck} />
+          <FooterBTNs
+            setIsLoading={setIsLoading}
+            fetchDeck={fetchDeck}
+            deck={deck}
+          />
         </div>
       )}
     </>

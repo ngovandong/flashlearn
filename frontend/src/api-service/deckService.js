@@ -27,6 +27,9 @@ class DeckService extends BaseService {
   clearLearningProgress = (id) => {
     return this.request.put(this.detailAction(id, "clear_learning_process"));
   };
+  searchDeck = (searchText) => {
+    return this.request.get(this.base, { params: { search: searchText } });
+  };
 }
 
 export const deckService = new DeckService();

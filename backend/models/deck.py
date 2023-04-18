@@ -26,7 +26,7 @@ class Deck(DateTimeUUIDModel):
             return FULL_ROLE_CLASS.OWNER
         else:
             role = self.user_roles.filter(user=user).first()
-            return role.role if role else (FULL_ROLE_CLASS.VIEW_ONLY if self.is_public else None)
+            return role.role if role else None
 
     def user_can_edit_deck(self, user):
         user_role = self.get_user_permission(user)
@@ -36,3 +36,6 @@ class Deck(DateTimeUUIDModel):
 
     def user_is_in_deck(self, user):
         return self.get_user_permission(user) is not None
+
+    def user_can_view_deck(self, user):
+        return self.is_public or self.get_user_permission(user)
