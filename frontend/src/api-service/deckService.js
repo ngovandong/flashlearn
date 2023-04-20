@@ -30,6 +30,12 @@ class DeckService extends BaseService {
   searchDeck = (searchText) => {
     return this.request.get(this.base, { params: { search: searchText } });
   };
+  joinDeck = (id) => {
+    return this.request.post(this.detailAction(id, "join_deck"));
+  };
+  leaveDeck = (id) => {
+    return this.request.post(this.detailAction(id, "leave_deck"));
+  };
 }
 
 export const deckService = new DeckService();

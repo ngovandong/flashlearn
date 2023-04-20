@@ -12,6 +12,7 @@ from ..models import Deck, User
 from base.views import FlexibleViewSet
 from ..permissions import EditableDeck, IsOwnerPermission
 from ..services import AuthService, LearningService
+from ..constants import FULL_ROLE_CLASS
 
 
 class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
@@ -27,7 +28,9 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         "destroy": owner_permission,
         "remove_user_to_deck": owner_permission,
         "get_invite_url": owner_permission,
-        "clear_learning_process": permissions.IsAuthenticated
+        "clear_learning_process": permissions.IsAuthenticated,
+        "join_deck": permissions.IsAuthenticated,
+        "leave_deck": permissions.IsAuthenticated,
     }
 
     serializer_map = {
@@ -126,6 +129,27 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
     def clear_learning_process(self, request, pk=None, *args, **kwargs):
         LearningService.clear_learning_progress(pk, request.user)
         return Response({"message": "clear learning progress success"}, status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["POST"])
+    def join_deck(self, request, pk=None, *args, **kwargs):
+        user = request.user
+        instance = self.get_object()
+        if not instance.is_public:
+            return Response({"errors": "You have not permission"}, status=status.HTTP_400_BAD_REQUEST)
+        if user in instance.users.all():
+            return Response({"errors": "user is already in deck"}, status=status.HTTP_400_BAD_REQUEST)
+        instance.users.add(user, through_defaults={
+                           'role': FULL_ROLE_CLASS.VIEW_ONLY})
+        return Response({"message": "join deck success"}, status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["POST"])
+    def leave_deck(self, request, pk=None, *args, **kwargs):
+        user = request.user
+        instance = self.get_object()
+        if user not in instance.users.all():
+            return Response({"errors": "user is not in deck"}, status=status.HTTP_400_BAD_REQUEST)
+        instance.users.remove(user)
+        return Response({"message": "leave deck success"}, status=status.HTTP_204_NO_CONTENT)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

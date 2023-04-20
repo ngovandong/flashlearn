@@ -12,5 +12,5 @@ FULL_ROLE_CHOICES = (
 
 class FULL_ROLE_CLASS:
     EDIT = "E"
-    VIEW_ONLY = "E"
+    VIEW_ONLY = "V"
     OWNER = "O"

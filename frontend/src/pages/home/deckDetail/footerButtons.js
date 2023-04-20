@@ -85,32 +85,75 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
       toast.error("Getting invite link failed!");
     }
   };
+
+  const handleJoinDeck = async () => {
+    try {
+      setIsLoading(true);
+      const res = await deckService.joinDeck(deckID);
+      if (!res.error) {
+        toast.success("Join deck success!");
+        fetchDeck();
+      } else {
+        const errorMessage = getFirstError(res.error);
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleLeaveDeck = async () => {
+    try {
+      setIsLoading(true);
+      const res = await deckService.leaveDeck(deckID);
+      if (!res.error) {
+        toast.success("Deck is removed from your deck!");
+        navigate("/deck");
+      } else {
+        const errorMessage = getFirstError(res.error);
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <>
       <div className="footer-group-btn">
-        {(role === ROLES.EDIT || role === ROLES.OWNER) && (
-          <CircleButton onClick={() => navigate("edit")}>
-            <EditIcon />
-          </CircleButton>
+        {!role ? (
+          <div className="join-btn" onClick={handleJoinDeck}>
+            Join deck
+          </div>
+        ) : (
+          <>
+            {(role === ROLES.EDIT || role === ROLES.OWNER) && (
+              <CircleButton onClick={() => navigate("edit")}>
+                <EditIcon />
+              </CircleButton>
+            )}
+            {role === ROLES.OWNER && (
+              <CircleButton
+                id="share-button"
+                onClick={(e) => {
+                  setAnchorShareEl(e.currentTarget);
+                }}
+              >
+                <IosShareIcon />
+              </CircleButton>
+            )}
+            <CircleButton
+              id="more-button"
+              onClick={(e) => {
+                setAnchorEl(e.currentTarget);
+              }}
+            >
+              <MoreHorizIcon />
+            </CircleButton>
+          </>
         )}
-        {role === ROLES.OWNER && (
-          <CircleButton
-            id="share-button"
-            onClick={(e) => {
-              setAnchorShareEl(e.currentTarget);
-            }}
-          >
-            <IosShareIcon />
-          </CircleButton>
-        )}
-        <CircleButton
-          id="more-button"
-          onClick={(e) => {
-            setAnchorEl(e.currentTarget);
-          }}
-        >
-          <MoreHorizIcon />
-        </CircleButton>
         <Menu
           id="basic-menu"
           anchorEl={anchorEl}
@@ -174,7 +217,13 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsOpenDeleteDialog(false)}>Disagree</Button>
-          <Button onClick={handleDeleteDeck} autoFocus>
+          <Button
+            onClick={() => {
+              if (role === ROLES.OWNER) handleDeleteDeck();
+              else handleLeaveDeck();
+            }}
+            autoFocus
+          >
             Agree
           </Button>
         </DialogActions>
