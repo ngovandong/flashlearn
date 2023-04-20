@@ -1,5 +1,4 @@
 from django.db.models import Manager, Q, QuerySet
-from django.db.models import Prefetch
 
 
 class TermManager(Manager):

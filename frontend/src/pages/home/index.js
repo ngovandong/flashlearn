@@ -14,7 +14,7 @@ function Home() {
   const fetchDeck = async () => {
     setIsLoading(true);
     try {
-      const res = await deckService.getMyDecks();
+      const res = await deckService.getLatestDeck();
       if (!res.error) {
         setMydecks(res.data);
       } else {

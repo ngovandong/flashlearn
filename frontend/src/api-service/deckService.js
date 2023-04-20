@@ -11,6 +11,12 @@ class DeckService extends BaseService {
   getMyOwnDecks = () => {
     return this.request.get(this.action("my_own_decks"));
   };
+  getLatestDeck = () => {
+    return this.request.get(this.action("latest_decks"));
+  };
+  getOthersDeck = () => {
+    return this.request.get(this.action("others_deck"));
+  };
   getInviteUrl = (id, role) => {
     return this.request.post(this.detailAction(id, "get_invite_url"), { role });
   };

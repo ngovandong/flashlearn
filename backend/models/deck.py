@@ -17,16 +17,15 @@ class Deck(DateTimeUUIDModel):
     owner = models.ForeignKey(
         User, related_name='my_own_decks', on_delete=models.CASCADE)
 
-    @property
-    def number_of_term(self):
-        return self.terms.count()
-
-    def get_user_permission(self, user):
-        if user == self.owner:
+    def get_user_permission(instance, user):
+        if user == instance.owner:
             return FULL_ROLE_CLASS.OWNER
         else:
-            role = self.user_roles.filter(user=user).first()
-            return role.role if role else None
+            role = None
+            for r in instance.user_roles.all():
+                if r.user == user:
+                    role = r.role
+            return role
 
     def user_can_edit_deck(self, user):
         user_role = self.get_user_permission(user)
