@@ -16,13 +16,65 @@
             color: $main-text-color;
         }
 
-        .create-btn {
-            @include purple_btn;
-        }
 
     }
 
+
+
     .create-deck__tab {
+
+        .upper-btns {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+
+            .group-btns {
+                display: flex;
+                column-gap: 1rem;
+            }
+
+            .back-btn {
+                font-weight: 600;
+                cursor: pointer;
+
+                &:hover {
+                    span {
+                        color: $yellow;
+                    }
+                }
+
+                span {
+                    color: $blue;
+                    margin-right: 5px;
+                    font-size: 24px;
+                    font-weight: bold;
+                }
+            }
+
+            .main-btn {
+                @include purple_btn;
+                text-decoration: none;
+            }
+
+            .save-btn {
+                @include purple_btn;
+                background-color: $blue;
+
+                &:hover {
+                    background-color: $yellow;
+                    color: black;
+                }
+            }
+
+            .disabled.save-btn {
+                &:hover {
+                    color: white;
+                    background-color: $blue;
+                }
+            }
+        }
+
+
         &.next {
             animation: slide-in-right 0.4s;
 
@@ -47,7 +99,7 @@
             display: flex;
 
             .info-input-card {
-                width: 50%;
+                width: 60%;
 
                 .info-row {
                     padding: 0.25rem 0;
@@ -66,13 +118,14 @@
 
             .info-visible-card {
                 display: flex;
-                width: 50%;
+                width: 40%;
                 padding-left: 100px;
+                padding-top: 50px;
                 align-items: center;
+                justify-content: center;
 
 
                 .visible-select {
-                    display: inline-block;
                     padding-right: 2rem;
                 }
             }
@@ -94,12 +147,16 @@
         }
     }
 
+    .red-bottom {
+        border-bottom: 4px solid $error-red;
+    }
 
     .term-card {
         width: 100%;
         background-color: white;
         border-radius: 0.5rem;
         margin-bottom: 20px;
+
 
 
         .term-toolbar {
@@ -117,9 +174,33 @@
 
             }
 
-            .toolbar {
+            .error-session {
                 display: flex;
                 flex-grow: 1;
+                justify-content: center;
+                align-items: center;
+
+                .error-message {
+                    display: flex;
+                    align-items: center;
+                    // background-color: #ffe0e0;
+                    color: $error-red;
+                    padding: 10px;
+                    border-radius: 5px;
+                    // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    margin-bottom: 10px;
+
+                    i {
+                        font-size: 1.5rem;
+                        margin-right: 10px;
+                    }
+
+                    span {
+                        font-size: 1rem;
+                        font-weight: 500;
+                        margin-left: 0.5rem;
+                    }
+                }
             }
         }
 
@@ -143,6 +224,8 @@
                 align-items: center;
                 width: 10%;
 
+
+
                 .upload-btn {
                     border: 0.125rem dashed #d9dde8;
                     border-radius: .25rem;
@@ -153,6 +236,10 @@
                     height: 4rem;
                     width: 5rem;
 
+                    &:hover {
+                        border-color: $yellow;
+                        color: $yellow;
+                    }
 
                     div {
                         font-size: 0.7rem;
@@ -184,6 +271,19 @@
                 justify-content: center;
             }
         }
+    }
+
+    .add-terms-tab {
+        .add-more-container {
+            padding: 2rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border-radius: 0.5rem;
+            margin-bottom: 20px;
+        }
+
     }
 
 

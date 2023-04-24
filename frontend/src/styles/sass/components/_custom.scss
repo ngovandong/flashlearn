@@ -95,3 +95,67 @@
         display: none;
     }
 }
+
+.circle-btn {
+    background-color: white;
+    border-radius: 50%;
+    padding: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 0.0625rem solid #d9dde8;
+
+    &:hover {
+        background-color: #d9dde8;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+}
+
+.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+.permissiondenied-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.permissiondenied-heading {
+    color: $main-purple;
+    font-size: 6rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 4rem 0;
+}
+
+.permissiondenied-message {
+    color: #666;
+    font-size: 2rem;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.permissiondenied-button {
+    background-color: $main-purple;
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+
+    &:hover {
+        background-color: darken($main-purple, 10%);
+    }
+}

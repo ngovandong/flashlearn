@@ -1,10 +1,13 @@
 from rest_framework import viewsets, status, permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.conf import settings
+from django.shortcuts import redirect
 from base.views import FlexibleViewSet
-from ..serializers import UserDeckRoleSerializer, UpdateRoleSerializer
-from ..models import UserDeckRole
+from ..serializers import UserDeckRoleSerializer, UpdateRoleSerializer, InviteSerializer
+from ..models import UserDeckRole, Deck
 from ..permissions import IsOwnerOfRolePermission
+from ..token import JWTToken
 
 
 class RoleViewSet(FlexibleViewSet):
@@ -13,12 +16,16 @@ class RoleViewSet(FlexibleViewSet):
 
     permission_classes = (permissions.IsAuthenticated, IsOwnerOfRolePermission)
 
-    serializer_map = {"update_role": UpdateRoleSerializer}
+    serializer_map = {"update_role": UpdateRoleSerializer,
+                      }
+
+    permission_map = {"invite": permissions.IsAuthenticated}
 
     @action(detail=True, methods=['PUT'])
     def update_role(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
@@ -28,3 +35,24 @@ class RoleViewSet(FlexibleViewSet):
             instance._prefetched_objects_cache = {}
 
         return Response(serializer.data)
+
+    @action(detail=False, methods=['GET'])
+    def invite(self, request, *args, **kwargs):
+        token = request.GET.get('token', None)
+        if token is None:
+            return Response({"error": "token is required"}, status=status.HTTP_400_BAD_REQUEST)
+        t = JWTToken(token)
+        try:
+            payload = t.get_payload()
+            deck_id = payload['deck_id']
+            role = payload['role']
+            deck = Deck.objects.filter(id=deck_id).first()
+            if not deck:
+                return Response({"error": "deck not found"}, status=status.HTTP_400_BAD_REQUEST)
+            if not (request.user in deck.users.all() or request.user == deck.owner):
+                deck_role = UserDeckRole(
+                    deck=deck, user=request.user, role=role)
+                deck_role.save()
+            return Response({"deck_id": deck_id}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)

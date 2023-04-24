@@ -4,6 +4,9 @@ import Alert from "@mui/material/Alert";
 
 import authService from "@api-services/authService";
 import cloudinaryService from "@api-services/cloudinaryService";
+import { getFirstError } from "@utils/errorHandler";
+import { useDispatch } from "react-redux";
+import { setLoading } from "@app/store/authSlice";
 
 function SignUp() {
   const [firstName, setFirstName] = useState("");
@@ -14,6 +17,7 @@ function SignUp() {
   const [avatar, setAvatar] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handle_submit = async (e) => {
     e.preventDefault();
@@ -33,6 +37,7 @@ function SignUp() {
         name: firstName + " " + lastName,
         image_url: url,
       };
+      dispatch(setLoading(true));
       try {
         const res = await authService.signUp(user);
         if (res.status === 201) {
@@ -43,18 +48,16 @@ function SignUp() {
               info,
             }).toString(),
           });
-        } else {
+        } else if (res.error) {
           // handle error
-          const data = res.response.data;
-          const firstKeyError = Object.keys(data)[0];
-          const error = Array.isArray(data[firstKeyError])
-            ? data[firstKeyError][0]
-            : data[firstKeyError];
-          const errorMessage = firstKeyError + ": " + error;
+          const errorMessage = getFirstError(res.error);
           setError(errorMessage);
         }
       } catch (error) {
         console.log(error);
+        setError("Something Wrong!");
+      } finally {
+        dispatch(setLoading(false));
       }
     }
   };
@@ -116,7 +119,6 @@ function SignUp() {
               type="file"
               name="attachment-file"
               id="custom-file-upload"
-              required
               onChange={(e) => setAvatar(e.target.files[0])}
               accept="image/*"
             />

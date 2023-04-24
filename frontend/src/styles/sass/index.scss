@@ -5,9 +5,12 @@
 @import "base/_variables";
 
 // Components
-@import "components/home/_home";
+@import "components/not_found";
 @import "components/custom";
+@import "components/home/_home";
+@import "components/home/learn";
 @import "components/home/create_deck";
+@import "components/home/deck_page";
 
 
 

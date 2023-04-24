@@ -31,3 +31,12 @@
         background-color: $dark-purple;
     }
 }
+
+@mixin border_bottom_purple {
+    border-bottom: 0.3125rem solid #fff;
+
+    &:hover {
+        border-bottom: 0.3125rem solid $hover-purple;
+        transition: all .12s cubic-bezier(.47, 0, .745, .715);
+    }
+}

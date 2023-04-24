@@ -1,28 +1,16 @@
 {
     "compilerOptions": {
-        "baseUrl": "./src",
-        "paths": {
-            "@components/*": [
-                "components/*"
-            ],
-            "@utils/*": [
-                "utils/*"
-            ],
-            "@styles/*": [
-                "styles/*"
-            ],
-            "@constants/*": [
-                "constants/*"
-            ],
-            "@app/*": [
-                "app/*"
-            ],
-            "@pages/*": [
-                "pages/*"
-            ],
-            "@api-services/*": [
-                "api-service/*"
-            ]
-        }
-    }
-}
+      "baseUrl": ".",
+      "paths": {
+        "@components/*": ["src/components/*"],
+        "@utils/*": ["src/utils/*"],
+        "@styles/*": ["src/styles/*"],
+        "@constants/*": ["src/constants/*"],
+        "@app/*": ["src/app/*"],
+        "@pages/*": ["src/pages/*"],
+        "@api-services/*": ["src/api-service/*"]
+      }
+    },
+    "exclude": ["node_modules", "build"]
+  }
+  

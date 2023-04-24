@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import UploadButton from "./uploadButton";
 
-function UploadAvatarButton() {
-  const [selectedFile, setSelectedFile] = useState(null);
-
+function UploadAvatarButton({ selectedFile, setSelectedFile }) {
+  const is_url = typeof selectedFile === "string";
   return (
     <div className="upload-card">
       <UploadButton
@@ -11,7 +10,9 @@ function UploadAvatarButton() {
         setFile={setSelectedFile}
         id="set-avatar"
       />
-      {selectedFile ? (
+      {is_url ? (
+        <img src={selectedFile} alt="placeholder" className="selected-image" />
+      ) : selectedFile ? (
         <img
           src={URL.createObjectURL(selectedFile)}
           alt="selected"

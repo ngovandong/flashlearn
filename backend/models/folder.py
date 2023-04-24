@@ -8,3 +8,4 @@ class Folder(DateTimeUUIDModel):
     description = models.TextField()
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='folders')
+    decks = models.ManyToManyField('Deck', related_name='folders')

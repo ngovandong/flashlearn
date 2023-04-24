@@ -1,97 +1,78 @@
-import { FormHelperText, TextField } from "@mui/material";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import UploadAvatarButton from "@components/uploadAvatarImageBT";
+import { Alert, Snackbar } from "@mui/material";
 import { useState } from "react";
-import TermCard from "./termCard";
+import { deckService } from "@api-services/deckService";
+import { getFirstError } from "@utils/errorHandler";
+import { LocalLoadingWrapper } from "@components/loading";
+import CreateDeckTab from "../deckDetail/editDeck/createDeckTab";
+import { useNavigate } from "react-router-dom";
 
 function CreateDeck() {
-  const [currentTab, setCurrentTab] = useState({ tab: 0, start: 1 });
+  const [error, setError] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const [deck, setDeck] = useState({
+    is_public: false,
+    name: "",
+    description: "",
+    background: null,
+  });
+
+  const handleClickNext = async () => {
+    if (deck.background && deck.description && deck.name) {
+      const formData = new FormData();
+      formData.append("is_public", deck.is_public);
+      formData.append("name", deck.name);
+      formData.append("description", deck.description);
+      formData.append("background", deck.background);
+      setIsLoading(true);
+      try {
+        const res = await deckService.create(formData);
+        if (!res.error) {
+          navigate(`/deck/${res.data.id}/edit?tab=1`);
+        } else {
+          const responseError = getFirstError(res.error);
+          setError(responseError);
+        }
+      } catch (error) {
+        console.log(error);
+        setError("Something wrong!");
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setError("Please fill all fields!");
+    }
+  };
+
   return (
-    <div className="create-deck">
-      <div className="create-deck__header">
-        <h2>Create a new study deck</h2>
-        <div
-          className="create-btn"
-          onClick={() => {
-            setCurrentTab((pre) => ({ tab: pre.tab ? 0 : 1, start: 0 }));
+    <>
+      <LocalLoadingWrapper open={isLoading} />
+      <div className="create-deck">
+        <Snackbar
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
           }}
+          open={error != null}
+          autoHideDuration={6000}
+          onClose={() => setError(null)}
         >
-          {currentTab.tab ? "Back" : "Next"}
+          <Alert onClose={() => setError(null)} severity="error">
+            {error}
+          </Alert>
+        </Snackbar>
+        <div className="create-deck__header">
+          <h2>Create a new study deck</h2>
+        </div>
+        <div className="create-deck__tab next" start={0}>
+          <CreateDeckTab
+            deck={deck}
+            setDeck={setDeck}
+            handleClickNext={handleClickNext}
+          />
         </div>
       </div>
-      <div
-        className="create-deck__tab next"
-        tab={currentTab.tab}
-        start={currentTab.start}
-      >
-        <div className="create-deck__info">
-          <div className="info-input-card">
-            <div className="info-row">
-              <TextField
-                id="title"
-                label="Title"
-                variant="standard"
-                fullWidth
-              />
-            </div>
-            <div className="info-row">
-              <TextField
-                id="description"
-                label="Description"
-                variant="standard"
-                fullWidth
-                multiline
-                rows={3}
-              />
-            </div>
-          </div>
-          <div className="info-visible-card">
-            <div className="visible-select">
-              <FormControl sx={{ m: 1, minWidth: 180 }}>
-                <Select
-                  value={1}
-                  //   onChange={handleChange}
-                  displayEmpty
-                  inputProps={{ "aria-label": "Without label" }}
-                >
-                  <MenuItem value={0}>Only me</MenuItem>
-                  <MenuItem value={1}>Everyone</MenuItem>
-                  <MenuItem value={2}>People with passcode</MenuItem>
-                </Select>
-                <FormHelperText>Who can view</FormHelperText>
-              </FormControl>
-            </div>
-            <div className="visible-select">
-              <FormControl sx={{ m: 1, minWidth: 180 }}>
-                <Select
-                  value={0}
-                  //   onChange={handleChange}
-                  displayEmpty
-                  inputProps={{ "aria-label": "Without label" }}
-                >
-                  <MenuItem value={0}>Only me</MenuItem>
-                  <MenuItem value={1}>Everyone</MenuItem>
-                  <MenuItem value={2}>People with passcode</MenuItem>
-                </Select>
-                <FormHelperText>Who can edit</FormHelperText>
-              </FormControl>
-            </div>
-          </div>
-        </div>
-        <br />
-        <br />
-        <br />
-        <UploadAvatarButton />
-        <div className="create-deck__term"></div>
-      </div>
-      <div className="create-deck__tab back" tab={currentTab.tab}>
-        <TermCard index={1} />
-        <TermCard index={2} />
-        <TermCard index={3} />
-      </div>
-    </div>
+    </>
   );
 }
 

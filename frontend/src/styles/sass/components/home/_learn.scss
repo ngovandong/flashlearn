@@ -1,0 +1,345 @@
+.learn-wrapper {
+    position: absolute;
+    top: -64px;
+    height: calc(100vh + 64px);
+    width: 100%;
+
+    .learn-header {
+        display: flex;
+        position: fixed;
+        z-index: 10000000;
+        background-color: white;
+        box-shadow: 0 0.25rem 1rem 0 #2e385614;
+        transition: all 1s ease;
+        height: 64px;
+        top: 0;
+        width: 100%;
+
+        .left-header,
+        .right-header {
+            width: 20%;
+        }
+
+        .center-header {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+            font-size: 1.2rem;
+            flex-grow: 1;
+
+            div {
+                font-size: 1.4rem;
+                font-weight: 600;
+            }
+        }
+
+        .right-header {
+            display: flex;
+            justify-content: end;
+
+            .close-btn {
+                height: 64px;
+                width: 64px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        }
+
+    }
+
+    .learn-body {
+        margin-top: 128px;
+        height: calc(100vh - 64px);
+        width: 100%;
+
+
+        .learn-container {
+            height: 100%;
+            padding: 2rem;
+            max-width: 64rem;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+
+            $card-color-back: #333;
+            $card-color-front: #fff;
+            $card-text-color-back: #fff;
+            $card-text-color-front: #333;
+
+            .next-button {
+                width: 20rem;
+                background-color: $main-purple;
+                color: #fff;
+                padding: 10px 20px;
+                border-radius: 5px;
+                border: none;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: bold;
+                transition: all 0.3s ease;
+                margin-top: 4rem;
+                margin: auto;
+
+                &:hover {
+                    background-color: darken($main-purple, 10%);
+                }
+            }
+
+
+            .flip-card {
+                perspective: 5000px;
+                cursor: pointer;
+                position: relative;
+                height: 90%;
+                display: flex;
+                background-color: white;
+                border-radius: 0.5rem;
+                box-shadow: 0 0.25rem 1rem 0 #2e385614;
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 1rem;
+            }
+
+
+            .flip-card-inner {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                transition: transform 1s;
+                transform-style: preserve-3d;
+            }
+
+            .flip-card.flipped .flip-card-inner {
+                transform: rotateY(180deg);
+            }
+
+            .flip-card-front,
+            .flip-card-back {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                backface-visibility: hidden;
+                border-radius: 0.5rem;
+            }
+
+            .flip-card-front {
+                background-color: $card-color-front;
+                color: $card-text-color-front;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                .meaning-text {
+                    padding-left: 4rem;
+                    display: flex;
+                    justify-content: center;
+
+                    h1 {
+                        font-size: 1.65rem;
+                    }
+                }
+
+                .half-width {
+                    width: 40%;
+                }
+
+                .meaning-img {
+                    width: 60%;
+                    padding: 2rem;
+
+                    img {
+                        max-width: 100%;
+                        height: auto;
+                    }
+                }
+            }
+
+            .flip-card-back {
+                background-color: $card-color-back;
+                color: $card-text-color-back;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transform: rotateY(180deg);
+
+                h1 {
+                    animation: fade-in 1s;
+                }
+            }
+
+
+
+            .learn-navigate {
+                height: 10%;
+                display: flex;
+
+                .navigate-btns {
+                    width: 12rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-around;
+                }
+
+                .site-btn {
+                    flex-grow: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+            }
+        }
+    }
+}
+
+
+.quiz-container {
+    @keyframes correct {
+        0% {
+            transform: scale(0);
+            opacity: 0;
+        }
+
+        50% {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @keyframes incorrect {
+        0% {
+            transform: translateX(-50px);
+            opacity: 0;
+        }
+
+        50% {
+            transform: translateX(10px);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 1rem 0 #2e385614;
+
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+    font-family: Arial,
+    sans-serif;
+
+
+
+
+    .question-container {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+
+        .question {
+            font-size: 20px;
+            font-weight: bold;
+            flex-grow: 1;
+            margin-bottom: 1rem;
+        }
+
+        img {
+            max-height: 300px;
+            max-width: 80%;
+            height: auto;
+            margin: auto
+        }
+
+        .speech-button {
+            background-color: #ccc;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    }
+
+    .answer-container {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+
+        .answer {
+            background-color: #f4f4f4;
+            border: 2px solid $minor-text-color;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px;
+            cursor: pointer;
+            flex-basis: calc(50% - 20px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+
+            &.correct {
+                border-color: $light-blue;
+                background-color: lighten($light-blue, 60%);
+                animation-name: correct;
+                animation-duration: 0.5s;
+                animation-timing-function: ease-out;
+                animation-fill-mode: forwards;
+
+            }
+
+            &.incorrect {
+                border-color: $error-red;
+                background-color: lighten($error-red, 60%);
+                animation-name: incorrect;
+                animation-duration: 0.5s;
+                animation-timing-function: ease-out;
+                animation-fill-mode: forwards;
+            }
+
+            .option {
+                font-size: 18px;
+                font-weight: bold;
+                text-align: center;
+            }
+
+            .icon {
+                margin-left: 10px;
+            }
+        }
+    }
+
+    .feedback {
+        margin-bottom: 20px;
+        margin-left: 10px;
+
+        .correct-feedback {
+            color: $light-blue;
+            font-weight: bold;
+        }
+
+        .incorrect-feedback {
+            color: $error-red;
+            font-weight: bold;
+        }
+    }
+
+
+}

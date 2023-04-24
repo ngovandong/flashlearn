@@ -3,6 +3,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { setError, setToken } from "@app/store/authSlice";
 import authService from "@api-services/authService";
+import { getFirstError } from "@utils/errorHandler";
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 function CustomPopupGoogleLoginBT() {
@@ -13,28 +14,17 @@ function CustomPopupGoogleLoginBT() {
     "https://www.googleapis.com/auth/userinfo.profile",
   ].join(" ");
   const handleUserInit = (res) => {
-    if (res.data) {
+    if (!res.error) {
       const { access, refresh } = res.data;
       dispatch(setToken({ access, refresh }));
     } else {
-      const data = res.response.data;
-      if (data.message) {
-        throw new Error(data.message);
-      } else {
-        const data = res.response.data;
-        const firstKeyError = Object.keys(data)[0];
-        const error = Array.isArray(data[firstKeyError])
-          ? data[firstKeyError][0]
-          : data[firstKeyError];
-        const errorMessage = firstKeyError + ": " + error;
-        dispatch(setError(errorMessage));
-      }
+      const errorMessage = getFirstError(res.error);
+      dispatch(setError(errorMessage));
     }
   };
-  const onPopupSuccess = (response) => {
+  const onPopupSuccess = async (response) => {
     const id_token = response.credential;
-
-    authService
+    await authService
       .initUser(id_token)
       .then(handleUserInit)
       .catch((notifyError) => console.log(notifyError));
@@ -59,7 +49,7 @@ function CustomPopupGoogleLoginBT() {
   useGoogleOneTapLogin({
     onSuccess: onPopupSuccess,
     onError: () => {
-      console.log("Login Failed");
+      dispatch(setError("Login Failed!"));
     },
   });
   return (

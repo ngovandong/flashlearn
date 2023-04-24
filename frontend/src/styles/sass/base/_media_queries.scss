@@ -1,18 +1,17 @@
-@media (max-width: 725px) {}
+@media (max-width: 725px) {
+    .deck-page {
 
-@media (max-width: 1050px) {
-    .create-deck {
-        .create-deck__info {
-            .info-visible-card {
-                flex-direction: column;
+        .deck-menu {
+            flex-wrap: wrap;
+            row-gap: 1rem;
 
-                .visible-select {
-                    display: block;
-                }
+            .menu-btn {
+                width: 45%;
             }
         }
     }
 }
+
 
 @media (max-width: 850px) {
 
