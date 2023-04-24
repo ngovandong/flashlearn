@@ -4,7 +4,7 @@ import CircleButton from "@components/circleButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { learningService } from "@api-services/learningService";
 import { useNavigate, useParams } from "react-router-dom";
@@ -12,8 +12,10 @@ import { getFirstError } from "@utils/errorHandler";
 import { toast } from "react-toastify";
 import { LocalLoadingWrapper } from "@components/loading";
 import { speak } from "@api-services/voiceService";
+import { deckService } from "@api-services/deckService";
 
 function LearnPage() {
+  const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [terms, setTerms] = useState();
   const [currentState, setCurrentState] = useState({
@@ -62,6 +64,28 @@ function LearnPage() {
       setIsLoading(false);
     }
   };
+  const fetchDeck = async () => {
+    try {
+      setIsLoading(true);
+      const res = await deckService.retrieve(deckID);
+      if (!res.error) {
+        setDeck(res.data);
+      } else {
+        const errorMessage = getFirstError(res.error);
+        if (
+          errorMessage === "You do not have permission to perform this action."
+        ) {
+          navigate("/denied");
+        } else {
+          toast.error(errorMessage);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const learned = async () => {
     learningService.create({ term_id: currentTerm.id });
@@ -77,12 +101,17 @@ function LearnPage() {
       learned();
     }
   }, [currentTerm]);
-  return terms ? (
+  useEffect(() => {
+    if (deckID) {
+      fetchDeck();
+    }
+  }, [deckID]);
+  return deck && terms ? (
     <div className="learn-wrapper">
       <div className="learn-header">
         <div className="left-header"></div>
         <div className="center-header">
-          <div>Toeic</div>
+          <div>{deck.name}</div>
           <span>{`${currentState.index + 1}/${terms.length}`}</span>
         </div>
         <div className="right-header">

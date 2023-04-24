@@ -65,10 +65,10 @@ function DeckDetail() {
               <LocalLibraryIcon color="purple" />
               <span>Learn</span>
             </Link>
-            <div className="menu-btn">
+            <Link to="revise" className="menu-btn">
               <CollectionsBookmarkIcon color="purple" />
               <span>Revise </span>
-            </div>
+            </Link>
             <div className="menu-btn">
               <TimerIcon color="purple" />
               <span>Quick Revise </span>

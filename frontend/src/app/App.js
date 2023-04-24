@@ -23,6 +23,7 @@ import PermissionDenied from "@pages/permissionDenied";
 import Invite from "@pages/invite";
 import LearnPage from "@pages/home/deckDetail/learn";
 import DeckPage from "@pages/home/deckPage";
+import Revise from "@pages/home/deckDetail/revise";
 
 function App() {
   const loading = useSelector(selectLoading);
@@ -40,6 +41,7 @@ function App() {
             <Route path="" element={<DeckDetail />} />
             <Route path="edit" element={<EditDeck />} />
             <Route path="learn" element={<LearnPage />} />
+            <Route path="revise" element={<Revise />} />
           </Route>
           <Route path="invite" element={<Invite />} />
         </Route>
