@@ -38,9 +38,9 @@ class DeckService:
     def get_my_own_decks(user):
 
         my_own_decks = user.my_own_decks.annotate(
-            my_permission=Value('O')
+            number_of_term=Count('terms', distinct=True)
         ).annotate(
-            number_of_term=Count('terms')
+            my_permission=Value('O')
         ).annotate(
             learned=Count('terms__learning_progress__score', filter=Q(
                 terms__learning_progress__score__gte=2))
@@ -59,7 +59,7 @@ class DeckService:
                 output_field=CharField(),
             )
         ).annotate(
-            number_of_term=Count('terms')
+            number_of_term=Count('terms', distinct=True)
         ).annotate(
             learned=Count('terms__learning_progress__score', filter=Q(
                 terms__learning_progress__score__gte=2))
@@ -80,7 +80,7 @@ class DeckService:
                 output_field=CharField(),
             )
         ).annotate(
-            number_of_term=Count('terms')
+            number_of_term=Count('terms', distinct=True)
         ).annotate(
             learned=Count('terms__learning_progress__score', filter=Q(
                 terms__learning_progress__score__gte=2))
