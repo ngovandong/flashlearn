@@ -38,7 +38,7 @@ const Quiz = ({
         question={question.question}
         speakTerm={speakTerm}
       />
-      <div className="answer-container">
+      <div className="choice-container">
         {question.options.map((option, index) => (
           <Answer
             key={index}

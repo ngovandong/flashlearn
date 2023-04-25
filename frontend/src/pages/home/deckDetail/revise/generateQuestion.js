@@ -1,8 +1,10 @@
+import { shuffleArray } from "@utils/array";
+
 const { QUESTION_TYPES } = require("@constants/questionTypes");
 
-export function generateQuestions(terms) {
+export function generateQuizQuestions(terms) {
   // Shuffle terms array
-  terms = terms.sort(() => Math.random() - 0.5);
+  terms = shuffleArray(terms);
 
   // Create questions array
   const questions = terms.map((term) => {
@@ -27,4 +29,21 @@ export function generateQuestions(terms) {
   });
 
   return questions;
+}
+
+export function generateFillQuestions(terms) {
+  return terms.map((term) => ({
+    type: QUESTION_TYPES.FILL,
+    id: term.id,
+    image: term.image,
+    question: term.description,
+    answer: term.name,
+  }));
+}
+
+export function generateQuestions(terms) {
+  const quiz = generateQuizQuestions(terms);
+  const fill = generateFillQuestions(terms);
+  const result = quiz.concat(fill);
+  return shuffleArray(result);
 }

@@ -10,29 +10,8 @@ import { speak } from "@api-services/voiceService";
 import { deckService } from "@api-services/deckService";
 import Quiz from "./quiz";
 import { generateQuestions } from "./generateQuestion";
-
-const quizData = [
-  {
-    question: "What is the capital of France?",
-    options: ["Paris", "London", "Berlin", "Madrid"],
-    answer: "A",
-    image:
-      "https://hips.hearstapps.com/hmg-prod/images/dog-puppy-on-garden-royalty-free-image-1586966191.jpg?crop=0.752xw:1.00xh;0.175xw,0&resize=1200:*",
-    name: "Funny",
-  },
-  {
-    question: "What is the largest country in the world?",
-    options: ["China", "Russia", "United States", "India"],
-    answer: "B",
-    name: "Funny",
-  },
-  {
-    question: "What is the highest mountain in the world?",
-    options: ["K2", "Everest", "Kilimanjaro", "Denali"],
-    answer: "B",
-    name: "Funny",
-  },
-];
+import Fill from "./fill";
+import { QUESTION_TYPES } from "@constants/questionTypes";
 
 function Revise() {
   const [deck, setDeck] = useState();
@@ -139,13 +118,23 @@ function Revise() {
       </div>
       <div className="learn-body">
         <div className="learn-container">
-          <Quiz
-            question={currentQuestion}
-            speakTerm={speakTerm}
-            playCorrectSound={playCorrectSound}
-            playIncorrectSound={playIncorrectSound}
-            showNext={showNext}
-          />
+          {currentQuestion.type === QUESTION_TYPES.QUIZ ? (
+            <Quiz
+              question={currentQuestion}
+              speakTerm={speakTerm}
+              playCorrectSound={playCorrectSound}
+              playIncorrectSound={playIncorrectSound}
+              showNext={showNext}
+            />
+          ) : (
+            <Fill
+              question={currentQuestion}
+              speakTerm={speakTerm}
+              playCorrectSound={playCorrectSound}
+              playIncorrectSound={playIncorrectSound}
+              showNext={showNext}
+            />
+          )}
           <button
             className={`next-button${
               currentState.showNext ? "" : " display-none"

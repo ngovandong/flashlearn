@@ -32,6 +32,15 @@
     }
 }
 
+@mixin yellow_btn {
+    @include purple_btn;
+    background-color: $yellow;
+
+    &:hover {
+        background-color: $yellow-hover;
+    }
+}
+
 @mixin border_bottom_purple {
     border-bottom: 0.3125rem solid #fff;
 

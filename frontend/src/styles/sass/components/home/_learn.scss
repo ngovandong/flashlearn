@@ -293,15 +293,16 @@
         }
     }
 
-    .answer-container {
+    .choice-container {
         display: flex;
         flex-wrap: wrap;
+        padding: 0 1rem;
         margin-bottom: 20px;
 
         .answer {
             background-color: #f4f4f4;
             border: 2px solid $minor-text-color;
-            border-radius: 5px;
+            border-radius: 10px;
             padding: 10px;
             margin: 10px;
             cursor: pointer;
@@ -342,9 +343,69 @@
         }
     }
 
+    .answer-container {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+
+        .input-container {
+            label {
+                font-size: 16px;
+                font-weight: bold;
+                display: flex;
+                margin-bottom: 1rem;
+            }
+
+            .input-group {
+                position: relative;
+
+                .answer-input {
+                    display: block;
+                    width: 100%;
+                    padding: 10px;
+                    border: 2px solid #dcdcdc;
+                    border-radius: 5px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    transition: border-color 0.3s ease;
+                    text-transform: uppercase;
+
+                    &:focus {
+                        outline: none;
+                        border-color: $blue;
+                    }
+
+                    &.correct {
+                        border-color: $light-blue;
+                    }
+
+                    &.incorrect {
+                        border-color: $error-red;
+                    }
+                }
+            }
+        }
+
+        .button-group {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: end;
+
+            .btn-answer {
+                @include purple_btn;
+                margin-right: 1rem;
+            }
+
+            .btn-show-answer {
+                @include yellow_btn;
+            }
+        }
+    }
+
     .feedback {
         margin-bottom: 20px;
-        margin-left: 10px;
+        margin-left: 1.6rem;
 
         .correct-feedback {
             color: $light-blue;
@@ -356,6 +417,4 @@
             font-weight: bold;
         }
     }
-
-
 }
