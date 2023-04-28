@@ -5,9 +5,10 @@ import QuestionHeader from "./questionHeader";
 const Quiz = ({
   question,
   speakTerm,
-  playCorrectSound,
-  playIncorrectSound,
+  handleCorrect,
+  handleIncorrect,
   showNext,
+  setIsLoading,
 }) => {
   const [selectedAnswer, setSelectedAnswer] = useState("");
 
@@ -17,9 +18,9 @@ const Quiz = ({
     if (!isAnswered) {
       setSelectedAnswer(choosed);
       if (choosed === question.answer) {
-        playCorrectSound();
+        handleCorrect();
       } else {
-        playIncorrectSound();
+        handleIncorrect();
       }
     }
   };
@@ -37,6 +38,7 @@ const Quiz = ({
         image={question.image}
         question={question.question}
         speakTerm={speakTerm}
+        setIsLoading={setIsLoading}
       />
       <div className="choice-container">
         {question.options.map((option, index) => (

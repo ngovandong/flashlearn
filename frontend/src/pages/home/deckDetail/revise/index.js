@@ -23,12 +23,18 @@ function Revise() {
     showNext: false,
   });
   let currentQuestion = null;
+  let length = 0;
   if (terms) {
     currentQuestion = terms[currentState.index];
+    length = terms.length;
   }
 
   const handleNextQuestionClick = () => {
-    setCurrentState((pre) => ({ index: pre.index + 1, showNext: false }));
+    if (currentState.index < length - 1) {
+      setCurrentState((pre) => ({ index: pre.index + 1, showNext: false }));
+    } else {
+      navigate(-1);
+    }
   };
   const showNext = () => {
     setCurrentState((pre) => ({ ...pre, showNext: true }));
@@ -47,15 +53,29 @@ function Revise() {
     incorrectSound.play();
   };
 
+  const handleCorrect = async () => {
+    playCorrectSound();
+    await learningService.correct(currentQuestion.progressId);
+  };
+  const handleIncorrect = async () => {
+    playIncorrectSound();
+    await learningService.incorrect(currentQuestion.progressId);
+  };
+
   const speakTerm = async () => {
     speak(currentQuestion.answer);
   };
 
   const fetchWords = async () => {
     try {
-      const res = await learningService.getLearningTerms(deckID);
+      const res = await learningService.getReviseTerms(deckID);
       if (!res.error) {
-        const questions = generateQuestions(res.data.terms);
+        const { revise_terms, all_terms } = res.data;
+        if (revise_terms.length === 0) {
+          toast.info("Has nothing to revise");
+          navigate(`/deck/${deckID}`);
+        }
+        const questions = generateQuestions(revise_terms, all_terms);
         setTerms(questions);
       } else {
         const errorMessage = getFirstError(res.error);
@@ -100,6 +120,22 @@ function Revise() {
     }
   }, [deckID]);
 
+  const handleKeyDown = (event) => {
+    if (event.key === "ArrowRight" || event.key === "Enter") {
+      handleNextQuestionClick();
+    }
+  };
+
+  useEffect(() => {
+    if (currentState.showNext) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentState.showNext]);
+
   return deck && terms ? (
     <div className="learn-wrapper">
       <div className="learn-header">
@@ -122,17 +158,19 @@ function Revise() {
             <Quiz
               question={currentQuestion}
               speakTerm={speakTerm}
-              playCorrectSound={playCorrectSound}
-              playIncorrectSound={playIncorrectSound}
+              handleCorrect={handleCorrect}
+              handleIncorrect={handleIncorrect}
               showNext={showNext}
+              setIsLoading={setIsLoading}
             />
           ) : (
             <Fill
               question={currentQuestion}
               speakTerm={speakTerm}
-              playCorrectSound={playCorrectSound}
-              playIncorrectSound={playIncorrectSound}
+              handleCorrect={handleCorrect}
+              handleIncorrect={handleIncorrect}
               showNext={showNext}
+              setIsLoading={setIsLoading}
             />
           )}
           <button
@@ -141,7 +179,7 @@ function Revise() {
             }`}
             onClick={handleNextQuestionClick}
           >
-            Next Question
+            {currentState.index === length - 1 ? "Finish" : "Next Question"}
           </button>
         </div>
       </div>

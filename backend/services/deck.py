@@ -43,7 +43,7 @@ class DeckService:
             my_permission=Value('O')
         ).annotate(
             learned=Count('terms__learning_progress__score', filter=Q(
-                terms__learning_progress__score__gte=2))
+                terms__learning_progress__score__gte=5))
         )
 
         return my_own_decks
@@ -62,7 +62,7 @@ class DeckService:
             number_of_term=Count('terms', distinct=True)
         ).annotate(
             learned=Count('terms__learning_progress__score', filter=Q(
-                terms__learning_progress__score__gte=2))
+                terms__learning_progress__score__gte=5))
         )
 
         return others_deck
@@ -83,7 +83,7 @@ class DeckService:
             number_of_term=Count('terms', distinct=True)
         ).annotate(
             learned=Count('terms__learning_progress__score', filter=Q(
-                terms__learning_progress__score__gte=2))
+                terms__learning_progress__score__gte=5))
         )
 
         return my_decks

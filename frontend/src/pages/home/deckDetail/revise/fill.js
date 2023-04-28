@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import QuestionHeader from "./questionHeader";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
@@ -11,13 +11,13 @@ const initialState = {
 const Fill = ({
   question,
   speakTerm,
-  playCorrectSound,
-  playIncorrectSound,
+  handleCorrect,
+  handleIncorrect,
   showNext,
+  setIsLoading,
 }) => {
   const [currentState, setCurrentState] = useState(initialState);
   const handleAnswer = () => {
-    showNext();
     const isCorrect =
       currentState.answer.toLowerCase() === question.answer.toLowerCase();
     setCurrentState((pre) => ({
@@ -26,12 +26,14 @@ const Fill = ({
       isAnswered: true,
     }));
     if (isCorrect) {
-      playCorrectSound();
+      handleCorrect();
     } else {
-      playIncorrectSound();
+      handleIncorrect();
     }
+    showNext();
   };
   const handleKeyDown = (event) => {
+    event.stopPropagation();
     if (event.key === "Enter") {
       handleAnswer();
     }
@@ -39,6 +41,7 @@ const Fill = ({
 
   const handleShowAnswer = () => {
     setCurrentState((pre) => ({ ...pre, isAnswered: true }));
+    showNext();
   };
 
   const handleChange = (e) => {
@@ -49,12 +52,19 @@ const Fill = ({
   useLayoutEffect(() => {
     setCurrentState(initialState);
   }, [question]);
+
+  useEffect(() => {
+    if (currentState.answer === "")
+      document.getElementById("answer-input").focus();
+  }, [currentState.answer]);
+
   return (
     <div className="quiz-container">
       <QuestionHeader
         image={question.image}
         question={question.question}
         speakTerm={speakTerm}
+        setIsLoading={setIsLoading}
       />
       <div className="answer-container">
         <div className="input-container">
@@ -63,6 +73,7 @@ const Fill = ({
             <input
               id="answer-input"
               autoComplete="off"
+              autoFocus
               className={`answer-input${
                 currentState.isAnswered && currentState.isCorrect
                   ? " correct"
@@ -82,7 +93,7 @@ const Fill = ({
               <CheckIcon
                 style={{
                   position: "absolute",
-                  right: "10px",
+                  right: "20px",
                   top: "10px",
                   color: COLORS.LIGHT_BLUE,
                 }}
@@ -92,7 +103,7 @@ const Fill = ({
               <CloseIcon
                 style={{
                   position: "absolute",
-                  right: "10px",
+                  right: "20px",
                   top: "10px",
                   color: COLORS.ERROR_RED,
                 }}
@@ -103,7 +114,9 @@ const Fill = ({
         <div className="button-group">
           <div
             className={`btn-answer${
-              currentState.isAnswered ? " disabled" : ""
+              currentState.isAnswered || currentState.answer === ""
+                ? " disabled"
+                : ""
             }`}
             onClick={handleAnswer}
           >

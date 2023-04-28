@@ -20,6 +20,31 @@ class TermNestInDeckSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'description', 'image')
 
 
+class OnlyNameTermSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Term
+        fields = ('id', 'name')
+
+
+class ProgressTermSerializer(serializers.ModelSerializer):
+    image = serializers.URLField(allow_blank=True)
+    learning_progress_id = serializers.UUIDField(read_only=True)
+
+    class Meta:
+        model = Term
+        fields = ('id', 'name', 'description', 'image', 'learning_progress_id')
+
+
+class ReviseTermSerializer(serializers.Serializer):
+    all_terms = OnlyNameTermSerializer(many=True)
+    revise_terms = ProgressTermSerializer(many=True)
+
+    class Meta:
+        model = Term
+        fields = ('all_terms', 'revise_terms')
+
+
 class LearningTermSerializer(serializers.Serializer):
     last_learned_index = serializers.IntegerField(required=False)
     terms = TermSerializer(many=True)

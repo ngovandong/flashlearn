@@ -1,6 +1,14 @@
 import { IconButton } from "@mui/material";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-function QuestionHeader({ question, speakTerm, image }) {
+import { useEffect } from "react";
+function QuestionHeader({ question, speakTerm, image, setIsLoading }) {
+  useEffect(() => {
+    if (image) {
+      const img = new Image();
+      img.onload = () => setIsLoading(true);
+      img.src = image;
+    }
+  }, [image]);
   return (
     <div className="question-container">
       <div className="question-header">

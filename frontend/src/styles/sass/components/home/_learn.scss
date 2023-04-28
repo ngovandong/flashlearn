@@ -296,7 +296,6 @@
     .choice-container {
         display: flex;
         flex-wrap: wrap;
-        padding: 0 1rem;
         margin-bottom: 20px;
 
         .answer {
@@ -347,7 +346,6 @@
         display: flex;
         flex-direction: column;
         flex-wrap: wrap;
-        margin-bottom: 20px;
 
         .input-container {
             label {
@@ -355,13 +353,16 @@
                 font-weight: bold;
                 display: flex;
                 margin-bottom: 1rem;
+                margin-left: 10px;
             }
 
             .input-group {
                 position: relative;
+                padding: 0 10px;
 
                 .answer-input {
                     display: block;
+                    box-sizing: border-box;
                     width: 100%;
                     padding: 10px;
                     border: 2px solid #dcdcdc;
@@ -405,7 +406,7 @@
 
     .feedback {
         margin-bottom: 20px;
-        margin-left: 1.6rem;
+        margin-left: 10px;
 
         .correct-feedback {
             color: $light-blue;
