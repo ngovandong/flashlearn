@@ -12,7 +12,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'name', 'password', 'first_name', 'last_name', 'image_url']
+        fields = ['id', 'email', 'name', 'password', 'first_name',
+                  'last_name', 'image_url', 'default_deck']
 
     # def validate_email(self, value):
     #     if not MailService.validate_email(value):
@@ -29,7 +30,8 @@ class GoogleUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'name', 'image_url', 'first_name', 'last_name']
+        fields = ['id', 'email', 'name',
+                  'image_url', 'first_name', 'last_name']
 
 
 class SetPasswordSerializer(serializers.Serializer):

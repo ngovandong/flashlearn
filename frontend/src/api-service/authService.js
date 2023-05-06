@@ -20,7 +20,7 @@ const initUser = (token) => {
 };
 
 const getUser = async () => {
-  const res = await request.get("customers/get_own_data");
+  const res = await request.get("users/get_profile");
   return res.data;
 };
 

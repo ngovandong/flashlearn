@@ -33,6 +33,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         "leave_deck": permissions.IsAuthenticated,
         "others_deck": permissions.IsAuthenticated,
         "latest_decks": permissions.IsAuthenticated,
+        "set_default_deck": permissions.IsAuthenticated,
     }
 
     serializer_map = {
@@ -156,6 +157,14 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
             return Response({"errors": "user is not in deck"}, status=status.HTTP_400_BAD_REQUEST)
         instance.users.remove(user)
         return Response({"message": "leave deck success"}, status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["PUT"])
+    def set_default_deck(self, request, *args, **kwargs):
+        user = request.user
+        instance = self.get_object()
+        user.default_deck = instance
+        user.save()
+        return Response({"message": "update successfully"}, status=status.HTTP_200_OK)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

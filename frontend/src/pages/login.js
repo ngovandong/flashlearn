@@ -10,6 +10,7 @@ import {
   setError,
 } from "@app/store/authSlice";
 import GoogleLoginBT from "@components/googleLoginBT";
+import { sendTokenToExtension } from "@utils/extensionLogin";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,6 +46,7 @@ function Login() {
     const access = searchParams.get("access");
     const refresh = searchParams.get("refresh");
     if (access && refresh) {
+      sendTokenToExtension({ access, refresh });
       dispatch(setToken({ access, refresh }));
     }
   }, []);
