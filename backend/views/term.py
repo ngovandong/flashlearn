@@ -47,6 +47,24 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     @action(detail=False, methods=["POST"])
+    def add_to_default_deck(self, request, *args, **kwargs):
+        default_deck_id = request.user.default_deck_id
+        if not default_deck_id:
+            return Response({"errors": "user doesn't have default deck"}, status=status.HTTP_400_BAD_REQUEST)
+        data = request.data
+        data["deck"] = default_deck_id
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        name = data["name"]
+        term = Term.objects.filter(
+            deck_id=default_deck_id, name__iexact=name).first()
+        if term:
+            return Response({"errors": "term is already existed"},status=status.HTTP_400_BAD_REQUEST)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @action(detail=False, methods=["POST"])
     def add_terms(self, request, *args, **kwargs):
         deck_id = request.data.get("deck_id")
         if not deck_id:

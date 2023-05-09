@@ -24,6 +24,11 @@ class UserSerializer(serializers.ModelSerializer):
         ModelClass = self.Meta.model
         return ModelClass.objects.create_user(**validated_data)
 
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret["default_deck"] = str(ret["default_deck"])
+        return ret
+
 
 class GoogleUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
