@@ -21,31 +21,55 @@ const appendHeader = (request) => {
 //   return request;
 // };
 
-let refresh = false;
+let isRefreshing = false;
+let failedQueue = [];
 
 const refreshToken = async (error) => {
   if (error.code === "ERR_NETWORK") {
     return { error: "Server Error" };
   }
   const token = getCurrentToken();
-  if (error.response?.status === 401 && !refresh && token) {
-    refresh = true;
-    try {
-      const { data } = await axios.post("users/refresh/", {
-        refresh: token.refresh,
+  if (error.response?.status === 401 && token) {
+    const originalRequest = error.config;
+
+    if (!isRefreshing) {
+      isRefreshing = true;
+      try {
+        const { data } = await axios.post("users/refresh/", {
+          refresh: token.refresh,
+        });
+        store.dispatch(setToken(data));
+        originalRequest.headers["Authorization"] = `Bearer ${data.access}`;
+        processQueue(null, data.access);
+        return axios(error.config);
+      } catch {
+        store.dispatch(logout());
+        processQueue("Logout Error", null);
+      } finally {
+        isRefreshing = false;
+      }
+    } else {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject, originalRequest });
       });
-      store.dispatch(setToken(data));
-      error.config.headers["Authorization"] = `Bearer ${data.access}`;
-      return axios(error.config);
-    } catch {
-      store.dispatch(logout());
     }
-  } else if (error.response.data) {
+  } else if (error.response?.data) {
     return { error: error.response.data };
   }
-  refresh = false;
   return error;
 };
+
+function processQueue(error, token = null) {
+  failedQueue.forEach((promise) => {
+    if (error) {
+      promise.reject(error);
+    } else {
+      promise.originalRequest.headers["Authorization"] = `Bearer ${token}`;
+      promise.resolve(axios(promise.originalRequest));
+    }
+  });
+  failedQueue = [];
+}
 
 axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
 
