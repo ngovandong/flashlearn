@@ -99,3 +99,10 @@ $transition: 20ms ease-in 0s;
         transform: rotateX(-180deg);
     }
 }
+
+@keyframes spin {
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

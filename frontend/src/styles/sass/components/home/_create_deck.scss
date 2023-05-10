@@ -257,15 +257,54 @@
 
         .term-image {
             border-top: 2px solid $app-background;
-            padding: .5rem;
+            padding: 1rem;
             display: flex;
 
+
             .image-url {
-                width: 60%;
+                width: 70%;
+            }
+
+            .google-photos {
+                width: 70%;
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                height: 8rem;
+
+                .loading-image {
+                    display: block;
+                    margin: auto;
+                    width: 12%;
+                    animation: spin 2s linear infinite;
+                }
+
+                .google-image {
+                    box-sizing: content-box;
+                    border: 3px solid transparent;
+                    width: 18%;
+                    height: auto;
+                    max-height: 100%;
+
+                    /* Set up the transition effect */
+                    transition: all 0.3s ease-in-out;
+
+                    /* Set up the hover effect */
+                    &:hover {
+                        border-color: $yellow;
+                        transform: scale(1.1);
+                    }
+
+                    /* Set up the click effect */
+                    &:active {
+                        transform: scale(0.9);
+                    }
+                }
+
             }
 
             .local-upload {
-                width: 40%;
+                width: 30%;
                 display: flex;
                 align-items: center;
                 justify-content: center;

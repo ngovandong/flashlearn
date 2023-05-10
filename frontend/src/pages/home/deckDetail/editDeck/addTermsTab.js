@@ -47,7 +47,7 @@ function AddTermsTab({ handleClickBack }) {
     setTerms(newTerms);
   };
   const handleDeleteTerm = async (i) => {
-    if (terms.length > 5) {
+    if (terms.length > 4) {
       const term = terms[i];
       if (term.id) {
         try {
