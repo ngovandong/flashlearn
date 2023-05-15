@@ -26,7 +26,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret["default_deck"] = str(ret["default_deck"])
+        if ret["default_deck"]:
+            ret["default_deck"] = str(ret["default_deck"])
         return ret
 
 
