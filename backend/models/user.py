@@ -13,6 +13,11 @@ class User(UUIDModel, CustomAbstractUser):
     image_url = models.URLField(
         _("image url"), max_length=255, blank=True, null=True)
     is_validated_email = models.BooleanField(default=False)
+    default_deck = models.OneToOneField(
+        "Deck",
+        on_delete=models.DO_NOTHING,
+        blank=True, null=True
+    )
 
     objects = CustomUserManager()
 
@@ -31,7 +36,7 @@ class User(UUIDModel, CustomAbstractUser):
 
     def set_default_image(self):
         self.image_url = settings.BASE_URL + \
-                         settings.MEDIA_URL + 'default/default_avatar.jpg'
+            settings.MEDIA_URL + 'default/default_avatar.jpg'
 
     def save(self, *args, **kwargs):
         if not self.image_url:

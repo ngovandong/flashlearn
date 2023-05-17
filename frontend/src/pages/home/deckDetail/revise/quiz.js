@@ -1,26 +1,26 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import Answer from "./answer";
+import QuestionHeader from "./questionHeader";
 
-const Quiz = ({ question }) => {
+const Quiz = ({
+  question,
+  speakTerm,
+  handleCorrect,
+  handleIncorrect,
+  showNext,
+  setIsLoading,
+}) => {
   const [selectedAnswer, setSelectedAnswer] = useState("");
-  const correctSound = new Audio(`${process.env.PUBLIC_URL}/sound/true.mp3`);
-  const incorrectSound = new Audio(`${process.env.PUBLIC_URL}/sound/false.mp3`);
-
-  const playCorrectSound = () => {
-    correctSound.play();
-  };
-  const playIncorrectSound = () => {
-    incorrectSound.play();
-  };
 
   const isAnswered = selectedAnswer !== "";
-  const handleAnswerClick = (letter) => {
+  const handleAnswerClick = (choosed) => {
+    showNext();
     if (!isAnswered) {
-      setSelectedAnswer(letter);
-      if (letter === question.answer) {
-        playCorrectSound();
+      setSelectedAnswer(choosed);
+      if (choosed === question.answer) {
+        handleCorrect();
       } else {
-        playIncorrectSound();
+        handleIncorrect();
       }
     }
   };
@@ -34,11 +34,13 @@ const Quiz = ({ question }) => {
 
   return (
     <div className="quiz-container">
-      <div className="question-container">
-        <div className="question">{question.question}</div>
-        {question.img && <img src={question.img} alt="" />}
-      </div>
-      <div className="answer-container">
+      <QuestionHeader
+        image={question.image}
+        question={question.question}
+        speakTerm={speakTerm}
+        setIsLoading={setIsLoading}
+      />
+      <div className="choice-container">
         {question.options.map((option, index) => (
           <Answer
             key={index}
@@ -56,8 +58,7 @@ const Quiz = ({ question }) => {
             <div className="correct-feedback">Correct!</div>
           ) : (
             <div className="incorrect-feedback">
-              Incorrect. The correct answer is{" "}
-              {question.options[correctAnswer.charCodeAt(0) - 65]}.
+              Incorrect. The correct answer is {question.answer}.
             </div>
           )}
         </div>

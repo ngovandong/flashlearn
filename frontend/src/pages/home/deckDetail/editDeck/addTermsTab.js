@@ -47,7 +47,7 @@ function AddTermsTab({ handleClickBack }) {
     setTerms(newTerms);
   };
   const handleDeleteTerm = async (i) => {
-    if (terms.length > 5) {
+    if (terms.length > 4) {
       const term = terms[i];
       if (term.id) {
         try {
@@ -76,6 +76,26 @@ function AddTermsTab({ handleClickBack }) {
     setTerms((pre) => [...pre, emptyTerm]);
   };
 
+  function validateSameName(array) {
+    const seenNames = {};
+    const duplicateIndices = [];
+
+    array.forEach((obj, index) => {
+      const name = obj.name;
+      if (seenNames[name]) {
+        duplicateIndices.push(index);
+      } else {
+        seenNames[name] = true;
+      }
+    });
+
+    if (duplicateIndices.length === 0) {
+      return null;
+    } else {
+      return duplicateIndices;
+    }
+  }
+
   const validate = () => {
     let success = true;
     const newterms = terms.map((t) => {
@@ -88,6 +108,19 @@ function AddTermsTab({ handleClickBack }) {
       }
       return { ...t, error: null };
     });
+    const sameNameTerms = validateSameName(newterms);
+    console.log(newterms);
+    console.log(sameNameTerms);
+    if (success && sameNameTerms) {
+      success = false;
+      sameNameTerms.forEach(
+        (index) =>
+          (newterms[
+            index
+          ].error = `Term '${newterms[index].name}' is already used`)
+      );
+    }
+
     if (success) {
       return [true, newterms];
     } else {

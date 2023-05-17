@@ -94,6 +94,10 @@
     input[type='file'] {
         display: none;
     }
+
+    .button-text {
+        text-transform: capitalize;
+    }
 }
 
 .circle-btn {
@@ -117,7 +121,7 @@
 
 .disabled {
     opacity: 0.5;
-    cursor: not-allowed;
+    cursor: not-allowed !important;
 }
 
 

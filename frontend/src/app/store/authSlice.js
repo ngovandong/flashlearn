@@ -3,11 +3,15 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authService from "@api-services/authService";
 import { decodeUser } from "@utils/jwt";
 import { getFirstError } from "@utils/errorHandler";
+import { sendTokenToExtension } from "@utils/extensionLogin";
+
+// Fire the event on the window object
 
 export const login = createAsyncThunk("auth/login", async (user) => {
   const { email, password } = user;
   const res = await authService.login(email, password);
   if (!res.error) {
+    sendTokenToExtension(res.data);
     return res.data;
   } else {
     const errorMessage = getFirstError(res.error);

@@ -103,7 +103,7 @@ function DeckDetail() {
                     </div>
                   </div>
                   <div className="detail-row">
-                    <div className="progress-title c-p">Completed:</div>
+                    <div className="progress-title c-p">Mastered:</div>
                     <div className="detail-number c-p">
                       {deck.learning_progress.completed}
                     </div>

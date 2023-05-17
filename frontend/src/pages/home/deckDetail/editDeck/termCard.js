@@ -5,31 +5,17 @@ import { CustomInput } from "@components/customInput";
 import PhotoIcon from "@mui/icons-material/Photo";
 import UploadButton from "@components/uploadButton";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import { isImageUrl } from "@utils/imageURL";
+import { useEffect, useState } from "react";
+import { getImagesURL } from "@api-services/crawlerService";
 function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
+  const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const handleOnEnter = async (url) => {
-    try {
-      if (isImageUrl(url)) {
-        handleTermChange(index, {
-          ...term,
-          error: term.error === "Not a valid image URL" ? null : term.error,
-          open: false,
-          image: url,
-        });
-      } else {
-        handleTermChange(index, {
-          ...term,
-          image: "",
-          error: "Not a valid image URL",
-        });
-      }
-    } catch {
-      handleTermChange(index, {
-        ...term,
-        image: "",
-        error: "Not a valid image URL",
-      });
-    }
+    handleTermChange(index, {
+      ...term,
+      open: false,
+      image: url,
+    });
   };
   const handleOpenImageCard = () => {
     handleTermChange(index, {
@@ -46,6 +32,30 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
       open: !term.open,
     });
   };
+
+  const fetchImages = async () => {
+    if (!isLoading) {
+      try {
+        setIsLoading(true);
+        const res = await getImagesURL(term.name);
+        setImages(res.data.urls);
+      } catch (error) {
+        setImages([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (term.open && term.name !== "") {
+      const debounceTimer = setTimeout(fetchImages, 800); // 800ms delay before calling the filter function
+
+      return () => {
+        clearTimeout(debounceTimer);
+      };
+    }
+  }, [term.name, term.open]);
 
   return (
     <div className={term.error ? "term-card red-bottom" : "term-card"}>
@@ -133,16 +143,36 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
         </div>
       </div>
       <div className={term.open ? "term-image" : "display-none"}>
-        <div className="image-url">
+        {/* <div className="image-url">
           <CustomInput
             onEnter={handleOnEnter}
             placeholder="Enter image url"
             helpText="URL"
           />
+        </div> */}
+        <div className="google-photos">
+          {isLoading && (
+            <img
+              className="loading-image"
+              src="/imgs/loading.png"
+              alt="Loading..."
+            />
+          )}
+          {!isLoading &&
+            images.map((i, key) => (
+              <img
+                onClick={() => handleOnEnter(i)}
+                className={`google-image`}
+                src={i}
+                key={key}
+                alt=""
+              />
+            ))}
         </div>
         <div className="local-upload">
           <UploadButton
-            text="Or upload your local image"
+            text="upload your local image"
+            font
             id={`avatar-${index}`}
             setFile={handleUploadAvatar}
           />

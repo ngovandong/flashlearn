@@ -10,13 +10,13 @@ class LearningService:
         terms = Term.objects.filter(filter).annotate(completed=Count(
             Case(
                 When(learning_progress__user=user,
-                     learning_progress__score__gte=2, then=1),
+                     learning_progress__score__gte=5, then=1),
                 output_field=IntegerField(),
             )
         ), learning=Count(
             Case(
                 When(learning_progress__user=user,
-                     learning_progress__score__lt=2, then=1),
+                     learning_progress__score__lt=5, then=1),
                 output_field=IntegerField(),
             )
         ))

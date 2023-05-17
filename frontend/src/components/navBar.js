@@ -160,8 +160,13 @@ function ResponsiveAppBar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              <MenuItem onClick={handleCloseUserMenu}>
-                <Typography textAlign="center">Profile</Typography>
+              <MenuItem
+                onClick={() => {
+                  navigate("deck");
+                  handleCloseUserMenu();
+                }}
+              >
+                <Typography textAlign="center">My decks</Typography>
               </MenuItem>
               <MenuItem onClick={() => dispatch(logout())}>
                 <Typography textAlign="center">Logout</Typography>

@@ -9,20 +9,20 @@ const Answer = ({
   correctAnswer,
 }) => {
   const handleClick = () => {
-    handleAnswerClick(letter);
+    handleAnswerClick(option);
   };
 
   const isSelected = selectedAnswer !== "";
   let styleClass = "";
-  if (isSelected && selectedAnswer === letter) styleClass = " incorrect";
-  if (isSelected && correctAnswer === letter) styleClass = " correct";
+  if (isSelected && selectedAnswer === option) styleClass = " incorrect";
+  if (isSelected && correctAnswer === option) styleClass = " correct";
 
   let icon = null;
 
   if (isSelected) {
-    if (correctAnswer === letter) {
+    if (correctAnswer === option) {
       icon = <CheckIcon className="icon" style={{ color: "#59e8b5" }} />;
-    } else if (selectedAnswer === letter) {
+    } else if (selectedAnswer === option) {
       icon = <CloseIcon className="icon" style={{ color: "#ff7873" }} />;
     }
   }

@@ -1,0 +1,3 @@
+# Exclude the .venv and frontend directories
+.venv
+frontend

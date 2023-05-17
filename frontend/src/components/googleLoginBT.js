@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { setError, setToken } from "@app/store/authSlice";
 import authService from "@api-services/authService";
 import { getFirstError } from "@utils/errorHandler";
+import { sendTokenToExtension } from "@utils/extensionLogin";
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 function CustomPopupGoogleLoginBT() {
@@ -15,8 +16,8 @@ function CustomPopupGoogleLoginBT() {
   ].join(" ");
   const handleUserInit = (res) => {
     if (!res.error) {
-      const { access, refresh } = res.data;
-      dispatch(setToken({ access, refresh }));
+      sendTokenToExtension(res.data);
+      dispatch(setToken(res.data));
     } else {
       const errorMessage = getFirstError(res.error);
       dispatch(setError(errorMessage));
