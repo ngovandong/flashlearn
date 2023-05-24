@@ -11,6 +11,20 @@ class TermSerializer(serializers.ModelSerializer):
         model = Term
         fields = ('id', 'name', 'description', 'image', 'deck')
 
+    def to_internal_value(self, data):
+        from ..services import TermService
+        ret = super().to_internal_value(data)
+        image = ret.get("image", None)
+        if image and image.startswith("https://encrypted-tbn0.gstatic.com/images?"):
+            try:
+                base = TermService.url_to_base64(image)
+                ret["image"] = base
+            except Exception:
+                pass
+        if data.get("id", None):
+            ret['id'] = data["id"]
+        return ret
+
 
 class TermNestInDeckSerializer(serializers.ModelSerializer):
     image = serializers.URLField(allow_blank=True)
