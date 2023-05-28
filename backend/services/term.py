@@ -1,6 +1,8 @@
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import cloudinary.uploader
 import re
+import requests
+import base64
 from ..serializers import TermSerializer
 from ..models import Term
 
@@ -38,7 +40,7 @@ class TermService:
         parsed_data = cls.convert_form_ata_to_list_term(formdata=formdata)
         serializer = TermSerializer(data=parsed_data, many=True, partial=True)
         serializer.is_valid(raise_exception=True)
-        for item in parsed_data:
+        for item in serializer.validated_data:
             term = Term.objects.filter(id=item['id']).first()
             if term:
                 term.name = item['name']
@@ -53,3 +55,25 @@ class TermService:
         all_terms = Term.objects.get_terms_for_deck(deck_id)
         revise_terms = Term.objects.get_revise_terms(user, deck_id)
         return {"all_terms": all_terms, "revise_terms": revise_terms}
+
+    @staticmethod
+    def url_to_base64(image_url):
+        # Send an HTTP GET request to the image URL
+        response = requests.get(image_url)
+        response.raise_for_status()
+
+        # Read the image data
+        image_data = response.content
+
+        # Convert the image data to base64
+        base64_data = base64.b64encode(image_data)
+
+        # Decode the base64 data to a string
+        base64_string = base64_data.decode('utf-8')
+
+        # Add the base64 prefix based on the image format
+        image_format = response.headers.get('content-type')
+        if image_format:
+            base64_string = f"data:{image_format};base64,{base64_string}"
+
+        return base64_string

@@ -1,6 +1,6 @@
 from django.db import models
-from base.models import DateTimeUUIDModel
 from cloudinary.models import CloudinaryField
+from base.models import DateTimeUUIDModel
 from . import User
 from ..constants import FULL_ROLE_CLASS
 

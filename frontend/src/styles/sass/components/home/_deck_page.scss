@@ -2,6 +2,7 @@
     max-width: 60rem;
     padding: 2.5rem;
     margin: auto;
+    animation: fade-in 0.5s;
 
     .deck-header {
         h2 {
@@ -33,6 +34,15 @@
                 font-weight: 600;
                 font-size: 1rem;
                 margin-left: 0.5rem;
+            }
+        }
+
+        .lock {
+            cursor: not-allowed;
+            border-bottom: 0.3125rem solid #fff;
+
+            &:hover {
+                border-bottom: 0.3125rem solid #fff;
             }
         }
     }

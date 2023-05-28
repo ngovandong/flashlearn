@@ -1,7 +1,6 @@
 from django.db import models
 from base.models import CustomAbstractUser
 from django.utils.translation import gettext_lazy as _
-from django.conf import settings
 
 from ..managers import CustomUserManager
 from base.models import UUIDModel
@@ -33,13 +32,3 @@ class User(UUIDModel, CustomAbstractUser):
     @property
     def is_google_account(self):
         return not self.has_usable_password()
-
-    def set_default_image(self):
-        self.image_url = settings.BASE_URL + \
-            settings.MEDIA_URL + 'default/default_avatar.jpg'
-
-    def save(self, *args, **kwargs):
-        if not self.image_url:
-            self.set_default_image()
-            self.save()
-        super().save(*args, **kwargs)

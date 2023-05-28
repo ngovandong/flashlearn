@@ -1,17 +1,20 @@
 from django.db import models
-from base.models import UUIDModel
+from base.models import DateTimeUUIDModel
 from . import Deck
 from ..managers import TermManager
 
 
-class Term(UUIDModel):
+class Term(DateTimeUUIDModel):
     name = models.CharField(max_length=255)
     description = models.TextField()
-    image = models.CharField(max_length=255, blank=True, null=True)
+    image = models.TextField(blank=True, null=True)
     deck = models.ForeignKey(
         Deck, on_delete=models.CASCADE, related_name='terms')
 
     objects = TermManager()
+
+    class Meta:
+        ordering = ['created_at']
 
     def can_edit_term(self, user):
         return self.deck.owner == user or self.deck.user_roles.filter(user=user, role='E').first() is not None
