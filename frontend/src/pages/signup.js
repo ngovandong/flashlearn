@@ -35,8 +35,8 @@ function SignUp() {
         email,
         password,
         name: firstName + " " + lastName,
-        image_url: url,
       };
+      if (url) user.image_url = url;
       dispatch(setLoading(true));
       try {
         const res = await authService.signUp(user);

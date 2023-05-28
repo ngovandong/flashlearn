@@ -28,9 +28,6 @@ class UserSerializer(serializers.ModelSerializer):
         ret = super().to_representation(instance)
         if ret.get("default_deck"):
             ret["default_deck"] = str(ret["default_deck"])
-        if not ret.get("image_url"):
-            ret["image_url"] = settings.BASE_BACKEND_URL + \
-                'images/default_avatar.png'
         return ret
 
 

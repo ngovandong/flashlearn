@@ -5,6 +5,7 @@ from ..models import Deck, UserDeckRole
 from . import AddUserSerializer, UserSerializer, ProgressSerializer
 from ..constants import FULL_ROLE_CHOICES
 from ..services import LearningService
+from cloudinary.utils import cloudinary_url
 
 
 class DeckSerializer(serializers.ModelSerializer):
@@ -16,12 +17,6 @@ class DeckSerializer(serializers.ModelSerializer):
         model = Deck
         fields = ('id', 'name', 'description', 'is_public', 'owner', 'number_of_term',
                   'created_at', 'updated_at', 'background')
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        if not ret.get("background"):
-            ret["background"]= settings.BASE_BACKEND_URL + 'images/default_deck.jpg'
-        return ret
 
 
 class DeckDetailSerializer(DeckSerializer):
