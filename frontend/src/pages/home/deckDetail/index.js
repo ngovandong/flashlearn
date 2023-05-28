@@ -69,12 +69,12 @@ function DeckDetail() {
               <CollectionsBookmarkIcon color="purple" />
               <span>Revise </span>
             </Link>
-            <div className="menu-btn">
-              <TimerIcon color="purple" />
+            <div className="menu-btn lock">
+              <TimerIcon color="grey" />
               <span>Quick Revise </span>
             </div>
-            <div className="menu-btn">
-              <SportsEsportsIcon color="purple" />
+            <div className="menu-btn lock">
+              <SportsEsportsIcon color="grey" />
               <span>Competition </span>
             </div>
           </div>
