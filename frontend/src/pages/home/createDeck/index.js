@@ -18,12 +18,12 @@ function CreateDeck() {
   });
 
   const handleClickNext = async () => {
-    if (deck.background && deck.description && deck.name) {
+    if (deck.description && deck.name) {
       const formData = new FormData();
       formData.append("is_public", deck.is_public);
       formData.append("name", deck.name);
       formData.append("description", deck.description);
-      formData.append("background", deck.background);
+      if (deck.background) formData.append("background", deck.background);
       setIsLoading(true);
       try {
         const res = await deckService.create(formData);

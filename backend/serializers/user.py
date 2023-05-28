@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import PasswordField
-
+from django.conf import settings
 from ..models import User
 
 
@@ -26,8 +26,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        if ret["default_deck"]:
+        if ret.get("default_deck"):
             ret["default_deck"] = str(ret["default_deck"])
+        if not ret.get("image_url"):
+            ret["image_url"] = settings.BASE_BACKEND_URL + \
+                'images/default_avatar.png'
         return ret
 
 
