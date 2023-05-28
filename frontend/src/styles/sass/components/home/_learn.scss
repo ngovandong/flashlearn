@@ -143,16 +143,17 @@
                 }
 
                 .half-width {
-                    width: 40%;
+                    width: 50%;
                 }
 
                 .meaning-img {
-                    width: 60%;
+                    width: 50%;
                     padding: 2rem;
 
                     img {
                         max-width: 100%;
                         height: auto;
+                        max-height: 100%;
                     }
                 }
             }

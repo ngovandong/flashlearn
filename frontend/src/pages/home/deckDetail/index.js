@@ -13,7 +13,7 @@ import FooterBTNs from "./footerButtons";
 
 function DeckDetail() {
   const [deck, setDeck] = useState();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { deckID } = useParams();
 
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ function DeckDetail() {
       navigate("edit?tab=1");
     }
   }, [deck]);
-  return deck ? (
+  return (
     <>
       <LocalLoadingWrapper open={isLoading} />
       {deck && (
@@ -126,8 +126,6 @@ function DeckDetail() {
         </div>
       )}
     </>
-  ) : (
-    <></>
   );
 }
 

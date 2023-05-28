@@ -32,8 +32,8 @@ function LearnPage() {
   function handleClick() {
     setCurrentState((pre) => ({ ...pre, isFlipped: !pre.isFlipped }));
   }
-  const speakTerm = async () => {
-    speak(currentTerm.name);
+  const speakTerm = () => {
+    return speak(currentTerm.name);
   };
   const handleNext = async () => {
     setCurrentState((pre) => ({ index: pre.index + 1, isFlipped: false }));
@@ -97,8 +97,9 @@ function LearnPage() {
 
   useEffect(() => {
     if (currentTerm != null) {
-      speakTerm();
+      const stop = speakTerm();
       learned();
+      return stop;
     }
   }, [currentTerm]);
   useEffect(() => {

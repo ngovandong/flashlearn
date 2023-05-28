@@ -109,8 +109,6 @@ function AddTermsTab({ handleClickBack }) {
       return { ...t, error: null };
     });
     const sameNameTerms = validateSameName(newterms);
-    console.log(newterms);
-    console.log(sameNameTerms);
     if (success && sameNameTerms) {
       success = false;
       sameNameTerms.forEach(
@@ -238,13 +236,16 @@ function AddTermsTab({ handleClickBack }) {
         </div>
         <div className="group-btns">
           <div
-            className={`save-btn ${!isSateChanged ? "disabled" : ""}`}
+            className={`save-btn${!isSateChanged ? " disabled" : ""}`}
             onClick={handleClickSave}
           >
             Save
           </div>
           {isUpdate && (
-            <Link to={`/deck/${deckID}`} className="main-btn">
+            <Link
+              to={`/deck/${deckID}`}
+              className={`main-btn${isChangeState ? " disabled" : ""}`}
+            >
               Done
             </Link>
           )}
