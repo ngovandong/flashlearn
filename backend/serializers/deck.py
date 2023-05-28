@@ -20,7 +20,7 @@ class DeckSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         if not ret.get("background"):
-            ret["background"]= settings.BASE_BACKEND_URL + 'images/default_deck.jpg'
+            ret["background"]= settings.BASE_BACKEND_URL + '/images/default_deck.jpg'
         return ret
 
 
