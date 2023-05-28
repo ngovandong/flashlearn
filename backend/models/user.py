@@ -1,7 +1,7 @@
 from django.db import models
 from base.models import CustomAbstractUser
 from django.utils.translation import gettext_lazy as _
-
+from cloudinary.utils import cloudinary_url
 from ..managers import CustomUserManager
 from base.models import UUIDModel
 
@@ -32,3 +32,12 @@ class User(UUIDModel, CustomAbstractUser):
     @property
     def is_google_account(self):
         return not self.has_usable_password()
+
+    def set_default_image(self):
+        url, _ = cloudinary_url("default_avatar")
+        self.image_url = url
+
+    def save(self, *args, **kwargs):
+        if not self.image_url:
+            self.set_default_image()
+        super().save(*args, **kwargs)
