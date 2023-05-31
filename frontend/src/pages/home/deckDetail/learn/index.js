@@ -108,6 +108,29 @@ function LearnPage() {
       fetchDeck();
     }
   }, [deckID]);
+
+  const handleKeyDown = (event) => {
+    if (event.key === "ArrowRight") {
+      if (terms && currentState.index + 1 < terms.length) {
+        handleNext();
+      }
+    }
+    if (event.key === "ArrowLeft") {
+      if (currentState.index > 0) {
+        handleBack();
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Clean up the event listener on component unmount
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentState.index]);
+
   return deck && terms ? (
     <div className="learn-wrapper">
       <div className="learn-header">
