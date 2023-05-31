@@ -18,6 +18,7 @@ function LearnPage() {
   const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [terms, setTerms] = useState();
+  const [showConfetti, setShowConfetti] = useState(false);
   const [currentState, setCurrentState] = useState({
     index: 0,
     isFlipped: false,
