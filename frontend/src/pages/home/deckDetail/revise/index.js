@@ -7,12 +7,12 @@ import { getFirstError } from "@utils/errorHandler";
 import { toast } from "react-toastify";
 import Confetti from "react-confetti";
 import { LocalLoadingWrapper } from "@components/loading";
-import { speak } from "@api-services/voiceService";
 import { deckService } from "@api-services/deckService";
 import Quiz from "./quiz";
 import { generateQuestions } from "./generateQuestion";
 import Fill from "./fill";
 import { QUESTION_TYPES } from "@constants/questionTypes";
+import { speak } from "@api-services/voiceService";
 
 function Revise() {
   const [deck, setDeck] = useState();
@@ -143,6 +143,13 @@ function Revise() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [currentState.showNext]);
+
+  useEffect(() => {
+    if (currentQuestion) {
+      const stop = speak(currentQuestion.answer);
+      return stop;
+    }
+  }, [currentQuestion]);
 
   return deck && terms ? (
     <div className="learn-wrapper">
