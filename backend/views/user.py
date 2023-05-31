@@ -10,6 +10,7 @@ from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from django.conf import settings
 from django.urls import reverse
 from django.shortcuts import redirect
+from django_rq import enqueue
 
 from ..serializers import CustomTokenObtainPairSerializer, ActiveAccountSerializer, UserSerializer, \
     SetPasswordSerializer, \
@@ -78,10 +79,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
         params = urlencode({'token': token})
         link = f'{active_account_url}?{params}'
 
-        context = {'name': user.name, 'link': link}
-
-        MailService.send_template_mail(
-            user.email, 'emails/confirm_email.html', context)
+        enqueue('emailService.tasks.send_active_account_email',
+                user.name, link, user.email)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['post'])

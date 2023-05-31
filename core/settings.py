@@ -215,3 +215,12 @@ cloudinary.config(
 )
 
 BASE_CLOUDINARY_URL = f"https://res.cloudinary.com/{os.environ.get('CLOUDINARY_CLOUD_NAME')}/"
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': '172.104.56.241',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 360,
+    }
+}
