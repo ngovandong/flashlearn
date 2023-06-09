@@ -18,14 +18,18 @@ function LearnPage() {
   const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [terms, setTerms] = useState();
-  const [showConfetti, setShowConfetti] = useState(false);
   const [currentState, setCurrentState] = useState({
     index: 0,
     isFlipped: false,
   });
   let currentTerm = null;
+  let youglish = null;
+  let google = null;
   if (terms && terms.length > 0) {
     currentTerm = terms[currentState.index];
+    const encodedPhrase = encodeURIComponent(currentTerm.name);
+    youglish = "https://youglish.com/pronounce/" + encodedPhrase + "/english";
+    google = "https://www.google.com/search?q=" + encodedPhrase;
   }
   const navigate = useNavigate();
   const { deckID } = useParams();
@@ -178,6 +182,9 @@ function LearnPage() {
               <IconButton component="label" onClick={speakTerm}>
                 <VolumeUpIcon />
               </IconButton>
+              <IconButton component="label" onClick={handleRestart}>
+                <RestartAltIcon />
+              </IconButton>
             </div>
             <div className="navigate-btns">
               <CircleButton
@@ -196,9 +203,16 @@ function LearnPage() {
               </CircleButton>
             </div>
             <div className="site-btn">
-              <IconButton component="label" onClick={handleRestart}>
-                <RestartAltIcon />
-              </IconButton>
+              {youglish && (
+                <a href={youglish} target="_blank" rel="noreferrer">
+                  Youglish
+                </a>
+              )}
+              {google && (
+                <a href={google} target="_blank" rel="noreferrer">
+                  Search on google
+                </a>
+              )}
             </div>
           </div>
         </div>
