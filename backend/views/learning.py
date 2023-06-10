@@ -63,6 +63,14 @@ class LearningViewSet(FlexibleViewSet):
 
         return Response(status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=["PUT"])
+    def remember(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.is_skip = not instance.is_skip
+        instance.save()
+
+        return Response(status=status.HTTP_200_OK)
+
     @swagger_auto_schema(manual_parameters=[
         openapi.Parameter('deck_id', openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Filter by deck")])
     @action(detail=False, methods=["GET"], )
