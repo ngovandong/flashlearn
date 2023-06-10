@@ -20,6 +20,9 @@ class LearningService extends BaseService {
   incorrect = (id) => {
     return this.request.put(this.detailAction(id, "incorrect"));
   };
+  remember = (id) => {
+    return this.request.put(this.detailAction(id, "remember"));
+  };
 }
 
 export const learningService = new LearningService();

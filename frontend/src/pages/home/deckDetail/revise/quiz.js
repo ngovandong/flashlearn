@@ -35,6 +35,7 @@ const Quiz = ({
   return (
     <div className="quiz-container">
       <QuestionHeader
+        id={question.progressId}
         image={question.image}
         question={question.question}
         speakTerm={speakTerm}

@@ -26,11 +26,9 @@ function Login() {
     dispatch(login({ email, password }));
   };
 
-  useEffect(() => {
-    if (token) {
-      navigate("/");
-    }
-  }, [token]);
+  if (token) {
+    navigate("/");
+  }
 
   useEffect(() => {
     const info = searchParams.get("info");
