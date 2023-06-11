@@ -73,6 +73,7 @@
             .set-card {
                 @include app_radius;
                 @include border_bottom_purple;
+                min-width: 300px;
                 padding: 0.75rem 1rem;
                 width: 32.5%;
                 height: 10rem;

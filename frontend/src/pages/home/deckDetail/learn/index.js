@@ -4,7 +4,7 @@ import CircleButton from "@components/circleButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { learningService } from "@api-services/learningService";
 import { useNavigate, useParams } from "react-router-dom";
@@ -18,6 +18,9 @@ function LearnPage() {
   const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [terms, setTerms] = useState();
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
   const [currentState, setCurrentState] = useState({
     index: 0,
     isFlipped: false,
@@ -33,6 +36,24 @@ function LearnPage() {
   }
   const navigate = useNavigate();
   const { deckID } = useParams();
+
+  const handleTouchStart = (event) => {
+    touchStartX.current = event.touches[0].clientX;
+  };
+
+  const handleTouchMove = (event) => {
+    touchEndX.current = event.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const swipeDistance = touchEndX.current - touchStartX.current;
+
+    if (swipeDistance > 40) {
+      handleBack();
+    } else if (swipeDistance < -40) {
+      handleNext();
+    }
+  };
 
   function handleClick() {
     setCurrentState((pre) => ({ ...pre, isFlipped: !pre.isFlipped }));
@@ -136,7 +157,12 @@ function LearnPage() {
   }, [currentState.index]);
 
   return deck && terms ? (
-    <div className="learn-wrapper">
+    <div
+      className="learn-wrapper"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       <div className="learn-header">
         <div className="left-header"></div>
         <div className="center-header">

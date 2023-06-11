@@ -43,6 +43,7 @@ class TermManager(Manager):
         """
         filter = Q(deck_id=deck_id)
         filter &= Q(learning_progress__user=user)
+        filter &= Q(learning_progress__is_skip=False)
         filter &= Q(learning_progress__score__lt=5)
         return self.filter(filter)
 
@@ -52,7 +53,8 @@ class TermManager(Manager):
         """
         filter = Q(deck_id=deck_id)
         filter &= Q(learning_progress__user=user)
-        filter &= Q(learning_progress__score__gte=5)
+        filter &= Q(learning_progress__is_skip=True) | Q(
+            learning_progress__score__gte=5)
         return self.filter(filter)
 
     def get_unlearned_terms(self, user, deck_id: int) -> QuerySet:
@@ -68,6 +70,7 @@ class TermManager(Manager):
         """
         today = timezone.now().date()
         filter = Q(deck_id=deck_id)
+        filter &= Q(learning_progress__is_skip=False)
         filter &= Q(learning_progress__user=user)
         revise_terms = self.filter(filter).annotate(
             learning_progress_id=F('learning_progress__id'),
