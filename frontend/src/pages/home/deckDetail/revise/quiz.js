@@ -31,10 +31,10 @@ const Quiz = ({
   useLayoutEffect(() => {
     setSelectedAnswer("");
   }, [question]);
-
   return (
     <div className="quiz-container">
       <QuestionHeader
+        name={question.answer}
         id={question.progressId}
         image={question.image}
         question={question.question}
