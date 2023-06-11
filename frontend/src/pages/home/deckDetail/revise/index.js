@@ -1,6 +1,6 @@
 import { IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { learningService } from "@api-services/learningService";
 import { useNavigate, useParams } from "react-router-dom";
 import { getFirstError } from "@utils/errorHandler";
@@ -18,6 +18,8 @@ function Revise() {
   const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [terms, setTerms] = useState();
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
   const [showConfetti, setShowConfetti] = useState(false);
   const [currentState, setCurrentState] = useState({
     index: 0,
@@ -60,7 +62,21 @@ function Revise() {
   const playIncorrectSound = () => {
     incorrectSound.play();
   };
+  const handleTouchStart = (event) => {
+    touchStartX.current = event.touches[0].clientX;
+  };
 
+  const handleTouchMove = (event) => {
+    touchEndX.current = event.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const swipeDistance = touchEndX.current - touchStartX.current;
+
+    if (currentState.showNext && swipeDistance < -40) {
+      handleNextQuestionClick();
+    }
+  };
   const handleCorrect = async () => {
     playCorrectSound();
     await learningService.correct(currentQuestion.progressId);
@@ -152,7 +168,12 @@ function Revise() {
   }, [currentQuestion]);
 
   return deck && terms ? (
-    <div className="learn-wrapper">
+    <div
+      className="learn-wrapper"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {showConfetti && (
         <Confetti
           gravity={0.2}

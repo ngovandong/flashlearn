@@ -68,17 +68,25 @@ function ResponsiveAppBar() {
               display: { md: "flex" },
             }}
           >
-            {links.map((link) => (
-              <NavLink
-                key={link.link}
-                className={({ isActive }) =>
-                  isActive ? "nav-item nav-item--active" : "nav-item"
-                }
-                to={link.link}
-              >
-                {link.name}
-              </NavLink>
-            ))}
+            <Box
+              sx={{
+                flexGrow: 1,
+                alignSelf: "stretch",
+                display: { md: "flex", xs: "none" },
+              }}
+            >
+              {links.map((link) => (
+                <NavLink
+                  key={link.link}
+                  className={({ isActive }) =>
+                    isActive ? "nav-item nav-item--active" : "nav-item"
+                  }
+                  to={link.link}
+                >
+                  {link.name}
+                </NavLink>
+              ))}
+            </Box>
           </Box>
           <Box sx={{ flexGrow: 0, marginRight: "1.25rem" }}>
             <IconButton
