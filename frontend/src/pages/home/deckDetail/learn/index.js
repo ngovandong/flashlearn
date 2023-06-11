@@ -48,9 +48,9 @@ function LearnPage() {
   const handleTouchEnd = () => {
     const swipeDistance = touchEndX.current - touchStartX.current;
 
-    if (swipeDistance > 40) {
+    if (currentState.index > 0 && swipeDistance > 40) {
       handleBack();
-    } else if (swipeDistance < -40) {
+    } else if (currentState.index + 1 < terms.length && swipeDistance < -40) {
       handleNext();
     }
   };
