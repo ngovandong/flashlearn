@@ -20,6 +20,9 @@ class Deck(DateTimeUUIDModel):
     owner = models.ForeignKey(
         User, related_name='my_own_decks', on_delete=models.CASCADE)
 
+    class Meta:
+        ordering = ('created_at',)
+
     def get_user_permission(instance, user):
         if user == instance.owner:
             return FULL_ROLE_CLASS.OWNER

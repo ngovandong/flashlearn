@@ -88,11 +88,18 @@ class DeckService:
 
         return my_decks
 
+    # @staticmethod
+    # def get_latest_decks(user):
+    #     latest_decks = DeckService.get_my_decks(user).annotate(
+    #         latest_learned=Coalesce(Max('terms__learning_progress__last_learned_at', filter=Q(
+    #             terms__learning_progress__user=user)), Value(datetime.datetime(1900, 1, 1), output_field=DateTimeField()))
+    #     ).order_by('-latest_learned')[:5]
+
+    #     return latest_decks
+
     @staticmethod
     def get_latest_decks(user):
-        latest_decks = DeckService.get_my_decks(user).annotate(
-            latest_learned=Coalesce(Max('terms__learning_progress__last_learned_at', filter=Q(
-                terms__learning_progress__user=user)), Value(datetime.datetime(1900, 1, 1), output_field=DateTimeField()))
-        ).order_by('-latest_learned')[:5]
+        latest_decks = DeckService.get_my_decks(
+            user).order_by('-updated_at')[:5]
 
         return latest_decks

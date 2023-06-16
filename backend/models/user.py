@@ -14,7 +14,7 @@ class User(UUIDModel, CustomAbstractUser):
     is_validated_email = models.BooleanField(default=False)
     default_deck = models.OneToOneField(
         "Deck",
-        on_delete=models.DO_NOTHING,
+        on_delete=models.SET_NULL,
         blank=True, null=True
     )
 
