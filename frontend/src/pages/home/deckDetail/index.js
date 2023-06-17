@@ -2,7 +2,12 @@ import { deckService } from "@api-services/deckService";
 import { LocalLoadingWrapper } from "@components/loading";
 import { getFirstError } from "@utils/errorHandler";
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { toast } from "react-toastify";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import CollectionsBookmarkIcon from "@mui/icons-material/CollectionsBookmark";
@@ -15,6 +20,7 @@ function DeckDetail() {
   const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const { deckID } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const navigate = useNavigate();
 
@@ -48,7 +54,8 @@ function DeckDetail() {
   }, [deckID]);
 
   useEffect(() => {
-    if (deck && deck.number_of_term === 0) {
+    const notnavigate = searchParams.get("notnavigate");
+    if (!notnavigate && deck && deck.number_of_term === 0) {
       navigate("edit?tab=1");
     }
   }, [deck]);
@@ -88,13 +95,17 @@ function DeckDetail() {
             <div className="progress-card">
               <h4>Learning progress</h4>
               <div className="result-card">
-                <CircularProgressWithLabel
-                  value={parseInt(
-                    (deck.learning_progress.completed / deck.number_of_term) *
-                      100
+                {deck.number_of_term > 0 &&
+                  deck.learning_progress.completed > 0 && (
+                    <CircularProgressWithLabel
+                      value={parseInt(
+                        (deck.learning_progress.completed /
+                          deck.number_of_term) *
+                          100
+                      )}
+                      size={120}
+                    />
                   )}
-                  size={120}
-                />
                 <div className="progress-detail">
                   <div className="detail-row">
                     <div className="progress-title c-b">Learning:</div>

@@ -39,6 +39,9 @@ class DeckService extends BaseService {
   joinDeck = (id) => {
     return this.request.post(this.detailAction(id, "join_deck"));
   };
+  cloneDeck = (id) => {
+    return this.request.get(this.detailAction(id, "clone"));
+  };
   leaveDeck = (id) => {
     return this.request.post(this.detailAction(id, "leave_deck"));
   };

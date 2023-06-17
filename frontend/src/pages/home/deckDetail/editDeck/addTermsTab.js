@@ -3,7 +3,7 @@ import TermCard from "./termCard";
 import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useState } from "react";
 import { termService } from "@api-services/termService";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { LocalLoadingWrapper } from "@components/loading";
 import { getFirstError } from "@utils/errorHandler";
 import { filterChangedTerms, isChangeState } from "@utils/state";
@@ -27,6 +27,8 @@ function AddTermsTab({ handleClickBack }) {
   const { deckID } = useParams();
   const isUpdate = terms[0].id;
   const isSateChanged = isChangeState(oldTerms, terms);
+
+  const navigate = useNavigate();
 
   const convertTerms = (terms) => {
     return terms.map((t) => ({
@@ -229,6 +231,15 @@ function AddTermsTab({ handleClickBack }) {
         </Alert>
       </Snackbar>
       {isLoading && <LocalLoadingWrapper />}
+      {!isUpdate && (
+        <div
+          className="back-btn"
+          onClick={() => navigate(`/deck/${deckID}?notnavigate=true`)}
+        >
+          <span>{"<   "}</span>
+          Back to detail
+        </div>
+      )}
       <div className="upper-btns">
         <div className="back-btn" onClick={handleClickBack}>
           <span>{"<   "}</span>
@@ -242,10 +253,7 @@ function AddTermsTab({ handleClickBack }) {
             Save
           </div>
           {isUpdate && (
-            <Link
-              to={`/deck/${deckID}`}
-              className={`main-btn${isChangeState ? " disabled" : ""}`}
-            >
+            <Link to={`/deck/${deckID}`} className={`main-btn`}>
               Done
             </Link>
           )}

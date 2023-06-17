@@ -41,6 +41,15 @@
     }
 }
 
+@mixin blue_btn {
+    @include purple_btn;
+    background-color: $blue;
+
+    &:hover {
+        background-color: $blue-hover;
+    }
+}
+
 @mixin border_bottom_purple {
     border-bottom: 0.3125rem solid #fff;
 
