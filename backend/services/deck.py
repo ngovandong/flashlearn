@@ -1,7 +1,8 @@
 from django.db.models import Case, CharField, Q, Value, When, Count, Sum, Max, DateTimeField, IntegerField, Prefetch
 from django.db.models.functions import Coalesce
+from django.db import transaction
 import datetime
-from ..models import Deck, UserDeckRole
+from ..models import Deck, UserDeckRole, Term
 from ..constants import FULL_ROLE_CLASS
 
 
@@ -103,3 +104,32 @@ class DeckService:
             user).order_by('-updated_at')[:5]
 
         return latest_decks
+
+    @staticmethod
+    def clone_deck(old_deck, user):
+        with transaction.atomic():
+            # Cloning the deck object
+            new_deck_name = "Copy of " + old_deck.owner.name + " - " + old_deck.name
+            new_deck = Deck.objects.create(
+                name=new_deck_name,
+                description=old_deck.description,
+                is_public=False,
+                background=old_deck.background,
+                field=old_deck.field,
+                owner=user
+            )
+
+            # Cloning the term objects associated with the old deck
+            old_terms = old_deck.terms.all()
+            new_terms = [
+                Term(
+                    name=term.name,
+                    description=term.description,
+                    image=term.image,
+                    deck=new_deck
+                )
+                for term in old_terms
+            ]
+            Term.objects.bulk_create(new_terms)
+
+        return new_deck

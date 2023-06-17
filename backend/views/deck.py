@@ -45,6 +45,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         "others_deck": MyDeckSerializer,
         "latest_decks": MyDeckSerializer,
         "retrieve": DeckDetailSerializer,
+        "clone": DeckDetailSerializer,
         "get_invite_url": InviteSerializer
     }
 
@@ -179,6 +180,17 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         user.default_deck = instance
         user.save()
         return Response({"message": "update successfully"}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["GET"])
+    def clone(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            new_deck = DeckService.clone_deck(instance, request.user)
+            serializer = self.get_serializer(new_deck)
+            return Response(serializer.data)
+        except Exception:
+            Response({"errors": "Clone deck fail"},
+                     status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
