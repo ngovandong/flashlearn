@@ -50,7 +50,7 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet):
     def add_to_default_deck(self, request, *args, **kwargs):
         default_deck_id = request.user.default_deck_id
         if not default_deck_id:
-            return Response({"errors": "user doesn't have default deck"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": "Please setup your default deck"}, status=status.HTTP_400_BAD_REQUEST)
         data = request.data
         data["deck"] = default_deck_id
         serializer = self.get_serializer(data=data)

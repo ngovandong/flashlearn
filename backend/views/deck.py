@@ -3,6 +3,7 @@ from rest_framework import viewsets, status, permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q, Count, Prefetch
+from django.utils import timezone
 from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -44,6 +45,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         "others_deck": MyDeckSerializer,
         "latest_decks": MyDeckSerializer,
         "retrieve": DeckDetailSerializer,
+        "clone": DeckDetailSerializer,
         "get_invite_url": InviteSerializer
     }
 
@@ -55,12 +57,25 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
     @swagger_auto_schema(manual_parameters=[
         openapi.Parameter('search', openapi.IN_QUERY, type=openapi.TYPE_STRING,
                           description="Search by Deck name, user name, or email")])
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.updated_at = timezone.now()
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
     def list(self, request, *args, **kwargs):
         search_query = request.query_params.get('search')
 
         self.queryset = DeckService.get_search_queryset(
             request.user, search_query)
         return super().list(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        User.objects.filter(default_deck=instance).update(default_deck=None)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=["GET"])
     def my_own_decks(self, request, *args, **kwargs):
@@ -165,6 +180,17 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         user.default_deck = instance
         user.save()
         return Response({"message": "update successfully"}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["GET"])
+    def clone(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            new_deck = DeckService.clone_deck(instance, request.user)
+            serializer = self.get_serializer(new_deck)
+            return Response(serializer.data)
+        except Exception:
+            Response({"errors": "Clone deck fail"},
+                     status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

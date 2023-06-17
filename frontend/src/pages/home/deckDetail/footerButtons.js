@@ -103,6 +103,24 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
       setIsLoading(false);
     }
   };
+
+  const handleCloneDeck = async () => {
+    try {
+      setIsLoading(true);
+      const res = await deckService.cloneDeck(deckID);
+      if (!res.error) {
+        toast.success("Clone deck success!");
+        navigate(`/deck/${res.data.id}`);
+      } else {
+        const errorMessage = getFirstError(res.error);
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const handleLeaveDeck = async () => {
     try {
       setIsLoading(true);
@@ -124,8 +142,13 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
     <>
       <div className="footer-group-btn">
         {!role ? (
-          <div className="join-btn" onClick={handleJoinDeck}>
-            Join deck
+          <div className="join-clone-group">
+            <div className="join-btn" onClick={handleJoinDeck}>
+              Join deck
+            </div>
+            <div className="clone-btn" onClick={handleCloneDeck}>
+              Clone deck
+            </div>
           </div>
         ) : (
           <>
