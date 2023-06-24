@@ -8,7 +8,7 @@ class UserLearningProgress(UUIDModel):
         User, on_delete=models.CASCADE, related_name='learning_progress')
     term = models.ForeignKey(
         Term, on_delete=models.CASCADE, related_name='learning_progress')
-    last_learned_at = models.DateTimeField(auto_now=True)
+    last_learned_at = models.DateTimeField(auto_now_add=True)
     score = models.IntegerField(default=0)
     is_skip = models.BooleanField(default=False)
 
