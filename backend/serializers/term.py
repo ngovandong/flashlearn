@@ -5,7 +5,6 @@ from ..models import Term, Deck
 
 
 class TermSerializer(serializers.ModelSerializer):
-    image = serializers.URLField(allow_blank=True, required=False)
 
     class Meta:
         model = Term
