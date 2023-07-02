@@ -16,6 +16,18 @@ import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import CircularProgressWithLabel from "@components/progress";
 import FooterBTNs from "./footerButtons";
 
+function MenuButton({ icon, text, link, isDisabled }) {
+  const IconName = icon;
+  return (
+    <div className={`menu-btn${isDisabled ? " lock" : ""}`}>
+      <Link to={link} className="menu-link">
+        <IconName color={isDisabled ? "grey" : "purple"} />
+        <span>{text}</span>
+      </Link>
+    </div>
+  );
+}
+
 function DeckDetail() {
   const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(true);
@@ -68,22 +80,38 @@ function DeckDetail() {
             <h2>{deck.name}</h2>
           </div>
           <div className="deck-menu">
-            <Link to="learn" className="menu-btn">
-              <LocalLibraryIcon color="purple" />
-              <span>Learn</span>
-            </Link>
-            <Link to="revise" className="menu-btn">
-              <CollectionsBookmarkIcon color="purple" />
-              <span>Revise </span>
-            </Link>
-            <div className="menu-btn lock">
-              <TimerIcon color="grey" />
-              <span>Quick Revise </span>
-            </div>
-            <div className="menu-btn lock">
-              <SportsEsportsIcon color="grey" />
-              <span>Competition </span>
-            </div>
+            {/* <div className="menu-btn lock">
+              <Link to="learn">
+                <LocalLibraryIcon
+                  color={deck.my_permission ? "purple" : "grey"}
+                />
+                <span>Learn</span>
+              </Link>
+            </div> */}
+            <MenuButton
+              link="learn"
+              text="Learn"
+              isDisabled={!deck.my_permission}
+              icon={LocalLibraryIcon}
+            />
+            <MenuButton
+              link="revise"
+              text="Revise"
+              isDisabled={!deck.my_permission}
+              icon={CollectionsBookmarkIcon}
+            />
+            <MenuButton
+              link="quick-revise"
+              text="Quick Revise"
+              isDisabled={true}
+              icon={TimerIcon}
+            />
+            <MenuButton
+              link="competition"
+              text="Competition"
+              isDisabled={true}
+              icon={SportsEsportsIcon}
+            />
           </div>
           <div className="deck-progress">
             <div className="quote-card">

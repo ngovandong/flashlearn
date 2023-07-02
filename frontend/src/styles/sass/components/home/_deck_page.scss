@@ -17,6 +17,27 @@
         column-gap: 2rem;
         justify-content: space-between;
 
+        .menu-link {
+            text-decoration: none;
+            display: flex;
+            justify-content: left;
+            align-items: center;
+            padding: .6rem .8rem;
+            height: 100%;
+            width: 100%;
+
+            span {
+                color: $main-text-color;
+                font-weight: 600;
+                font-size: 1rem;
+                margin-left: 0.5rem;
+            }
+        }
+
+        .lock>.menu-link {
+            pointer-events: none;
+        }
+
         .menu-btn {
             @include app_radius;
             @include border_bottom_purple;
@@ -26,16 +47,10 @@
             align-items: center;
             text-decoration: none;
             background-color: white;
-            padding: .6rem .8rem;
             width: 24%;
 
-            span {
-                color: $main-text-color;
-                font-weight: 600;
-                font-size: 1rem;
-                margin-left: 0.5rem;
-            }
         }
+
 
         .lock {
             cursor: not-allowed;
