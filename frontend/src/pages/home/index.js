@@ -58,7 +58,7 @@ function Home() {
               alt="streak-calendar"
             />
             <div className="streak-text">
-              <div>You have a 4-day streak of learning</div>
+              <div>You have a 1-day streak of learning</div>
               <span>Keep studying hard to maintain your streak!</span>
             </div>
           </div>

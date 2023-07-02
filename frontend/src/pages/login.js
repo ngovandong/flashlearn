@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Alert from "@mui/material/Alert";
@@ -14,6 +14,7 @@ import { sendTokenToExtension } from "@utils/extensionLogin";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const passwordRef = useRef();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = useSelector(selectToken);
@@ -29,6 +30,16 @@ function Login() {
   if (token) {
     navigate("/");
   }
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.stopPropagation();
+      event.preventDefault();
+      if (email) {
+        handle_submit(event);
+      }
+    }
+  };
 
   useEffect(() => {
     const info = searchParams.get("info");
@@ -85,6 +96,14 @@ function Login() {
             placeholder="Enter your email address..."
             value={email}
             required
+            tabIndex={1}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                event.stopPropagation();
+                passwordRef.current.focus();
+              }
+            }}
           />
           <br />
 
@@ -96,6 +115,9 @@ function Login() {
             placeholder="Enter your password..."
             value={password}
             required
+            onKeyDown={handleKeyDown}
+            tabIndex={1}
+            ref={passwordRef}
           />
           <br />
 
