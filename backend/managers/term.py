@@ -74,7 +74,7 @@ class TermManager(Manager):
         filter &= Q(learning_progress__user=user)
         revise_terms = self.filter(filter).annotate(
             learning_progress_id=F('learning_progress__id'),
-            delta_day=today-F("learning_progress__last_learned_at__date")
+            delta_day=today-F("learning_progress__last_revised_at__date")
         ).order_by(
             "-delta_day", 'learning_progress__score')[:5]
         return revise_terms

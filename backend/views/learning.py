@@ -49,6 +49,7 @@ class LearningViewSet(FlexibleViewSet):
     def correct(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.score += 2
+        instance.last_revised_at = timezone.now()
         instance.save()
 
         return Response(status=status.HTTP_200_OK)
@@ -57,6 +58,7 @@ class LearningViewSet(FlexibleViewSet):
     def incorrect(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.score -= 3
+        instance.last_revised_at = timezone.now()
         instance.save()
 
         return Response(status=status.HTTP_200_OK)
