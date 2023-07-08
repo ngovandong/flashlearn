@@ -170,7 +170,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         instance = self.get_object()
         if user not in instance.users.all():
             return Response({"errors": "user is not in deck"}, status=status.HTTP_400_BAD_REQUEST)
-        instance.users.remove(user)
+        DeckService.leave_deck(instance,user)
         return Response({"message": "leave deck success"}, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["PUT"])

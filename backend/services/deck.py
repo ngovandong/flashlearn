@@ -135,3 +135,9 @@ class DeckService:
             Term.objects.bulk_create(new_terms)
 
         return new_deck
+
+    @staticmethod
+    def leave_deck(deck, user):
+        with transaction.atomic():
+            user.learning_progress.filter(term__deck_id=deck.id).delete()
+            deck.users.remove(user)
