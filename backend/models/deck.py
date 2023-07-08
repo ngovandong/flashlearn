@@ -24,7 +24,7 @@ class Deck(DateTimeUUIDModel):
         ordering = ('created_at',)
 
     def get_user_permission(instance, user):
-        if user == instance.owner:
+        if user == instance.owner or user.is_superuser:
             return FULL_ROLE_CLASS.OWNER
         else:
             role = None
@@ -34,6 +34,8 @@ class Deck(DateTimeUUIDModel):
             return role
 
     def user_can_edit_deck(self, user):
+        if user.is_superuser:
+            return True
         user_role = self.get_user_permission(user)
         if user_role is None:
             return False
@@ -43,7 +45,7 @@ class Deck(DateTimeUUIDModel):
         return self.get_user_permission(user) is not None
 
     def user_can_view_deck(self, user):
-        return self.is_public or self.get_user_permission(user)
+        return self.is_public or self.get_user_permission(user) or user.is_superuser
 
     def set_default_image(self):
         random_number = random.randint(1, 5)

@@ -17,6 +17,8 @@ class DeckService:
 
     @staticmethod
     def get_search_queryset(user, search_query):
+        if user.is_superuser:
+            return Deck.objects.all()
         queryset = Deck.objects.filter(
             Q(is_public=True) | Q(owner=user) | Q(users=user)
         ).select_related('owner')

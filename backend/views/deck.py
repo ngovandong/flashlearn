@@ -54,9 +54,6 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
             return DeckService.get_retrieve_queryset(self.request.user)
         return super().get_queryset()
 
-    @swagger_auto_schema(manual_parameters=[
-        openapi.Parameter('search', openapi.IN_QUERY, type=openapi.TYPE_STRING,
-                          description="Search by Deck name, user name, or email")])
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.updated_at = timezone.now()
@@ -64,6 +61,9 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('search', openapi.IN_QUERY, type=openapi.TYPE_STRING,
+                          description="Search by Deck name, user name, or email")])
     def list(self, request, *args, **kwargs):
         search_query = request.query_params.get('search')
 
