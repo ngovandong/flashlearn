@@ -18,8 +18,7 @@ function LearnPage() {
   const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [terms, setTerms] = useState();
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
+  const touchStartRef = useRef(null);
 
   const [currentState, setCurrentState] = useState({
     index: 0,
@@ -38,19 +37,17 @@ function LearnPage() {
   const { deckID } = useParams();
 
   const handleTouchStart = (event) => {
-    touchStartX.current = event.touches[0].clientX;
+    touchStartRef.current = event.touches[0].clientX;
   };
 
-  const handleTouchMove = (event) => {
-    touchEndX.current = event.touches[0].clientX;
-  };
+  const handleTouchEnd = (event) => {
 
-  const handleTouchEnd = () => {
-    const swipeDistance = touchEndX.current - touchStartX.current;
-
-    if (currentState.index > 0 && swipeDistance > 40) {
+    const touchEnd = event.changedTouches[0].clientX;
+    const touchStart = touchStartRef.current;
+    const distance = touchEnd - touchStart;
+    if (currentState.index > 0 && distance > 50) {
       handleBack();
-    } else if (currentState.index + 1 < terms.length && swipeDistance < -40) {
+    } else if (currentState.index + 1 < terms.length && distance < -50) {
       handleNext();
     }
   };
@@ -160,7 +157,6 @@ function LearnPage() {
     <div
       className="learn-wrapper"
       onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       <div className="learn-header">
