@@ -30,8 +30,11 @@ function LearnPage() {
   if (terms && terms.length > 0) {
     currentTerm = terms[currentState.index];
     const encodedPhrase = encodeURIComponent(currentTerm.name);
+    const definitionPhrase = encodeURIComponent(
+      currentTerm.name + " definition"
+    );
     youglish = "https://youglish.com/pronounce/" + encodedPhrase + "/english";
-    google = "https://www.google.com/search?q=" + encodedPhrase;
+    google = "https://www.google.com/search?q=" + definitionPhrase;
   }
   const navigate = useNavigate();
   const { deckID } = useParams();
