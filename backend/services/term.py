@@ -52,7 +52,7 @@ class TermService:
 
     @classmethod
     def get_revise_terms(cls, user, deck_id):
-        all_terms = Term.objects.get_terms_for_deck(deck_id)
+        all_terms = Term.objects.get_random_terms(deck_id)
         revise_terms = Term.objects.get_revise_terms(user, deck_id)
         return {"all_terms": all_terms, "revise_terms": revise_terms}
 

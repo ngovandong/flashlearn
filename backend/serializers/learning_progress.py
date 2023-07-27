@@ -25,3 +25,4 @@ class ProgressSerializer(serializers.Serializer):
     learning = serializers.IntegerField()
     completed = serializers.IntegerField()
     left = serializers.IntegerField()
+    learned_today = serializers.IntegerField()

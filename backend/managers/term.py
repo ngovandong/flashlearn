@@ -47,6 +47,16 @@ class TermManager(Manager):
         filter &= Q(learning_progress__score__lt=5)
         return self.filter(filter)
 
+    def get_learned_today_terms(self, user, deck_id: int) -> QuerySet:
+        """
+        Returns the terms that the given user has completed for the given deck.
+        """
+        today = timezone.now().date()
+        filter = Q(deck_id=deck_id)
+        filter &= Q(learning_progress__user=user)
+        filter &= Q(learning_progress__last_revised_at__date=today)
+        return self.filter(filter)
+
     def get_completed_terms(self, user, deck_id: int) -> QuerySet:
         """
         Returns the terms that the given user has completed for the given deck.
@@ -78,3 +88,8 @@ class TermManager(Manager):
         ).order_by(
             "-delta_day", 'learning_progress__score')[:5]
         return revise_terms
+
+    def get_random_terms(self, deck_id: int) -> QuerySet:
+        all_deck_terms = self.get_terms_for_deck(deck_id=deck_id)
+        random_terms = all_deck_terms.order_by('?')[:20]
+        return random_terms
