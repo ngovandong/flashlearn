@@ -53,8 +53,10 @@ class LearningService:
             user=user, deck_id=deck_id).count()
         left = Term.objects.get_unlearned_terms(
             user=user, deck_id=deck_id).count()
+        learned_today = Term.objects.get_learned_today_terms(
+            user=user, deck_id=deck_id).count()
 
-        return learning + completed + left, {"learning": learning, "completed": completed, "left": left}
+        return learning + completed + left, {"learning": learning, "completed": completed, "left": left, "learned_today": learned_today}
 
     def clear_learning_progress(deck_id, user):
         UserLearningProgress.objects.filter(

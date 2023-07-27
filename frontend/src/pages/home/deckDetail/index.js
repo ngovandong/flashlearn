@@ -116,7 +116,7 @@ function DeckDetail() {
           <div className="deck-progress">
             <div className="quote-card">
               <div className="quote">
-                Way to go! You’ve reviewed all the cards.
+                Way to go! You’ve reviewed {deck.learning_progress.learned_today} words today.
               </div>
               <img src="/imgs/trumpet.svg" alt="trumpet" />
             </div>
