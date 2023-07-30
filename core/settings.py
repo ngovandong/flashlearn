@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_elasticsearch_dsl',
     'debug_toolbar',
     'corsheaders',
     'drf_yasg',
@@ -131,7 +132,8 @@ LANGUAGE_CODE = 'en-us'
 
 USE_I18N = True
 
-USE_TZ = False
+USE_TZ = True
+TIME_ZONE = 'Asia/Ho_Chi_Minh'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
@@ -223,4 +225,11 @@ RQ_QUEUES = {
         'DB': 0,
         'DEFAULT_TIMEOUT': 360,
     }
+}
+
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': '172.104.56.241:9200'
+    },
 }

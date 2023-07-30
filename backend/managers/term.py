@@ -1,4 +1,5 @@
 from django.db.models import Manager, Q, QuerySet, F
+from django.db.models.functions import ExtractDay
 from django.utils import timezone
 
 
@@ -84,9 +85,11 @@ class TermManager(Manager):
         filter &= Q(learning_progress__user=user)
         revise_terms = self.filter(filter).annotate(
             learning_progress_id=F('learning_progress__id'),
-            delta_day=today-F("learning_progress__last_revised_at__date")
+            delta_day=ExtractDay(today) - ExtractDay(F("learning_progress__last_revised_at__date"))
+        ).annotate(
+            rank=F('delta_day') * -10 + F("learning_progress__score")
         ).order_by(
-            "-delta_day", 'learning_progress__score')[:5]
+            "rank")[:5]
         return revise_terms
 
     def get_random_terms(self, deck_id: int) -> QuerySet:
