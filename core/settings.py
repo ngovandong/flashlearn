@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_elasticsearch_dsl',
     'debug_toolbar',
     'corsheaders',
     'drf_yasg',
@@ -224,4 +225,11 @@ RQ_QUEUES = {
         'DB': 0,
         'DEFAULT_TIMEOUT': 360,
     }
+}
+
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': '172.104.56.241:9200'
+    },
 }

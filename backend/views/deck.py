@@ -3,6 +3,7 @@ from rest_framework import viewsets, status, permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q, Count, Prefetch
+from elasticsearch_dsl import Q
 from django.utils import timezone
 from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
@@ -10,16 +11,18 @@ from drf_yasg import openapi
 from ..serializers import DeckSerializer, AddUserSerializer, RemoveUserSerializer, MyDeckSerializer, \
     DeckDetailSerializer, InviteSerializer
 from ..models import Deck, User
-from base.views import FlexibleViewSet
+from base.views import FlexibleViewSet, SearchViewSet
 from ..permissions import EditableDeck, IsOwnerPermission
 from ..services import AuthService, LearningService, DeckService
 from ..constants import FULL_ROLE_CLASS
+from ..documents import DeckDocument
 
 
-class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
+class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     serializer_class = DeckSerializer
     queryset = Deck.objects.all()
     pagination_class = None
+    document_class = DeckDocument
 
     permission_classes = (permissions.IsAuthenticated, EditableDeck)
 
@@ -53,6 +56,38 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         if self.action == 'retrieve':
             return DeckService.get_retrieve_queryset(self.request.user)
         return super().get_queryset()
+
+    def generate_q_expression(self, query, request):
+        user = request.user
+        search_query = Q('bool', should=[])
+
+        # Use multi_match query to search the query across multiple fields
+        search_query.should.append(Q('multi_match', query=query, fields=[
+                                   'owner.email', 'name', 'description', 'owner.name^2.0']))
+
+        # Add the condition: (owner = user or user in users)
+        user_condition_query = Q('bool', should=[
+            # Match documents where owner.id is the same as user.id
+            Q('match', owner__id=user.id),
+            Q('term', is_public=True),
+            Q('nested', path='users', query=Q('match', **
+              {'users.id': user.id})),  # Match user in users
+        ], minimum_should_match=1)
+
+        # Add the user_condition_query as a must clause to satisfy the overall condition
+        if query.strip():
+            return search_query & user_condition_query
+        else:
+            return user_condition_query
+
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('query', openapi.IN_QUERY, type=openapi.TYPE_STRING,
+                          description="Search by Deck name, user name, or email")])
+    @action(detail=False, methods=["GET"])
+    def search(self, request, *args, **kwargs):
+        query = request.query_params.get('query')
+        results = self.get_search_results(query=query, request=request)
+        return Response(results)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -170,7 +205,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         instance = self.get_object()
         if user not in instance.users.all():
             return Response({"errors": "user is not in deck"}, status=status.HTTP_400_BAD_REQUEST)
-        DeckService.leave_deck(instance,user)
+        DeckService.leave_deck(instance, user)
         return Response({"message": "leave deck success"}, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["PUT"])
