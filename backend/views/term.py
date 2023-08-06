@@ -8,7 +8,7 @@ import cloudinary.uploader
 from ..serializers import TermSerializer, AddTermsToDeckSerializer
 from ..models import Term, Deck
 from ..permissions import EditableTerm
-from ..services import TermService
+from ..services import TermService, learning_progress_cache
 
 
 class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet):
@@ -18,6 +18,16 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet):
     pagination_class = None
     permission_classes = (permissions.IsAuthenticated, EditableTerm)
     serializer_map = {"add_terms": AddTermsToDeckSerializer}
+
+    def perform_create(self, serializer):
+        term = serializer.save()
+        learning_progress_cache.delete_combine(
+            term.deck_id, self.request.user.id)
+
+    def perform_destroy(self, instance):
+        learning_progress_cache.delete_combine(
+            instance.deck_id, self.request.user.id)
+        instance.delete()
 
     @swagger_auto_schema(manual_parameters=[
         openapi.Parameter('deck_id', openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Filter by deck")])
@@ -59,7 +69,7 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         term = Term.objects.filter(
             deck_id=default_deck_id, name__iexact=name).first()
         if term:
-            return Response({"errors": "term is already existed"},status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": "term is already existed"}, status=status.HTTP_400_BAD_REQUEST)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -75,6 +85,7 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        learning_progress_cache.delete_combine(deck_id, request.user.id)
         return Response({'message': 'Terms created successfully'})
 
     @action(detail=False, methods=["PUT"])

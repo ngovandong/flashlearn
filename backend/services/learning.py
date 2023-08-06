@@ -42,21 +42,33 @@
 #             term__deck_id=deck_id, user=user).delete()
 
 from ..models import Term, UserLearningProgress
+from .cache import CacheService, RESOURCE
+
+learning_progress_cache = CacheService.factory(
+    RESOURCE.LEARNING_PROGRESS)
 
 
 class LearningService:
     @staticmethod
     def get_learning_progress(deck_id, user):
-        learning = Term.objects.get_learning_terms(
-            user=user, deck_id=deck_id).count()
-        completed = Term.objects.get_completed_terms(
-            user=user, deck_id=deck_id).count()
-        left = Term.objects.get_unlearned_terms(
-            user=user, deck_id=deck_id).count()
-        learned_today = Term.objects.get_learned_today_terms(
-            user=user, deck_id=deck_id).count()
+        progress = learning_progress_cache.get_combine(deck_id, user.id)
+        if progress:
+            return progress
+        else:
+            learning = Term.objects.get_learning_terms(
+                user=user, deck_id=deck_id).count()
+            completed = Term.objects.get_completed_terms(
+                user=user, deck_id=deck_id).count()
+            left = Term.objects.get_unlearned_terms(
+                user=user, deck_id=deck_id).count()
+            learned_today = Term.objects.get_learned_today_terms(
+                user=user, deck_id=deck_id).count()
 
-        return learning + completed + left, {"learning": learning, "completed": completed, "left": left, "learned_today": learned_today}
+            progress = learning + completed + \
+                left, {"learning": learning, "completed": completed,
+                       "left": left, "learned_today": learned_today}
+            learning_progress_cache.set_combine(deck_id, user.id, progress)
+        return progress
 
     def clear_learning_progress(deck_id, user):
         UserLearningProgress.objects.filter(

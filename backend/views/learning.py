@@ -8,7 +8,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from ..serializers import LearningTermSerializer, CreateLearningProgressSerializer, ReviseTermSerializer, UserLearningProgressSerializer
 from ..models import Term, UserLearningProgress
-from ..services import TermService
+from ..services import TermService, learning_progress_cache
 from ..permissions import EditableDeck, IsOwnerPermission
 
 
@@ -32,7 +32,10 @@ class LearningViewSet(FlexibleViewSet):
         instance = self.get_queryset().filter(
             user=self.request.user, term_id=term_id).first()
         if instance is None:
-            serializer.save()
+            learning_progress = serializer.save()
+            term = Term.objects.get(id=term_id) 
+            learning_progress_cache.delete_combine(
+                term.deck_id, learning_progress.user_id)
         else:
             instance.last_learned_at = timezone.now()
             instance.save()
@@ -51,6 +54,10 @@ class LearningViewSet(FlexibleViewSet):
         instance.score += 2
         instance.last_revised_at = timezone.now()
         instance.save()
+        if instance.score == 5 or instance.score == 6:
+            instance.term.deck_id
+            learning_progress_cache.delete_combine(
+                instance.term.deck_id, request.user.id)
 
         return Response(status=status.HTTP_200_OK)
 
@@ -60,6 +67,10 @@ class LearningViewSet(FlexibleViewSet):
         instance.score -= 3
         instance.last_revised_at = timezone.now()
         instance.save()
+        if instance.score in [2, 3, 4]:
+            instance.term.deck_id
+            learning_progress_cache.delete_combine(
+                instance.term.deck_id, request.user.id)
 
         return Response(status=status.HTTP_200_OK)
 
