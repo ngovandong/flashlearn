@@ -54,10 +54,10 @@ class LearningViewSet(FlexibleViewSet):
         instance.score += 2
         instance.last_revised_at = timezone.now()
         instance.save()
-        if instance.score == 5 or instance.score == 6:
-            instance.term.deck_id
-            learning_progress_cache.delete_combine(
-                instance.term.deck_id, request.user.id)
+        # if instance.score == 5 or instance.score == 6:
+        instance.term.deck_id
+        learning_progress_cache.delete_combine(
+            instance.term.deck_id, request.user.id)
 
         return Response(status=status.HTTP_200_OK)
 
@@ -67,10 +67,10 @@ class LearningViewSet(FlexibleViewSet):
         instance.score -= 3
         instance.last_revised_at = timezone.now()
         instance.save()
-        if instance.score in [2, 3, 4]:
-            instance.term.deck_id
-            learning_progress_cache.delete_combine(
-                instance.term.deck_id, request.user.id)
+        # if instance.score in [2, 3, 4]:
+        instance.term.deck_id
+        learning_progress_cache.delete_combine(
+            instance.term.deck_id, request.user.id)
 
         return Response(status=status.HTTP_200_OK)
 
