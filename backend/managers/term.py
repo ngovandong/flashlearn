@@ -1,5 +1,4 @@
-from django.db.models import Manager, Q, QuerySet, F
-from django.db.models.functions import ExtractDay
+from django.db.models import Manager, Q, QuerySet, F,  ExpressionWrapper, IntegerField
 from django.utils import timezone
 
 
@@ -79,13 +78,14 @@ class TermManager(Manager):
         """
         Returns the terms to revise for the given deck.
         """
-        today = timezone.now().date()
+        now = timezone.now()
         filter = Q(deck_id=deck_id)
         filter &= Q(learning_progress__is_skip=False)
         filter &= Q(learning_progress__user=user)
         revise_terms = self.filter(filter).annotate(
             learning_progress_id=F('learning_progress__id'),
-            delta_day=ExtractDay(today) - ExtractDay(F("learning_progress__last_revised_at__date"))
+            delta_day=ExpressionWrapper((now - F("learning_progress__last_revised_at")),
+                                        output_field=IntegerField()) / (1000000 * 60 * 60 * 24)
         ).annotate(
             rank=F('delta_day') * -10 + F("learning_progress__score")
         ).order_by(

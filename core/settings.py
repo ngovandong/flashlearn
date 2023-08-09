@@ -233,3 +233,16 @@ ELASTICSEARCH_DSL = {
         'hosts': '172.104.56.241:9200'
     },
 }
+
+CACHE_TTL = 60 * 15
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        # Replace with your Redis server address and database number
+        'LOCATION': 'redis://172.104.56.241:6379',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}

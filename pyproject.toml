@@ -24,6 +24,7 @@ django-rq = "^2.8.1"
 elasticsearch = "7.1.0"
 elasticsearch-dsl = "^7.4.1"
 django-elasticsearch-dsl = "^7.3"
+django-redis = "^5.3.0"
 
 
 [tool.poetry.group.dev.dependencies]
