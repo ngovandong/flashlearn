@@ -1,6 +1,24 @@
 from enum import Enum
-from django.core.cache import cache
-# Define an enumeration class
+from django.core.cache import cache as redis_cache
+from django.conf import settings
+
+
+class SKIP_REDIS:
+    @staticmethod
+    def get(key):
+        return None
+
+    @staticmethod
+    def set(key, value, live_time=None):
+        pass
+
+
+cache = None
+
+if settings.SKIP_REDIS:
+    cache = SKIP_REDIS()
+else:
+    cache = redis_cache
 
 
 class RESOURCE(Enum):

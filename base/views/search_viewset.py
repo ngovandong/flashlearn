@@ -6,17 +6,16 @@ class SearchViewSet(viewsets.GenericViewSet):
     document_class = None
 
     @abc.abstractmethod
-    def generate_q_expression(self, query, request):
+    def generate_q_expression(self, query, **kwargs):
         """This method should be overridden
         and return a Q() expression."""
 
-    def get_search_results(self, request, query):
-        q = self.generate_q_expression(query, request)
+    def get_search_results(self, query, **kwargs):
+        q = self.generate_q_expression(query, **kwargs)
         search = self.document_class.search().query(q)
         response = search.execute()
 
-        print(
-            f'Found {response.hits.total.value} hit(s) for query: "{query}"')
+        print(f'Found {response.hits.total.value} hit(s) for query: "{query}"')
 
         page = self.paginate_queryset(response)
         if page is not None:

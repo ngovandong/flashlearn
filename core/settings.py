@@ -230,17 +230,21 @@ RQ_QUEUES = {
 
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': '172.104.56.241:9200'
+        'hosts': os.getenv('ELASTIC_SEARCH_HOST'), 
+        'http_auth': (os.getenv('ELASTIC_SEARCH_USER'), os.getenv('ELASTIC_SEARCH_PASSWORD')),
     },
 }
 
 CACHE_TTL = 60 * 15
 
+SKIP_REDIS = os.getenv("SKIP_REDIS")
+
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
         # Replace with your Redis server address and database number
-        'LOCATION': 'redis://172.104.56.241:6379',
+        'LOCATION': f'redis://{os.getenv("REDIS_HOST")}:6379',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
