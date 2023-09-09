@@ -1,0 +1,14 @@
+from rest_framework import views, status
+from rest_framework.response import Response
+from ..services.crawler import BSCrawler
+
+class GetImagesUrlView(views.APIView):
+    def post(self, request, format=None):
+        query = request.data.get("query")
+        count = request.data.get("count", 4)
+        if not query:
+            return Response({"error": "Missing query parameter"}, status=status.HTTP_400_BAD_REQUEST)
+
+        urls = BSCrawler.get_preview_images(query, count)
+
+        return Response({"query": query, "urls": urls}, status=status.HTTP_200_OK)

@@ -220,7 +220,7 @@ BASE_CLOUDINARY_URL = f"https://res.cloudinary.com/{os.environ.get('CLOUDINARY_C
 
 RQ_QUEUES = {
     'default': {
-        'HOST': '172.104.56.241',
+        'HOST': os.environ.get("DB_HOST"),
         'PORT': 6379,
         'DB': 0,
         'DEFAULT_TIMEOUT': 360,

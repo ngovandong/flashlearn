@@ -20,4 +20,4 @@ COPY . /app
 EXPOSE 8000
 
 # Start the Django development server using Gunicorn
-CMD poetry run gunicorn core.wsgi:application --bind 0.0.0.0:8000 -w 4
+CMD poetry run gunicorn core.wsgi:application --bind 0.0.0.0:8000 -w 2

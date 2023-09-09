@@ -12,6 +12,10 @@ class SKIP_REDIS:
     def set(key, value, live_time=None):
         pass
 
+    @staticmethod
+    def delete(key):
+        pass
+
 
 cache = None
 
