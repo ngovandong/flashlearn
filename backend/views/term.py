@@ -54,12 +54,27 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
                           type=openapi.TYPE_STRING, description="Filter by deck"),
         openapi.Parameter('query', openapi.IN_QUERY, type=openapi.TYPE_STRING,
                           description="Search by term name, desc, deck name")])
-    def list(self, request, *args, **kwargs):
+    @action(detail=False, methods=["GET"])
+    def search(self, request, *args, **kwargs):
         deck_id = request.query_params.get("deck_id", "")
         query = request.query_params.get('query', "")
         results = self.get_search_results(query, deck_id=deck_id)
         return Response(results)
-        # return super().list(request, *args, **kwargs)
+
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('deck_id', openapi.IN_QUERY,
+                          type=openapi.TYPE_STRING, description="Filter by deck")])
+    def list(self, request, *args, **kwargs):
+        deck_id = request.query_params.get("deck_id", "")
+        queryset = self.filter_queryset(self.get_queryset().filter(deck_id=deck_id).order_by('-created_at'))
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
 
     def create(self, request, *args, **kwargs):
         data = request.data

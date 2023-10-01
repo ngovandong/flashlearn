@@ -5,8 +5,8 @@ class TermService extends BaseService {
     super("terms");
   }
 
-  getTermsByDeck(deck_id) {
-    return this.request.get(this.base, { params: { deck_id } });
+  getTermsByDeck(deck_id, page=1) {
+    return this.request.get(this.base, { params: { deck_id, page } });
   }
 
   addTermsToDeck(deck_id, terms) {

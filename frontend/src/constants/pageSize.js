@@ -1,0 +1,1 @@
+export const LEARNING_TERM_PAGE_SIZE = 20
