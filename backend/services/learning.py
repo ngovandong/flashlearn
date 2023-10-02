@@ -74,9 +74,8 @@ class LearningService:
             return progress
         else:
             queryset = Term.objects.filter(
-                Q(learning_progress__user_id=user.id) | Q(
-                    learning_progress__user_id__isnull=True),
-                deck_id=deck_id
+                Q(deck_id=deck_id) &
+                Q(learning_progress__user_id=user.id)
             ).annotate(
                 score=F('learning_progress__score'),
                 last_learned_at=F('learning_progress__last_learned_at'),
@@ -85,24 +84,23 @@ class LearningService:
                 'id', 'name', 'score', 'last_learned_at', 'last_revised_at'
             )
 
+            deck_term = Term.objects.filter(deck_id=deck_id).count()
             total = len(queryset)
             today = timezone.localtime(timezone.now()).date()
 
-            left = 0
+            left = deck_term - total
             completed = 0
             learned_today = 0
 
             for term in queryset:
-                if term['score'] is None:
-                    left += 1
-
                 if term['last_revised_at'] and term['last_revised_at'].date() == today:
                     learned_today += 1
 
                 if term['score'] and term['score'] > 5:
                     completed += 1
-            progress = total, {"learning": total - completed - left, "completed": completed,
-                               "left": left, "learned_today": learned_today}
+
+            progress = deck_term, {"learning": total - completed, "completed": completed,
+                                   "left": left, "learned_today": learned_today}
             learning_progress_cache.set_combine(deck_id, user.id, progress)
             return progress
 
