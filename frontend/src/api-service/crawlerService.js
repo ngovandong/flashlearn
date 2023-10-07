@@ -5,5 +5,5 @@ export const translateEnToVI = (term) => {
   return axios.post(`${crawlerURL}translate/`, { text: term });
 };
 export const getImagesURL = (query) => {
-  return axios.post(`${crawlerURL}images/`, { query });
+  return axios.post(`${crawlerURL}images/`, { query, count: 5 });
 };

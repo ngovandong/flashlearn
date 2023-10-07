@@ -42,7 +42,7 @@ class BSCrawler:
             if src and src.startswith("https://encrypted-tbn0.gstatic.com/images?"):
                 images.append(src)
 
-        return images[:count+1]
+        return images[:count]
 
     @staticmethod
     def url_to_base64(image_url):
