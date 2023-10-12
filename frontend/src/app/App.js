@@ -24,6 +24,7 @@ import Invite from "@pages/invite";
 import LearnPage from "@pages/home/deckDetail/learn";
 import DeckPage from "@pages/home/deckPage";
 import Revise from "@pages/home/deckDetail/revise";
+import PrivacyPage from "@pages/privacy";
 
 function App() {
   const loading = useSelector(selectLoading);
@@ -49,6 +50,7 @@ function App() {
         <Route path="signup" element={<SignUp />} />
         <Route path="denied" element={<PermissionDenied />} />
         <Route path="notfound" element={<NotFound />} />
+        <Route path="privacy" element={<PrivacyPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ToastContainer />

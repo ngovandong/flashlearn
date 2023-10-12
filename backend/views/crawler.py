@@ -5,7 +5,7 @@ from ..services.crawler import BSCrawler
 class GetImagesUrlView(views.APIView):
     def post(self, request, format=None):
         query = request.data.get("query")
-        count = request.data.get("count", 4)
+        count = request.data.get("count", 10)
         if not query:
             return Response({"error": "Missing query parameter"}, status=status.HTTP_400_BAD_REQUEST)
 
