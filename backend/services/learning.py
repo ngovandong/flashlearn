@@ -2,6 +2,7 @@ from django.db.models import Q, F, Count, Case, When, IntegerField
 from django.utils import timezone
 from ..models import Term, UserLearningProgress
 from .cache import CacheService, RESOURCE
+from ..constants.raw_query import LEARNING_PROGRESS_QUERY
 
 
 # class LearningService:
@@ -73,17 +74,9 @@ class LearningService:
         if progress:
             return progress
         else:
-            queryset = Term.objects.filter(
-                Q(deck_id=deck_id) &
-                Q(learning_progress__user_id=user.id)
-            ).annotate(
-                score=F('learning_progress__score'),
-                last_learned_at=F('learning_progress__last_learned_at'),
-                last_revised_at=F('learning_progress__last_revised_at')
-            ).values(
-                'id', 'name', 'score', 'last_learned_at', 'last_revised_at'
-            )
-
+            from ..utils.db_utils import execute_raw_sql
+            queryset = execute_raw_sql(
+                LEARNING_PROGRESS_QUERY, user_id=user.id, deck_id=deck_id)
             deck_term = Term.objects.filter(deck_id=deck_id).count()
             total = len(queryset)
             today = timezone.localtime(timezone.now()).date()
@@ -93,10 +86,10 @@ class LearningService:
             learned_today = 0
 
             for term in queryset:
-                if term['last_revised_at'] and term['last_revised_at'].date() == today:
+                if term[2] and term[3].date() == today:
                     learned_today += 1
 
-                if term['score'] and term['score'] > 5:
+                if term[1] and term[1] > 5:
                     completed += 1
 
             progress = deck_term, {"learning": total - completed, "completed": completed,
