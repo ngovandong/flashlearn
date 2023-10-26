@@ -51,24 +51,6 @@ learning_progress_cache = CacheService.factory(
 
 class LearningService:
     @staticmethod
-    # def get_learning_progress(deck_id, user):
-    #     progress = learning_progress_cache.get_combine(deck_id, user.id)
-    #     if progress:
-    #         return progress
-    #     else:
-    #         learning = Term.objects.get_learning_terms(
-    #             user=user, deck_id=deck_id).count()
-    #         completed = Term.objects.get_completed_terms(
-    #             user=user, deck_id=deck_id).count()
-    #         left = Term.objects.get_unlearned_terms(
-    #             user=user, deck_id=deck_id).count()
-    #         learned_today = Term.objects.get_learned_today_terms(
-    #             user=user, deck_id=deck_id).count()
-    #         progress = learning + completed + \
-    #             left, {"learning": learning, "completed": completed,
-    #                    "left": left, "learned_today": learned_today}
-    #         learning_progress_cache.set_combine(deck_id, user.id, progress)
-    #     return progress
     def get_learning_progress(deck_id, user):
         progress = learning_progress_cache.get_combine(deck_id, user.id)
         if progress:
@@ -86,7 +68,7 @@ class LearningService:
             learned_today = 0
 
             for term in queryset:
-                if term[2] and term[3].date() == today:
+                if term[2].date() == today or term[3].date() == today:
                     learned_today += 1
 
                 if term[1] and term[1] > 5:

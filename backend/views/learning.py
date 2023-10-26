@@ -17,9 +17,8 @@ class LearningViewSet(FlexibleViewSet):
     serializer_class = UserLearningProgressSerializer
     queryset = UserLearningProgress.objects.all()
 
-    # permission_classes = (permissions.IsAuthenticated)
+    permission_classes = (permissions.IsAuthenticated, EditableDeck)
 
-    permission_map = {}
 
     serializer_map = {
         "get_learning_terms": TermSerializer,
