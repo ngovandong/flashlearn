@@ -1,4 +1,5 @@
-from rest_framework import status, permissions
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.conf import settings
@@ -10,15 +11,22 @@ from drf_yasg import openapi
 from ..serializers import TermSerializer, CreateLearningProgressSerializer, ReviseTermSerializer, UserLearningProgressSerializer
 from ..models import Term, UserLearningProgress
 from ..services import TermService, learning_progress_cache
-from ..permissions import EditableDeck, IsOwnerPermission
+from ..permissions import EditableLearningProgress
 
 
 class LearningViewSet(FlexibleViewSet):
     serializer_class = UserLearningProgressSerializer
     queryset = UserLearningProgress.objects.all()
 
-    permission_classes = (permissions.IsAuthenticated, EditableDeck)
+    permission_classes = (IsAuthenticated)
 
+    editable_learning_progress = (IsAuthenticated, EditableLearningProgress)
+
+    permission_map = {
+        "correct": editable_learning_progress,
+        "incorrect": editable_learning_progress,
+        "remember": editable_learning_progress
+    }
 
     serializer_map = {
         "get_learning_terms": TermSerializer,

@@ -27,3 +27,11 @@ class EditableTerm(permissions.BasePermission):
             return True
 
         return obj.can_edit_term(request.user)
+
+
+class EditableLearningProgress(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj: Term):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        return obj.user_id == request.user.id
