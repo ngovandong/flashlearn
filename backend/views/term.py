@@ -17,7 +17,7 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     serializer_class = TermSerializer
     queryset = Term.objects.all()
 
-    pagination_class = None
+    # pagination_class = None
     document_class = TermDocument
 
     permission_classes = (permissions.IsAuthenticated, EditableTerm)

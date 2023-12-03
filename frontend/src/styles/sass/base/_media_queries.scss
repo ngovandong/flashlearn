@@ -36,6 +36,61 @@
             width: 100% !important;
         }
     }
+
+    .create-deck {
+        padding: 0rem 1rem;
+
+        .term-card {
+            .term-content {
+                flex-wrap: wrap;
+                height: 400px !important;
+
+                .term {
+                    width: 100% !important;
+                    padding: .25rem !important;
+                }
+
+                .desc {
+                    width: 100% !important;
+                    padding: .25rem !important;
+                }
+
+                .img {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 100%;
+                    max-height: 140px;
+
+
+
+                    .upload-btn {
+                        border: 0.25rem dashed #d9dde8;
+                        height: 8rem;
+                        width: 10rem;
+
+                    }
+
+                }
+            }
+
+            .term-image {
+                flex-wrap: wrap;
+
+                .google-photos {
+                    width: 100% !important;
+
+                    .google-image {
+                        width: 40%;
+                    }
+                }
+
+                .local-upload {
+                    width: 100% !important;
+                }
+            }
+        }
+    }
 }
 
 
