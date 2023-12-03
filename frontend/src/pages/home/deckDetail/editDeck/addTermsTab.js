@@ -30,7 +30,7 @@ function AddTermsTab({ handleClickBack }) {
   const isUpdate = terms.some((t) => t.id);
   const isSateChanged = isChangeState(oldTerms, terms);
   const [fetchState, setFetchState] = useState({
-    nextPage: 1,
+    cursor: null,
     next: "",
   });
 
@@ -172,10 +172,10 @@ function AddTermsTab({ handleClickBack }) {
           setError("Something wrong!");
         } finally {
           setFetchState({
-            nextPage: 1,
+            cursor: null,
             next: "",
           });
-          if (ischangedState) fetchTerms(1, true);
+          if (ischangedState) fetchTerms(null, true);
           setIsLoading(false);
         }
       } else {
@@ -184,24 +184,24 @@ function AddTermsTab({ handleClickBack }) {
     }
   };
 
-  const extractNextPage = (url) => {
+  const extractcursor = (url) => {
     if (!url) return null;
     const urlObject = new URL(url);
 
-    return urlObject.searchParams.get("page");
+    return urlObject.searchParams.get("cursor");
   };
 
-  const fetchTerms = async (page = 0, refresh = false) => {
+  const fetchTerms = async (cursor = null, refresh = false) => {
     setIsLoading(true);
     try {
-      const res = await termService.getTermsByDeck(
+      const res = await termService.getTermsByDeckCursor(
         deckID,
-        page ? page : fetchState.nextPage
+        cursor | refresh ? cursor : fetchState.cursor
       );
       if (!res.error) {
-        if (res.data.count) {
+        if (res.data.results.length > 0) {
           setFetchState(() => ({
-            nextPage: extractNextPage(res.data.next),
+            cursor: extractcursor(res.data.next),
             next: res.data.next,
           }));
           const fetchedTerms = isUpdate

@@ -14,7 +14,7 @@ class Term(DateTimeUUIDModel):
     objects = TermManager()
 
     class Meta:
-        ordering = ['created_at']
+        ordering = ['-created_at', 'name']
 
     def can_edit_term(self, user):
         return self.deck.owner == user or self.deck.user_roles.filter(user=user, role='E').first() is not None

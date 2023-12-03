@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.pagination import CursorPagination
 from base.views import FlexibleViewSet, SearchViewSet
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -13,14 +14,19 @@ from ..documents import TermDocument
 from elasticsearch_dsl import Q
 
 
+class LatestlCursorPagination(CursorPagination):
+    ordering = '-created_at'
+
+
 class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     serializer_class = TermSerializer
     queryset = Term.objects.all()
 
-    # pagination_class = None
+    pagination_class = LatestlCursorPagination
     document_class = TermDocument
 
-    permission_classes = (permissions.IsAuthenticated, EditableTerm)
+    # permission_classes = (permissions.IsAuthenticated, EditableTerm)
+    permission_classes = ()
     serializer_map = {"add_terms": AddTermsToDeckSerializer,
                       "list": TermNestInDeckSerializer}
 
@@ -67,7 +73,7 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     def list(self, request, *args, **kwargs):
         deck_id = request.query_params.get("deck_id", "")
         queryset = self.filter_queryset(self.get_queryset().filter(
-            deck_id=deck_id).order_by('-created_at'))
+            deck_id=deck_id))
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
