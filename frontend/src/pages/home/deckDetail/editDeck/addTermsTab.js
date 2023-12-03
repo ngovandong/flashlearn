@@ -521,7 +521,7 @@ function AddTermsTab({ handleClickBack }) {
     const isAtBottom =
       window.innerHeight + window.scrollY >= document.body.offsetHeight - 100;
     // Update the state based on whether the user is at the end of the page
-    if (isAtBottom && fetchState.next) {
+    if (!isLoading && isAtBottom && fetchState.next) {
       fetchTerms();
     }
   };
