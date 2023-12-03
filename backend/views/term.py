@@ -25,8 +25,7 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     pagination_class = LatestlCursorPagination
     document_class = TermDocument
 
-    # permission_classes = (permissions.IsAuthenticated, EditableTerm)
-    permission_classes = ()
+    permission_classes = (permissions.IsAuthenticated, EditableTerm)
     serializer_map = {"add_terms": AddTermsToDeckSerializer,
                       "list": TermNestInDeckSerializer}
 
