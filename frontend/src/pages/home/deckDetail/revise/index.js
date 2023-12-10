@@ -133,11 +133,23 @@ function Revise() {
   }, [currentState.showNext]);
 
   useEffect(() => {
+    let timeoutId;
+
     if (currentQuestion) {
-      const stop = speak(currentQuestion.answer);
-      return stop;
+      // Set a timeout to call speakTerm after 1000 milliseconds (1 second)
+      timeoutId = setTimeout(() => {
+        speak(currentQuestion.answer);
+      }, 4000);
     }
+
+    // Cleanup function to clear the timeout if the component unmounts or the dependencies change
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [currentQuestion]);
+
 
   return terms ? (
     <div
