@@ -13,6 +13,8 @@ import Fill from "./fill";
 import { QUESTION_TYPES } from "@constants/questionTypes";
 import { speak } from "@api-services/voiceService";
 
+let timeoutId;
+
 function Revise() {
   const [deckName, setDeckName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -76,11 +78,21 @@ function Revise() {
       handleNextQuestionClick();
     }
   };
+
+  const speakTermWhenAnswer = () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    speak(currentQuestion.answer);
+  };
+
   const handleCorrect = async () => {
+    speakTermWhenAnswer();
     playCorrectSound();
     await learningService.correct(currentQuestion.progressId);
   };
   const handleIncorrect = async () => {
+    speakTermWhenAnswer();
     playIncorrectSound();
     await learningService.incorrect(currentQuestion.progressId);
   };
@@ -133,13 +145,11 @@ function Revise() {
   }, [currentState.showNext]);
 
   useEffect(() => {
-    let timeoutId;
-
     if (currentQuestion) {
-      // Set a timeout to call speakTerm after 1000 milliseconds (1 second)
+      const timeout = currentQuestion.type === QUESTION_TYPES.FILL ? 12000 : 5000;
       timeoutId = setTimeout(() => {
         speak(currentQuestion.answer);
-      }, 4000);
+      }, timeout);
     }
 
     // Cleanup function to clear the timeout if the component unmounts or the dependencies change
@@ -149,7 +159,6 @@ function Revise() {
       }
     };
   }, [currentQuestion]);
-
 
   return terms ? (
     <div
