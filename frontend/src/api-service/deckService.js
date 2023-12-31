@@ -8,6 +8,9 @@ class DeckService extends BaseService {
   getMyDecks = () => {
     return this.request.get(this.action("my_decks"));
   };
+  getPublicDecks = () => {
+    return this.request.get(this.action("public_decks"));
+  };
   getMyOwnDecks = () => {
     return this.request.get(this.action("my_own_decks"));
   };

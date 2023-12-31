@@ -132,6 +132,12 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=["GET"])
+    def public_decks(self, request, *args, **kwargs):
+        queryset = DeckService.get_public_decks(request.user)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     @action(detail=True, methods=["POST"])
     def add_user_to_deck(self, request, *args, **kwargs):
         instance = self.get_object()

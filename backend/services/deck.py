@@ -64,12 +64,31 @@ class DeckService:
             user_id=user.id).values_list("deck_id", flat=True))
         deck_ids += list(Deck.objects.filter(owner_id=user.id).values_list("id", flat=True))
 
-        my_decks = Deck.objects.filter(id__in=deck_ids).select_related('owner').annotate(
+        my_decks = Deck.objects.filter(id__in=deck_ids).select_related(
+            'owner'
         ).annotate(
             number_of_term=Count('terms', distinct=True)
         )
 
         return my_decks
+
+    @staticmethod
+    def get_public_decks(user):
+        deck_ids = list(UserDeckRole.objects.filter(
+            user_id=user.id).values_list("deck_id", flat=True))
+        deck_ids += list(Deck.objects.filter(owner_id=user.id).values_list("id", flat=True))
+
+        decks = Deck.objects.filter(
+            is_public=True
+        ).exclude(
+            id__in=deck_ids
+        ).select_related(
+            'owner'
+        ).annotate(
+            number_of_term=Count('terms', distinct=True)
+        ).order_by('-number_of_term')[:5]
+
+        return decks
 
     # @staticmethod
     # def get_latest_decks(user):
