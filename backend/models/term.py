@@ -6,7 +6,7 @@ from ..managers import TermManager
 
 class Term(DateTimeUUIDModel):
     name = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     image = models.TextField(blank=True, null=True)
     deck = models.ForeignKey(
         Deck, on_delete=models.CASCADE, related_name='terms')

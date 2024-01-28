@@ -110,9 +110,6 @@ function AddTermsTab({ handleClickBack }) {
       if (!t.name) {
         success = false;
         return { ...t, error: "Name is required" };
-      } else if (!t.description) {
-        success = false;
-        return { ...t, error: "Description is required" };
       }
       return { ...t, error: null };
     });

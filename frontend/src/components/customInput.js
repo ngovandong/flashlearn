@@ -6,11 +6,15 @@ export function CustomInput({
   placeholder,
   helpText,
   onEnter,
+  translateTerm,
 }) {
   const inputEl = useRef(null);
   const handleKeyPress = (event) => {
     if (event.key === "Enter" && onEnter) {
       onEnter(inputEl.current.value);
+      if (translateTerm) {
+        translateTerm();
+      }
     }
   };
   return (
@@ -20,7 +24,12 @@ export function CustomInput({
           ref={inputEl}
           placeholder={placeholder}
           onKeyDown={handleKeyPress}
-          onBlur={() => onEnter(inputEl.current.value)}
+          onBlur={() => {
+            if (translateTerm) {
+              translateTerm();
+            }
+            onEnter(inputEl.current.value);
+          }}
         ></input>
       ) : (
         <input
@@ -28,6 +37,11 @@ export function CustomInput({
           onChange={(e) => setValue(e.target.value)}
           placeholder={placeholder}
           onKeyDown={handleKeyPress}
+          onBlur={() => {
+            if (translateTerm) {
+              translateTerm();
+            }
+          }}
         ></input>
       )}
       <span>{helpText}</span>

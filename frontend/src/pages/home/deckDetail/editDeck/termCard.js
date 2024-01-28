@@ -6,7 +6,7 @@ import PhotoIcon from "@mui/icons-material/Photo";
 import UploadButton from "@components/uploadButton";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { useEffect, useState } from "react";
-import { getImagesURL } from "@api-services/crawlerService";
+import { getImagesURL, translateEnToVI } from "@api-services/crawlerService";
 function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +44,20 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
       } finally {
         setIsLoading(false);
       }
+    }
+  };
+
+  const translateTerms = async () => {
+    if (term.name && !term.id) {
+      try {
+        const res = await translateEnToVI(term.name);
+        handleTermChange(index, {
+          ...{
+            ...term,
+            description: res.data,
+          },
+        });
+      } catch (error) {}
     }
   };
 
@@ -100,6 +114,7 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
             }
             placeholder="Enter term"
             helpText="TERM"
+            translateTerm={translateTerms}
           />
         </div>
         <div className="desc">

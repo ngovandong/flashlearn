@@ -5,3 +5,4 @@ from .role import RoleViewSet
 from .term import TermViewSet
 from .learning import LearningViewSet
 from .crawler import GetImagesUrlView
+from .translate import TranslateView

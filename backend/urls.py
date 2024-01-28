@@ -1,6 +1,6 @@
 from django.urls import include, path, re_path
 from rest_framework import routers
-from .views import UserViewSet, FolderViewSet, DeckViewSet, RoleViewSet, TermViewSet, LearningViewSet, GetImagesUrlView
+from .views import UserViewSet, FolderViewSet, DeckViewSet, RoleViewSet, TermViewSet, LearningViewSet, GetImagesUrlView, TranslateView
 from django.conf import settings
 
 router = routers.DefaultRouter()
@@ -17,6 +17,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('images/', GetImagesUrlView.as_view(), name='images'),
+    path('translate/', TranslateView.as_view(), name='translate'),
 ]
 
 if settings.DEBUG:
