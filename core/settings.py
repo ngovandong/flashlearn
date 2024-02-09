@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'corsheaders',
     'drf_yasg',
+    'revproxy',
     'base',
     'backend'
 ]
@@ -230,15 +231,14 @@ RQ_QUEUES = {
 
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': os.getenv('ELASTIC_SEARCH_HOST'), 
-        'http_auth': (os.getenv('ELASTIC_SEARCH_USER'), os.getenv('ELASTIC_SEARCH_PASSWORD')),
+        'hosts': f"{os.getenv('ELASTIC_SEARCH_HOST')}:{os.getenv('ELASTIC_SEARCH_PORT')}", 
+        # 'http_auth': (os.getenv('ELASTIC_SEARCH_USER'), os.getenv('ELASTIC_SEARCH_PASSWORD')),
     },
 }
 
 CACHE_TTL = 60 * 15
 
 SKIP_REDIS = os.getenv("SKIP_REDIS")
-
 
 CACHES = {
     'default': {
