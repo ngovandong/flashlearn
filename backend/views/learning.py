@@ -36,16 +36,18 @@ class LearningViewSet(FlexibleViewSet):
 
     def perform_create(self, serializer):
         term_id = serializer.validated_data.get("term_id")
+        user_id = serializer.validated_data.get("user_id")
         instance = self.get_queryset().filter(
             user=self.request.user, term_id=term_id).first()
+        term = Term.objects.get(id=term_id)
+        deck_id = term.deck_id
         if instance is None:
-            learning_progress = serializer.save()
-            term = Term.objects.get(id=term_id)
-            learning_progress_cache.delete_combine(
-                term.deck_id, learning_progress.user_id)
+            serializer.save()
         else:
             instance.last_learned_at = timezone.now()
             instance.save()
+        learning_progress_cache.delete_combine(
+            deck_id, user_id)
 
     def create(self, request, *args, **kwargs):
         data = request.data

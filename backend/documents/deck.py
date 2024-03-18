@@ -3,7 +3,7 @@ from django_elasticsearch_dsl.registries import registry
 from ..models import Deck
 
 
-# @registry.register_document
+@registry.register_document
 class DeckDocument(Document):
     owner = fields.ObjectField(properties={
         'id': fields.TextField(),

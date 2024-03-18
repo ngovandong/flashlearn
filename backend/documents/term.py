@@ -3,7 +3,7 @@ from django_elasticsearch_dsl.registries import registry
 from ..models import Term
 
 
-# @registry.register_document
+@registry.register_document
 class TermDocument(Document):
     deck = fields.ObjectField(properties={
         'id': fields.TextField(),

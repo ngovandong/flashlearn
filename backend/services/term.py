@@ -5,9 +5,24 @@ import requests
 import base64
 from ..serializers import TermSerializer
 from ..models import Term, Deck
+from .cache import CacheService, RESOURCE
+
+deck_terms_cache = CacheService.factory(
+    RESOURCE.TERM)
 
 
 class TermService:
+    @staticmethod
+    def get_terms_from_deck_id(deck_id: int):
+        # terms = deck_terms_cache.get(deck_id)
+        # if terms:
+        #     return terms
+        # else:
+            terms = Term.objects.filter(
+                deck_id=deck_id)
+            # deck_terms_cache.set(deck_id, terms)
+            return terms
+
     @classmethod
     def convert_form_ata_to_list_term(cls, formdata):
         parsed_data = []
