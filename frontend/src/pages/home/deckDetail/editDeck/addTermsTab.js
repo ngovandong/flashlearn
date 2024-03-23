@@ -230,7 +230,7 @@ function AddTermsTab({ handleClickBack }) {
   const handleScroll = () => {
     // Calculate the distance between the bottom of the viewport and the bottom of the document
     const isAtBottom =
-      window.innerHeight + window.scrollY >= document.body.offsetHeight;
+      window.innerHeight + window.scrollY >= document.body.offsetHeight - 50;
     // Update the state based on whether the user is at the end of the page
     if (!isLoadMore && isAtBottom && fetchState.next) {
       isLoadMore = true;

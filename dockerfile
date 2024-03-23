@@ -17,7 +17,7 @@ RUN poetry config virtualenvs.create false && \
 COPY . /app
 
 # Expose the port that Django runs on
-EXPOSE 8000
+EXPOSE 8005
 
 # Start the Django development server using Gunicorn
-CMD poetry run gunicorn core.wsgi:application --bind 0.0.0.0:8000 -w 2
+CMD poetry run gunicorn core.wsgi:application --bind 0.0.0.0:8005 -w 2

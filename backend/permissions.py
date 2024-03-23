@@ -5,12 +5,12 @@ from .models import Deck, Term
 class IsOwnerPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return obj.owner == request.user or request.user.is_superuser
+        return obj.cache_owner == request.user or request.user.is_superuser
 
 
 class IsOwnerOfRolePermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return obj.deck.owner == request.user
+        return obj.deck.cache_owner == request.user
 
 
 class EditableDeck(permissions.BasePermission):

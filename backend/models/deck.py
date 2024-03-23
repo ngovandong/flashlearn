@@ -23,15 +23,24 @@ class Deck(DateTimeUUIDModel):
     class Meta:
         ordering = ('created_at',)
 
-    def get_user_permission(instance, user):
-        if user == instance.owner or user.is_superuser:
-            return FULL_ROLE_CLASS.OWNER
+    def get_user_permission(self, user):
+        from ..services.cache import cache
+
+        key = f"deck_user_perm_{user.id}_{self.id}"
+        perm = cache.get(key)
+        if perm is not None:
+            return perm
+        if user == self.cache_owner or user.is_superuser:
+            perm = FULL_ROLE_CLASS.OWNER
         else:
-            role = None
-            for r in instance.user_roles.all():
+            for r in self.user_roles.all():
                 if r.user == user:
-                    role = r.role
-            return role
+                    perm = r.role
+                    break
+        if perm is not None:
+            # cache.set(key, perm)
+            pass
+        return perm
 
     def user_can_edit_deck(self, user):
         if user.is_superuser:
@@ -60,3 +69,17 @@ class Deck(DateTimeUUIDModel):
         if not self.background:
             self.set_default_image()
         super().save(*args, **kwargs)
+
+    @property
+    def cache_owner(self):
+        if not hasattr(self, '_cached_owner'):
+            from ..services.cache import cache
+
+            key = f"user_{self.owner_id}"
+            user = cache.get(key)
+            if user is None:
+                user = self.owner
+                cache.set(key, user)
+            self._cached_owner = user
+        return self._cached_owner
+
