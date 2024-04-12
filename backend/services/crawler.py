@@ -5,23 +5,15 @@ import requests
 from bs4 import BeautifulSoup
 
 
-TRANSLATE_URL = "https://translate.google.com/"
-SEARCH_PHOTO_URL = "https://www.google.com/search"
-# CHROME_DRIVER_PATH = "chromedriver/chromedriver"
-TRANSLATED_XPATH_LOCATOR = "//*[@jsname='W297wb']"
-IMAGES_XPATH_LOCATOR_1 = "//*[@jsname='sTFXNd']"
-IMAGES_XPATH_LOCATOR_2 = "//*[@jsname='sTFXNd' and @href]"
-# IMAGE_CONTAINER_CSS_SELECTOR = "div[data-tbnid]"
-# IMAGE_CSS_SELECTOR = "a img"
-IMAGE_CSS_SELECTOR = "div[data-tbnid] a img"
-HIGH_IMAGES_XPATH_LOCATOR = "(//*[@jsname='JuXqh' ])[2]"
+SEARCH_PHOTO_URL = "https://www.bing.com/images/search"
+IMAGE_CSS_SELECTOR = "div.imgpt a.iusc img"
 
 
 class BSCrawler:
     @staticmethod
     def get_preview_images(query, count=5):
         # Format the search query for the Google Images URL
-        params = urlencode({'q': query, "tbm": "isch"})
+        params = urlencode({'q': query})
         url = f'{SEARCH_PHOTO_URL}?{params}'
 
         # Send an HTTP GET request to the Google Images page
@@ -39,7 +31,7 @@ class BSCrawler:
         images = []
         for image in image_elements:
             src = image.attrs.get("data-src", None)
-            if src and src.startswith("https://encrypted-tbn0.gstatic.com/images?"):
+            if src and src.startswith("https://tse3.mm.bing.net/th/id"):
                 images.append(src)
 
         return images[:count]
