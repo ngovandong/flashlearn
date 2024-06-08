@@ -40,4 +40,5 @@ class User(UUIDModel, CustomAbstractUser):
     def save(self, *args, **kwargs):
         if not self.image_url:
             self.set_default_image()
+        
         super().save(*args, **kwargs)

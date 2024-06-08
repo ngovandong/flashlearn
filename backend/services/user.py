@@ -3,6 +3,7 @@ from typing import Tuple
 from django.db import transaction
 
 from ..models import User
+from core.cache import cache
 
 
 class UserService:
@@ -20,3 +21,9 @@ class UserService:
         user = User.objects.get(pk=user_id)
         user.is_validated_email = True
         user.save()
+        cls.clear_cache(user_id)
+
+    @classmethod
+    def clear_cache(cls, user_id):
+        key = f"user_{user_id}"
+        cache.delete(key)                                                                               

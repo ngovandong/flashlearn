@@ -1,28 +1,5 @@
 from enum import Enum
-from django.core.cache import cache as redis_cache
-from django.conf import settings
-
-
-class SKIP_REDIS:
-    @staticmethod
-    def get(key):
-        return None
-
-    @staticmethod
-    def set(key, value, live_time=None):
-        pass
-
-    @staticmethod
-    def delete(key):
-        pass
-
-
-cache = None
-
-if settings.SKIP_REDIS == "1":
-    cache = SKIP_REDIS()
-else:
-    cache = redis_cache
+from core.cache import cache
 
 
 class RESOURCE(Enum):
@@ -88,10 +65,9 @@ class CacheService:
 
 class _LearningProgressCache(CacheService):
     PREFIX = "learning_progress"
-    LIVE_TIME = 60*5
+    LIVE_TIME = 60 * 5
 
 
 class _DeckTermsCache(CacheService):
     PREFIX = "term"
     LIVE_TIME = None
-
