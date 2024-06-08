@@ -14,5 +14,8 @@ class Command(BaseCommand):
                 term.image = url_to_base64(term.image)
                 term.save()
             except Exception as e:
+                term.image = None
+                term.save()
+                print(e)
                 print(f"Term {term.id} {term.name} failed!")
                 continue
