@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
-
+from .proxy import NextChatProxyView
 
 from django.http import HttpResponse
 
@@ -19,6 +19,7 @@ def serve_image(request, path):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('backend.urls'), name='api'),
+    re_path('nextchat/'+r'(?P<path>.*)', NextChatProxyView.as_view()),
     path('images/<str:path>/', serve_image, name='serve_image'),
     path('__debug__/', include('debug_toolbar.urls'))
 ]

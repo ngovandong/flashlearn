@@ -1,8 +1,7 @@
 from urllib.parse import urlencode
-from rest_framework import viewsets, status, permissions, mixins
+from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Q, Count, Prefetch
 from elasticsearch_dsl import Q
 from django.utils import timezone
 from django.conf import settings
@@ -57,8 +56,8 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
             return DeckService.get_retrieve_queryset(self.request.user)
         return super().get_queryset()
 
-    def generate_q_expression(self, query, request):
-        user = request.user
+    def generate_q_expression(self, query, **kwargs):
+        user = kwargs.get('user')
         search_query = Q('bool', should=[])
 
         # Use multi_match query to search the query across multiple fields
@@ -86,7 +85,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     @action(detail=False, methods=["GET"])
     def search(self, request, *args, **kwargs):
         query = request.query_params.get('query')
-        results = self.get_search_results(query=query, request=request)
+        results = self.get_search_results(query, user=request.user)
         return Response(results)
 
     def retrieve(self, request, *args, **kwargs):
@@ -130,6 +129,12 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     @action(detail=False, methods=["GET"])
     def my_decks(self, request, *args, **kwargs):
         queryset = DeckService.get_my_decks(request.user)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["GET"])
+    def public_decks(self, request, *args, **kwargs):
+        queryset = DeckService.get_public_decks(request.user)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 

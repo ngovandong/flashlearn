@@ -32,10 +32,7 @@ class TermManager(Manager):
         Returns the last learned term by the given user for the given deck, or None if there are no learned terms.
         """
         learned_terms = self.get_learned_terms(user, deck_id)
-        try:
-            return learned_terms.order_by('-learning_progress__last_learned_at')[0]
-        except IndexError:
-            return None
+        return learned_terms.order_by('-learning_progress__last_learned_at').first()
 
     def get_learning_terms(self, user, deck_id: int) -> QuerySet:
         """
@@ -93,6 +90,6 @@ class TermManager(Manager):
         return revise_terms
 
     def get_random_terms(self, deck_id: int) -> QuerySet:
-        all_deck_terms = self.get_terms_for_deck(deck_id=deck_id)
+        all_deck_terms = self.get_terms_for_deck(deck_id=deck_id).values("id","name")
         random_terms = all_deck_terms.order_by('?')[:20]
         return random_terms

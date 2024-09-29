@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import { LocalLoadingWrapper } from "@components/loading";
 import { speak } from "@api-services/voiceService";
 import { deckService } from "@api-services/deckService";
+import { LEARNING_TERM_PAGE_SIZE } from "@constants/pageSize";
 
 function LearnPage() {
   const [deck, setDeck] = useState();
@@ -22,7 +23,10 @@ function LearnPage() {
 
   const [currentState, setCurrentState] = useState({
     index: 0,
+    absolute_index: 0,
     isFlipped: false,
+    latest_id: "",
+    currentPage: 0,
   });
   let currentTerm = null;
   let youglish = null;
@@ -44,7 +48,6 @@ function LearnPage() {
   };
 
   const handleTouchEnd = (event) => {
-
     const touchEnd = event.changedTouches[0].clientX;
     const touchStart = touchStartRef.current;
     const distance = touchEnd - touchStart;
@@ -62,26 +65,92 @@ function LearnPage() {
     return speak(currentTerm.name);
   };
   const handleNext = async () => {
-    setCurrentState((pre) => ({ index: pre.index + 1, isFlipped: false }));
+    if (currentState.index + 2 > terms.length) {
+      fetchMore(currentState.currentPage + 1);
+    } else {
+      setCurrentState((pre) => ({
+        ...pre,
+        index: pre.index + 1,
+        absolute_index: pre.absolute_index + 1,
+        isFlipped: false,
+      }));
+    }
   };
   const handleBack = async () => {
-    setCurrentState((pre) => ({ index: pre.index - 1, isFlipped: false }));
+    if (currentState.index === 0 && currentState.currentPage !== 1) {
+      fetchMore(currentState.currentPage - 1, false);
+    } else {
+      setCurrentState((pre) => ({
+        ...pre,
+        index: pre.index - 1,
+        absolute_index: pre.absolute_index - 1,
+        isFlipped: false,
+      }));
+    }
   };
   const handleRestart = async () => {
     setCurrentState((pre) => ({ index: 0, isFlipped: false }));
   };
 
-  const fetchWords = async () => {
+  const fetchMore = async (page, isNext = true) => {
+    setIsLoading(true);
     try {
-      const res = await learningService.getLearningTerms(deckID);
+      const res = await learningService.getLearningTerms(deckID, page);
       if (!res.error) {
-        setCurrentState({
-          index: res.data.last_learned_index,
-          isFlipped: false,
-        });
-        setTerms(res.data.terms);
+        const res_terms = res.data.results;
+
+        if (isNext) {
+          setTerms((pre) => [...pre, ...res_terms]);
+          setCurrentState((pre) => ({
+            ...pre,
+            index: pre.index + 1,
+            isFlipped: false,
+            currentPage: pre.currentPage + 1,
+            absolute_index: pre.absolute_index + 1,
+          }));
+        } else {
+          setTerms((pre) => [...res_terms, ...pre]);
+          setCurrentState((pre) => ({
+            ...pre,
+            index: pre.index + LEARNING_TERM_PAGE_SIZE - 1,
+            isFlipped: false,
+            currentPage: pre.currentPage - 1,
+            absolute_index: pre.absolute_index - 1,
+          }));
+        }
       } else {
         const errorMessage = getFirstError(res.error);
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const fetchWords = async () => {
+    try {
+      const res1 = await learningService.getLatestLearnedTerm(deckID);
+      if (!res1.error) {
+        setCurrentState({
+          index: res1.data.last_learned_index % LEARNING_TERM_PAGE_SIZE,
+          absolute_index: res1.data.last_learned_index,
+          latest_id: res1.data.latest_id,
+          isFlipped: false,
+          currentPage: res1.data.default_page,
+        });
+        const res2 = await learningService.getLearningTerms(
+          deckID,
+          res1.data.default_page
+        );
+        if (!res2.error) {
+          setTerms(res2.data.results);
+        } else {
+          const errorMessage = getFirstError(res2.error);
+          toast.error(errorMessage);
+        }
+      } else {
+        const errorMessage = getFirstError(res1.error);
         toast.error(errorMessage);
       }
     } catch (error) {
@@ -123,11 +192,28 @@ function LearnPage() {
 
   useEffect(() => {
     if (currentTerm != null) {
-      const stop = speakTerm();
       learned();
-      return stop;
     }
   }, [currentTerm]);
+
+  useEffect(() => {
+    let timeoutId;
+
+    if (currentTerm != null && currentState.isFlipped) {
+      // Set a timeout to call speakTerm after 1000 milliseconds (1 second)
+      timeoutId = setTimeout(() => {
+        speakTerm();
+      }, 1500);
+    }
+
+    // Cleanup function to clear the timeout if the component unmounts or the dependencies change
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [currentTerm, currentState.isFlipped, speakTerm]);
+
   useEffect(() => {
     if (deckID) {
       fetchDeck();
@@ -136,12 +222,16 @@ function LearnPage() {
 
   const handleKeyDown = (event) => {
     if (event.key === "ArrowRight") {
-      if (terms && currentState.index + 1 < terms.length) {
+      if (
+        terms &&
+        currentState.absolute_index + 1 < deck.number_of_term &&
+        !isLoading
+      ) {
         handleNext();
       }
     }
     if (event.key === "ArrowLeft") {
-      if (currentState.index > 0) {
+      if (currentState.absolute_index > 0 && !isLoading) {
         handleBack();
       }
     }
@@ -166,7 +256,9 @@ function LearnPage() {
         <div className="left-header"></div>
         <div className="center-header">
           <div>{deck.name}</div>
-          <span>{`${currentState.index + 1}/${terms.length}`}</span>
+          <span>{`${currentState.absolute_index + 1}/${
+            deck.number_of_term
+          }`}</span>
         </div>
         <div className="right-header">
           <div className="close-btn">
@@ -215,14 +307,18 @@ function LearnPage() {
               <CircleButton
                 size={60}
                 onClick={handleBack}
-                disabled={currentState.index === 0}
+                disabled={
+                  currentState.index === 0 && currentState.currentPage === 1
+                }
               >
                 <ArrowBackIcon />
               </CircleButton>
               <CircleButton
                 onClick={handleNext}
                 size={60}
-                disabled={currentState.index + 1 === terms.length}
+                disabled={
+                  currentState.absolute_index + 1 === deck.number_of_term
+                }
               >
                 <ArrowForwardIcon />
               </CircleButton>
@@ -242,9 +338,10 @@ function LearnPage() {
           </div>
         </div>
       </div>
+      <LocalLoadingWrapper open={isLoading} />
     </div>
   ) : (
-    <LocalLoadingWrapper open={isLoading} />
+    <LocalLoadingWrapper />
   );
 }
 

@@ -1,23 +1,48 @@
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from base.views import FlexibleViewSet
+from rest_framework.pagination import CursorPagination
+from base.views import FlexibleViewSet, SearchViewSet
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import cloudinary.uploader
-from ..serializers import TermSerializer, AddTermsToDeckSerializer
+from ..serializers import TermSerializer, AddTermsToDeckSerializer, TermNestInDeckSerializer
 from ..models import Term, Deck
 from ..permissions import EditableTerm
 from ..services import TermService, learning_progress_cache
+from ..documents import TermDocument
+from elasticsearch_dsl import Q
 
 
-class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet):
+class LatestlCursorPagination(CursorPagination):
+    ordering = '-created_at'
+
+
+class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     serializer_class = TermSerializer
     queryset = Term.objects.all()
 
-    pagination_class = None
+    pagination_class = LatestlCursorPagination
+    document_class = TermDocument
+
     permission_classes = (permissions.IsAuthenticated, EditableTerm)
-    serializer_map = {"add_terms": AddTermsToDeckSerializer}
+    serializer_map = {"add_terms": AddTermsToDeckSerializer,
+                      "list": TermNestInDeckSerializer}
+
+    def generate_q_expression(self, query,  **kwargs):
+        deck_id = kwargs.get("deck_id")
+        search_query = Q('bool', should=[])
+        if deck_id:
+            search_query.should.append(
+                Q('match', deck_id=deck_id)
+            )
+        if query.strip():
+            search_query.should.append(
+                Q('multi_match', query=query, fields=[
+                    'name', 'description', 'deck.name'])
+            )
+
+        return search_query
 
     def perform_create(self, serializer):
         term = serializer.save()
@@ -30,12 +55,31 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet):
         instance.delete()
 
     @swagger_auto_schema(manual_parameters=[
-        openapi.Parameter('deck_id', openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Filter by deck")])
+        openapi.Parameter('deck_id', openapi.IN_QUERY,
+                          type=openapi.TYPE_STRING, description="Filter by deck"),
+        openapi.Parameter('query', openapi.IN_QUERY, type=openapi.TYPE_STRING,
+                          description="Search by term name, desc, deck name")])
+    @action(detail=False, methods=["GET"])
+    def search(self, request, *args, **kwargs):
+        deck_id = request.query_params.get("deck_id", "")
+        query = request.query_params.get('query', "")
+        results = self.get_search_results(query, deck_id=deck_id)
+        return Response(results)
+
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter('deck_id', openapi.IN_QUERY,
+                          type=openapi.TYPE_STRING, description="Filter by deck")])
     def list(self, request, *args, **kwargs):
-        deck_id = request.query_params.get("deck_id")
-        if deck_id:
-            self.queryset = self.queryset.filter(deck_id=deck_id)
-        return super().list(request, *args, **kwargs)
+        deck_id = request.query_params.get("deck_id", "")
+        queryset = self.filter_queryset(self.get_queryset().filter(
+            deck_id=deck_id))
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         data = request.data

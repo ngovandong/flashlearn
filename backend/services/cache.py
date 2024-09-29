@@ -1,11 +1,11 @@
 from enum import Enum
-from django.core.cache import cache
-# Define an enumeration class
+from core.cache import cache
 
 
 class RESOURCE(Enum):
     LEARNING_PROGRESS = 1
     DECK = 2
+    TERM = 3
 
 
 class CacheService:
@@ -16,6 +16,8 @@ class CacheService:
     def factory(source):
         if source == RESOURCE.LEARNING_PROGRESS:
             return _LearningProgressCache
+        if source == RESOURCE.TERM:
+            return _DeckTermsCache
 
     @classmethod
     def get_combine_key(cls, first_key, second_key):
@@ -63,4 +65,9 @@ class CacheService:
 
 class _LearningProgressCache(CacheService):
     PREFIX = "learning_progress"
-    LIVE_TIME = 60*5
+    LIVE_TIME = 60 * 5
+
+
+class _DeckTermsCache(CacheService):
+    PREFIX = "term"
+    LIVE_TIME = None

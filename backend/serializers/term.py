@@ -52,10 +52,11 @@ class ProgressTermSerializer(serializers.ModelSerializer):
 class ReviseTermSerializer(serializers.Serializer):
     all_terms = OnlyNameTermSerializer(many=True)
     revise_terms = ProgressTermSerializer(many=True)
+    deck_name = serializers.CharField()
 
     class Meta:
         model = Term
-        fields = ('all_terms', 'revise_terms')
+        fields = ('all_terms', 'revise_terms','deck_name')
 
 
 class LearningTermSerializer(serializers.Serializer):

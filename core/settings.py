@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = eval(os.getenv('DEBUG'))
 
 ALLOWED_HOSTS = ["*"]
 
@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'corsheaders',
     'drf_yasg',
+    'revproxy',
     'base',
     'backend'
 ]
@@ -151,9 +152,10 @@ AUTH_USER_MODEL = 'backend.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'PAGE_SIZE': 20,
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'core.authentication.CustomTokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
     )
@@ -220,7 +222,7 @@ BASE_CLOUDINARY_URL = f"https://res.cloudinary.com/{os.environ.get('CLOUDINARY_C
 
 RQ_QUEUES = {
     'default': {
-        'HOST': '172.104.56.241',
+        'HOST': os.environ.get("DB_HOST"),
         'PORT': 6379,
         'DB': 0,
         'DEFAULT_TIMEOUT': 360,
@@ -230,19 +232,45 @@ RQ_QUEUES = {
 
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': '172.104.56.241:9200'
+        'hosts': f"{os.getenv('ELASTIC_SEARCH_HOST')}:{os.getenv('ELASTIC_SEARCH_PORT')}", 
+        # 'http_auth': (os.getenv('ELASTIC_SEARCH_USER'), os.getenv('ELASTIC_SEARCH_PASSWORD')),
     },
 }
 
 CACHE_TTL = 60 * 15
 
+SKIP_REDIS = os.getenv("SKIP_REDIS")
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
         # Replace with your Redis server address and database number
-        'LOCATION': 'redis://172.104.56.241:6379',
+        'LOCATION': f'redis://{os.getenv("REDIS_HOST")}:{os.getenv("REDIS_PORT")}/0',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
+}
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'django_queries.log',
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+    },
 }

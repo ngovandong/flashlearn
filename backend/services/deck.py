@@ -42,54 +42,53 @@ class DeckService:
 
         my_own_decks = user.my_own_decks.annotate(
             number_of_term=Count('terms', distinct=True)
-        ).annotate(
-            my_permission=Value('O')
-        ).annotate(
-            learned=Count('terms__learning_progress__score', filter=Q(
-                terms__learning_progress__score__gte=5))
         )
 
         return my_own_decks
 
     @staticmethod
     def get_my_others_deck(user):
-        ft = Q(user_roles__user=user)
-        others_deck = Deck.objects.filter(ft).select_related('owner').annotate(
-            my_permission=Case(
-                When(user_roles__user=user, then='user_roles__role'),
-                When(owner=user, then=Value(FULL_ROLE_CLASS.OWNER)),
-                default=Value('null'),
-                output_field=CharField(),
-            )
+        deck_ids = list(UserDeckRole.objects.filter(
+            user_id=user.id).values_list("deck_id", flat=True))
+
+        others_deck = Deck.objects.filter(id__in=deck_ids).select_related('owner').annotate(
         ).annotate(
             number_of_term=Count('terms', distinct=True)
-        ).annotate(
-            learned=Count('terms__learning_progress__score', filter=Q(
-                terms__learning_progress__score__gte=5))
         )
 
         return others_deck
 
     @staticmethod
     def get_my_decks(user):
-        ft = Q(user_roles__user=user)
-        ft |= Q(owner=user)
+        deck_ids = list(UserDeckRole.objects.filter(
+            user_id=user.id).values_list("deck_id", flat=True))
+        deck_ids += list(Deck.objects.filter(owner_id=user.id).values_list("id", flat=True))
 
-        my_decks = Deck.objects.filter(ft).distinct().select_related('owner').annotate(
-            my_permission=Case(
-                When(user_roles__user=user, then='user_roles__role'),
-                When(owner=user, then=Value(FULL_ROLE_CLASS.OWNER)),
-                default=Value('null'),
-                output_field=CharField(),
-            )
+        my_decks = Deck.objects.filter(id__in=deck_ids).select_related(
+            'owner'
         ).annotate(
             number_of_term=Count('terms', distinct=True)
-        ).annotate(
-            learned=Count('terms__learning_progress__score', filter=Q(
-                terms__learning_progress__score__gte=5))
         )
 
         return my_decks
+
+    @staticmethod
+    def get_public_decks(user):
+        deck_ids = list(UserDeckRole.objects.filter(
+            user_id=user.id).values_list("deck_id", flat=True))
+        deck_ids += list(Deck.objects.filter(owner_id=user.id).values_list("id", flat=True))
+
+        decks = Deck.objects.filter(
+            is_public=True
+        ).exclude(
+            id__in=deck_ids
+        ).select_related(
+            'owner'
+        ).annotate(
+            number_of_term=Count('terms', distinct=True)
+        ).order_by('-number_of_term')[:5]
+
+        return decks
 
     # @staticmethod
     # def get_latest_decks(user):

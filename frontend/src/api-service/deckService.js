@@ -8,6 +8,9 @@ class DeckService extends BaseService {
   getMyDecks = () => {
     return this.request.get(this.action("my_decks"));
   };
+  getPublicDecks = () => {
+    return this.request.get(this.action("public_decks"));
+  };
   getMyOwnDecks = () => {
     return this.request.get(this.action("my_own_decks"));
   };
@@ -34,7 +37,7 @@ class DeckService extends BaseService {
     return this.request.put(this.detailAction(id, "clear_learning_process"));
   };
   searchDeck = (searchText) => {
-    return this.request.get(this.action("search"), { params: { query: searchText } });
+    return this.request.get(this.base, { params: { query: searchText } });
   };
   joinDeck = (id) => {
     return this.request.post(this.detailAction(id, "join_deck"));

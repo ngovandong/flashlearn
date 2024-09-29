@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import { selectUser } from "@app/store/authSlice";
 function Home() {
   const [mydecks, setMydecks] = useState();
+  const [publicDecks, setPublicDecks] = useState();
   const [error, setError] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const user = useSelector(selectUser);
@@ -16,7 +17,27 @@ function Home() {
     try {
       const res = await deckService.getLatestDeck();
       if (!res.error) {
-        setMydecks(res.data);
+        const decks = res.data;
+        setMydecks(decks);
+        if (decks.length < 3) {
+          fetchPublicDeck();
+        }
+      } else {
+        const responseError = getFirstError(res.error);
+        setError(responseError);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const fetchPublicDeck = async () => {
+    setIsLoading(true);
+    try {
+      const res = await deckService.getPublicDecks();
+      if (!res.error) {
+        setPublicDecks(res.data);
       } else {
         const responseError = getFirstError(res.error);
         setError(responseError);
@@ -64,13 +85,13 @@ function Home() {
           </div>
         </div>
       </section>
-      <section>
-        <div className="section-header">
-          <h5>Recents</h5>
-        </div>
-        <div className="section-cards">
-          {mydecks &&
-            mydecks.map((d) => (
+      {mydecks && mydecks.length !== 0 && (
+        <section>
+          <div className="section-header">
+            <h5>Recents</h5>
+          </div>
+          <div className="section-cards">
+            {mydecks.map((d) => (
               <DeckCard
                 key={d.id}
                 id={d.id}
@@ -80,8 +101,28 @@ function Home() {
                 background={d.background}
               />
             ))}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
+      {publicDecks && (
+        <section>
+          <div className="section-header">
+            <h5>Public decks</h5>
+          </div>
+          <div className="section-cards">
+            {publicDecks.map((d) => (
+              <DeckCard
+                key={d.id}
+                id={d.id}
+                name={d.name}
+                owner={d.owner}
+                terms={d.number_of_term}
+                background={d.background}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   ) : (
     <></>

@@ -19,14 +19,20 @@ const emptyTerm = {
 const initTerms = [emptyTerm, emptyTerm, emptyTerm, emptyTerm];
 let oldTerms = initTerms;
 
+let isLoadMore = false;
+
 function AddTermsTab({ handleClickBack }) {
   const [terms, setTerms] = useState(initTerms);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
   const [isSuccess, setIsSuccess] = useState(false);
   const { deckID } = useParams();
-  const isUpdate = terms[0].id;
+  const isUpdate = terms.some((t) => t.id);
   const isSateChanged = isChangeState(oldTerms, terms);
+  const [fetchState, setFetchState] = useState({
+    cursor: null,
+    next: "",
+  });
 
   const navigate = useNavigate();
 
@@ -56,7 +62,7 @@ function AddTermsTab({ handleClickBack }) {
           setIsLoading(true);
           const res = await termService.delete(term.id);
           if (res.status === 204) {
-            fetchTerms();
+            setTerms((pre) => pre.filter((t) => t.id !== term.id));
           } else {
             setError("Delete Fail!");
           }
@@ -75,7 +81,7 @@ function AddTermsTab({ handleClickBack }) {
     }
   };
   const handleAddTerm = () => {
-    setTerms((pre) => [...pre, emptyTerm]);
+    setTerms((pre) => [emptyTerm, ...pre]);
   };
 
   function validateSameName(array) {
@@ -104,9 +110,6 @@ function AddTermsTab({ handleClickBack }) {
       if (!t.name) {
         success = false;
         return { ...t, error: "Name is required" };
-      } else if (!t.description) {
-        success = false;
-        return { ...t, error: "Description is required" };
       }
       return { ...t, error: null };
     });
@@ -165,7 +168,11 @@ function AddTermsTab({ handleClickBack }) {
           console.log(error);
           setError("Something wrong!");
         } finally {
-          if (ischangedState) fetchTerms();
+          setFetchState({
+            cursor: null,
+            next: "",
+          });
+          if (ischangedState) fetchTerms(null, true);
           setIsLoading(false);
         }
       } else {
@@ -174,13 +181,29 @@ function AddTermsTab({ handleClickBack }) {
     }
   };
 
-  const fetchTerms = async () => {
+  const extractcursor = (url) => {
+    if (!url) return null;
+    const urlObject = new URL(url);
+
+    return urlObject.searchParams.get("cursor");
+  };
+
+  const fetchTerms = async (cursor = null, refresh = false) => {
     setIsLoading(true);
     try {
-      const res = await termService.getTermsByDeck(deckID);
+      const res = await termService.getTermsByDeckCursor(
+        deckID,
+        cursor | refresh ? cursor : fetchState.cursor
+      );
       if (!res.error) {
-        if (res.data.length) {
-          const fetchedTerms = convertTerms(res.data);
+        if (res.data.results.length > 0) {
+          setFetchState(() => ({
+            cursor: extractcursor(res.data.next),
+            next: res.data.next,
+          }));
+          const fetchedTerms = isUpdate
+            ? [...(refresh ? [] : terms), ...convertTerms(res.data.results)]
+            : convertTerms(res.data.results);
           oldTerms = fetchedTerms;
           setTerms(fetchedTerms);
         }
@@ -194,13 +217,36 @@ function AddTermsTab({ handleClickBack }) {
       setError("Something wrong!");
     } finally {
       setIsLoading(false);
+      isLoadMore = false;
     }
   };
+
   useEffect(() => {
     if (deckID) {
       fetchTerms();
     }
   }, []);
+
+  const handleScroll = () => {
+    // Calculate the distance between the bottom of the viewport and the bottom of the document
+    const isAtBottom =
+      window.innerHeight + window.scrollY >= document.body.offsetHeight - 50;
+    // Update the state based on whether the user is at the end of the page
+    if (!isLoadMore && isAtBottom && fetchState.next) {
+      isLoadMore = true;
+      fetchTerms();
+    }
+  };
+
+  useEffect(() => {
+    // Attach the scroll event listener
+    window.addEventListener("scroll", handleScroll);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [fetchState]);
 
   return (
     <>
@@ -260,15 +306,6 @@ function AddTermsTab({ handleClickBack }) {
         </div>
       </div>
       <div className="add-terms-tab">
-        {terms.map((t, i) => (
-          <TermCard
-            key={i}
-            index={i}
-            term={t}
-            handleTermChange={handleTermChange}
-            handleDeleteTerm={handleDeleteTerm}
-          />
-        ))}
         <div className="add-more-container">
           <Button
             variant="contained"
@@ -280,6 +317,15 @@ function AddTermsTab({ handleClickBack }) {
             <span className="button-text">Add Term</span>
           </Button>
         </div>
+        {terms.map((t, i) => (
+          <TermCard
+            key={i}
+            index={i}
+            term={t}
+            handleTermChange={handleTermChange}
+            handleDeleteTerm={handleDeleteTerm}
+          />
+        ))}
       </div>
     </>
   );

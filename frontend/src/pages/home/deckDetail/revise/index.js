@@ -7,15 +7,16 @@ import { getFirstError } from "@utils/errorHandler";
 import { toast } from "react-toastify";
 import Confetti from "react-confetti";
 import { LocalLoadingWrapper } from "@components/loading";
-import { deckService } from "@api-services/deckService";
 import Quiz from "./quiz";
 import { generateQuestions } from "./generateQuestion";
 import Fill from "./fill";
 import { QUESTION_TYPES } from "@constants/questionTypes";
 import { speak } from "@api-services/voiceService";
 
+let timeoutId;
+
 function Revise() {
-  const [deck, setDeck] = useState();
+  const [deckName, setDeckName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [terms, setTerms] = useState();
   const touchStartX = useRef(0);
@@ -77,11 +78,21 @@ function Revise() {
       handleNextQuestionClick();
     }
   };
+
+  const speakTermWhenAnswer = () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    speak(currentQuestion.answer);
+  };
+
   const handleCorrect = async () => {
+    speakTermWhenAnswer();
     playCorrectSound();
     await learningService.correct(currentQuestion.progressId);
   };
   const handleIncorrect = async () => {
+    speakTermWhenAnswer();
     playIncorrectSound();
     await learningService.incorrect(currentQuestion.progressId);
   };
@@ -94,11 +105,12 @@ function Revise() {
     try {
       const res = await learningService.getReviseTerms(deckID);
       if (!res.error) {
-        const { revise_terms, all_terms } = res.data;
+        const { revise_terms, all_terms, deck_name } = res.data;
         if (revise_terms.length === 0) {
           toast.info("Has nothing to revise");
           navigate(`/deck/${deckID}`);
         }
+        setDeckName(deck_name);
         const questions = generateQuestions(revise_terms, all_terms);
         setTerms(questions);
       } else {
@@ -111,38 +123,10 @@ function Revise() {
       setIsLoading(false);
     }
   };
-  const fetchDeck = async () => {
-    try {
-      setIsLoading(true);
-      const res = await deckService.retrieve(deckID);
-      if (!res.error) {
-        setDeck(res.data);
-      } else {
-        const errorMessage = getFirstError(res.error);
-        if (
-          errorMessage === "You do not have permission to perform this action."
-        ) {
-          navigate("/denied");
-        } else {
-          toast.error(errorMessage);
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   useEffect(() => {
     fetchWords();
   }, []);
-
-  useEffect(() => {
-    if (deckID) {
-      fetchDeck();
-    }
-  }, [deckID]);
 
   const handleKeyDown = (event) => {
     if (event.key === "ArrowRight" || event.key === "Enter") {
@@ -162,12 +146,21 @@ function Revise() {
 
   useEffect(() => {
     if (currentQuestion) {
-      const stop = speak(currentQuestion.answer);
-      return stop;
+      const timeout = currentQuestion.type === QUESTION_TYPES.FILL ? 12000 : 5000;
+      timeoutId = setTimeout(() => {
+        speak(currentQuestion.answer);
+      }, timeout);
     }
+
+    // Cleanup function to clear the timeout if the component unmounts or the dependencies change
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [currentQuestion]);
 
-  return deck && terms ? (
+  return terms ? (
     <div
       className="learn-wrapper"
       onTouchStart={handleTouchStart}
@@ -184,7 +177,7 @@ function Revise() {
       <div className="learn-header">
         <div className="left-header"></div>
         <div className="center-header">
-          <div>{deck.name}</div>
+          <div>{deckName}</div>
           <span>{`${currentState.index + 1}/${terms.length}`}</span>
         </div>
         <div className="right-header">

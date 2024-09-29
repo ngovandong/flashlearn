@@ -4,8 +4,13 @@ class LearningService extends BaseService {
   constructor() {
     super("learnings");
   }
-  getLearningTerms = (deck_id) => {
+  getLearningTerms = (deck_id, page) => {
     return this.request.get(this.action("get_learning_terms"), {
+      params: { deck_id, page },
+    });
+  };
+  getLatestLearnedTerm = (deck_id) => {
+    return this.request.get(this.action("get_latest_learned_term"), {
       params: { deck_id },
     });
   };
@@ -22,6 +27,11 @@ class LearningService extends BaseService {
   };
   remember = (id) => {
     return this.request.put(this.detailAction(id, "remember"));
+  };
+  changePriority = (id, point) => {
+    return this.request.put(this.detailAction(id, "priority"), {
+      adjust_point: point,
+    });
   };
 }
 
