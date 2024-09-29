@@ -91,6 +91,17 @@ class LearningViewSet(FlexibleViewSet):
 
         return Response(status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=["PUT"])
+    def priority(self, request, *args, **kwargs):
+        data = request.data
+        adjust_point = int(data.get("adjust_point", 0))
+        if adjust_point:
+            instance = self.get_object()
+            instance.score += adjust_point
+            instance.save()
+
+        return Response(status=status.HTTP_200_OK)
+
     @swagger_auto_schema(manual_parameters=[
         openapi.Parameter('deck_id', openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Filter by deck")])
     @action(detail=False, methods=["GET"], )
