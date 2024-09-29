@@ -8,7 +8,7 @@ class SKIP_REDIS:
         return None
 
     @staticmethod
-    def set(key, value, live_time=None):
+    def set(key, value, timeout=None):
         pass
 
     @staticmethod
