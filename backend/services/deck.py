@@ -35,7 +35,7 @@ class DeckService:
         else:
             # Return the original queryset if no search query is specified
             filtered_queryset = queryset
-        return filtered_queryset
+        return filtered_queryset.distinct()
 
     @staticmethod
     def get_my_own_decks(user):
