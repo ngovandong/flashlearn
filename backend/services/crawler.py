@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 SEARCH_PHOTO_URL_BING = "https://www.bing.com/images/search"
 IMAGE_CSS_SELECTOR_BING = "div.imgpt a.iusc img"
 SEARCH_PHOTO_URL_GOOGLE = "https://www.google.com.vn/search"
-IMAGE_CSS_SELECTOR_GOOGLE = "[data-lpage] h3 img[id*='dimg_']"
+IMAGE_CSS_SELECTOR_GOOGLE = "tr img"
 
 
 class ImageSearchStrategy(ABC):
@@ -54,27 +54,15 @@ class GoogleImageSearchStrategy(ImageSearchStrategy):
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, "html.parser")
-        script_tags = soup.find_all("script")
+
+        image_elements = soup.select(IMAGE_CSS_SELECTOR_GOOGLE)
+
         image_urls = []
         url_pattern = r"https://encrypted-tbn0.gstatic.com/images\?q[\w\d\-\u0026=]+"
-
-        for script in script_tags:
-            if script.string and "google.ldi" in script.string:
-                try:
-                    json_data = re.search(
-                        r"google\.ldi\s*=\s*({.*?});", script.string
-                    ).group(1)
-                    json_data = json_data.replace("\\u003d", "=").replace(
-                        "\\u0026", "&"
-                    )
-                    json_data = json.loads(json_data)
-
-                    for key, value in json_data.items():
-                        if re.match(url_pattern, value):
-                            image_urls.append(value)
-
-                except (json.JSONDecodeError, AttributeError):
-                    continue
+        for img in image_elements:
+            src = str(img.attrs.get("src", ""))
+            if re.match(url_pattern, src):
+                image_urls.append(src)
 
         return image_urls[:count]
 
