@@ -34,7 +34,14 @@ export function speak(text, rate = 1)
 
         // Handle completion
         utterance.onend = () => resolve();
-        utterance.onerror = (error) => reject(error);
+        utterance.onerror = (event) =>
+        {
+            if (event.error === 'canceled' || event.error === 'interrupted') {
+                resolve();
+            } else {
+                reject(event);
+            }
+        };
 
         // Start speaking
         window.speechSynthesis.speak(utterance);
