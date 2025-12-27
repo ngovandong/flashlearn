@@ -51,177 +51,488 @@
 
     .learn-body {
         margin-top: 128px;
-        height: calc(100vh - 64px);
+        height: 100vh;
         width: 100%;
-
+        overflow-y: auto;
 
         .learn-container {
-            min-height: calc(100vh - 64px);
-            height: 100%;
-            padding: 2rem;
-            max-width: 64rem;
-            margin: auto;
-            display: flex;
-            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem; // Consistent padding all around
 
-            $card-color-back: #333;
-            $card-color-front: #fff;
-            $card-text-color-back: #fff;
-            $card-text-color-front: #333;
-
-            .next-button {
-                width: 20rem;
-                background-color: $main-purple;
-                color: #fff;
-                padding: 10px 20px;
-                border-radius: 5px;
-                border: none;
-                cursor: pointer;
-                font-size: 16px;
-                font-weight: bold;
-                transition: all 0.3s ease;
-                margin-top: 2rem;
-                margin: auto;
-
-                &:hover {
-                    background-color: darken($main-purple, 10%);
-                }
+            &.learn-page-grid {
+                display: grid;
+                grid-template-columns: 1.5fr 1fr;
+                gap: 2rem;
+                align-items: start;
             }
 
-
-            .flip-card {
-                perspective: 5000px;
-                cursor: pointer;
-                position: relative;
-                height: 90%;
-                display: flex;
-                background-color: white;
-                border-radius: 0.5rem;
-                box-shadow: 0 0.25rem 1rem 0 #2e385614;
+            // --- Left Column ---
+            .learn-left-col {
                 display: flex;
                 flex-direction: column;
-                margin-bottom: 1rem;
-            }
+                gap: 2rem;
 
+                .progress-bar-container {
+                    width: 100%;
+                    height: 6px;
+                    background-color: #e0e0e0;
+                    border-radius: 3px;
+                    margin-bottom: -1rem; // Pull closer to card
+                    overflow: hidden;
 
-            .flip-card-inner {
-                position: relative;
-                width: 100%;
-                height: 100%;
-                transition: transform 1s;
-                transform-style: preserve-3d;
-            }
-
-            .flip-card.flipped .flip-card-inner {
-                transform: rotateY(180deg);
-            }
-
-            .flip-card-front,
-            .flip-card-back {
-                position: absolute;
-                width: 100%;
-                height: 100%;
-                backface-visibility: hidden;
-                border-radius: 0.5rem;
-            }
-
-            .flip-card-front {
-                background-color: $card-color-front;
-                color: $card-text-color-front;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-
-                .meaning-text {
-                    padding-left: 4rem;
-                    display: flex;
-                    justify-content: center;
-
-                    h1 {
-                        font-size: 1.65rem;
+                    .progress-bar-fill {
+                        height: 100%;
+                        background-color: #333; // Dark progress bar as per reference
+                        transition: width 0.3s ease;
                     }
                 }
 
-                .half-width {
-                    width: 50%;
-                }
+                .flip-card {
+                    perspective: 1000px;
+                    width: 100%;
+                    height: 480px; // Taller card
+                    cursor: pointer;
+                    background-color: transparent;
 
-                .meaning-img {
-                    width: 50%;
-                    padding: 2rem;
+                    .flip-card-inner {
+                        position: relative;
+                        width: 100%;
+                        height: 100%;
+                        transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+                        transform-style: preserve-3d;
+                        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); // Deeper shadow
+                        border-radius: 1.5rem;
+                        background-color: white;
+                    }
 
-                    img {
-                        max-width: 100%;
-                        height: auto;
-                        max-height: 100%;
+                    // Flip rotation
+                    &.flipped .flip-card-inner {
+                        transform: rotateY(180deg);
+                    }
+
+                    .flip-card-front,
+                    .flip-card-back {
+                        position: absolute;
+                        width: 100%;
+                        height: 100%;
+                        -webkit-backface-visibility: hidden;
+                        backface-visibility: hidden;
+                        border-radius: 1.5rem;
+                        background-color: white;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 3rem;
+                        text-align: center;
+                        min-height: 20rem;
+
+                        .star-btn {
+                            position: absolute;
+                            top: 1rem;
+                            right: 1rem;
+                            z-index: 10;
+                        }
+
+                        // Wrapper for Front Content
+                        // Wrapper for Front Content
+                        .front-content {
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            width: 100%;
+                            height: 100%;
+                            gap: 1.5rem; // Add gap between text and image
+
+                            &.has-image {
+                                .meaning-img {
+                                    display: flex;
+                                    justify-content: center;
+
+                                    img {
+                                        max-height: 200px;
+                                        border-radius: 0.8rem;
+                                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                                        object-fit: contain;
+                                    }
+                                }
+                            }
+                        }
+
+                        h1 {
+                            font-size: 3rem;
+                            font-weight: 700;
+                            color: #2e3856;
+                            margin-bottom: 0.5rem;
+                            letter-spacing: -0.5px;
+                        }
+
+                        p {
+                            color: #939bb4;
+                            font-size: 0.95rem;
+                            margin-top: 1.5rem;
+                            font-weight: 500;
+                        }
+
+                        // General image styling (Back card uses this too if not wrapped)
+                        .meaning-img {
+                            max-width: 100%;
+                            height: auto;
+                            // margin-top: 1.5rem; 
+
+                            img {
+                                max-height: 220px;
+                                border-radius: 0.8rem;
+                            }
+                        }
+                    }
+
+                    .flip-card-back {
+                        transform: rotateY(180deg);
+                        color: #2e3856;
+
+                        h1 {
+                            font-size: 1.8rem;
+                            line-height: 1.5;
+                            font-weight: 500;
+                        }
                     }
                 }
-            }
 
-            .flip-card-back {
-                background-color: $card-color-back;
-                color: $card-text-color-back;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transform: rotateY(180deg);
-
-                h1 {
-                    animation: fade-in 1s;
-                }
-            }
-
-
-
-            .learn-navigate {
-                height: 10%;
-                display: flex;
-
-                .navigate-btns {
-                    width: 30%;
+                // Learn Navigation Bar
+                .learn-navigate {
                     display: flex;
                     align-items: center;
-                    justify-content: space-around;
+                    justify-content: space-between;
+                    background: white;
+                    padding: 0.5rem 1rem;
+                    border-radius: 4rem; // Pill shape
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+
+                    .site-btn {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        min-width: 15rem; // ensure spacing
+
+                        // Icons styling
+                        button {
+                            color: #666;
+
+                            &:hover {
+                                color: #333;
+                                background-color: #f0f0f0;
+                            }
+                        }
+
+                        // Links styling
+                        a {
+                            text-decoration: none;
+                            color: #1cb0f6; // Bright blue
+                            font-weight: 600;
+                            font-size: 0.9rem;
+                            margin: 0 0.5rem;
+
+                            &:hover {
+                                text-decoration: underline;
+                            }
+                        }
+
+                        // Right align the right controls
+                        &:last-child {
+                            justify-content: flex-end;
+                        }
+                    }
+
+                    .navigate-btns {
+                        display: flex;
+                        gap: 2rem;
+
+                        // Fix alignment of arrows
+                        &>div {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        }
+                    }
                 }
 
-                .site-btn {
-                    width: 35%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    column-gap: 1rem;
+                .definition-card {
+                    background: white;
+                    padding: 2.5rem;
+                    border-radius: 1.5rem;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 
-                    a {
-                        display: inline;
-                        padding: 5px;
-                        margin: 5px;
-                        color: $blue;
+                    h3 {
+                        margin: 0 0 1.5rem 0;
+                        font-size: 1.2rem;
+                        color: #2e3856;
+                        font-weight: 700;
+                    }
+
+                    .definition-content {
+                        p {
+                            font-size: 1.2rem;
+                            line-height: 1.7;
+                            color: #444;
+                            margin-bottom: 2rem;
+                        }
+
+                        .definition-meta {
+                            border-top: 1px solid #efefef;
+                            padding-top: 1.5rem;
+
+                            p {
+                                font-size: 1rem;
+                                color: #666;
+                                margin-bottom: 0.5rem;
+                                font-weight: 500;
+                            }
+                        }
+                    }
+
+                    .site-btn a {
                         text-decoration: none;
-                        font-family: Arial, sans-serif;
-                        font-size: 14px;
-                    }
+                        color: #3ccfcf;
+                        font-weight: 600;
+                        font-size: 0.9rem;
 
-                    a:hover {
-                        text-decoration: underline;
+                        &:hover {
+                            text-decoration: underline;
+                        }
                     }
                 }
             }
-        }
 
-        // Responsive
-        @media (max-width: 725px) {
-            .question {
-                margin-left: 0 !important;
-            }
 
-            .util-bar {
+            // --- Right Column ---
+            .learn-right-col {
+                display: flex;
                 flex-direction: column;
+                gap: 1.5rem;
+
+                .info-card {
+                    background: white;
+                    padding: 1.5rem;
+                    border-radius: 1rem;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+
+                    h3 {
+                        margin: 0 0 1rem 0;
+                        font-size: 1.1rem;
+                        color: #2e3856;
+                        font-weight: 600;
+                    }
+
+                    .sentence-box {
+                        background-color: #f7f7f9;
+                        padding: 1.2rem;
+                        border-radius: 0.8rem;
+                        margin-bottom: 1rem;
+                        border-left: 4px solid #3ccfcf;
+
+                        p {
+                            font-style: italic;
+                            color: #4a5568;
+                            line-height: 1.6;
+                            font-size: 1.05rem;
+                        }
+                    }
+
+                    .audio-actions {
+                        .audio-btn {
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                            background: none;
+                            border: none;
+                            color: #666;
+                            font-size: 0.95rem;
+                            cursor: pointer;
+                            padding: 0.5rem;
+                            border-radius: 0.5rem;
+                            transition: background-color 0.2s;
+
+                            &:hover {
+                                background-color: #f7f7f9;
+                                color: #333;
+                            }
+
+                            svg {
+                                font-size: 1.2rem;
+                            }
+                        }
+                    }
+
+                    .synonyms-list {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 0.8rem;
+
+                        .synonym-chip {
+                            background-color: #f0f0f0;
+                            padding: 0.5rem 1rem;
+                            border-radius: 2rem;
+                            font-size: 0.9rem;
+                            color: #4a5568;
+                            font-weight: 500;
+
+                            &:hover {
+                                background-color: #e2e8f0;
+                            }
+                        }
+                    }
+
+                    .stat-row {
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 0.8rem 0;
+                        border-bottom: 1px solid #f0f0f0;
+                        font-size: 0.95rem;
+                        color: #718096;
+
+                        &:last-child {
+                            border-bottom: none;
+                        }
+
+                        .stat-value {
+                            font-weight: 700;
+                            color: #2d3748;
+                        }
+                    }
+                }
             }
 
-            .learn-container {
-                padding: 0;
+            // --- Responsive ---
+            @media (max-width: 960px) {
+                &.learn-page-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                gap: 1.5rem;
+                padding-bottom: 6rem;
+
+                .learn-left-col {
+                    .flip-card {
+                        height: 400px;
+
+                        .flip-card-front h1 {
+                            font-size: 2.5rem;
+                        }
+                    }
+
+                    .learn-navigate .navigate-btns {
+                        flex-wrap: wrap;
+                    }
+                }
+            }
+
+            @media (max-width: 600px) {
+                padding: 1rem;
+
+                .learn-navigate {
+                    margin-top: 2rem;
+                }
+
+                &.learn-page-grid {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .learn-left-col {
+                    .flip-card {
+                        height: 50vh; // Reduced height for better mobile fit
+                        min-height: 280px;
+
+                        .flip-card-front,
+                        .flip-card-back {
+                            padding: 1rem; // Reduced padding
+                            overflow: hidden; // Prevent overflow
+
+                            // Flex layout for front content to fill height properly
+                            .front-content {
+                                flex: 1;
+                                display: flex;
+                                flex-direction: column;
+                                min-height: 0; // Crucial for nested flex scrolling/sizing
+                                width: 100%;
+                                gap: 0.5rem;
+                            }
+
+                            h1 {
+                                font-size: 1.5rem; // Smaller font
+                                word-break: break-word; // Handle long words
+                                flex-shrink: 0; // Don't shrink text
+                            }
+
+                            .meaning-img {
+                                flex: 1; // Take remaining space
+                                min-height: 0; // Allow shrinking
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                width: 100%;
+
+                                img {
+                                    max-height: 100%; // Fill container height
+                                    max-width: 100%;
+                                    height: auto;
+                                    width: auto;
+                                    object-fit: contain;
+                                }
+                            }
+                        }
+                    }
+
+                    .learn-navigate {
+                        flex-direction: column;
+                        gap: 1rem;
+                        height: auto;
+                        padding: 1rem;
+                        border-radius: 2rem;
+
+                        .site-btn {
+                            min-width: auto;
+                            width: 100%;
+                            justify-content: center;
+
+                            &:last-child {
+                                justify-content: center;
+                            }
+                        }
+                    }
+                }
+
+                // Stack the right column content on mobile instead of hiding it
+                .learn-right-col {
+                    display: flex;
+                    width: 100%;
+                    margin-top: 1rem;
+                }
             }
         }
+    }
+}
+
+// Next Question Button (for Revise page)
+.next-button {
+    background-color: #4255ff;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 20px auto;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+    width: 20rem;
+    display: block;
+
+    &:hover {
+        background-color: #0f27ff;
     }
 }
 

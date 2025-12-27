@@ -1,9 +1,14 @@
 import { IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 import CircleButton from "@components/circleButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import CheckIcon from "@mui/icons-material/Check";
+import LoopIcon from "@mui/icons-material/Loop";
+
 import { useEffect, useRef, useState } from "react";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { learningService } from "@api-services/learningService";
@@ -15,7 +20,8 @@ import { speak } from "@api-services/voiceService";
 import { deckService } from "@api-services/deckService";
 import { LEARNING_TERM_PAGE_SIZE } from "@constants/pageSize";
 
-function LearnPage() {
+function LearnPage()
+{
   const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [terms, setTerms] = useState();
@@ -31,6 +37,23 @@ function LearnPage() {
   let currentTerm = null;
   let youglish = null;
   let google = null;
+  const MOCK_DATA = {
+    sentence:
+      '"The keynote speaker was incredibly eloquent, captivating the entire audience with her powerful words and clear delivery."',
+    synonyms: [
+      "Articulate",
+      "Fluent",
+      "Expressive",
+      "Persuasive",
+      "Silver-tongued",
+      "Well-spoken",
+    ],
+    partOfSpeech: "Adjective",
+    pronunciation: "/ˈeləkwənt/",
+    definition:
+      "Having or showing the ability to use language clearly and effectively; expressing oneself readily, clearly, and effectively.",
+  };
+
   if (terms && terms.length > 0) {
     currentTerm = terms[currentState.index];
     const encodedPhrase = encodeURIComponent(currentTerm.name);
@@ -43,11 +66,13 @@ function LearnPage() {
   const navigate = useNavigate();
   const { deckID } = useParams();
 
-  const handleTouchStart = (event) => {
+  const handleTouchStart = (event) =>
+  {
     touchStartRef.current = event.touches[0].clientX;
   };
 
-  const handleTouchEnd = (event) => {
+  const handleTouchEnd = (event) =>
+  {
     const touchEnd = event.changedTouches[0].clientX;
     const touchStart = touchStartRef.current;
     const distance = touchEnd - touchStart;
@@ -58,13 +83,24 @@ function LearnPage() {
     }
   };
 
-  function handleClick() {
+  function handleClick()
+  {
     setCurrentState((pre) => ({ ...pre, isFlipped: !pre.isFlipped }));
   }
-  const speakTerm = () => {
+
+  const [isStarred, setIsStarred] = useState(false);
+  const handleStarClick = (e) =>
+  {
+    e.stopPropagation(); // Prevent card flip
+    setIsStarred((prev) => !prev);
+  };
+
+  const speakTerm = () =>
+  {
     return speak(currentTerm.name);
   };
-  const handleNext = async () => {
+  const handleNext = async () =>
+  {
     if (currentState.index + 2 > terms.length) {
       fetchMore(currentState.currentPage + 1);
     } else {
@@ -76,7 +112,8 @@ function LearnPage() {
       }));
     }
   };
-  const handleBack = async () => {
+  const handleBack = async () =>
+  {
     if (currentState.index === 0 && currentState.currentPage !== 1) {
       fetchMore(currentState.currentPage - 1, false);
     } else {
@@ -88,11 +125,13 @@ function LearnPage() {
       }));
     }
   };
-  const handleRestart = async () => {
+  const handleRestart = async () =>
+  {
     setCurrentState((pre) => ({ index: 0, isFlipped: false }));
   };
 
-  const fetchMore = async (page, isNext = true) => {
+  const fetchMore = async (page, isNext = true) =>
+  {
     setIsLoading(true);
     try {
       const res = await learningService.getLearningTerms(deckID, page);
@@ -128,7 +167,8 @@ function LearnPage() {
       setIsLoading(false);
     }
   };
-  const fetchWords = async () => {
+  const fetchWords = async () =>
+  {
     try {
       const res1 = await learningService.getLatestLearnedTerm(deckID);
       if (!res1.error) {
@@ -159,7 +199,8 @@ function LearnPage() {
       setIsLoading(false);
     }
   };
-  const fetchDeck = async () => {
+  const fetchDeck = async () =>
+  {
     try {
       setIsLoading(true);
       const res = await deckService.retrieve(deckID);
@@ -182,45 +223,53 @@ function LearnPage() {
     }
   };
 
-  const learned = async () => {
+  const learned = async () =>
+  {
     learningService.create({ term_id: currentTerm.id });
   };
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     fetchWords();
   }, []);
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     if (currentTerm != null) {
       learned();
     }
   }, [currentTerm]);
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     let timeoutId;
 
     if (currentTerm != null && currentState.isFlipped) {
       // Set a timeout to call speakTerm after 1000 milliseconds (1 second)
-      timeoutId = setTimeout(() => {
+      timeoutId = setTimeout(() =>
+      {
         speakTerm();
       }, 1500);
     }
 
     // Cleanup function to clear the timeout if the component unmounts or the dependencies change
-    return () => {
+    return () =>
+    {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
     };
   }, [currentTerm, currentState.isFlipped, speakTerm]);
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     if (deckID) {
       fetchDeck();
     }
   }, [deckID]);
 
-  const handleKeyDown = (event) => {
+  const handleKeyDown = (event) =>
+  {
     if (event.key === "ArrowRight") {
       if (
         terms &&
@@ -237,11 +286,13 @@ function LearnPage() {
     }
   };
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     window.addEventListener("keydown", handleKeyDown);
 
     // Clean up the event listener on component unmount
-    return () => {
+    return () =>
+    {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [currentState.index]);
@@ -256,9 +307,9 @@ function LearnPage() {
         <div className="left-header"></div>
         <div className="center-header">
           <div>{deck.name}</div>
-          <span>{`${currentState.absolute_index + 1}/${
+          {/* <span style={{display:'none'}}>{`${currentState.absolute_index + 1}/${
             deck.number_of_term
-          }`}</span>
+          }`}</span> */}
         </div>
         <div className="right-header">
           <div className="close-btn">
@@ -269,71 +320,160 @@ function LearnPage() {
         </div>
       </div>
       <div className="learn-body">
-        <div className="learn-container">
-          <div
-            className={`flip-card${currentState.isFlipped ? " flipped" : ""}`}
-            onClick={handleClick}
-          >
-            <div className="flip-card-inner">
-              <div className="flip-card-front">
-                <div
-                  className={`meaning-text ${
-                    currentTerm.image ? "half-width" : ""
-                  }`}
-                >
-                  <h1>{currentTerm.description}</h1>
-                </div>
-                {currentTerm.image && (
-                  <div className="meaning-img">
-                    <img src={currentTerm.image} alt="meaning" />
+        <div className="learn-container learn-page-grid">
+          {/* --- Left Column --- */}
+          <div className="learn-left-col">
+            {/* Progress Bar (Mocked visual) */}
+            <div className="progress-bar-container">
+              <div
+                className="progress-bar-fill"
+                style={{
+                  width: `${(currentState.absolute_index / deck.number_of_term) * 100
+                    }%`,
+                }}
+              ></div>
+            </div>
+            <div style={{ textAlign: "center", marginBottom: "1rem", color: "#666", fontSize: "0.9rem" }}>
+              Card {currentState.absolute_index + 1} of {deck.number_of_term}
+            </div>
+
+            {/* Flip Card */}
+            <div
+              className={`flip-card${currentState.isFlipped ? " flipped" : ""}`}
+              onClick={handleClick}
+            >
+              <div className="flip-card-inner">
+                <div className="flip-card-front">
+                  <div className="star-btn">
+                    <IconButton onClick={handleStarClick}>
+                      {isStarred ? <StarIcon sx={{ color: '#FFD700', fontSize: '2rem' }} /> : <StarBorderIcon sx={{ fontSize: '2rem' }} />}
+                    </IconButton>
                   </div>
+                  <div className={`front-content ${currentTerm.image ? "has-image" : ""}`}>
+                    <div className="meaning-text">
+                      <h1>{currentTerm.name}</h1>
+                      <p>Click to reveal meaning</p>
+                    </div>
+                    {currentTerm.image && (
+                      <div className="meaning-img">
+                        <img src={currentTerm.image} alt="meaning" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flip-card-back">
+                  <h1>{currentTerm.description}</h1>
+                  {currentTerm.image && (
+                    <div className="meaning-img">
+                      <img src={currentTerm.image} alt="meaning" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Control Buttons - Restored Old UI */}
+            <div className="learn-navigate">
+              <div className="site-btn">
+                <IconButton component="label" onClick={speakTerm}>
+                  <VolumeUpIcon />
+                </IconButton>
+                <IconButton component="label" onClick={handleRestart}>
+                  <RestartAltIcon />
+                </IconButton>
+              </div>
+              <div className="navigate-btns">
+                <CircleButton
+                  size={60}
+                  onClick={handleBack}
+                  disabled={
+                    currentState.index === 0 && currentState.currentPage === 1
+                  }
+                >
+                  <ArrowBackIcon />
+                </CircleButton>
+                <CircleButton
+                  onClick={handleNext}
+                  size={60}
+                  disabled={
+                    currentState.absolute_index + 1 === deck.number_of_term
+                  }
+                >
+                  <ArrowForwardIcon />
+                </CircleButton>
+              </div>
+              <div className="site-btn">
+                {youglish && (
+                  <a href={youglish} target="_blank" rel="noreferrer">
+                    Youglish
+                  </a>
+                )}
+                {google && (
+                  <a href={google} target="_blank" rel="noreferrer">
+                    Search on google
+                  </a>
                 )}
               </div>
-              <div className="flip-card-back">
-                {currentState.isFlipped && <h1>{currentTerm.name}</h1>}
+            </div>
+
+            <div className="definition-card">
+              <h3>Definition</h3>
+              <div className="definition-content">
+                <p>{MOCK_DATA.definition}</p>
+                <div className="definition-meta">
+                  <p>Part of Speech: {MOCK_DATA.partOfSpeech}</p>
+                  <p>Pronunciation: {MOCK_DATA.pronunciation}</p>
+                </div>
               </div>
             </div>
           </div>
-          <div className="learn-navigate">
-            <div className="site-btn">
-              <IconButton component="label" onClick={speakTerm}>
-                <VolumeUpIcon />
-              </IconButton>
-              <IconButton component="label" onClick={handleRestart}>
-                <RestartAltIcon />
-              </IconButton>
+
+          {/* --- Right Column --- */}
+          <div className="learn-right-col">
+            {/* Sentence Example */}
+            <div className="info-card">
+              <h3>Sentence Example</h3>
+              <div className="sentence-box">
+                <p>{MOCK_DATA.sentence}</p>
+              </div>
+              <div className="audio-actions">
+                <button className="audio-btn" onClick={speakTerm}>
+                  <VolumeUpIcon /> Listen to pronunciation
+                </button>
+              </div>
             </div>
-            <div className="navigate-btns">
-              <CircleButton
-                size={60}
-                onClick={handleBack}
-                disabled={
-                  currentState.index === 0 && currentState.currentPage === 1
-                }
-              >
-                <ArrowBackIcon />
-              </CircleButton>
-              <CircleButton
-                onClick={handleNext}
-                size={60}
-                disabled={
-                  currentState.absolute_index + 1 === deck.number_of_term
-                }
-              >
-                <ArrowForwardIcon />
-              </CircleButton>
+
+            {/* Synonyms */}
+            <div className="info-card">
+              <h3>Synonyms</h3>
+              <div className="synonyms-list">
+                {MOCK_DATA.synonyms.map((s, i) => (
+                  <span key={i} className="synonym-chip">
+                    {s}
+                  </span>
+                ))}
+              </div>
             </div>
-            <div className="site-btn">
-              {youglish && (
-                <a href={youglish} target="_blank" rel="noreferrer">
-                  Youglish
-                </a>
-              )}
-              {google && (
-                <a href={google} target="_blank" rel="noreferrer">
-                  Search on google
-                </a>
-              )}
+
+            {/* Study Progress */}
+            <div className="info-card">
+              <h3>Study Progress</h3>
+              <div className="studystats">
+                <div className="stat-row">
+                  <span>Words Learned</span>
+                  <span className="stat-value">
+                    {currentState.absolute_index}/{deck.number_of_term}
+                  </span>
+                </div>
+                <div className="stat-row">
+                  <span>Study Streak</span>
+                  <span className="stat-value">5 days</span>
+                </div>
+                <div className="stat-row">
+                  <span>Time Studied</span>
+                  <span className="stat-value">23 min</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
