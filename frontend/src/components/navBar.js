@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/Add";
+import MenuIcon from "@mui/icons-material/Menu";
 import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import Container from "@mui/material/Container";
@@ -26,7 +27,9 @@ const links = [
   { link: "deck", name: "Deck" },
 ];
 
-function ResponsiveAppBar() {
+function ResponsiveAppBar()
+{
+  const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [ancharElCreate, setAncharElCreate] = useState(null);
   const navigate = useNavigate();
@@ -34,15 +37,28 @@ function ResponsiveAppBar() {
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
 
-  const handleOpenUserMenu = (event) => {
+  const handleOpenUserMenu = (event) =>
+  {
     setAnchorElUser(event.currentTarget);
   };
 
-  const handleCloseUserMenu = () => {
+  const handleOpenNavMenu = (event) =>
+  {
+    setAnchorElNav(event.currentTarget);
+  };
+
+  const handleCloseNavMenu = () =>
+  {
+    setAnchorElNav(null);
+  };
+
+  const handleCloseUserMenu = () =>
+  {
     setAnchorElUser(null);
   };
 
-  const handleClickDeck = () => {
+  const handleClickDeck = () =>
+  {
     setAncharElCreate(null);
     navigate("create-deck");
   };
@@ -68,6 +84,47 @@ function ResponsiveAppBar() {
               display: { md: "flex" },
             }}
           >
+            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleOpenNavMenu}
+                color="inherit"
+              >
+                <MenuIcon />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorElNav}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}
+                open={Boolean(anchorElNav)}
+                onClose={handleCloseNavMenu}
+                sx={{
+                  display: { xs: "block", md: "none" },
+                }}
+              >
+                {links.map((link) => (
+                  <MenuItem key={link.name} onClick={handleCloseNavMenu}>
+                    <NavLink
+                      to={link.link}
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
+                      <Typography textAlign="center">{link.name}</Typography>
+                    </NavLink>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
             <Box
               sx={{
                 flexGrow: 1,
@@ -169,7 +226,8 @@ function ResponsiveAppBar() {
               onClose={handleCloseUserMenu}
             >
               <MenuItem
-                onClick={() => {
+                onClick={() =>
+                {
                   navigate("deck");
                   handleCloseUserMenu();
                 }}
