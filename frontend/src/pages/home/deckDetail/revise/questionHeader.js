@@ -110,7 +110,7 @@ function QuestionHeader({
             <div className="header-button">
               <IconButton
                 component="label"
-                onClick={() => changePriority(-10)}
+                onClick={() => changePriority(15)}
                 className={animatingIcon === "down" ? "success-animate" : ""}
               >
                 <ArrowCircleDownIcon sx={{ color: yellow[900] }} />
@@ -119,7 +119,7 @@ function QuestionHeader({
             <div className="header-button">
               <IconButton
                 component="label"
-                onClick={() => changePriority(+10)}
+                onClick={() => changePriority(-15)}
                 className={animatingIcon === "up" ? "success-animate" : ""}
               >
                 <ArrowCircleUpIcon sx={{ color: green[400] }} />

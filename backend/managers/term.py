@@ -91,5 +91,5 @@ class TermManager(Manager):
 
     def get_random_terms(self, deck_id: int) -> QuerySet:
         all_deck_terms = self.get_terms_for_deck(deck_id=deck_id).values("id","name")
-        random_terms = all_deck_terms.order_by('?')[:20]
+        random_terms = all_deck_terms.order_by('?')[:50]
         return random_terms

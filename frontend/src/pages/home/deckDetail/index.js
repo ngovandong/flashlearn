@@ -2,12 +2,13 @@ import { deckService } from "@api-services/deckService";
 import { LocalLoadingWrapper } from "@components/loading";
 import { getFirstError } from "@utils/errorHandler";
 import React, { useEffect, useState } from "react";
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import
+  {
+    Link,
+    useNavigate,
+    useParams,
+    useSearchParams,
+  } from "react-router-dom";
 import { toast } from "react-toastify";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import CollectionsBookmarkIcon from "@mui/icons-material/CollectionsBookmark";
@@ -16,7 +17,8 @@ import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import CircularProgressWithLabel from "@components/progress";
 import FooterBTNs from "./footerButtons";
 
-function MenuButton({ icon, text, link, isDisabled }) {
+function MenuButton({ icon, text, link, isDisabled })
+{
   const IconName = icon;
   return (
     <div className={`menu-btn${isDisabled ? " lock" : ""}`}>
@@ -28,7 +30,8 @@ function MenuButton({ icon, text, link, isDisabled }) {
   );
 }
 
-function DeckDetail() {
+function DeckDetail()
+{
   const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const { deckID } = useParams();
@@ -36,7 +39,8 @@ function DeckDetail() {
 
   const navigate = useNavigate();
 
-  const fetchDeck = async () => {
+  const fetchDeck = async () =>
+  {
     try {
       setIsLoading(true);
       const res = await deckService.retrieve(deckID);
@@ -59,13 +63,15 @@ function DeckDetail() {
     }
   };
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     if (deckID) {
       fetchDeck();
     }
   }, [deckID]);
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     const notnavigate = searchParams.get("notnavigate");
     if (!notnavigate && deck && deck.number_of_term === 0) {
       navigate("edit?tab=1");
@@ -103,7 +109,7 @@ function DeckDetail() {
             <MenuButton
               link="quick-revise"
               text="Quick Revise"
-              isDisabled={true}
+              isDisabled={!deck.my_permission}
               icon={TimerIcon}
             />
             <MenuButton
@@ -129,7 +135,7 @@ function DeckDetail() {
                       value={parseInt(
                         (deck.learning_progress.completed /
                           deck.number_of_term) *
-                          100
+                        100
                       )}
                       size={120}
                     />

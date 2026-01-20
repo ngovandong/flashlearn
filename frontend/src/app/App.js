@@ -8,11 +8,12 @@ import Folder from "@pages/folder";
 import Home from "@pages/home";
 import CreateDeck from "@pages/home/createDeck";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  selectGlobalError,
-  selectLoading,
-  setGlobalError,
-} from "./store/authSlice";
+import
+  {
+    selectGlobalError,
+    selectLoading,
+    setGlobalError,
+  } from "./store/authSlice";
 import { GlobalLoadingWrapper } from "@components/loading";
 import DeckDetail from "@pages/home/deckDetail";
 import EditDeck from "@pages/home/deckDetail/editDeck";
@@ -24,9 +25,11 @@ import Invite from "@pages/invite";
 import LearnPage from "@pages/home/deckDetail/learn";
 import DeckPage from "@pages/home/deckPage";
 import Revise from "@pages/home/deckDetail/revise";
+import QuickRevise from "@pages/home/deckDetail/revise/quickRevise";
 import PrivacyPage from "@pages/privacy";
 
-function App() {
+function App()
+{
   const loading = useSelector(selectLoading);
   const error = useSelector(selectGlobalError);
   const dispatch = useDispatch();
@@ -43,6 +46,7 @@ function App() {
             <Route path="edit" element={<EditDeck />} />
             <Route path="learn" element={<LearnPage />} />
             <Route path="revise" element={<Revise />} />
+            <Route path="quick-revise" element={<QuickRevise />} />
           </Route>
           <Route path="invite" element={<Invite />} />
         </Route>

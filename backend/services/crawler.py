@@ -1,33 +1,37 @@
-import base64
-from urllib.parse import  urlencode
-
 import requests
+from urllib.parse import urlencode
 from bs4 import BeautifulSoup
+import re
+import json
+from abc import ABC, abstractmethod
 
 
-SEARCH_PHOTO_URL = "https://www.bing.com/images/search"
-IMAGE_CSS_SELECTOR = "div.imgpt a.iusc img"
+SEARCH_PHOTO_URL_BING = "https://www.bing.com/images/search"
+IMAGE_CSS_SELECTOR_BING = "div.imgpt a.iusc img"
+SEARCH_PHOTO_URL_GOOGLE = "https://www.google.com.vn/search"
+IMAGE_CSS_SELECTOR_GOOGLE = "tr img"
 
 
-class BSCrawler:
-    @staticmethod
-    def get_preview_images(query, count=5):
-        # Format the search query for the Google Images URL
-        params = urlencode({'q': query})
-        url = f'{SEARCH_PHOTO_URL}?{params}'
+class ImageSearchStrategy(ABC):
+    @abstractmethod
+    def get_preview_images(self, query, count=10):
+        pass
 
-        # Send an HTTP GET request to the Google Images page
+
+class BingImageSearchStrategy(ImageSearchStrategy):
+    def get_preview_images(self, query, count=10):
+        params = urlencode({"q": query})
+        url = f"{SEARCH_PHOTO_URL_BING}?{params}"
+
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept-Language': 'en-US,en;q=0.5'
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "Accept-Language": "en-US,en;q=0.5",
         }
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
-        # Parse the HTML response
-        soup = BeautifulSoup(response.text, 'html.parser')
-
-        image_elements = soup.select(IMAGE_CSS_SELECTOR)
+        soup = BeautifulSoup(response.text, "html.parser")
+        image_elements = soup.select(IMAGE_CSS_SELECTOR_BING)
         images = []
         for image in image_elements:
             src = image.attrs.get("data-src", None)
@@ -36,24 +40,37 @@ class BSCrawler:
 
         return images[:count]
 
-    @staticmethod
-    def url_to_base64(image_url):
-        # Send an HTTP GET request to the image URL
-        response = requests.get(image_url)
+
+class GoogleImageSearchStrategy(ImageSearchStrategy):
+    def get_preview_images(self, query, count=10):
+        params = urlencode({"q": query, "udm": 2})
+        url = f"{SEARCH_PHOTO_URL_GOOGLE}?{params}"
+
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+            "Accept-Language": "en-US,en;q=0.5",
+        }
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
 
-        # Read the image data
-        image_data = response.content
+        soup = BeautifulSoup(response.text, "html.parser")
 
-        # Convert the image data to base64
-        base64_data = base64.b64encode(image_data)
+        image_elements = soup.select(IMAGE_CSS_SELECTOR_GOOGLE)
 
-        # Decode the base64 data to a string
-        base64_string = base64_data.decode('utf-8')
+        image_urls = []
+        url_pattern = r"https://encrypted-tbn0.gstatic.com/images\?q[\w\d\-\u0026=]+"
+        for img in image_elements:
+            src = str(img.attrs.get("src", ""))
+            if re.match(url_pattern, src):
+                image_urls.append(src)
 
-        # Add the base64 prefix based on the image format
-        image_format = response.headers.get('content-type')
-        if image_format:
-            base64_string = f"data:{image_format};base64,{base64_string}"
-        print(base64_string)
-        return base64_string
+        return image_urls[:count]
+
+
+class BSCrawler:
+    bing_strategy = BingImageSearchStrategy()
+    google_strategy = GoogleImageSearchStrategy()
+
+    @classmethod
+    def get_preview_images(cls, query, count=10):
+        return cls.google_strategy.get_preview_images(query, count)

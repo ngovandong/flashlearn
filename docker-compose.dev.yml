@@ -1,0 +1,26 @@
+
+services:
+  backend:
+    command: uv run python manage.py runserver 0.0.0.0:8005
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=True
+      - CORS_ALLOW_ALL_ORIGINS=True
+      - ALLOWED_HOSTS=*
+
+  frontend:
+    build:
+      context: ./frontend
+      target: build
+    command: npm start
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.docker
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WDS_SOCKET_PORT=0

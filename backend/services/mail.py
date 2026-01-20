@@ -66,7 +66,9 @@
 #             msg.send()
 #         except Exception as e:
 #             # TODO: Add a log right here
-#             print(str(e))
+#             import logging
+#             logger = logging.getLogger(__name__)
+#             logger.error(f"Failed to send email: {str(e)}")
 #
 #
 # class SendMail:

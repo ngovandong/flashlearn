@@ -2,26 +2,26 @@ from rest_framework import serializers
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import cloudinary.uploader
 from ..models import Term, Deck
+from ..services import url_to_base64
 
 
 class TermSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Term
-        fields = ('id', 'name', 'description', 'image', 'deck')
+        fields = ("id", "name", "description", "image", "deck")
 
     def to_internal_value(self, data):
-        from ..services import TermService
         ret = super().to_internal_value(data)
         image = ret.get("image", None)
-        if image and image.startswith("https://encrypted-tbn0.gstatic.com/images?"):
+        if image and image.startswith("https:"):
             try:
-                base = TermService.url_to_base64(image)
+                base = url_to_base64(image)
                 ret["image"] = base
             except Exception:
                 pass
         if data.get("id", None):
-            ret['id'] = data["id"]
+            ret["id"] = data["id"]
         return ret
 
 
@@ -30,14 +30,14 @@ class TermNestInDeckSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Term
-        fields = ('id', 'name', 'description', 'image')
+        fields = ("id", "name", "description", "image")
 
 
 class OnlyNameTermSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Term
-        fields = ('id', 'name')
+        fields = ("id", "name")
 
 
 class ProgressTermSerializer(serializers.ModelSerializer):
@@ -46,7 +46,7 @@ class ProgressTermSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Term
-        fields = ('id', 'name', 'description', 'image', 'learning_progress_id')
+        fields = ("id", "name", "description", "image", "learning_progress_id")
 
 
 class ReviseTermSerializer(serializers.Serializer):
@@ -56,7 +56,7 @@ class ReviseTermSerializer(serializers.Serializer):
 
     class Meta:
         model = Term
-        fields = ('all_terms', 'revise_terms','deck_name')
+        fields = ("all_terms", "revise_terms", "deck_name")
 
 
 class LearningTermSerializer(serializers.Serializer):
@@ -70,35 +70,31 @@ class AddTermsToDeckSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Deck
-        fields = ('deck_id', 'terms')
+        fields = ("deck_id", "terms")
 
     def to_internal_value(self, data):
-        parsed_dict = {
-            'deck_id': data.get('deck_id', ''),
-            'terms': []
-        }
+        parsed_dict = {"deck_id": data.get("deck_id", ""), "terms": []}
 
         for key, value in data.items():
-            if key.startswith('terms'):
-                term_index = int(key.split('[')[1].split(']')[0])
-                term_property = key.split('[')[2].split(']')[0]
-                if len(parsed_dict['terms']) < term_index + 1:
-                    parsed_dict['terms'].append({})
-                if term_property == 'name':
-                    parsed_dict['terms'][term_index]['name'] = value
-                elif term_property == 'description':
-                    parsed_dict['terms'][term_index]['description'] = value
-                elif term_property == 'image':
-                    parsed_dict['terms'][term_index]['image'] = value
+            if key.startswith("terms"):
+                term_index = int(key.split("[")[1].split("]")[0])
+                term_property = key.split("[")[2].split("]")[0]
+                if len(parsed_dict["terms"]) < term_index + 1:
+                    parsed_dict["terms"].append({})
+                if term_property == "name":
+                    parsed_dict["terms"][term_index]["name"] = value
+                elif term_property == "description":
+                    parsed_dict["terms"][term_index]["description"] = value
+                elif term_property == "image":
+                    parsed_dict["terms"][term_index]["image"] = value
                     if isinstance(value, InMemoryUploadedFile):
                         # Convert the InMemoryUploadedFile to bytes
                         image_bytes = value.read()
                         # Post the bytes to Cloudinary and get the URL
                         result = cloudinary.uploader.upload(image_bytes)
-                        parsed_dict['terms'][term_index]['image'] = result.get(
-                            'url')
+                        parsed_dict["terms"][term_index]["image"] = result.get("url")
                     else:
-                        parsed_dict['terms'][term_index]['image'] = value
+                        parsed_dict["terms"][term_index]["image"] = value
         data = super().to_internal_value(parsed_dict)
         return data
 
@@ -112,4 +108,4 @@ class AddTermsToDeckSerializer(serializers.ModelSerializer):
         terms = [Term(deck_id=deck_id, **term) for term in terms_data]
         Term.objects.bulk_create(terms)
 
-        return {'message': 'Terms created successfully'}
+        return {"message": "Terms created successfully"}
