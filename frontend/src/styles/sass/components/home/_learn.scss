@@ -513,6 +513,21 @@
                 }
             }
         }
+
+        // Responsive
+        @media (max-width: 725px) {
+            .question {
+                margin-left: 0 !important;
+            }
+
+            .util-bar {
+                flex-direction: column;
+            }
+
+            .learn-container {
+                padding: 0;
+            }
+        }
     }
 }
 
