@@ -29,5 +29,5 @@ COPY . /app
 # Expose the port that Django runs on
 EXPOSE 8005
 
-# Start the Django development server using Gunicorn
-CMD ["uv", "run", "gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8005", "-w", "2"]
+# Start the Django development server using Daphne (ASGI)
+CMD ["uv", "run", "daphne", "-b", "0.0.0.0", "-p", "8005", "core.asgi:application"]

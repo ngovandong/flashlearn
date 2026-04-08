@@ -1,0 +1,18 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: flashlearn_backend
+    env_file:
+      - .env.docker
+    ports:
+      - "8005:8005"
+
+  frontend:
+    build: ./frontend
+    container_name: flashlearn_frontend
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend

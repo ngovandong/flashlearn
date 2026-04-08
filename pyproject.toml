@@ -34,3 +34,8 @@ dependencies = [
 dev = [
     "autopep8>=2.1.0,<3.0.0",
 ]
+
+[dependency-groups]
+dev = [
+    "debugpy>=1.8.20",
+]

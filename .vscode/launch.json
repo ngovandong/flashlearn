@@ -6,11 +6,12 @@
     "configurations": [
         {
             "name": "Python: Django",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
-                "runserver"
+                "runserver",
+                "8005"
             ],
             "django": true,
             "justMyCode": false
