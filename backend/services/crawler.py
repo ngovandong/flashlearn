@@ -10,7 +10,7 @@ SEARCH_PHOTO_URL_BING = "https://www.bing.com/images/search"
 IMAGE_CSS_SELECTOR_BING = "div.imgpt a.iusc img"
 SEARCH_PHOTO_URL_GOOGLE = "https://www.google.com/search"
 IMAGE_CSS_SELECTOR_GOOGLE = "h3 img"
-IMG_URL_PREFIX_BING = "https://tse2.mm.bing.net/"
+IMG_URL_REGEX_BING = r"https://tse\d.mm.bing.net/"
 IMG_URL_REGEX_GOOLE = r"https://encrypted-tbn0.gstatic.com/images\?q[\w\d\-\u0026=]+"
 
 
@@ -38,7 +38,7 @@ class BingImageSearchStrategy(ImageSearchStrategy):
         images = []
         for image in image_elements:
             src = image.attrs.get("src", None)
-            if src and src.startswith(IMG_URL_PREFIX_BING):
+            if src and re.match(IMG_URL_REGEX_BING, src):
                 images.append(src)
 
         return images[:count]
