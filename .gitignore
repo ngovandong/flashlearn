@@ -125,3 +125,6 @@ GitHub.sublime-settings
 
 # docker env
 .env.docker
+
+# Rust
+rust_backend/target/
