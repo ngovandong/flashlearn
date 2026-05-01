@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0007_deck_owner_alter_userdeckrole_role'),
+        ("backend", "0007_deck_owner_alter_userdeckrole_role"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='is_superuser',
-            field=models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status'),
+            model_name="user",
+            name="is_superuser",
+            field=models.BooleanField(
+                default=False,
+                help_text="Designates that this user has all permissions without explicitly assigning them.",
+                verbose_name="superuser status",
+            ),
         ),
     ]

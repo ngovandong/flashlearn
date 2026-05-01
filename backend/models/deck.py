@@ -1,11 +1,14 @@
-from django.db import models
-from cloudinary.models import CloudinaryField
-from base.models import DateTimeUUIDModel
 import random
 from urllib.parse import urlparse
+
+from cloudinary.models import CloudinaryField
 from cloudinary.utils import cloudinary_url
-from . import User
+from django.db import models
+
+from base.models import DateTimeUUIDModel
+
 from ..constants import FULL_ROLE_CLASS
+from .user import User
 
 
 class Deck(DateTimeUUIDModel):
@@ -15,13 +18,11 @@ class Deck(DateTimeUUIDModel):
     background = CloudinaryField("image", blank=True, null=True)
 
     field = models.CharField(max_length=127)
-    users = models.ManyToManyField(
-        User, through='UserDeckRole', related_name='decks')
-    owner = models.ForeignKey(
-        User, related_name='my_own_decks', on_delete=models.CASCADE)
+    users = models.ManyToManyField(User, through="UserDeckRole", related_name="decks")
+    owner = models.ForeignKey(User, related_name="my_own_decks", on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ('created_at',)
+        ordering = ("created_at",)
 
     def get_user_permission(self, user):
         from ..services.cache import cache
@@ -62,7 +63,7 @@ class Deck(DateTimeUUIDModel):
         url, _ = cloudinary_url(random_background)
         parsed_url = urlparse(url)
         path = parsed_url.path.lstrip("/")
-        path = parsed_url.path.lstrip("/")[path.index("/", 1)+1:]
+        path = parsed_url.path.lstrip("/")[path.index("/", 1) + 1 :]
         self.background = path
 
     def save(self, *args, **kwargs):
@@ -72,7 +73,7 @@ class Deck(DateTimeUUIDModel):
 
     @property
     def cache_owner(self):
-        if not hasattr(self, '_cached_owner'):
+        if not hasattr(self, "_cached_owner"):
             from ..services.cache import cache
 
             key = f"user_{self.owner_id}"
@@ -82,4 +83,3 @@ class Deck(DateTimeUUIDModel):
                 cache.set(key, user)
             self._cached_owner = user
         return self._cached_owner
-

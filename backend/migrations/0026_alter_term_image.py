@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0025_remove_deck_default_deck_user_default_deck'),
+        ("backend", "0025_remove_deck_default_deck_user_default_deck"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='term',
-            name='image',
+            model_name="term",
+            name="image",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
     ]

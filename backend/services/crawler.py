@@ -1,10 +1,9 @@
-import requests
-from urllib.parse import urlencode
-from bs4 import BeautifulSoup
 import re
-import json
 from abc import ABC, abstractmethod
+from urllib.parse import urlencode
 
+import requests
+from bs4 import BeautifulSoup
 
 SEARCH_PHOTO_URL_BING = "https://www.bing.com/images/search"
 IMAGE_CSS_SELECTOR_BING = "div.imgpt a.iusc img"
@@ -29,7 +28,7 @@ class BingImageSearchStrategy(ImageSearchStrategy):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             "Accept-Language": "en-US,en;q=0.5",
         }
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, "html.parser")
@@ -53,7 +52,7 @@ class GoogleImageSearchStrategy(ImageSearchStrategy):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             "Accept-Language": "en-US,en;q=0.5",
         }
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, "html.parser")

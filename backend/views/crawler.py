@@ -1,6 +1,8 @@
-from rest_framework import views, status
+from rest_framework import status, views
 from rest_framework.response import Response
+
 from ..services.crawler import BSCrawler
+
 
 class GetImagesUrlView(views.APIView):
     def post(self, request, format=None):

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0011_remove_deck_visible_deck_is_public'),
+        ("backend", "0011_remove_deck_visible_deck_is_public"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='deck',
-            name='background_url',
-            field=models.CharField(default='', max_length=255),
+            model_name="deck",
+            name="background_url",
+            field=models.CharField(default="", max_length=255),
         ),
     ]

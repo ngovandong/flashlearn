@@ -1,4 +1,5 @@
 from enum import Enum
+
 from core.cache import cache
 
 
@@ -61,6 +62,10 @@ class CacheService:
     def delete_combine(cls, first_key, second_key):
         key = cls.get_combine_key(first_key, second_key)
         cache.delete(key)
+
+    @classmethod
+    def clear_all(cls):
+        cache.delete_pattern(f"{cls.PREFIX}_*")
 
 
 class _LearningProgressCache(CacheService):

@@ -1,18 +1,17 @@
-import requests
 import io
-from typing import Dict, Any
+from typing import Any
 
-from django.core.exceptions import ValidationError
+import requests
 from django.conf import settings
 from django.contrib.auth.models import update_last_login
-
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.settings import api_settings
+from django.core.exceptions import ValidationError
 from rest_framework.parsers import JSONParser
+from rest_framework_simplejwt.settings import api_settings
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from ..constants import (
-    GOOGLE_ID_TOKEN_INFO_URL,
     GOOGLE_ACCESS_TOKEN_OBTAIN_URL,
+    GOOGLE_ID_TOKEN_INFO_URL,
     GOOGLE_USER_INFO_URL,
 )
 from ..models import User
@@ -49,9 +48,9 @@ class AuthService:
         return JWTToken.generate_token(payload)
 
     @classmethod
-    def google_validate_id_token(cls, id_token: str) -> Dict:
+    def google_validate_id_token(cls, id_token: str) -> dict:
         # Reference: https://developers.google.com/identity/sign-in/web/backend-auth#verify-the-integrity-of-the-id-token
-        response = requests.get(GOOGLE_ID_TOKEN_INFO_URL, params={"id_token": id_token})
+        response = requests.get(GOOGLE_ID_TOKEN_INFO_URL, params={"id_token": id_token}, timeout=10)
 
         if not response.ok:
             raise ValidationError("id_token is invalid.")
@@ -77,7 +76,7 @@ class AuthService:
             "grant_type": "authorization_code",
         }
 
-        response = requests.post(GOOGLE_ACCESS_TOKEN_OBTAIN_URL, data=data)
+        response = requests.post(GOOGLE_ACCESS_TOKEN_OBTAIN_URL, data=data, timeout=10)
 
         if not response.ok:
             raise ValidationError("Failed to obtain access token from Google.")
@@ -87,11 +86,9 @@ class AuthService:
         return access_token
 
     @classmethod
-    def google_get_user_info(cls, access_token: str) -> Dict[str, Any]:
+    def google_get_user_info(cls, access_token: str) -> dict[str, Any]:
         # Reference: https://developers.google.com/identity/protocols/oauth2/web-server#callinganapi
-        response = requests.get(
-            GOOGLE_USER_INFO_URL, params={"access_token": access_token}
-        )
+        response = requests.get(GOOGLE_USER_INFO_URL, params={"access_token": access_token}, timeout=10)
 
         if not response.ok:
             raise ValidationError("Failed to obtain user info from Google.")

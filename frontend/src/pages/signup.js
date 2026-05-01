@@ -54,7 +54,6 @@ function SignUp() {
           setError(errorMessage);
         }
       } catch (error) {
-        console.log(error);
         setError("Something Wrong!");
       } finally {
         dispatch(setLoading(false));

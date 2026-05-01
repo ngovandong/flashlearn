@@ -24,6 +24,7 @@ import PermissionDenied from "@pages/permissionDenied";
 import Invite from "@pages/invite";
 import LearnPage from "@pages/home/deckDetail/learn";
 import DeckPage from "@pages/home/deckPage";
+import UserSettings from "@pages/home/userSettings";
 import Revise from "@pages/home/deckDetail/revise";
 import QuickRevise from "@pages/home/deckDetail/revise/quickRevise";
 import PrivacyPage from "@pages/privacy";
@@ -49,6 +50,7 @@ function App()
             <Route path="quick-revise" element={<QuickRevise />} />
           </Route>
           <Route path="invite" element={<Invite />} />
+          <Route path="settings" element={<UserSettings />} />
         </Route>
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<SignUp />} />

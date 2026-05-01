@@ -21,7 +21,7 @@ function Login() {
   const error = useSelector(selectError);
   const [redirectError, setRedirectError] = useState();
   const [redirectInfo, setRedirectInfo] = useState();
-  let [searchParams, _] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const handle_submit = async (e) => {
     e.preventDefault();
     dispatch(login({ email, password }));
@@ -58,6 +58,7 @@ function Login() {
       sendTokenToExtension({ access, refresh });
       dispatch(setToken({ access, refresh }));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

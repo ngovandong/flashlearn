@@ -1,12 +1,12 @@
-from rest_framework import serializers
-from django.core.files.uploadedfile import InMemoryUploadedFile
 import cloudinary.uploader
-from ..models import Term, Deck
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from rest_framework import serializers
+
+from ..models import Deck, Term
 from ..services import url_to_base64
 
 
 class TermSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Term
         fields = ("id", "name", "description", "image", "deck")
@@ -34,7 +34,6 @@ class TermNestInDeckSerializer(serializers.ModelSerializer):
 
 
 class OnlyNameTermSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Term
         fields = ("id", "name")

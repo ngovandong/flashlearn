@@ -2,7 +2,7 @@ import { styled } from "@mui/material/styles";
 import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
 import { COLORS } from "@constants/colors";
-import { CircularProgress, List, ListItem, ListItemText } from "@mui/material";
+import { CircularProgress, List, ListItemText } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { deckService } from "@api-services/deckService";
 import { getFirstError } from "@utils/errorHandler";
@@ -139,7 +139,7 @@ function SearchDeckInput() {
         toast.error(errorMessage);
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Search failed");
     } finally {
       setLoading(false);
     }
@@ -153,6 +153,7 @@ function SearchDeckInput() {
         clearTimeout(debounceTimer);
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchValue]);
 
   const handleSearchChange = (event) => {

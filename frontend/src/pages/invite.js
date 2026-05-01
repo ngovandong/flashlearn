@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { roleService } from "@api-services/roleService";
 
 function Invite() {
-  const [searchParams, _] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const token = searchParams.get("token");
   useEffect(() => {
@@ -20,7 +20,7 @@ function Invite() {
     } else {
       navigate("/notfound");
     }
-  }, []);
+  }, [navigate, token]);
   return <>{token}</>;
 }
 

@@ -28,7 +28,7 @@ function CustomPopupGoogleLoginBT() {
     await authService
       .initUser(id_token)
       .then(handleUserInit)
-      .catch((notifyError) => console.log(notifyError));
+      .catch(() => {});
   };
   const openGoogleLoginPage = () => {
     const googleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth";
