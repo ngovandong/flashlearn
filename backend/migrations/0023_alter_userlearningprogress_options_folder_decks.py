@@ -4,19 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0022_alter_userlearningprogress_score'),
+        ("backend", "0022_alter_userlearningprogress_score"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='userlearningprogress',
-            options={'ordering': ('last_learned_at',)},
+            name="userlearningprogress",
+            options={"ordering": ("last_learned_at",)},
         ),
         migrations.AddField(
-            model_name='folder',
-            name='decks',
-            field=models.ManyToManyField(related_name='folders', to='backend.deck'),
+            model_name="folder",
+            name="decks",
+            field=models.ManyToManyField(related_name="folders", to="backend.deck"),
         ),
     ]

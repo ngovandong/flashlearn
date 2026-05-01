@@ -1,9 +1,10 @@
 import base64
+
 import requests
 
 
 def url_to_base64(image_url):
-    response = requests.get(image_url)
+    response = requests.get(image_url, timeout=10)
     response.raise_for_status()
 
     image_data = response.content

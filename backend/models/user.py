@@ -1,30 +1,26 @@
-from django.db import models
-from base.models import CustomAbstractUser
-from django.utils.translation import gettext_lazy as _
 from cloudinary.utils import cloudinary_url
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
+from base.models import CustomAbstractUser, UUIDModel
+
 from ..managers import CustomUserManager
-from base.models import UUIDModel
 
 
 class User(UUIDModel, CustomAbstractUser):
     name = models.CharField(max_length=255, blank=False, null=False)
     email = models.EmailField(_("email address"), unique=True)
-    image_url = models.URLField(
-        _("image url"), max_length=255, blank=True, null=True)
+    image_url = models.URLField(_("image url"), max_length=255, blank=True, null=True)
     is_validated_email = models.BooleanField(default=False)
-    default_deck = models.OneToOneField(
-        "Deck",
-        on_delete=models.SET_NULL,
-        blank=True, null=True
-    )
+    default_deck = models.OneToOneField("Deck", on_delete=models.SET_NULL, blank=True, null=True)
 
     objects = CustomUserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
 
     def __str__(self):
         return self.email
@@ -40,5 +36,5 @@ class User(UUIDModel, CustomAbstractUser):
     def save(self, *args, **kwargs):
         if not self.image_url:
             self.set_default_image()
-        
+
         super().save(*args, **kwargs)

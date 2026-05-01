@@ -1,6 +1,7 @@
 from rest_framework import serializers
+
 from ..models import Folder
-from . import UserSerializer
+from .user import UserSerializer
 
 
 class FolderSerializer(serializers.ModelSerializer):
@@ -8,4 +9,4 @@ class FolderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Folder
-        fields = ('id', 'name', 'description', 'owner', 'created_at', 'updated_at')
+        fields = ("id", "name", "description", "owner", "created_at", "updated_at")

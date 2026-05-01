@@ -1,6 +1,6 @@
 from rest_framework import viewsets
-from rest_framework.serializers import Serializer
 from rest_framework.response import Response
+from rest_framework.serializers import Serializer
 
 
 class FlexibleViewSet(viewsets.GenericViewSet):
@@ -10,13 +10,13 @@ class FlexibleViewSet(viewsets.GenericViewSet):
 
     def get_serializer_class(self):
         """
-            Get serializer for each action
+        Get serializer for each action
         """
         return self.serializer_map.get(self.action, self.serializer_class)
 
     def get_permissions(self):
         """
-            Get permission for each action
+        Get permission for each action
         """
         permissions = self.permission_map.get(self.action, self.permission_classes)
         if not (isinstance(permissions, list) or isinstance(permissions, tuple)):

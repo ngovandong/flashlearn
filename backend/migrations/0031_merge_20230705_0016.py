@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0029_userlearningprogress_is_skip'),
-        ('backend', '0030_alter_deck_options'),
+        ("backend", "0029_userlearningprogress_is_skip"),
+        ("backend", "0030_alter_deck_options"),
     ]
 
-    operations = [
-    ]
+    operations = []

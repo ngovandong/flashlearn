@@ -9,6 +9,17 @@ services:
     ports:
       - "8005:8005"
 
+  worker:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: flashlearn_worker
+    command: uv run python manage.py start_worker
+    env_file:
+      - .env.docker
+    depends_on:
+      - backend
+
   frontend:
     build: ./frontend
     container_name: flashlearn_frontend

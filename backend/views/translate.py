@@ -1,6 +1,6 @@
-from rest_framework import views, status
-from rest_framework.response import Response
 import requests
+from rest_framework import status, views
+from rest_framework.response import Response
 
 GOOGLE_TRANSLATE_URL = "https://translate.google.com/translate_a/single"
 
@@ -12,9 +12,8 @@ class TranslateView(views.APIView):
         target_language = request.data.get("target_language", "vi")
         translated_text = ""
         try:
-            translated_text = self.translate_text(
-                text, target_language, source_language)
-        except:
+            translated_text = self.translate_text(text, target_language, source_language)
+        except Exception:
             pass
         return Response(translated_text, status=status.HTTP_200_OK)
 
@@ -26,15 +25,15 @@ class TranslateView(views.APIView):
                 meaning += text
         return meaning
 
-    def translate_text(self, text, target_language='vi', source_language='auto'):
+    def translate_text(self, text, target_language="vi", source_language="auto"):
         params = {
-            'client': 'gtx',
-            'sl': source_language,
-            'tl': target_language,
-            'hl': target_language,
-            'dt': 't',
-            'q': text,
+            "client": "gtx",
+            "sl": source_language,
+            "tl": target_language,
+            "hl": target_language,
+            "dt": "t",
+            "q": text,
         }
-        response = requests.get(GOOGLE_TRANSLATE_URL, params=params)
+        response = requests.get(GOOGLE_TRANSLATE_URL, params=params, timeout=10)
         data = response.json()
         return self.get_meaning_from_response(data)

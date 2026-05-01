@@ -118,7 +118,7 @@ function Revise() {
         toast.error(errorMessage);
       }
     } catch (error) {
-      console.log(error);
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
@@ -126,6 +126,7 @@ function Revise() {
 
   useEffect(() => {
     fetchWords();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleKeyDown = (event) => {
@@ -142,6 +143,7 @@ function Revise() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentState.showNext]);
 
   useEffect(() => {

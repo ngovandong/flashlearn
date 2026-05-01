@@ -5,20 +5,19 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0014_alter_deck_background_url'),
+        ("backend", "0014_alter_deck_background_url"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='deck',
-            name='background_url',
+            model_name="deck",
+            name="background_url",
         ),
         migrations.AddField(
-            model_name='deck',
-            name='background',
-            field=cloudinary.models.CloudinaryField(default='', max_length=255, verbose_name='image'),
+            model_name="deck",
+            name="background",
+            field=cloudinary.models.CloudinaryField(default="", max_length=255, verbose_name="image"),
             preserve_default=False,
         ),
     ]

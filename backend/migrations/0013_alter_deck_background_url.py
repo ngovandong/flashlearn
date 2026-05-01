@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0012_deck_background_url'),
+        ("backend", "0012_deck_background_url"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='deck',
-            name='background_url',
+            model_name="deck",
+            name="background_url",
             field=models.URLField(),
         ),
     ]

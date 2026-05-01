@@ -1,6 +1,8 @@
 from rest_framework import serializers
+
 from ..models import UserLearningProgress
-from . import TermSerializer, UserSerializer
+from .term import TermSerializer
+from .user import UserSerializer
 
 
 class UserLearningProgressSerializer(serializers.ModelSerializer):
@@ -9,7 +11,7 @@ class UserLearningProgressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserLearningProgress
-        fields = ('id', 'user', 'term', 'last_learned_at', 'score')
+        fields = ("id", "user", "term", "last_learned_at", "score")
 
 
 class CreateLearningProgressSerializer(serializers.ModelSerializer):
@@ -18,7 +20,7 @@ class CreateLearningProgressSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserLearningProgress
-        fields = ('term_id', "user_id")
+        fields = ("term_id", "user_id")
 
 
 class ProgressSerializer(serializers.Serializer):

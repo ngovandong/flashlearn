@@ -1,26 +1,29 @@
 from urllib.parse import urlencode
-from rest_framework import viewsets, status, permissions
+
+from django.conf import settings
+from django.utils import timezone
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from elasticsearch_dsl import Q
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from elasticsearch_dsl import Q
-from django.utils import timezone
-from django.conf import settings
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-from ..serializers import (
-    DeckSerializer,
-    AddUserSerializer,
-    RemoveUserSerializer,
-    MyDeckSerializer,
-    DeckDetailSerializer,
-    InviteSerializer,
-)
-from ..models import Deck, User
+
 from base.views import FlexibleViewSet, SearchViewSet
-from ..permissions import EditableDeck, IsOwnerPermission
-from ..services import AuthService, LearningService, DeckService, UserService
+
 from ..constants import FULL_ROLE_CLASS
 from ..documents import DeckDocument
+from ..models import Deck, User
+from ..permissions import EditableDeck, IsOwnerPermission
+from ..serializers import (
+    AddUserSerializer,
+    DeckDetailSerializer,
+    DeckSerializer,
+    InviteSerializer,
+    MyDeckSerializer,
+    RemoveUserSerializer,
+)
+from ..services import AuthService, DeckService, LearningService, UserService
 
 
 class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
@@ -82,9 +85,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
                 # Match documents where owner.id is the same as user.id
                 Q("match", owner__id=user.id),
                 Q("term", is_public=True),
-                Q(
-                    "nested", path="users", query=Q("match", **{"users.id": user.id})
-                ),  # Match user in users
+                Q("nested", path="users", query=Q("match", **{"users.id": user.id})),  # Match user in users
             ],
             minimum_should_match=1,
         )
@@ -185,9 +186,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         else:
-            return Response(
-                {"errors": "user not found"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"errors": "user not found"}, status=status.HTTP_400_BAD_REQUEST)
         instance.users.add(user_to_add, through_defaults={"role": user_role})
 
         deck_serializer = DeckSerializer(instance)
@@ -206,17 +205,12 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
             if user in instance.users.all() or user == request.user:
                 instance.users.remove(user)
                 return Response(status=status.HTTP_200_OK)
-            return Response(
-                {"errors": "user isn't in deck"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"errors": "user isn't in deck"}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(
-                {"errors": "user not found"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"errors": "user not found"}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=["POST"])
     def get_invite_url(self, request, pk=None, *args, **kwargs):
-        instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         role = serializer.validated_data["role"]
@@ -248,22 +242,16 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         instance.users.add(user, through_defaults={"role": FULL_ROLE_CLASS.VIEW_ONLY})
-        return Response(
-            {"message": "join deck success"}, status=status.HTTP_204_NO_CONTENT
-        )
+        return Response({"message": "join deck success"}, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["POST"])
     def leave_deck(self, request, pk=None, *args, **kwargs):
         user = request.user
         instance = self.get_object()
         if user not in instance.users.all():
-            return Response(
-                {"errors": "user is not in deck"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"errors": "user is not in deck"}, status=status.HTTP_400_BAD_REQUEST)
         DeckService.leave_deck(instance, user)
-        return Response(
-            {"message": "leave deck success"}, status=status.HTTP_204_NO_CONTENT
-        )
+        return Response({"message": "leave deck success"}, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["PUT"])
     def set_default_deck(self, request, *args, **kwargs):
@@ -282,7 +270,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
             serializer = self.get_serializer(new_deck)
             return Response(serializer.data)
         except Exception:
-            Response({"errors": "Clone deck fail"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": "Clone deck fail"}, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

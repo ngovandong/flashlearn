@@ -1,36 +1,30 @@
-from django.db.models import Case, CharField, Q, Value, When, Count, Sum, Max, DateTimeField, IntegerField, Prefetch
-from django.db.models.functions import Coalesce
 from django.db import transaction
-import datetime
-from ..models import Deck, UserDeckRole, Term
-from ..constants import FULL_ROLE_CLASS
+from django.db.models import Count, Prefetch, Q
+
+from ..models import Deck, Term, UserDeckRole
 
 
 class DeckService:
     @staticmethod
     def get_retrieve_queryset(user):
-        prefetch = Prefetch(
-            "user_roles", queryset=UserDeckRole.objects.select_related('user'))
-        queryset = Deck.objects.select_related(
-            'owner').prefetch_related(prefetch)
+        prefetch = Prefetch("user_roles", queryset=UserDeckRole.objects.select_related("user"))
+        queryset = Deck.objects.select_related("owner").prefetch_related(prefetch)
         return queryset
 
     @staticmethod
     def get_search_queryset(user, search_query):
         if user.is_superuser:
             return Deck.objects.all()
-        queryset = Deck.objects.filter(
-            Q(is_public=True) | Q(owner=user) | Q(users=user)
-        ).select_related('owner')
+        queryset = Deck.objects.filter(Q(is_public=True) | Q(owner=user) | Q(users=user)).select_related("owner")
 
         if search_query:
             # Filter by search query and term count
-            queryset = queryset.annotate(term_count=Count('terms'))
+            queryset = queryset.annotate(term_count=Count("terms"))
             filtered_queryset = queryset.filter(
-                Q(name__icontains=search_query) |
-                Q(owner__name__icontains=search_query) |
-                Q(owner__email__icontains=search_query),
-                term_count__gt=0
+                Q(name__icontains=search_query)
+                | Q(owner__name__icontains=search_query)
+                | Q(owner__email__icontains=search_query),
+                term_count__gt=0,
             )
         else:
             # Return the original queryset if no search query is specified
@@ -39,54 +33,48 @@ class DeckService:
 
     @staticmethod
     def get_my_own_decks(user):
-
-        my_own_decks = user.my_own_decks.annotate(
-            number_of_term=Count('terms', distinct=True)
-        )
+        my_own_decks = user.my_own_decks.annotate(number_of_term=Count("terms", distinct=True))
 
         return my_own_decks
 
     @staticmethod
     def get_my_others_deck(user):
-        deck_ids = list(UserDeckRole.objects.filter(
-            user_id=user.id).values_list("deck_id", flat=True))
+        deck_ids = list(UserDeckRole.objects.filter(user_id=user.id).values_list("deck_id", flat=True))
 
-        others_deck = Deck.objects.filter(id__in=deck_ids).select_related('owner').annotate(
-        ).annotate(
-            number_of_term=Count('terms', distinct=True)
+        others_deck = (
+            Deck.objects.filter(id__in=deck_ids)
+            .select_related("owner")
+            .annotate()
+            .annotate(number_of_term=Count("terms", distinct=True))
         )
 
         return others_deck
 
     @staticmethod
     def get_my_decks(user):
-        deck_ids = list(UserDeckRole.objects.filter(
-            user_id=user.id).values_list("deck_id", flat=True))
+        deck_ids = list(UserDeckRole.objects.filter(user_id=user.id).values_list("deck_id", flat=True))
         deck_ids += list(Deck.objects.filter(owner_id=user.id).values_list("id", flat=True))
 
-        my_decks = Deck.objects.filter(id__in=deck_ids).select_related(
-            'owner'
-        ).annotate(
-            number_of_term=Count('terms', distinct=True)
+        my_decks = (
+            Deck.objects.filter(id__in=deck_ids)
+            .select_related("owner")
+            .annotate(number_of_term=Count("terms", distinct=True))
         )
 
         return my_decks
 
     @staticmethod
     def get_public_decks(user):
-        deck_ids = list(UserDeckRole.objects.filter(
-            user_id=user.id).values_list("deck_id", flat=True))
+        deck_ids = list(UserDeckRole.objects.filter(user_id=user.id).values_list("deck_id", flat=True))
         deck_ids += list(Deck.objects.filter(owner_id=user.id).values_list("id", flat=True))
 
-        decks = Deck.objects.filter(
-            is_public=True
-        ).exclude(
-            id__in=deck_ids
-        ).select_related(
-            'owner'
-        ).annotate(
-            number_of_term=Count('terms', distinct=True)
-        ).order_by('-number_of_term')[:5]
+        decks = (
+            Deck.objects.filter(is_public=True)
+            .exclude(id__in=deck_ids)
+            .select_related("owner")
+            .annotate(number_of_term=Count("terms", distinct=True))
+            .order_by("-number_of_term")[:5]
+        )
 
         return decks
 
@@ -101,8 +89,7 @@ class DeckService:
 
     @staticmethod
     def get_latest_decks(user):
-        latest_decks = DeckService.get_my_decks(
-            user).order_by('-updated_at')[:5]
+        latest_decks = DeckService.get_my_decks(user).order_by("-updated_at")[:5]
 
         return latest_decks
 
@@ -117,18 +104,13 @@ class DeckService:
                 is_public=False,
                 background=old_deck.background,
                 field=old_deck.field,
-                owner=user
+                owner=user,
             )
 
             # Cloning the term objects associated with the old deck
             old_terms = old_deck.terms.all()
             new_terms = [
-                Term(
-                    name=term.name,
-                    description=term.description,
-                    image=term.image,
-                    deck=new_deck
-                )
+                Term(name=term.name, description=term.description, image=term.image, deck=new_deck)
                 for term in old_terms
             ]
             Term.objects.bulk_create(new_terms)

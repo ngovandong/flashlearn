@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0009_remove_user_is_staff'),
+        ("backend", "0009_remove_user_is_staff"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='deck',
-            name='visible',
-            field=models.CharField(choices=[('PUB', 'Public'), ('PRI', 'Private')], default='PRI', max_length=3),
+            model_name="deck",
+            name="visible",
+            field=models.CharField(choices=[("PUB", "Public"), ("PRI", "Private")], default="PRI", max_length=3),
         ),
         migrations.AlterField(
-            model_name='userdeckrole',
-            name='streaks',
+            model_name="userdeckrole",
+            name="streaks",
             field=models.TextField(blank=True, null=True),
         ),
     ]

@@ -1,5 +1,6 @@
-from rest_framework import viewsets
 import abc
+
+from rest_framework import viewsets
 
 
 class SearchViewSet(viewsets.GenericViewSet):

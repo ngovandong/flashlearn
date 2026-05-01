@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0029_alter_user_default_deck'),
+        ("backend", "0029_alter_user_default_deck"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='deck',
-            options={'ordering': ('created_at',)},
+            name="deck",
+            options={"ordering": ("created_at",)},
         ),
     ]

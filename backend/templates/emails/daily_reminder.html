@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Your daily FlashLearn reminder</title>
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; }
+    img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    body { margin: 0; padding: 0; background-color: #F0F2FF; }
+    @media only screen and (max-width: 620px) {
+      .wrapper { width: 100% !important; padding: 0 !important; }
+      .card { border-radius: 0 !important; }
+      .btn { width: 100% !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#F0F2FF;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+
+  <!-- Hidden preview text -->
+  <div style="display:none;max-height:0;overflow:hidden;font-size:1px;color:#F0F2FF;">
+    Hey {{ name }}, your vocabulary is waiting for you today &#8203;
+  </div>
+
+  <!-- Outer wrapper -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F0F2FF;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+
+        <!-- Card -->
+        <table role="presentation" class="wrapper card" width="560" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(108,99,255,0.10);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#6C63FF 0%,#48C6EF 100%);padding:36px 48px 32px;text-align:center;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding-bottom:16px;">
+                    <!--[if !mso]><!-->
+                    <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"
+                         style="display:block;margin:0 auto;">
+                      <rect x="6" y="16" width="38" height="26" rx="5" fill="rgba(255,255,255,0.25)"/>
+                      <rect x="12" y="10" width="38" height="26" rx="5" fill="rgba(255,255,255,0.45)"/>
+                      <rect x="18" y="4" width="38" height="34" rx="6" fill="#ffffff"/>
+                      <text x="37" y="27" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="700"
+                            fill="#6C63FF" text-anchor="middle">A</text>
+                    </svg>
+                    <!--<![endif]-->
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center">
+                    <span style="font-size:26px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">FlashLearn</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top:6px;">
+                    <span style="font-size:13px;color:rgba(255,255,255,0.80);letter-spacing:2px;text-transform:uppercase;">Daily reminder</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:44px 48px 36px;">
+
+              <!-- Greeting -->
+              <p style="margin:0 0 8px;font-size:24px;font-weight:700;color:#1A1A2E;line-height:1.3;">
+                Hey {{ name }}! &#x1F44B;
+              </p>
+              <p style="margin:0 0 28px;font-size:15px;color:#6B7280;line-height:1.6;">
+                Your daily study session is waiting. Even a few minutes of review today
+                will keep your streak alive and your vocabulary growing.
+              </p>
+
+              <!-- Streak badge -->
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 32px;">
+                <tr>
+                  <td align="center" style="background:#FFF8E1;border-radius:12px;padding:16px 32px;">
+                    <div style="font-size:32px;line-height:1;">&#x1F525;</div>
+                    <div style="margin-top:6px;font-size:13px;font-weight:700;color:#B45309;letter-spacing:0.5px;text-transform:uppercase;">
+                      Keep your streak going
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA button -->
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 36px;">
+                <tr>
+                  <td align="center" style="border-radius:12px;background:linear-gradient(135deg,#6C63FF,#48C6EF);">
+                    <a href="{{ app_url }}" class="btn" target="_blank"
+                       style="display:inline-block;padding:16px 44px;font-size:16px;font-weight:700;color:#ffffff;
+                              text-decoration:none;border-radius:12px;letter-spacing:0.3px;
+                              background:linear-gradient(135deg,#6C63FF,#48C6EF);
+                              mso-padding-alt:16px 44px;">
+                      Start studying now &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Divider -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+                <tr>
+                  <td style="border-top:1px solid #E5E7EB;font-size:0;line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+
+              <!-- Tip -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background:#F0F2FF;border-radius:10px;padding:16px 20px;">
+                    <p style="margin:0;font-size:13px;color:#4255ff;font-weight:600;">&#x1F4A1; Study tip</p>
+                    <p style="margin:6px 0 0;font-size:13px;color:#6B7280;line-height:1.6;">
+                      Reviewing just 10 cards a day leads to a 90% retention rate after one month.
+                      Consistency beats intensity every time.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#F9FAFB;border-top:1px solid #E5E7EB;padding:24px 48px;text-align:center;border-radius:0 0 16px 16px;">
+              <p style="margin:0 0 6px;font-size:12px;color:#9CA3AF;line-height:1.6;">
+                You received this because you enabled daily reminders in your FlashLearn settings.
+                You can turn them off at any time from your
+                <a href="{{ settings_url }}" style="color:#6C63FF;text-decoration:none;">account settings</a>.
+              </p>
+              <p style="margin:0;font-size:11px;color:#D1D5DB;">
+                &copy; 2024 FlashLearn. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+        <!-- /Card -->
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

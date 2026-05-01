@@ -1,5 +1,5 @@
-from django.core.cache import cache as redis_cache
 from django.conf import settings
+from django.core.cache import cache as redis_cache
 
 
 class SKIP_REDIS:

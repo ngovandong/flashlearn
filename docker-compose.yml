@@ -38,10 +38,23 @@ services:
       redis:
         condition: service_started
 
+  worker:
+    build: .
+    container_name: flashlearn_worker
+    command: uv run python manage.py start_worker
+    env_file:
+      - .env.docker
+    environment:
+      - DEBUG=False
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
   frontend:
     build: ./frontend
     container_name: flashlearn_frontend
-    # Uses default Nginx CMD
     # Uses default Nginx CMD
     depends_on:
       - backend

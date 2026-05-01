@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0021_remove_userdeckrole_last_term_learned_id'),
+        ("backend", "0021_remove_userdeckrole_last_term_learned_id"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='userlearningprogress',
-            name='score',
+            model_name="userlearningprogress",
+            name="score",
             field=models.IntegerField(default=0),
         ),
     ]

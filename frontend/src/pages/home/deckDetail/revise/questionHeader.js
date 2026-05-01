@@ -54,7 +54,7 @@ function QuestionHeader({
         toast.error(getFirstError(res.error));
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Something went wrong!");
     }
   };
 
@@ -67,7 +67,7 @@ function QuestionHeader({
         toast.error(getFirstError(res.error));
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Something went wrong!");
     }
   };
 

@@ -51,7 +51,6 @@ function EditDeck() {
             setError(responseError);
           }
         } catch (error) {
-          console.log(error);
           setError("Something Wrong!");
         } finally {
           setIsLoading(false);
@@ -74,6 +73,7 @@ function EditDeck() {
     if (tab === "1") {
       setCurrentTab({ tab: 1, start: 0 });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchDeck = async () => {
@@ -88,7 +88,6 @@ function EditDeck() {
         setError(responseError);
       }
     } catch (error) {
-      console.log(error);
       setError("Something Wrong!");
     } finally {
       setIsLoading(false);
@@ -99,6 +98,7 @@ function EditDeck() {
     if (deckID) {
       fetchDeck();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

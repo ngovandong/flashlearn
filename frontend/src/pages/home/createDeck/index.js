@@ -34,7 +34,6 @@ function CreateDeck() {
           setError(responseError);
         }
       } catch (error) {
-        console.log(error);
         setError("Something wrong!");
       } finally {
         setIsLoading(false);

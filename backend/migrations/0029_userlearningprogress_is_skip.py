@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0028_alter_term_options_term_created_at_term_updated_at'),
+        ("backend", "0028_alter_term_options_term_created_at_term_updated_at"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userlearningprogress',
-            name='is_skip',
+            model_name="userlearningprogress",
+            name="is_skip",
             field=models.BooleanField(default=False),
         ),
     ]
