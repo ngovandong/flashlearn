@@ -9,9 +9,8 @@ services:
       - flashlearn_net
 
   backend:
-    build:
-      context: .
-      dockerfile: dockerfile
+    image: ngovandong/flashlearn_backend:arm64
+    platform: linux/arm64
     container_name: flashlearn_backend
     restart: unless-stopped
     env_file:
@@ -26,9 +25,8 @@ services:
       - redis
 
   worker:
-    build:
-      context: .
-      dockerfile: dockerfile
+    image: ngovandong/flashlearn_backend:arm64
+    platform: linux/arm64
     container_name: flashlearn_worker
     restart: unless-stopped
     command: uv run python manage.py start_worker
@@ -42,7 +40,8 @@ services:
       - backend
 
   frontend:
-    build: ./frontend
+    image: ngovandong/flashlearn_frontend:arm64
+    platform: linux/arm64
     container_name: flashlearn_frontend
     restart: unless-stopped
     ports:

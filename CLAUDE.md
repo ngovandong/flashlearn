@@ -78,6 +78,25 @@ docker-compose -f docker-compose.dev.yml up
 docker-compose build worker
 ```
 
+### Building & Pushing Images to Docker Hub
+```bash
+# Default build (linux/amd64, tagged :latest)
+DOCKER=podman ./build.sh
+
+# ARM64 build (tagged :arm64)
+DOCKER=podman ./build.sh --platform linux/arm64
+```
+
+The `DOCKER` env var selects the CLI (`docker` by default). Use `DOCKER=podman` when aliasing docker to podman.
+Images: `ngovandong/flashlearn_backend:<tag>` and `ngovandong/flashlearn_frontend:<tag>`.
+
+### Running from Docker Hub (self-service, no local build)
+```bash
+# Uses pre-built images from Docker Hub
+docker-compose -f docker-compose.dockerhub.selfservice.yml up -d
+```
+Requires `.env.docker`. The selfservice compose file targets ARM64 (`platform: linux/arm64`, tag `:arm64`).
+
 ## Architecture
 
 ### Request Flow

@@ -138,6 +138,49 @@ uv run python manage.py rqstats
 
 ---
 
+## Building & Publishing Docker Images
+
+Use `build.sh` to build and push images to Docker Hub.
+
+### Prerequisites
+- [Podman](https://podman.io/) or Docker installed
+- Logged in to Docker Hub (`podman login docker.io` or `docker login`)
+
+### Usage
+
+```bash
+# Default build (linux/amd64, tagged :latest)
+DOCKER=podman ./build.sh
+
+# ARM64 build (tagged :arm64)
+DOCKER=podman ./build.sh --platform linux/arm64
+```
+
+The `DOCKER` environment variable selects the container CLI (`docker` by default, override with `podman`).
+
+| Platform flag | Image tag |
+|---|---|
+| *(none)* | `latest` |
+| `--platform linux/arm64` | `arm64` |
+
+Images pushed:
+- `ngovandong/flashlearn_backend:<tag>`
+- `ngovandong/flashlearn_frontend:<tag>`
+
+### Running from Docker Hub (self-service)
+
+Copy `.env.sample` to `.env.docker`, fill in the values, then:
+
+```bash
+# ARM64 host
+docker-compose -f docker-compose.dockerhub.selfservice.yml up -d
+
+# AMD64 host — edit the file to use :latest tag and remove platform: linux/arm64
+docker-compose -f docker-compose.dockerhub.selfservice.yml up -d
+```
+
+---
+
 ## Code Quality
 
 Pre-commit hooks run automatically on every `git commit`. They cover:
