@@ -1,27 +1,40 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11-slim
+# Stage 1: Build — install deps with build tools
+FROM python:3.11-slim AS builder
 
-# Install system dependencies
 RUN apt-get update \
-    && apt-get install -y gcc curl \
-    && apt-get install -y default-mysql-client default-libmysqlclient-dev \
+    && apt-get install -y --no-install-recommends \
+       gcc curl default-libmysqlclient-dev dpkg-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Set the working directory to /app
 WORKDIR /app
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Copy the project files
-COPY pyproject.toml uv.lock* /app/
+COPY pyproject.toml uv.lock* ./
 
-# Set the MYSQLCLIENT_CFLAGS and MYSQLCLIENT_LDFLAGS environment variables
-ENV MYSQLCLIENT_CFLAGS="-I/usr/include/mysql" \
-    MYSQLCLIENT_LDFLAGS="-L/usr/lib/x86_64-linux-gnu -lmysqlclient"
+# Detect arch dynamically so this works on both amd64 and arm64
+RUN ARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) && \
+    MYSQLCLIENT_CFLAGS="-I/usr/include/mysql" \
+    MYSQLCLIENT_LDFLAGS="-L/usr/lib/${ARCH} -lmysqlclient" \
+    uv sync --frozen --no-cache
 
-# Install project dependencies
-RUN uv sync --frozen --no-cache
+# Stage 2: Runtime — only what's needed to run
+FROM python:3.11-slim
+
+# Only the runtime MySQL shared library (no gcc, no dev headers, no CLI)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libmariadb3 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# Copy built virtualenv from builder
+COPY --from=builder /app/.venv /app/.venv
 
 # Copy the Django project code
 COPY . /app
