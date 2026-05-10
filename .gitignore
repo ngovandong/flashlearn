@@ -126,5 +126,9 @@ GitHub.sublime-settings
 # docker env
 .env.docker
 
+# Google Drive OAuth credentials (never commit these)
+drive-credentials.json
+drive-token.json
+
 # Rust
 rust_backend/target/
