@@ -16,6 +16,18 @@ def send_active_account_email(name: str, link: str, email: str):
     )
 
 
+def send_welcome_email(name: str, email: str):
+    MailService.send_template_mail_sync(
+        to_email=email,
+        template="emails/welcome_email.html",
+        context_object={
+            "name": name,
+            "app_url": settings.BASE_FRONTEND_URL,
+        },
+        subject="Welcome to FlashLearn!",
+    )
+
+
 def send_daily_reminders():
     """
     Send a reminder to every active user who has daily_reminder = True in their settings.

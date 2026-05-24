@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Welcome to FlashLearn</title>
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; }
+    img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    body { margin: 0; padding: 0; background-color: #F0F2FF; }
+    @media only screen and (max-width: 620px) {
+      .wrapper { width: 100% !important; padding: 0 !important; }
+      .card { border-radius: 0 !important; }
+      .btn { width: 100% !important; }
+      .feature-cell { display: block !important; width: 100% !important; padding: 8px 0 !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#F0F2FF;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+
+  <div style="display:none;max-height:0;overflow:hidden;font-size:1px;color:#F0F2FF;">
+    Hi {{ name }}, your FlashLearn account is ready &#8203;
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F0F2FF;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+
+        <table role="presentation" class="wrapper card" width="560" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(108,99,255,0.10);">
+
+          <tr>
+            <td style="background:linear-gradient(135deg,#6C63FF 0%,#48C6EF 100%);padding:40px 48px 36px;text-align:center;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center">
+                    <span style="font-size:26px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">FlashLearn</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top:6px;">
+                    <span style="font-size:13px;color:rgba(255,255,255,0.80);letter-spacing:2px;text-transform:uppercase;">Learn English with flashcards</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:44px 48px 36px;">
+
+              <p style="margin:0 0 8px;font-size:24px;font-weight:700;color:#1A1A2E;line-height:1.3;">
+                Welcome, {{ name }}! &#x1F389;
+              </p>
+              <p style="margin:0 0 28px;font-size:15px;color:#6B7280;line-height:1.6;">
+                Your account is ready. We created a default deck for you so you can start adding vocabulary right away.
+              </p>
+
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 36px;">
+                <tr>
+                  <td align="center" style="border-radius:12px;background:linear-gradient(135deg,#6C63FF,#48C6EF);">
+                    <a href="{{ app_url }}" class="btn" target="_blank"
+                       style="display:inline-block;padding:16px 44px;font-size:16px;font-weight:700;color:#ffffff;
+                              text-decoration:none;border-radius:12px;letter-spacing:0.3px;
+                              background:linear-gradient(135deg,#6C63FF,#48C6EF);
+                              mso-padding-alt:16px 44px;">
+                      Start learning &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+                <tr>
+                  <td style="border-top:1px solid #E5E7EB;font-size:0;line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 20px;font-size:13px;font-weight:700;text-transform:uppercase;
+                         letter-spacing:1.5px;color:#9CA3AF;text-align:center;">
+                What you can do next
+              </p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td class="feature-cell" align="center" valign="top" width="33%" style="padding:0 8px 16px;">
+                    <div style="font-size:13px;font-weight:600;color:#374151;line-height:1.5;">Build flashcard decks</div>
+                  </td>
+                  <td class="feature-cell" align="center" valign="top" width="33%" style="padding:0 8px 16px;">
+                    <div style="font-size:13px;font-weight:600;color:#374151;line-height:1.5;">Revise with spaced review</div>
+                  </td>
+                  <td class="feature-cell" align="center" valign="top" width="33%" style="padding:0 8px 16px;">
+                    <div style="font-size:13px;font-weight:600;color:#374151;line-height:1.5;">Play Quick Revise</div>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background:#F9FAFB;border-top:1px solid #E5E7EB;padding:24px 48px;text-align:center;border-radius:0 0 16px 16px;">
+              <p style="margin:0 0 6px;font-size:12px;color:#9CA3AF;line-height:1.6;">
+                You signed in with Google. If this wasn&rsquo;t you, please contact support.
+              </p>
+              <p style="margin:0;font-size:11px;color:#D1D5DB;">
+                &copy; 2024 FlashLearn. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

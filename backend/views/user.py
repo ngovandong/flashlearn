@@ -11,7 +11,6 @@ from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
 from base.views import FlexibleViewSet
 
-from ..constants import DEFAULT_USER_SETTINGS
 from ..models import User, UserSetting
 from ..serializers import (
     ActiveAccountSerializer,
@@ -23,15 +22,8 @@ from ..serializers import (
     UserSerializer,
 )
 from ..services import AuthService, UserService
-from ..tasks import send_active_account_email
+from ..tasks import setup_new_user
 from ..utils.dispatch import dispatch
-
-
-def _seed_settings_for_user(user):
-    UserSetting.objects.get_or_create(user=user, key="reminder_email", defaults={"value": user.email})
-    for key, default_value in DEFAULT_USER_SETTINGS.items():
-        UserSetting.objects.get_or_create(user=user, key=key, defaults={"value": default_value})
-
 
 login_url = f"{settings.BASE_FRONTEND_URL}/login"
 
@@ -107,8 +99,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
         params = urlencode({"token": token})
         link = f"{active_account_url}?{params}"
 
-        _seed_settings_for_user(user)
-        dispatch(send_active_account_email, user.name, link, user.email)
+        dispatch(setup_new_user, user.id, link)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=["post"])
