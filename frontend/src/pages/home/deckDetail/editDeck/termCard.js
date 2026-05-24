@@ -69,6 +69,7 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
         clearTimeout(debounceTimer);
       };
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [term.name, term.open]);
 
   return (

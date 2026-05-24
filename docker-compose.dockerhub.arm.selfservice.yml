@@ -1,0 +1,56 @@
+services:
+  redis:
+    image: redis:6-alpine
+    container_name: flashlearn_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - flashlearn_net
+
+  backend:
+    image: ngovandong/flashlearn_backend:arm64
+    platform: linux/arm64
+    container_name: flashlearn_backend
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    ports:
+      - "8005:8005"
+    networks:
+      - flashlearn_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+
+  worker:
+    image: ngovandong/flashlearn_backend:arm64
+    platform: linux/arm64
+    container_name: flashlearn_worker
+    restart: unless-stopped
+    command: uv run python manage.py start_worker
+    env_file:
+      - .env.docker
+    networks:
+      - flashlearn_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - backend
+
+  frontend:
+    image: ngovandong/flashlearn_frontend:arm64
+    platform: linux/arm64
+    container_name: flashlearn_frontend
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+    networks:
+      - flashlearn_net
+    depends_on:
+      - backend
+
+networks:
+  flashlearn_net:
+    driver: bridge

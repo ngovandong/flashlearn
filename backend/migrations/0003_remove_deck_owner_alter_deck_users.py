@@ -5,19 +5,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0002_userlearningprogress_userdeckrole_deck_users'),
+        ("backend", "0002_userlearningprogress_userdeckrole_deck_users"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='deck',
-            name='owner',
+            model_name="deck",
+            name="owner",
         ),
         migrations.AlterField(
-            model_name='deck',
-            name='users',
-            field=models.ManyToManyField(related_name='decks', through='backend.UserDeckRole', to=settings.AUTH_USER_MODEL),
+            model_name="deck",
+            name="users",
+            field=models.ManyToManyField(
+                related_name="decks", through="backend.UserDeckRole", to=settings.AUTH_USER_MODEL
+            ),
         ),
     ]

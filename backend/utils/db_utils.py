@@ -1,14 +1,13 @@
-from django.db import connection
 from uuid import UUID
 
-def execute_raw_sql(query: str, **kwargs):
-    kwargs = {
-        k: str(v).replace("-", "") if isinstance(v, UUID) else v
-        for k, v in kwargs.items()
-    }
-    
+from django.db import connection
+
+
+def execute_raw_sql(query: str, params: list):
+    params = [str(v).replace("-", "") if isinstance(v, UUID) else v for v in params]
+
     with connection.cursor() as cursor:
-        cursor.execute(query.format(**kwargs))
+        cursor.execute(query, params)
         row = cursor.fetchall()
 
     return row

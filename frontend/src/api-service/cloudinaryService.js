@@ -12,7 +12,7 @@ const uploadImage = (file) => {
   })
     .then((resp) => resp.json())
     .then((data) => data.url)
-    .catch((err) => console.log(err));
+    .catch(() => {});
 };
 
 const cloudinaryService = { uploadImage };

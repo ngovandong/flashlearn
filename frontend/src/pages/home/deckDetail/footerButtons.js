@@ -40,7 +40,7 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
         toast.error(errorMessage);
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Something went wrong!");
     } finally {
       setIsLoading(false);
     }
@@ -60,7 +60,7 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
           toast.error(errorMessage);
         }
       } catch (error) {
-        console.log(error);
+        toast.error("Something went wrong!");
       } finally {
         setIsLoading(false);
       }
@@ -81,7 +81,6 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
         toast.error(errorMessage);
       }
     } catch (err) {
-      console.error(err);
       toast.error("Getting invite link failed!");
     }
   };
@@ -98,7 +97,7 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
         toast.error(errorMessage);
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Something went wrong!");
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +115,7 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
         toast.error(errorMessage);
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Something went wrong!");
     } finally {
       setIsLoading(false);
     }
@@ -133,7 +132,7 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
         toast.error(errorMessage);
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Something went wrong!");
     } finally {
       setIsLoading(false);
     }

@@ -20,6 +20,7 @@ dependencies = [
     "gunicorn>=21.2.0,<22.0.0",
     "mysqlclient>=2.2.0,<3.0.0",
     "django-rq>=2.10.0,<3.0.0",
+    "rq-scheduler>=0.13.0,<1.0.0",
     "elasticsearch>=8.11.0,<9.0.0",
     "elasticsearch-dsl>=8.11.0,<9.0.0",
     "django-elasticsearch-dsl>=8.0.0,<9.0.0",
@@ -28,9 +29,55 @@ dependencies = [
     "django-revproxy>=0.12.0,<1.0.0",
     "channels[daphne]>=4.0.0",
     "channels-redis>=4.0.0",
+    "google-auth>=2.23.0,<3.0.0",
+    "google-auth-oauthlib>=1.1.0,<2.0.0",
+    "google-auth-httplib2>=0.2.0,<1.0.0",
+    "google-api-python-client>=2.100.0,<3.0.0",
 ]
+
+[tool.uv]
+allow-insecure-host = ["pypi.org", "files.pythonhosted.org", "pypi.python.org"]
 
 [project.optional-dependencies]
 dev = [
-    "autopep8>=2.1.0,<3.0.0",
+    "ruff>=0.9.0",
+    "pre-commit>=4.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "debugpy>=1.8.20",
+    "ruff>=0.9.0",
+    "pre-commit>=4.0.0",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "W"]
+ignore = [
+    "E501",   # line too long — handled by formatter
+    "B008",   # do not perform function calls in default args (common in Django/DRF)
+    "B904",   # raise-without-from-inside-except — style preference
+]
+
+[tool.ruff.lint.per-file-ignores]
+"*/__init__.py" = ["F401", "F403"]
+"*/migrations/*" = ["E501", "F401"]
+"*/tests/*" = ["B"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.bandit]
+exclude_dirs = ["backend/migrations", "backend/tests"]
+skips = [
+    "B101",  # assert used in tests
+    "B104",  # binding to 0.0.0.0 — expected in Django dev server
+    "B105",  # hardcoded_password_string — false positive on URL constants
+    "B110",  # try_except_pass — intentional in WebSocket consumer error handlers
+    "B311",  # random — not used for crypto here
 ]

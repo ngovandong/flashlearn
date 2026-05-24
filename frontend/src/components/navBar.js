@@ -234,6 +234,15 @@ function ResponsiveAppBar()
               >
                 <Typography textAlign="center">My decks</Typography>
               </MenuItem>
+              <MenuItem
+                onClick={() =>
+                {
+                  navigate("settings");
+                  handleCloseUserMenu();
+                }}
+              >
+                <Typography textAlign="center">Settings</Typography>
+              </MenuItem>
               <MenuItem onClick={() => dispatch(logout())}>
                 <Typography textAlign="center">Logout</Typography>
               </MenuItem>

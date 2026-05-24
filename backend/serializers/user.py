@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import PasswordField
-from django.conf import settings
-from ..models import User
 
+from ..models import User
 
 # from ..services import MailService
 
@@ -12,8 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'name', 'password', 'first_name',
-                  'last_name', 'image_url', 'default_deck']
+        fields = ["id", "email", "name", "password", "first_name", "last_name", "image_url", "default_deck"]
 
     # def validate_email(self, value):
     #     if not MailService.validate_email(value):
@@ -36,8 +34,7 @@ class GoogleUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'name',
-                  'image_url', 'first_name', 'last_name']
+        fields = ["id", "email", "name", "image_url", "first_name", "last_name"]
 
 
 class SetPasswordSerializer(serializers.Serializer):
@@ -45,22 +42,18 @@ class SetPasswordSerializer(serializers.Serializer):
     new_password = PasswordField()
 
     def validate(self, attrs):
-        old_password = attrs['old_password']
-        new_password = attrs['new_password']
+        old_password = attrs["old_password"]
+        new_password = attrs["new_password"]
         if old_password == new_password:
-            raise serializers.ValidationError(
-                {"new_password": "new password must be difference!"}
-            )
+            raise serializers.ValidationError({"new_password": "new password must be difference!"})
         return attrs
 
     def save(self, **kwargs):
-        user = self.context['user']
-        old_password = self.validated_data['old_password']
-        new_password = self.validated_data['new_password']
+        user = self.context["user"]
+        old_password = self.validated_data["old_password"]
+        new_password = self.validated_data["new_password"]
         if not user.check_password(old_password):
-            raise serializers.ValidationError(
-                {"old_password": "old password wrong!"}
-            )
+            raise serializers.ValidationError({"old_password": "old password wrong!"})
         user.set_password(new_password)
         user.save()
         return user

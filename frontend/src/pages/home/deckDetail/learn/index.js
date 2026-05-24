@@ -6,10 +6,7 @@ import CircleButton from "@components/circleButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-import CheckIcon from "@mui/icons-material/Check";
-import LoopIcon from "@mui/icons-material/Loop";
-
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { learningService } from "@api-services/learningService";
 import { useNavigate, useParams } from "react-router-dom";
@@ -95,10 +92,10 @@ function LearnPage()
     setIsStarred((prev) => !prev);
   };
 
-  const speakTerm = () =>
+  const speakTerm = useCallback(() =>
   {
-    return speak(currentTerm.name);
-  };
+    return speak(currentTerm?.name);
+  }, [currentTerm]);
   const handleNext = async () =>
   {
     if (currentState.index + 2 > terms.length) {
@@ -162,7 +159,7 @@ function LearnPage()
         toast.error(errorMessage);
       }
     } catch (error) {
-      console.log(error);
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
@@ -194,7 +191,7 @@ function LearnPage()
         toast.error(errorMessage);
       }
     } catch (error) {
-      console.log(error);
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
@@ -217,7 +214,7 @@ function LearnPage()
         }
       }
     } catch (error) {
-      console.log(error);
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
@@ -231,6 +228,7 @@ function LearnPage()
   useEffect(() =>
   {
     fetchWords();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() =>
@@ -238,6 +236,7 @@ function LearnPage()
     if (currentTerm != null) {
       learned();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTerm]);
 
   useEffect(() =>
@@ -266,6 +265,7 @@ function LearnPage()
     if (deckID) {
       fetchDeck();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deckID]);
 
   const handleKeyDown = (event) =>
@@ -289,12 +289,11 @@ function LearnPage()
   useEffect(() =>
   {
     window.addEventListener("keydown", handleKeyDown);
-
-    // Clean up the event listener on component unmount
     return () =>
     {
       window.removeEventListener("keydown", handleKeyDown);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentState.index]);
 
   return deck && terms ? (

@@ -9,6 +9,16 @@ services:
       - CORS_ALLOW_ALL_ORIGINS=True
       - ALLOWED_HOSTS=*
 
+  worker:
+    build: .
+    command: uv run python manage.py start_worker
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=True
+    depends_on:
+      - backend
+
   frontend:
     build:
       context: ./frontend

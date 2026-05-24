@@ -8,6 +8,6 @@ FROM
     backend_term t
     INNER JOIN backend_userlearningprogress l ON t.id = l.term_id
 WHERE
-    l.user_id = '{user_id}'
-    AND t.deck_id = '{deck_id}';
+    l.user_id = %s
+    AND t.deck_id = %s;
 """

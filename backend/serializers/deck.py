@@ -1,11 +1,11 @@
 from rest_framework import serializers
-from django.db.models import Prefetch
-from django.conf import settings
-from ..models import Deck, UserDeckRole
-from . import AddUserSerializer, UserSerializer, ProgressSerializer
+
 from ..constants import FULL_ROLE_CHOICES
+from ..models import Deck
 from ..services import LearningService
-from cloudinary.utils import cloudinary_url
+from .learning_progress import ProgressSerializer
+from .role import AddUserSerializer
+from .user import UserSerializer
 
 
 class DeckSerializer(serializers.ModelSerializer):
@@ -15,41 +15,44 @@ class DeckSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Deck
-        fields = ('id', 'name', 'description', 'is_public', 'owner', 'number_of_term',
-                  'created_at', 'updated_at', 'background')
+        fields = (
+            "id",
+            "name",
+            "description",
+            "is_public",
+            "owner",
+            "number_of_term",
+            "created_at",
+            "updated_at",
+            "background",
+        )
 
 
 class DeckDetailSerializer(DeckSerializer):
     user_roles = AddUserSerializer(read_only=True, many=True)
     learning_progress = ProgressSerializer(read_only=True)
-    my_permission = serializers.ChoiceField(
-        choices=FULL_ROLE_CHOICES, read_only=True)
+    my_permission = serializers.ChoiceField(choices=FULL_ROLE_CHOICES, read_only=True)
 
     class Meta(DeckSerializer.Meta):
-        fields = (*DeckSerializer.Meta.fields, 'user_roles',
-                  'my_permission', 'learning_progress')
+        fields = (*DeckSerializer.Meta.fields, "user_roles", "my_permission", "learning_progress")
 
     def to_representation(self, instance):
-        request = self.context['request']
+        request = self.context["request"]
         user = request.user
         ret = super().to_representation(instance)
         permission = instance.get_user_permission(user)
         ret["my_permission"] = permission
-        ret["number_of_term"], ret['learning_progress'] = LearningService.get_learning_progress(
-            instance.id, user)
+        ret["number_of_term"], ret["learning_progress"] = LearningService.get_learning_progress(instance.id, user)
         return ret
 
 
 class MyDeckSerializer(DeckSerializer):
     learned = serializers.IntegerField(read_only=True)
-    my_permission = serializers.ChoiceField(
-        choices=FULL_ROLE_CHOICES, read_only=True)
+    my_permission = serializers.ChoiceField(choices=FULL_ROLE_CHOICES, read_only=True)
 
     class Meta(DeckSerializer.Meta):
-        fields = (*DeckSerializer.Meta.fields,
-                  'my_permission', 'learned')
+        fields = (*DeckSerializer.Meta.fields, "my_permission", "learned")
 
     def to_representation(self, instance):
-        user = self.context['request'].user
         ret = super().to_representation(instance)
         return ret

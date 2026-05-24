@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0026_alter_term_image'),
+        ("backend", "0026_alter_term_image"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='term',
-            name='image',
+            model_name="term",
+            name="image",
             field=models.TextField(blank=True, null=True),
         ),
     ]

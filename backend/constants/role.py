@@ -1,12 +1,12 @@
 USER_ROLE_CHOICES = (
-    ('E', 'Edit'),
-    ('V', 'ViewOnly'),
+    ("E", "Edit"),
+    ("V", "ViewOnly"),
 )
 
 FULL_ROLE_CHOICES = (
-    ('E', 'Edit'),
-    ('V', 'ViewOnly'),
-    ('O', 'Owner'),
+    ("E", "Edit"),
+    ("V", "ViewOnly"),
+    ("O", "Owner"),
 )
 
 

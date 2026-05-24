@@ -1,10 +1,11 @@
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
-from rest_framework_simplejwt.settings import api_settings
+from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from django.contrib.auth.models import update_last_login
-from .user import UserSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
+from rest_framework_simplejwt.settings import api_settings
+
 from ..models import User
+from .user import UserSerializer
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -13,15 +14,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         # Add custom claims
         serializer = UserSerializer(instance=user)
-        token['user'] = serializer.data
+        token["user"] = serializer.data
         # ...
         return token
 
     def validate(self, attrs):
         data = super().validate(attrs)
         if not self.user.is_validated_email:
-            raise serializers.ValidationError(
-                {"errors": "Please activate your email account!"})
+            raise serializers.ValidationError({"errors": "Please activate your email account!"})
         return data
 
 
@@ -33,14 +33,14 @@ class ActiveAccountSerializer(TokenRefreshSerializer):
         token = cls.token_class.for_user(user)
         # Add custom claims
         serializer = UserSerializer(instance=user)
-        token['user'] = serializer.data
+        token["user"] = serializer.data
         # ...
         return token
 
     def validate(self, attrs):
         data = super().validate(attrs)
-        refresh = self.token_class(data['refresh'])
-        user_id = refresh.payload['user_id']
+        refresh = self.token_class(data["refresh"])
+        user_id = refresh.payload["user_id"]
         self.user_id = user_id
         user = User.objects.filter(id=user_id).first()
         if user is None:

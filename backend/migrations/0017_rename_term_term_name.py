@@ -4,15 +4,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0016_alter_deck_background'),
+        ("backend", "0016_alter_deck_background"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='term',
-            old_name='term',
-            new_name='name',
+            model_name="term",
+            old_name="term",
+            new_name="name",
         ),
     ]

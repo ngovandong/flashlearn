@@ -67,7 +67,6 @@ function AddTermsTab({ handleClickBack }) {
             setError("Delete Fail!");
           }
         } catch (error) {
-          console.log(error);
           setError("Something Wrong!");
         } finally {
           setIsLoading(false);
@@ -165,7 +164,6 @@ function AddTermsTab({ handleClickBack }) {
             }
           }
         } catch (error) {
-          console.log(error);
           setError("Something wrong!");
         } finally {
           setFetchState({
@@ -208,12 +206,10 @@ function AddTermsTab({ handleClickBack }) {
           setTerms(fetchedTerms);
         }
       } else {
-        console.log(res.error);
         const errorMessage = getFirstError(res.error);
         setError(errorMessage);
       }
     } catch (error) {
-      console.log(error);
       setError("Something wrong!");
     } finally {
       setIsLoading(false);
@@ -225,6 +221,7 @@ function AddTermsTab({ handleClickBack }) {
     if (deckID) {
       fetchTerms();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleScroll = () => {
@@ -239,13 +236,11 @@ function AddTermsTab({ handleClickBack }) {
   };
 
   useEffect(() => {
-    // Attach the scroll event listener
     window.addEventListener("scroll", handleScroll);
-
-    // Clean up the event listener when the component unmounts
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchState]);
 
   return (

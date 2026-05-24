@@ -1,0 +1,82 @@
+.settings-page {
+    padding: 0 4rem;
+    max-width: 56rem;
+    margin: auto;
+
+    .settings-header {
+        height: 6.875rem;
+        display: flex;
+        align-items: center;
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: $main-text-color;
+        }
+    }
+
+    .settings-card {
+        @include app_radius;
+        background-color: white;
+        padding: 2rem 2.5rem;
+
+        .settings-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: $main-text-color;
+            margin-bottom: 1.25rem;
+        }
+
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+
+            .settings-row__label {
+                display: flex;
+                flex-direction: column;
+                row-gap: 0.25rem;
+
+                span {
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    color: $main-text-color;
+                }
+
+                small {
+                    font-size: 0.75rem;
+                    color: $gray-text-color;
+                }
+            }
+        }
+
+        .settings-divider {
+            border: none;
+            border-top: 1px solid #edeff4;
+            margin: 0.75rem 0;
+        }
+
+        .settings-field {
+            padding: 0.75rem 0;
+
+            label {
+                display: block;
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: $gray-text-color;
+                margin-bottom: 0.5rem;
+            }
+        }
+    }
+
+    .settings-footer {
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: flex-end;
+
+        .main-btn {
+            @include purple_btn;
+        }
+    }
+}

@@ -1,16 +1,18 @@
-import json
 import asyncio
-import random
+import json
 import logging
+import random
 from urllib.parse import parse_qs
-from channels.generic.websocket import AsyncWebsocketConsumer
+
 from channels.db import database_sync_to_async
-from rest_framework_simplejwt.tokens import AccessToken, TokenError
+from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
-from backend.services import TermService, learning_progress_cache
-from backend.serializers import ReviseTermSerializer
 from django.utils import timezone
-from backend.models import UserLearningProgress, Deck
+from rest_framework_simplejwt.tokens import AccessToken, TokenError
+
+from backend.models import Deck, UserLearningProgress
+from backend.serializers import ReviseTermSerializer
+from backend.services import TermService, learning_progress_cache
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +35,7 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        self.scope["user"] = (
-            user  # Keep this for consistency with other methods expecting self.scope['user']
-        )
+        self.scope["user"] = user  # Keep this for consistency with other methods expecting self.scope['user']
         self.user = user  # Also store in self.user for convenience
         self.deck_id = deck_id
         await self.accept()
@@ -67,9 +67,7 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def save_learning_progress(self, term_id):
-        learning_progress, _ = UserLearningProgress.objects.get_or_create(
-            user=self.user, term_id=term_id
-        )
+        learning_progress, _ = UserLearningProgress.objects.get_or_create(user=self.user, term_id=term_id)
         learning_progress.score += 1
         learning_progress.last_revised_at = timezone.now()
         learning_progress.save()
@@ -100,9 +98,7 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             logger.error(f"Error in receive handler: {e}", exc_info=True)
             try:
-                await self.send(
-                    text_data=json.dumps({"type": "error", "message": "Server error"})
-                )
+                await self.send(text_data=json.dumps({"type": "error", "message": "Server error"}))
             except Exception:
                 pass  # Connection might be closed
 
@@ -119,11 +115,7 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
                 # Cleanup on error
                 self._cleanup_game_memory()
                 try:
-                    await self.send(
-                        text_data=json.dumps(
-                            {"type": "error", "message": "Failed to start game"}
-                        )
-                    )
+                    await self.send(text_data=json.dumps({"type": "error", "message": "Failed to start game"}))
                 except Exception:
                     pass
 
@@ -156,9 +148,7 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
                 random.shuffle(distractors)
                 selected_distractors = distractors[:3]
 
-            questions_options = [current_term["name"]] + [
-                d["name"] for d in selected_distractors
-            ]
+            questions_options = [current_term["name"]] + [d["name"] for d in selected_distractors]
             random.shuffle(questions_options)
 
             question_payload = {
@@ -209,18 +199,12 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
                 except Exception as e:
                     logger.warning(f"Error cancelling previous timer: {e}")
 
-            self.game_state["timer_task"] = asyncio.create_task(
-                self.game_timer(time_limit)
-            )
+            self.game_state["timer_task"] = asyncio.create_task(self.game_timer(time_limit))
         except Exception as e:
             logger.error(f"Error in send_next_question: {e}", exc_info=True)
             self._cleanup_game_memory()
             try:
-                await self.send(
-                    text_data=json.dumps(
-                        {"type": "error", "message": "Failed to send question"}
-                    )
-                )
+                await self.send(text_data=json.dumps({"type": "error", "message": "Failed to send question"}))
             except Exception:
                 pass
 
@@ -229,13 +213,9 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
             await asyncio.sleep(duration)
             # Timeout - check if connection is still open
             try:
-                await self.send(
-                    text_data=json.dumps({"type": "game_over", "reason": "timeout"})
-                )
+                await self.send(text_data=json.dumps({"type": "game_over", "reason": "timeout"}))
             except Exception as e:
-                logger.debug(
-                    f"Could not send timeout message (connection closed?): {e}"
-                )
+                logger.debug(f"Could not send timeout message (connection closed?): {e}")
             # Do not close connection to allow replay
             # await self.close()
         except asyncio.CancelledError:
@@ -280,9 +260,7 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
             if user_answer.strip().lower() == correct_answer.lower():
                 await self.save_learning_progress(current_term["id"])
                 self.game_state["score"] += 1
-                await self.send(
-                    text_data=json.dumps({"type": "result", "correct": True})
-                )
+                await self.send(text_data=json.dumps({"type": "result", "correct": True}))
                 self.game_state["current_index"] += 1
                 await asyncio.sleep(0.5)
                 await self.send_next_question(is_first=False)
@@ -303,11 +281,7 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
             logger.error(f"Error handling answer: {e}", exc_info=True)
             self._cleanup_game_memory()
             try:
-                await self.send(
-                    text_data=json.dumps(
-                        {"type": "error", "message": "Error processing answer"}
-                    )
-                )
+                await self.send(text_data=json.dumps({"type": "error", "message": "Error processing answer"}))
             except Exception:
                 pass
 
@@ -330,12 +304,7 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
 
         # Clear cache - CRITICAL, must succeed
         try:
-            if (
-                hasattr(self, "user")
-                and hasattr(self, "deck_id")
-                and self.user
-                and self.deck_id
-            ):
+            if hasattr(self, "user") and hasattr(self, "deck_id") and self.user and self.deck_id:
                 learning_progress_cache.delete_combine(self.deck_id, self.user.id)
         except Exception as e:
             logger.error(f"Error deleting cache in disconnect: {e}")

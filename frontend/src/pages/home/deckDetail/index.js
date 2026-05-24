@@ -35,7 +35,7 @@ function DeckDetail()
   const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const { deckID } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   const navigate = useNavigate();
 
@@ -57,7 +57,7 @@ function DeckDetail()
         }
       }
     } catch (error) {
-      console.log(error);
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
@@ -68,6 +68,7 @@ function DeckDetail()
     if (deckID) {
       fetchDeck();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deckID]);
 
   useEffect(() =>
@@ -76,6 +77,7 @@ function DeckDetail()
     if (!notnavigate && deck && deck.number_of_term === 0) {
       navigate("edit?tab=1");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deck]);
   return (
     <>

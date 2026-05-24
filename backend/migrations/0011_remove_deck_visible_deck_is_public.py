@@ -4,19 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('backend', '0010_deck_visible_alter_userdeckrole_streaks'),
+        ("backend", "0010_deck_visible_alter_userdeckrole_streaks"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='deck',
-            name='visible',
+            model_name="deck",
+            name="visible",
         ),
         migrations.AddField(
-            model_name='deck',
-            name='is_public',
+            model_name="deck",
+            name="is_public",
             field=models.BooleanField(default=True),
         ),
     ]

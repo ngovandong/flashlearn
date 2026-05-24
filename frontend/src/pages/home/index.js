@@ -27,7 +27,7 @@ function Home() {
         setError(responseError);
       }
     } catch (error) {
-      console.log(error);
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
@@ -43,13 +43,14 @@ function Home() {
         setError(responseError);
       }
     } catch (error) {
-      console.log(error);
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
   };
   useEffect(() => {
     fetchDeck();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return user ? (
     <div className="home-page">

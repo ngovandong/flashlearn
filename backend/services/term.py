@@ -1,10 +1,10 @@
-from django.core.files.uploadedfile import InMemoryUploadedFile
-import cloudinary.uploader
 import re
-import requests
-import base64
-from ..models import Term, Deck
-from .cache import CacheService, RESOURCE
+
+import cloudinary.uploader
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
+from ..models import Deck, Term
+from .cache import RESOURCE, CacheService
 
 deck_terms_cache = CacheService.factory(RESOURCE.TERM)
 

@@ -4,7 +4,6 @@ import ReplayIcon from "@mui/icons-material/Replay";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import AccessTimeFilledIcon from "@mui/icons-material/AccessTimeFilled";
 import ErrorIcon from "@mui/icons-material/Error";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -19,7 +18,7 @@ import { selectToken } from "@app/store/authSlice";
 function QuickRevise()
 {
     const [question, setQuestion] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [, setIsLoading] = useState(true);
     const [showConfetti, setShowConfetti] = useState(false);
     const [timer, setTimer] = useState(0);
     const [initialTimer, setInitialTimer] = useState(0);
@@ -60,7 +59,6 @@ function QuickRevise()
 
         ws.current.onopen = () =>
         {
-            console.log("Connected to WebSocket");
             ws.current.send(JSON.stringify({ action: "start" }));
             setIsLoading(false);
         };
@@ -97,10 +95,7 @@ function QuickRevise()
             }
         };
 
-        ws.current.onclose = () =>
-        {
-            console.log("WebSocket Disconnected");
-        };
+        ws.current.onclose = () => {};
 
         return () =>
         {
@@ -108,6 +103,7 @@ function QuickRevise()
                 ws.current.close();
             }
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [deckID, token]);
 
     useEffect(() =>

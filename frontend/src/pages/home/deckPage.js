@@ -29,7 +29,7 @@ function DeckPage() {
         setError(responseError);
       }
     } catch (error) {
-      console.log(error);
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
