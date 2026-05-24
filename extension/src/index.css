@@ -1,0 +1,17 @@
+body {
+  margin: 0;
+  font-size: 16px;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  width: 400px;
+  height: 400px;
+}
+:root {
+  --main-bg-color: #f6f7fb;
+  --main-purple-color: #4255ff;
+  --hover-purple-color: #3c4ecc;
+}
