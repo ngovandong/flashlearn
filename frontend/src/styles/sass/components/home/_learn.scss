@@ -36,7 +36,7 @@
 
         .right-header {
             display: flex;
-            justify-content: end;
+            justify-content: flex-end;
 
             .close-btn {
                 height: 64px;
@@ -613,7 +613,7 @@
             width: 100%;
             display: flex;
             margin-bottom: 1rem;
-            justify-content: start;
+            justify-content: flex-start;
             align-items: center;
 
             .header-button {
@@ -758,7 +758,7 @@
         .button-group {
             margin-top: 2rem;
             display: flex;
-            justify-content: end;
+            justify-content: flex-end;
 
             .btn-answer {
                 @include purple_btn;
