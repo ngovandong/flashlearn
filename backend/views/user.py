@@ -129,9 +129,24 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
             params = urlencode({"error": error})
             return redirect(f"{login_url}?{params}")
 
-        domain = settings.BASE_BACKEND_URL
-        api_uri = reverse("user-google-login")
-        redirect_uri = f"{domain}{api_uri}"
+        state = validated_data.get("state") or request.GET.get("state")
+        redirect_uri = None
+        if state:
+            import base64
+            import json
+
+            try:
+                # Add padding if needed for base64 decoding
+                padded_state = state + "=" * (-len(state) % 4)
+                decoded_state = json.loads(base64.b64decode(padded_state).decode("utf-8"))
+                redirect_uri = decoded_state.get("r")
+            except Exception:
+                pass
+
+        if not redirect_uri:
+            domain = settings.BASE_BACKEND_URL
+            api_uri = reverse("user-google-login")
+            redirect_uri = f"{domain}{api_uri}"
 
         access_token = AuthService.google_get_access_token(code=code, redirect_uri=redirect_uri)
 
