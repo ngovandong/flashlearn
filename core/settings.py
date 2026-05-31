@@ -108,7 +108,7 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [
-                (os.getenv("REDIS_HOST"), int(os.getenv("REDIS_PORT", "6379"))),
+                os.getenv("REDIS_URL") or (os.getenv("REDIS_HOST", "127.0.0.1"), int(os.getenv("REDIS_PORT", "6379")))
             ],
         },
     },
@@ -246,14 +246,22 @@ cloudinary.config(
 
 BASE_CLOUDINARY_URL = f"https://res.cloudinary.com/{os.environ.get('CLOUDINARY_CLOUD_NAME')}/"
 
-RQ_QUEUES = {
-    "default": {
-        "HOST": os.environ.get("REDIS_HOST"),
-        "PORT": int(os.environ.get("REDIS_PORT", 6379)),
-        "DB": 0,
-        "DEFAULT_TIMEOUT": 360,
+if os.getenv("REDIS_URL"):
+    RQ_QUEUES = {
+        "default": {
+            "URL": os.getenv("REDIS_URL"),
+            "DEFAULT_TIMEOUT": 360,
+        }
     }
-}
+else:
+    RQ_QUEUES = {
+        "default": {
+            "HOST": os.environ.get("REDIS_HOST", "127.0.0.1"),
+            "PORT": int(os.environ.get("REDIS_PORT", 6379)),
+            "DB": 0,
+            "DEFAULT_TIMEOUT": 360,
+        }
+    }
 
 
 ELASTICSEARCH_DSL = {
@@ -270,8 +278,8 @@ SKIP_REDIS = os.getenv("SKIP_REDIS")
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        # Replace with your Redis server address and database number
-        "LOCATION": f"redis://{os.getenv('REDIS_HOST')}:{os.getenv('REDIS_PORT')}/0",
+        "LOCATION": os.getenv("REDIS_URL")
+        or f"redis://{os.getenv('REDIS_HOST', '127.0.0.1')}:{os.getenv('REDIS_PORT', '6379')}/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
