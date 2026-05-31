@@ -23,32 +23,38 @@ def _scheduler_loop(scheduler: Scheduler) -> None:
 
 
 class Command(BaseCommand):
-    help = "Start RQ worker + cron scheduler in a single process"
+    help = "Start RQ worker (and optionally cron scheduler) in a single process"
 
     def handle(self, *args, **options):
+        import os
+
         from backend.cron import register_jobs
 
         conn = get_connection("default")
+        run_scheduler = os.getenv("RUN_SCHEDULER", "False").lower() in ("true", "1", "yes")
 
-        # ── Register cron jobs ────────────────────────────────────────────────
-        scheduler = Scheduler(connection=conn, queue_name="default")
+        if run_scheduler:
+            # ── Register cron jobs ────────────────────────────────────────────────
+            scheduler = Scheduler(connection=conn, queue_name="default")
 
-        cancelled = sum(1 for job in scheduler.get_jobs() if scheduler.cancel(job) or True)
-        if cancelled:
-            self.stdout.write(f"Cleared {cancelled} existing scheduled job(s)")
+            cancelled = sum(1 for job in scheduler.get_jobs() if scheduler.cancel(job) or True)
+            if cancelled:
+                self.stdout.write(f"Cleared {cancelled} existing scheduled job(s)")
 
-        register_jobs(scheduler)
-        self.stdout.write(self.style.SUCCESS("Cron jobs registered"))
+            register_jobs(scheduler)
+            self.stdout.write(self.style.SUCCESS("Cron jobs registered"))
 
-        # ── Run scheduler in a background daemon thread ───────────────────────
-        scheduler_thread = threading.Thread(
-            target=_scheduler_loop,
-            args=(scheduler,),
-            name="rq-scheduler",
-            daemon=True,  # exits automatically when the worker (main thread) stops
-        )
-        scheduler_thread.start()
-        self.stdout.write("Scheduler thread started")
+            # ── Run scheduler in a background daemon thread ───────────────────────
+            scheduler_thread = threading.Thread(
+                target=_scheduler_loop,
+                args=(scheduler,),
+                name="rq-scheduler",
+                daemon=True,  # exits automatically when the worker (main thread) stops
+            )
+            scheduler_thread.start()
+            self.stdout.write("Scheduler thread started")
+        else:
+            self.stdout.write("Scheduler disabled (RUN_SCHEDULER is not True)")
 
         # ── Run worker on main thread (blocking) ─────────────────────────────
         self.stdout.write(self.style.SUCCESS("Starting worker..."))
