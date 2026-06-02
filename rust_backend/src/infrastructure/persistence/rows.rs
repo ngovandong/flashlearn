@@ -1,5 +1,5 @@
 use crate::util::db_uuid::MysqlUuid;
-use chrono::NaiveDateTime;
+use chrono::{NaiveDate, NaiveDateTime};
 use serde::Serialize;
 use sqlx::FromRow;
 
@@ -17,6 +17,8 @@ pub struct UserRow {
     pub image_url: Option<String>,
     pub is_validated_email: bool,
     pub default_deck_id: Option<MysqlUuid>,
+    pub learning_streak_count: i32,
+    pub last_study_date: Option<NaiveDate>,
 }
 
 #[derive(Debug, Clone, FromRow, Serialize)]
@@ -60,7 +62,6 @@ pub struct UserDeckRoleRow {
     pub user_id: MysqlUuid,
     pub deck_id: MysqlUuid,
     pub role: String,
-    pub streaks: Option<String>,
 }
 
 #[derive(Debug, Clone, FromRow, Serialize)]

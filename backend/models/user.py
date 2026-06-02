@@ -13,6 +13,8 @@ class User(UUIDModel, CustomAbstractUser):
     image_url = models.URLField(_("image url"), max_length=255, blank=True, null=True)
     is_validated_email = models.BooleanField(default=False)
     default_deck = models.OneToOneField("Deck", on_delete=models.SET_NULL, blank=True, null=True)
+    learning_streak_count = models.PositiveIntegerField(default=0)
+    last_study_date = models.DateField(null=True, blank=True)
 
     objects = CustomUserManager()
 

@@ -12,7 +12,7 @@ from rest_framework_simplejwt.tokens import AccessToken, TokenError
 
 from backend.models import Deck, UserLearningProgress
 from backend.serializers import ReviseTermSerializer
-from backend.services import TermService, learning_progress_cache
+from backend.services import LearningService, TermService, learning_progress_cache
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +71,7 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
         learning_progress.score += 1
         learning_progress.last_revised_at = timezone.now()
         learning_progress.save()
+        LearningService.record_study_activity(self.user)
 
     @database_sync_to_async
     def get_revise_terms(self):

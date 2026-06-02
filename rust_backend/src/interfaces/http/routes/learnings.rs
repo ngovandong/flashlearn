@@ -1,6 +1,6 @@
 //! `/api/learnings/*`
 
-use crate::application::term_service;
+use crate::application::{learning_service, term_service};
 use crate::error::AppError;
 use crate::infrastructure::persistence::{learning, terms};
 use crate::interfaces::http::extractors::AuthUser;
@@ -90,6 +90,9 @@ async fn create_learning(
             .delete_learning_progress_cached(&uuid::Uuid::from(t.deck_id), &uuid::Uuid::from(u.id))
             .await;
     }
+    learning_service::record_study_activity(&state, u.id)
+        .await
+        .map_err(|e| AppError::Anyhow(e.into()))?;
     Ok(Json(json!({"status": "ok"})))
 }
 
@@ -121,6 +124,9 @@ async fn correct(
             .delete_learning_progress_cached(&uuid::Uuid::from(t.deck_id), &uuid::Uuid::from(u.id))
             .await;
     }
+    learning_service::record_study_activity(&state, u.id)
+        .await
+        .map_err(|e| AppError::Anyhow(e.into()))?;
     Ok(axum::http::StatusCode::OK)
 }
 
@@ -152,6 +158,9 @@ async fn incorrect(
             .delete_learning_progress_cached(&uuid::Uuid::from(t.deck_id), &uuid::Uuid::from(u.id))
             .await;
     }
+    learning_service::record_study_activity(&state, u.id)
+        .await
+        .map_err(|e| AppError::Anyhow(e.into()))?;
     Ok(axum::http::StatusCode::OK)
 }
 

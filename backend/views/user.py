@@ -18,10 +18,11 @@ from ..serializers import (
     CustomTokenObtainPairSerializer,
     GoogleCallbackSerializer,
     GoogleUserSerializer,
+    LearningStreakSerializer,
     SetPasswordSerializer,
     UserSerializer,
 )
-from ..services import AuthService, UserService
+from ..services import AuthService, LearningService, UserService
 from ..tasks import setup_new_user
 from ..utils.dispatch import dispatch
 
@@ -45,6 +46,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
     permission_map = {
         "change_password": [permissions.IsAuthenticated],
         "get_profile": [permissions.IsAuthenticated],
+        "learning_streak": [permissions.IsAuthenticated],
         "my_settings": [permissions.IsAuthenticated],
     }
 
@@ -52,6 +54,12 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
     def get_profile(self, request, *args, **kwargs):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
+
+    @action(detail=False, methods=["GET"])
+    def learning_streak(self, request, *args, **kwargs):
+        user = User.objects.get(pk=request.user.pk)
+        data = LearningService.get_learning_streak(user)
+        return Response(LearningStreakSerializer(data).data)
 
     @action(detail=False, methods=["GET", "PATCH"])
     def my_settings(self, request, *args, **kwargs):

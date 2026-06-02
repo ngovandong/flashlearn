@@ -1,5 +1,6 @@
 //! `/api/users/*` routes.
 
+use crate::application::learning_service;
 use crate::auth::jwt::{issue_token_pair, verify_refresh_token};
 use crate::error::AppError;
 use crate::infrastructure::django_password;
@@ -38,6 +39,8 @@ pub fn protected_routes() -> Router<Arc<AppState>> {
     Router::new()
         .route("/api/users/get_profile/", get(get_profile))
         .route("/api/users/get_profile", get(get_profile))
+        .route("/api/users/learning_streak/", get(learning_streak))
+        .route("/api/users/learning_streak", get(learning_streak))
         .route("/api/users/", get(list_users))
         .route("/api/users", get(list_users))
         .route("/api/users/:id/change_password/", post(change_password))
@@ -156,6 +159,17 @@ async fn sign_up(
 
 async fn get_profile(AuthUser(u): AuthUser) -> Json<serde_json::Value> {
     Json(user_json_for_token(&u))
+}
+
+async fn learning_streak(
+    State(state): State<Arc<AppState>>,
+    AuthUser(u): AuthUser,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let streak = learning_service::get_learning_streak(&state, &u);
+    Ok(Json(json!({
+        "streak": streak.streak,
+        "studied_today": streak.studied_today,
+    })))
 }
 
 async fn list_users(AuthUser(_): AuthUser) -> Json<serde_json::Value> {

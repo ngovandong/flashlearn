@@ -18,7 +18,7 @@ from ..serializers import (
     TermSerializer,
     UserLearningProgressSerializer,
 )
-from ..services import TermService, learning_progress_cache
+from ..services import LearningService, TermService, learning_progress_cache
 
 
 class LearningViewSet(FlexibleViewSet):
@@ -53,6 +53,7 @@ class LearningViewSet(FlexibleViewSet):
             instance.last_learned_at = timezone.now()
             instance.save()
         learning_progress_cache.delete_combine(deck_id, user_id)
+        LearningService.record_study_activity(self.request.user)
 
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -69,6 +70,7 @@ class LearningViewSet(FlexibleViewSet):
         instance.last_revised_at = timezone.now()
         instance.save()
         learning_progress_cache.delete_combine(instance.term.deck_id, request.user.id)
+        LearningService.record_study_activity(request.user)
 
         return Response(status=status.HTTP_200_OK)
 
@@ -79,6 +81,7 @@ class LearningViewSet(FlexibleViewSet):
         instance.last_revised_at = timezone.now()
         instance.save()
         learning_progress_cache.delete_combine(instance.term.deck_id, request.user.id)
+        LearningService.record_study_activity(request.user)
 
         return Response(status=status.HTTP_200_OK)
 

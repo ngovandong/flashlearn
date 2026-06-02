@@ -1,6 +1,11 @@
 from .deck import DeckDetailSerializer, DeckSerializer, MyDeckSerializer
 from .folder import FolderSerializer
-from .learning_progress import CreateLearningProgressSerializer, ProgressSerializer, UserLearningProgressSerializer
+from .learning_progress import (
+    CreateLearningProgressSerializer,
+    LearningStreakSerializer,
+    ProgressSerializer,
+    UserLearningProgressSerializer,
+)
 from .role import (
     AddUserSerializer,
     InviteSerializer,

@@ -8,7 +8,7 @@ class UserDeckRoleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserDeckRole
-        fields = ("id", "email", "role", "streaks")
+        fields = ("id", "email", "role")
 
 
 class UpdateRoleSerializer(serializers.ModelSerializer):

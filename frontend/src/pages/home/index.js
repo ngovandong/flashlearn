@@ -1,4 +1,5 @@
 import { deckService } from "@api-services/deckService";
+import { userSettingService } from "@api-services/userSettingService";
 import { LocalLoadingWrapper } from "@components/loading";
 import { Alert, Snackbar } from "@mui/material";
 import { getFirstError } from "@utils/errorHandler";
@@ -6,9 +7,27 @@ import React, { useEffect, useState } from "react";
 import DeckCard from "./deckCard";
 import { useSelector } from "react-redux";
 import { selectUser } from "@app/store/authSlice";
+
+function streakCopy({ streak, studied_today }) {
+  if (streak === 0) {
+    return {
+      main: "Start your learning streak today!",
+      sub: "Study a deck to begin building your streak.",
+    };
+  }
+  const dayLabel = streak === 1 ? "1-day" : `${streak}-day`;
+  return {
+    main: `You have a ${dayLabel} streak of learning`,
+    sub: studied_today
+      ? "Keep studying hard to maintain your streak!"
+      : "Study today to keep your streak going!",
+  };
+}
+
 function Home() {
   const [mydecks, setMydecks] = useState();
   const [publicDecks, setPublicDecks] = useState();
+  const [learningStreak, setLearningStreak] = useState();
   const [error, setError] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const user = useSelector(selectUser);
@@ -48,10 +67,25 @@ function Home() {
       setIsLoading(false);
     }
   };
+  const fetchLearningStreak = async () => {
+    try {
+      const res = await userSettingService.getLearningStreak();
+      if (!res.error) {
+        setLearningStreak(res.data);
+      }
+    } catch {
+      // streak is non-critical; leave section empty on failure
+    }
+  };
+
   useEffect(() => {
     fetchDeck();
+    fetchLearningStreak();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const streakText = learningStreak ? streakCopy(learningStreak) : null;
+
   return user ? (
     <div className="home-page">
       <LocalLoadingWrapper open={isLoading} />
@@ -80,8 +114,12 @@ function Home() {
               alt="streak-calendar"
             />
             <div className="streak-text">
-              <div>You have a 1-day streak of learning</div>
-              <span>Keep studying hard to maintain your streak!</span>
+              {streakText && (
+                <>
+                  <div>{streakText.main}</div>
+                  <span>{streakText.sub}</span>
+                </>
+              )}
             </div>
           </div>
         </div>

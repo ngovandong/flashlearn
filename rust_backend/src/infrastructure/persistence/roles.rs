@@ -7,7 +7,7 @@ use uuid::Uuid;
 pub async fn find_role(pool: &MySqlPool, id: impl Into<Uuid>) -> Result<Option<UserDeckRoleRow>> {
     let id = id.into();
     sqlx::query_as::<_, UserDeckRoleRow>(
-        "SELECT id, user_id, deck_id, role, streaks FROM backend_userdeckrole WHERE id = ?",
+        "SELECT id, user_id, deck_id, role FROM backend_userdeckrole WHERE id = ?",
     )
     .bind(to_mysql_char(id))
     .fetch_optional(pool)
@@ -26,7 +26,7 @@ pub async fn insert_role(
     let user_id = user_id.into();
     let deck_id = deck_id.into();
     sqlx::query(
-        "INSERT INTO backend_userdeckrole (id, user_id, deck_id, role, streaks) VALUES (?, ?, ?, ?, NULL)",
+        "INSERT INTO backend_userdeckrole (id, user_id, deck_id, role) VALUES (?, ?, ?, ?)",
     )
     .bind(to_mysql_char(id))
     .bind(to_mysql_char(user_id))
