@@ -27,6 +27,7 @@ import DeckPage from "@pages/home/deckPage";
 import UserSettings from "@pages/home/userSettings";
 import Revise from "@pages/home/deckDetail/revise";
 import QuickRevise from "@pages/home/deckDetail/revise/quickRevise";
+import NumberTest from "@pages/home/deckDetail/numberTest";
 import PrivacyPage from "@pages/privacy";
 
 function App()
@@ -48,6 +49,7 @@ function App()
             <Route path="learn" element={<LearnPage />} />
             <Route path="revise" element={<Revise />} />
             <Route path="quick-revise" element={<QuickRevise />} />
+            <Route path="number-test" element={<NumberTest />} />
           </Route>
           <Route path="invite" element={<Invite />} />
           <Route path="settings" element={<UserSettings />} />
