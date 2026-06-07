@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import subprocess
@@ -12,7 +13,25 @@ DRIVE_CREDENTIALS_PATH = os.getenv("DRIVE_CREDENTIALS_PATH", "drive-credentials.
 DRIVE_BACKUP_FOLDER_ID = os.getenv("DRIVE_BACKUP_FOLDER_ID", "")
 
 
+def _load_oauth_client():
+    if not os.path.exists(DRIVE_CREDENTIALS_PATH):
+        raise RuntimeError(
+            f"Drive credentials not found at {DRIVE_CREDENTIALS_PATH}. "
+            "Download Desktop OAuth2 credentials from Google Cloud Console."
+        )
+
+    with open(DRIVE_CREDENTIALS_PATH) as f:
+        data = json.load(f)
+
+    client = data.get("installed") or data.get("web")
+    if not client:
+        raise RuntimeError(f"Invalid OAuth credentials format in {DRIVE_CREDENTIALS_PATH}")
+
+    return client["client_id"], client["client_secret"]
+
+
 def _get_drive_service():
+    from google.auth.exceptions import RefreshError
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
     from googleapiclient.discovery import build
@@ -20,10 +39,23 @@ def _get_drive_service():
     if not os.path.exists(DRIVE_TOKEN_PATH):
         raise RuntimeError(f"Drive token not found at {DRIVE_TOKEN_PATH}. Run: python manage.py setup_drive_oauth")
 
-    creds = Credentials.from_authorized_user_file(DRIVE_TOKEN_PATH, DRIVE_SCOPES)
+    with open(DRIVE_TOKEN_PATH) as f:
+        token_info = json.load(f)
+
+    client_id, client_secret = _load_oauth_client()
+    token_info["client_id"] = client_id
+    token_info["client_secret"] = client_secret
+    creds = Credentials.from_authorized_user_info(token_info, DRIVE_SCOPES)
 
     if creds.expired and creds.refresh_token:
-        creds.refresh(Request())
+        try:
+            creds.refresh(Request())
+        except RefreshError as exc:
+            raise RuntimeError(
+                "Drive token refresh failed (invalid or expired refresh token). "
+                "Re-authorize with: python manage.py setup_drive_oauth. "
+                "If the OAuth app is in Testing mode, publish it to Production first."
+            ) from exc
         with open(DRIVE_TOKEN_PATH, "w") as f:
             f.write(creds.to_json())
 

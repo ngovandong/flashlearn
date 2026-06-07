@@ -1,11 +1,11 @@
 # Graph Report - .  (2026-06-07)
 
 ## Corpus Check
-- 287 files · ~69,119 words
+- 287 files · ~75,471 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1092 nodes · 1071 edges · 245 communities detected
+- 1093 nodes · 1073 edges · 246 communities detected
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 61 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
@@ -255,6 +255,7 @@
 - [[_COMMUNITY_Community 242|Community 242]]
 - [[_COMMUNITY_Community 243|Community 243]]
 - [[_COMMUNITY_Community 244|Community 244]]
+- [[_COMMUNITY_Community 245|Community 245]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `UserSerializer` - 14 edges
@@ -283,12 +284,12 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.02
-Nodes (20): CursorPagination, DeckService, DeckViewSet, get_latest_decks(), get_my_decks(), leave_deck(), FlexibleViewSet, FolderViewSet (+12 more)
+Cohesion: 0.04
+Nodes (44): CustomAbstractUser, DateTimeUUIDModel, Deck, DeckDetailSerializer, DeckSerializer, Meta, MyDeckSerializer, Folder (+36 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.04
-Nodes (44): CustomAbstractUser, DateTimeUUIDModel, Deck, DeckDetailSerializer, DeckSerializer, Meta, MyDeckSerializer, Folder (+36 more)
+Nodes (16): CursorPagination, DeckViewSet, FlexibleViewSet, FolderViewSet, LearningViewSet, EditableDeck, EditableLearningProgress, EditableTerm (+8 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.07
@@ -303,252 +304,252 @@ Cohesion: 0.08
 Nodes (25): add_user_to_deck(), clone_deck(), CreateDeck, deck_detail(), deck_list_query(), deck_permission(), deck_rows_to_json(), delete_deck() (+17 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.11
-Nodes (13): add_to_default_deck(), AddDefault, AddTerms, create_term(), CreateTerm, DeckIdQ, delete_term(), get_term() (+5 more)
+Cohesion: 0.08
+Nodes (4): DeckService, get_latest_decks(), get_my_decks(), leave_deck()
 
 ### Community 6 - "Community 6"
 Cohesion: 0.11
-Nodes (14): ActiveQ, ChangePasswordBody, get_profile(), google_exchange_code(), google_login(), google_user_info(), GoogleCb, login() (+6 more)
+Nodes (13): add_to_default_deck(), AddDefault, AddTerms, create_term(), CreateTerm, DeckIdQ, delete_term(), get_term() (+5 more)
 
 ### Community 7 - "Community 7"
+Cohesion: 0.11
+Nodes (14): ActiveQ, ChangePasswordBody, get_profile(), google_exchange_code(), google_login(), google_user_info(), GoogleCb, login() (+6 more)
+
+### Community 8 - "Community 8"
 Cohesion: 0.09
 Nodes (9): BaseCommand, Command, Command, Command, Command, Command, Command, Run the scheduler tick loop without installing signal handlers.      scheduler.r (+1 more)
 
-### Community 8 - "Community 8"
+### Community 9 - "Community 9"
 Cohesion: 0.12
 Nodes (10): Manager, Returns the terms that the given user has learned for the given deck., Returns the last learned term by the given user for the given deck, or None if t, Returns the terms that the given user has completed for the given deck., Returns the terms that the given user has completed for the given deck., Returns the terms that the given user has completed for the given deck., Returns the terms that the given user has not yet learned for the given deck., Returns the terms for the given deck. (+2 more)
 
-### Community 9 - "Community 9"
+### Community 10 - "Community 10"
 Cohesion: 0.23
 Nodes (7): AsyncWebsocketConsumer, get_revise_terms(), get_user_and_deck(), QuickReviseConsumer, Cleanup when connection closes - MUST NOT fail, Clear large data structures to prevent memory leaks, save_learning_progress()
 
-### Community 10 - "Community 10"
+### Community 11 - "Community 11"
 Cohesion: 0.19
 Nodes (1): BaseService
 
-### Community 11 - "Community 11"
+### Community 12 - "Community 12"
 Cohesion: 0.24
 Nodes (2): LearningProgressCached, RedisCache
-
-### Community 12 - "Community 12"
-Cohesion: 0.17
-Nodes (4): delete_folder(), FolderBody, update_folder(), UpdateFolder
 
 ### Community 13 - "Community 13"
 Cohesion: 0.15
 Nodes (3): CreateLp, DeckIdP, PriorityBody
 
 ### Community 14 - "Community 14"
-Cohesion: 0.2
-Nodes (7): AccessClaims, InviteClaims, issue_token_pair(), new_jti(), now_ts(), RefreshClaims, TokenPair
+Cohesion: 0.17
+Nodes (4): delete_folder(), FolderBody, update_folder(), UpdateFolder
 
 ### Community 15 - "Community 15"
 Cohesion: 0.2
-Nodes (2): MysqlUuid, to_mysql_char()
+Nodes (7): AccessClaims, InviteClaims, issue_token_pair(), new_jti(), now_ts(), RefreshClaims, TokenPair
 
 ### Community 16 - "Community 16"
+Cohesion: 0.2
+Nodes (2): MysqlUuid, to_mysql_char()
+
+### Community 17 - "Community 17"
 Cohesion: 0.22
 Nodes (8): AbstractBaseUser, CustomAbstractUser, DateTimeModel, DateTimeUUIDModel, Meta, An abstract base class implementing a fully featured User model with     admin-c, Return the first_name plus the last_name, with a space in between., UUIDModel
 
-### Community 17 - "Community 17"
+### Community 18 - "Community 18"
 Cohesion: 0.24
 Nodes (4): MailService, send_template_mail(), SendMailThread, Thread
 
-### Community 18 - "Community 18"
+### Community 19 - "Community 19"
 Cohesion: 0.33
 Nodes (6): appendHeader(), createRefreshHandler(), createRequest(), getCurrentToken(), processQueue(), refreshToken()
 
-### Community 19 - "Community 19"
+### Community 20 - "Community 20"
 Cohesion: 0.22
 Nodes (7): DeckDocument, Django, Index, Document, Django, Index, TermDocument
 
-### Community 20 - "Community 20"
+### Community 21 - "Community 21"
 Cohesion: 0.47
 Nodes (8): bearer_headers(), delete_both(), DualResponse, get_json_both(), post_json_both(), post_json_pair(), put_json_both(), request_json()
 
-### Community 21 - "Community 21"
+### Community 22 - "Community 22"
 Cohesion: 0.25
 Nodes (2): find_user_by_id(), record_study_activity()
 
-### Community 22 - "Community 22"
+### Community 23 - "Community 23"
 Cohesion: 0.25
 Nodes (1): AuthService
 
-### Community 23 - "Community 23"
+### Community 24 - "Community 24"
 Cohesion: 0.39
 Nodes (3): env_optional(), env_var(), Settings
 
-### Community 24 - "Community 24"
-Cohesion: 0.29
-Nodes (4): get_learning_progress(), LearningStreak, ProgressBreakdown, utc_naive_to_local_date()
-
 ### Community 25 - "Community 25"
 Cohesion: 0.29
-Nodes (1): TermService
+Nodes (4): get_learning_progress(), LearningStreak, ProgressBreakdown, utc_naive_to_local_date()
 
 ### Community 26 - "Community 26"
 Cohesion: 0.29
 Nodes (4): AppConfig, BackendConfig, BaseConfig, FrontendConfig
 
 ### Community 27 - "Community 27"
+Cohesion: 0.29
+Nodes (1): TermService
+
+### Community 28 - "Community 28"
 Cohesion: 0.33
 Nodes (3): BaseUserManager, CustomUserManager, Create and save a user.py with the given email, and password.
 
-### Community 28 - "Community 28"
+### Community 29 - "Community 29"
 Cohesion: 0.38
 Nodes (3): legacy_api_base(), migrate_context_ready(), rust_api_base()
 
-### Community 29 - "Community 29"
+### Community 30 - "Community 30"
 Cohesion: 0.29
 Nodes (6): DeckRow, FolderRow, TermRow, UserDeckRoleRow, UserLearningProgressRow, UserRow
 
-### Community 30 - "Community 30"
+### Community 31 - "Community 31"
 Cohesion: 0.29
 Nodes (2): FullRole, UserRole
 
-### Community 31 - "Community 31"
+### Community 32 - "Community 32"
 Cohesion: 0.48
 Nodes (6): GameState, handle_answer(), handle_socket(), quick_revise_ws(), send_next(), WsParams
 
-### Community 32 - "Community 32"
+### Community 33 - "Community 33"
 Cohesion: 0.29
 Nodes (3): FlexibleViewSet, Get serializer for each action, Get permission for each action
 
-### Community 33 - "Community 33"
+### Community 34 - "Community 34"
 Cohesion: 0.33
 Nodes (0):
 
-### Community 34 - "Community 34"
+### Community 35 - "Community 35"
 Cohesion: 0.33
 Nodes (3): BasicConnectivityTest, Test that the admin login page loads successfully., TestCase
 
-### Community 35 - "Community 35"
+### Community 36 - "Community 36"
 Cohesion: 0.47
 Nodes (4): bytes_to_data_uri(), optimize_image_bytes(), Resize and re-encode an image until it fits within max_bytes., url_to_base64()
 
-### Community 36 - "Community 36"
+### Community 37 - "Community 37"
 Cohesion: 0.4
 Nodes (3): print_inspect_snapshot(), SqlCleanup, table_counts()
 
-### Community 37 - "Community 37"
+### Community 38 - "Community 38"
 Cohesion: 0.53
 Nodes (4): normalize_response(), strip_recursive(), strips_root_and_array_item_ids(), strips_timestamps_on_object()
 
-### Community 38 - "Community 38"
+### Community 39 - "Community 39"
 Cohesion: 0.33
 Nodes (3): OnlyName, ProgressTerm, ReviseTermsPayload
 
-### Community 39 - "Community 39"
+### Community 40 - "Community 40"
 Cohesion: 0.33
 Nodes (1): ElasticsearchClient
 
-### Community 40 - "Community 40"
+### Community 41 - "Community 41"
 Cohesion: 0.33
 Nodes (2): InviteQ, UpdateRole
 
-### Community 41 - "Community 41"
+### Community 42 - "Community 42"
 Cohesion: 0.4
 Nodes (3): BaseEmailBackend, EmailBackend, SMTP backend that uses certifi's CA bundle.      Needed on macOS/environments wh
 
-### Community 42 - "Community 42"
+### Community 43 - "Community 43"
 Cohesion: 0.4
 Nodes (3): CustomTokenAuthentication, Attempts to find and return a user using the given validated token., JWTAuthentication
 
-### Community 43 - "Community 43"
+### Community 44 - "Community 44"
 Cohesion: 0.4
 Nodes (0):
 
-### Community 44 - "Community 44"
-Cohesion: 0.4
-Nodes (2): Send a reminder to every active user who has daily_reminder = True in their sett, send_daily_reminders()
-
 ### Community 45 - "Community 45"
-Cohesion: 0.6
-Nodes (1): TranslateView
+Cohesion: 0.7
+Nodes (4): _delete_old_backups(), dump_database_to_drive(), _get_drive_service(), _load_oauth_client()
 
 ### Community 46 - "Community 46"
 Cohesion: 0.4
-Nodes (0):
+Nodes (2): Send a reminder to every active user who has daily_reminder = True in their sett, send_daily_reminders()
 
 ### Community 47 - "Community 47"
+Cohesion: 0.6
+Nodes (1): TranslateView
+
+### Community 48 - "Community 48"
 Cohesion: 0.4
 Nodes (0):
 
-### Community 48 - "Community 48"
+### Community 49 - "Community 49"
+Cohesion: 0.4
+Nodes (0):
+
+### Community 50 - "Community 50"
 Cohesion: 0.5
 Nodes (2): delete_progress_by_deck_user(), delete_progress_for_user_deck()
 
-### Community 49 - "Community 49"
+### Community 51 - "Community 51"
 Cohesion: 0.6
 Nodes (3): authenticate(), AuthUser, user_to_json_value()
 
-### Community 50 - "Community 50"
+### Community 52 - "Community 52"
 Cohesion: 0.6
 Nodes (3): build_cors(), create_router(), serve()
 
-### Community 51 - "Community 51"
+### Community 53 - "Community 53"
 Cohesion: 0.5
 Nodes (1): DeckService
 
-### Community 52 - "Community 52"
+### Community 54 - "Community 54"
 Cohesion: 0.67
 Nodes (2): closePopup(), isMouseInPopup()
 
-### Community 53 - "Community 53"
+### Community 55 - "Community 55"
 Cohesion: 0.5
 Nodes (0):
 
-### Community 54 - "Community 54"
+### Community 56 - "Community 56"
 Cohesion: 0.83
 Nodes (3): generateFillQuestions(), generateQuestions(), generateQuizQuestions()
 
-### Community 55 - "Community 55"
-Cohesion: 0.83
-Nodes (3): _delete_old_backups(), dump_database_to_drive(), _get_drive_service()
-
-### Community 56 - "Community 56"
+### Community 57 - "Community 57"
 Cohesion: 0.67
 Nodes (3): dispatch(), _has_active_worker(), Enqueue func if an RQ worker is running on queue_name, otherwise call it directl
 
-### Community 57 - "Community 57"
+### Community 58 - "Community 58"
 Cohesion: 0.83
 Nodes (3): clear_db_env(), database_url_from_env_builds_from_db_vars(), database_url_from_env_uses_database_url_when_set()
 
-### Community 58 - "Community 58"
+### Community 59 - "Community 59"
 Cohesion: 0.5
 Nodes (1): TranslateBody
 
-### Community 59 - "Community 59"
+### Community 60 - "Community 60"
 Cohesion: 0.5
 Nodes (1): ImgBody
 
-### Community 60 - "Community 60"
+### Community 61 - "Community 61"
 Cohesion: 0.67
 Nodes (2): main(), Run administrative tasks.
 
-### Community 61 - "Community 61"
+### Community 62 - "Community 62"
 Cohesion: 0.67
 Nodes (2): NextChatProxyView, ProxyView
 
-### Community 62 - "Community 62"
+### Community 63 - "Community 63"
 Cohesion: 0.67
 Nodes (1): reportWebVitals()
 
-### Community 63 - "Community 63"
+### Community 64 - "Community 64"
 Cohesion: 0.67
 Nodes (1): App()
 
-### Community 64 - "Community 64"
+### Community 65 - "Community 65"
 Cohesion: 0.67
 Nodes (1): speak()
 
-### Community 65 - "Community 65"
-Cohesion: 0.67
-Nodes (1): getFirstError()
-
 ### Community 66 - "Community 66"
 Cohesion: 0.67
-Nodes (0):
+Nodes (1): getFirstError()
 
 ### Community 67 - "Community 67"
 Cohesion: 0.67
@@ -568,23 +569,23 @@ Nodes (0):
 
 ### Community 71 - "Community 71"
 Cohesion: 0.67
-Nodes (1): LearningService
+Nodes (0):
 
 ### Community 72 - "Community 72"
 Cohesion: 0.67
-Nodes (1): RoleService
+Nodes (1): LearningService
 
 ### Community 73 - "Community 73"
 Cohesion: 0.67
-Nodes (0):
+Nodes (1): RoleService
 
 ### Community 74 - "Community 74"
 Cohesion: 0.67
-Nodes (1): UserSettingService
+Nodes (0):
 
 ### Community 75 - "Community 75"
 Cohesion: 0.67
-Nodes (0):
+Nodes (1): UserSettingService
 
 ### Community 76 - "Community 76"
 Cohesion: 0.67
@@ -595,52 +596,52 @@ Cohesion: 0.67
 Nodes (0):
 
 ### Community 78 - "Community 78"
+Cohesion: 0.67
+Nodes (0):
+
+### Community 79 - "Community 79"
 Cohesion: 1.0
 Nodes (2): Home(), streakCopy()
 
-### Community 79 - "Community 79"
+### Community 80 - "Community 80"
 Cohesion: 0.67
 Nodes (0):
 
-### Community 80 - "Community 80"
+### Community 81 - "Community 81"
 Cohesion: 1.0
 Nodes (2): NumberTest(), numberToEnglishWords()
 
-### Community 81 - "Community 81"
+### Community 82 - "Community 82"
 Cohesion: 0.67
 Nodes (1): Migration
 
-### Community 82 - "Community 82"
+### Community 83 - "Community 83"
 Cohesion: 0.67
 Nodes (2): Run all async setup for a newly created user: settings, default deck,     and th, setup_new_user()
 
-### Community 83 - "Community 83"
+### Community 84 - "Community 84"
 Cohesion: 0.67
 Nodes (2): convert_term_images_to_base64(), Download remote term images, compress if needed, and persist as base64 data URIs
 
-### Community 84 - "Community 84"
+### Community 85 - "Community 85"
 Cohesion: 0.67
 Nodes (2): Collect jobs from all domain modules and register them with the scheduler., register_jobs()
 
-### Community 85 - "Community 85"
+### Community 86 - "Community 86"
 Cohesion: 0.67
 Nodes (0):
 
-### Community 86 - "Community 86"
+### Community 87 - "Community 87"
 Cohesion: 1.0
 Nodes (2): load_dotenv(), rust_server_healthz()
 
-### Community 87 - "Community 87"
+### Community 88 - "Community 88"
 Cohesion: 0.67
 Nodes (1): AppError
 
-### Community 88 - "Community 88"
-Cohesion: 0.67
-Nodes (1): AppState
-
 ### Community 89 - "Community 89"
 Cohesion: 0.67
-Nodes (0):
+Nodes (1): AppState
 
 ### Community 90 - "Community 90"
 Cohesion: 0.67
@@ -648,23 +649,23 @@ Nodes (0):
 
 ### Community 91 - "Community 91"
 Cohesion: 0.67
-Nodes (1): Database
+Nodes (0):
 
 ### Community 92 - "Community 92"
-Cohesion: 1.0
-Nodes (1): Django settings for core project.  Generated by 'django-admin startproject' usin
+Cohesion: 0.67
+Nodes (1): Database
 
 ### Community 93 - "Community 93"
 Cohesion: 1.0
-Nodes (0):
+Nodes (1): Django settings for core project.  Generated by 'django-admin startproject' usin
 
 ### Community 94 - "Community 94"
 Cohesion: 1.0
-Nodes (1): WSGI config for core project.  It exposes the WSGI callable as a module-level va
+Nodes (0):
 
 ### Community 95 - "Community 95"
 Cohesion: 1.0
-Nodes (0):
+Nodes (1): WSGI config for core project.  It exposes the WSGI callable as a module-level va
 
 ### Community 96 - "Community 96"
 Cohesion: 1.0
@@ -836,7 +837,7 @@ Nodes (0):
 
 ### Community 138 - "Community 138"
 Cohesion: 1.0
-Nodes (1): Migration
+Nodes (0):
 
 ### Community 139 - "Community 139"
 Cohesion: 1.0
@@ -976,19 +977,19 @@ Nodes (1): Migration
 
 ### Community 173 - "Community 173"
 Cohesion: 1.0
-Nodes (1): FULL_ROLE_CLASS
+Nodes (1): Migration
 
 ### Community 174 - "Community 174"
 Cohesion: 1.0
-Nodes (0):
+Nodes (1): FULL_ROLE_CLASS
 
 ### Community 175 - "Community 175"
 Cohesion: 1.0
-Nodes (1): CronJob
+Nodes (0):
 
 ### Community 176 - "Community 176"
 Cohesion: 1.0
-Nodes (0):
+Nodes (1): CronJob
 
 ### Community 177 - "Community 177"
 Cohesion: 1.0
@@ -996,11 +997,11 @@ Nodes (0):
 
 ### Community 178 - "Community 178"
 Cohesion: 1.0
-Nodes (1): Uuid
+Nodes (0):
 
 ### Community 179 - "Community 179"
 Cohesion: 1.0
-Nodes (0):
+Nodes (1): Uuid
 
 ### Community 180 - "Community 180"
 Cohesion: 1.0
@@ -1152,27 +1153,27 @@ Nodes (0):
 
 ### Community 217 - "Community 217"
 Cohesion: 1.0
-Nodes (1): Async (threaded) — use in Django views to avoid blocking the HTTP response.
+Nodes (0):
 
 ### Community 218 - "Community 218"
 Cohesion: 1.0
-Nodes (1): Synchronous — use inside RQ tasks; the worker IS the background process.
+Nodes (1): Async (threaded) — use in Django views to avoid blocking the HTTP response.
 
 ### Community 219 - "Community 219"
 Cohesion: 1.0
-Nodes (0):
+Nodes (1): Synchronous — use inside RQ tasks; the worker IS the background process.
 
 ### Community 220 - "Community 220"
 Cohesion: 1.0
-Nodes (1): Run each provider sequentially and measure latency + URLs for verification.
+Nodes (0):
 
 ### Community 221 - "Community 221"
 Cohesion: 1.0
-Nodes (1): Human-readable report grouped by provider for manual image verification.
+Nodes (1): Run each provider sequentially and measure latency + URLs for verification.
 
 ### Community 222 - "Community 222"
 Cohesion: 1.0
-Nodes (0):
+Nodes (1): Human-readable report grouped by provider for manual image verification.
 
 ### Community 223 - "Community 223"
 Cohesion: 1.0
@@ -1256,246 +1257,248 @@ Nodes (0):
 
 ### Community 243 - "Community 243"
 Cohesion: 1.0
-Nodes (1): This method should be overridden         and return a Q() expression.
+Nodes (0):
 
 ### Community 244 - "Community 244"
+Cohesion: 1.0
+Nodes (1): This method should be overridden         and return a Q() expression.
+
+### Community 245 - "Community 245"
 Cohesion: 1.0
 Nodes (0):
 
 ## Knowledge Gaps
 - **140 isolated node(s):** `Run administrative tasks.`, `SKIP_REDIS`, `SMTP backend that uses certifi's CA bundle.      Needed on macOS/environments wh`, `Attempts to find and return a user using the given validated token.`, `Django settings for core project.  Generated by 'django-admin startproject' usin` (+135 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 92`** (2 nodes): `settings.py`, `Django settings for core project.  Generated by 'django-admin startproject' usin`
+- **Thin community `Community 93`** (2 nodes): `settings.py`, `Django settings for core project.  Generated by 'django-admin startproject' usin`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 93`** (2 nodes): `urls.py`, `serve_image()`
+- **Thin community `Community 94`** (2 nodes): `urls.py`, `serve_image()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 94`** (2 nodes): `wsgi.py`, `WSGI config for core project.  It exposes the WSGI callable as a module-level va`
+- **Thin community `Community 95`** (2 nodes): `wsgi.py`, `WSGI config for core project.  It exposes the WSGI callable as a module-level va`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 95`** (2 nodes): `renderApp()`, `App.test.js`
+- **Thin community `Community 96`** (2 nodes): `renderApp()`, `App.test.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 96`** (2 nodes): `openFrontendIfEnabled()`, `background.js`
+- **Thin community `Community 97`** (2 nodes): `openFrontendIfEnabled()`, `background.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 97`** (2 nodes): `flashIcon.js`, `FlashIcon()`
+- **Thin community `Community 98`** (2 nodes): `flashIcon.js`, `FlashIcon()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 98`** (2 nodes): `EditableInput()`, `editableInput.js`
+- **Thin community `Community 99`** (2 nodes): `EditableInput()`, `editableInput.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 99`** (2 nodes): `home.js`, `Home()`
+- **Thin community `Community 100`** (2 nodes): `home.js`, `Home()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 100`** (2 nodes): `login.js`, `LoginPage()`
+- **Thin community `Community 101`** (2 nodes): `login.js`, `LoginPage()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 101`** (2 nodes): `middleware.js`, `middleware()`
+- **Thin community `Community 102`** (2 nodes): `middleware.js`, `middleware()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 102`** (2 nodes): `uploadImage()`, `cloudinaryService.js`
+- **Thin community `Community 103`** (2 nodes): `uploadImage()`, `cloudinaryService.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 103`** (2 nodes): `sendTokenToExtension()`, `extensionLogin.js`
+- **Thin community `Community 104`** (2 nodes): `sendTokenToExtension()`, `extensionLogin.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 104`** (2 nodes): `shuffleArray()`, `array.js`
+- **Thin community `Community 105`** (2 nodes): `shuffleArray()`, `array.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 105`** (2 nodes): `jwt.js`, `decodeUser()`
+- **Thin community `Community 106`** (2 nodes): `jwt.js`, `decodeUser()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 106`** (2 nodes): `imageURL.js`, `isImageUrl()`
+- **Thin community `Community 107`** (2 nodes): `imageURL.js`, `isImageUrl()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 107`** (2 nodes): `uploadAvatarImageBT.js`, `UploadAvatarButton()`
+- **Thin community `Community 108`** (2 nodes): `uploadAvatarImageBT.js`, `UploadAvatarButton()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 108`** (2 nodes): `navBar.js`, `ResponsiveAppBar()`
+- **Thin community `Community 109`** (2 nodes): `navBar.js`, `ResponsiveAppBar()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 109`** (2 nodes): `googleLoginBT.js`, `CustomPopupGoogleLoginBT()`
+- **Thin community `Community 110`** (2 nodes): `googleLoginBT.js`, `CustomPopupGoogleLoginBT()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 110`** (2 nodes): `progress.js`, `CircularProgressWithLabel()`
+- **Thin community `Community 111`** (2 nodes): `progress.js`, `CircularProgressWithLabel()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 111`** (2 nodes): `privateRoute.js`, `PrivateRoute()`
+- **Thin community `Community 112`** (2 nodes): `privateRoute.js`, `PrivateRoute()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 112`** (2 nodes): `CircleButton()`, `circleButton.js`
+- **Thin community `Community 113`** (2 nodes): `CircleButton()`, `circleButton.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 113`** (2 nodes): `uploadButton.js`, `UploadButton()`
+- **Thin community `Community 114`** (2 nodes): `uploadButton.js`, `UploadButton()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 114`** (2 nodes): `mainContainer.js`, `MainContainer()`
+- **Thin community `Community 115`** (2 nodes): `mainContainer.js`, `MainContainer()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 115`** (2 nodes): `loader.js`, `Loader()`
+- **Thin community `Community 116`** (2 nodes): `loader.js`, `Loader()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 116`** (2 nodes): `invite.js`, `Invite()`
+- **Thin community `Community 117`** (2 nodes): `invite.js`, `Invite()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 117`** (2 nodes): `notfound.js`, `NotFound()`
+- **Thin community `Community 118`** (2 nodes): `notfound.js`, `NotFound()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 118`** (2 nodes): `permissionDenied.js`, `PermissionDenied()`
+- **Thin community `Community 119`** (2 nodes): `permissionDenied.js`, `PermissionDenied()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 119`** (2 nodes): `signup.js`, `SignUp()`
+- **Thin community `Community 120`** (2 nodes): `signup.js`, `SignUp()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 120`** (2 nodes): `login.js`, `Login()`
+- **Thin community `Community 121`** (2 nodes): `login.js`, `Login()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 121`** (2 nodes): `privacy.js`, `PrivacyPage()`
+- **Thin community `Community 122`** (2 nodes): `privacy.js`, `PrivacyPage()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 122`** (2 nodes): `userSettings.js`, `UserSettings()`
+- **Thin community `Community 123`** (2 nodes): `userSettings.js`, `UserSettings()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 123`** (2 nodes): `DeckPage()`, `deckPage.js`
+- **Thin community `Community 124`** (2 nodes): `DeckPage()`, `deckPage.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 124`** (2 nodes): `DeckCard()`, `deckCard.js`
+- **Thin community `Community 125`** (2 nodes): `DeckCard()`, `deckCard.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 125`** (2 nodes): `FooterBTNs()`, `footerButtons.js`
+- **Thin community `Community 126`** (2 nodes): `FooterBTNs()`, `footerButtons.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 126`** (2 nodes): `index.js`, `LearnPage()`
+- **Thin community `Community 127`** (2 nodes): `index.js`, `LearnPage()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 127`** (2 nodes): `AddTermsTab()`, `addTermsTab.js`
+- **Thin community `Community 128`** (2 nodes): `AddTermsTab()`, `addTermsTab.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 128`** (2 nodes): `CreateDeckTab()`, `createDeckTab.js`
+- **Thin community `Community 129`** (2 nodes): `CreateDeckTab()`, `createDeckTab.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 129`** (2 nodes): `index.js`, `EditDeck()`
+- **Thin community `Community 130`** (2 nodes): `index.js`, `EditDeck()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 130`** (2 nodes): `termCard.js`, `TermCard()`
+- **Thin community `Community 131`** (2 nodes): `termCard.js`, `TermCard()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 131`** (2 nodes): `quickRevise.js`, `QuickRevise()`
+- **Thin community `Community 132`** (2 nodes): `quickRevise.js`, `QuickRevise()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 132`** (2 nodes): `quiz.js`, `Quiz()`
+- **Thin community `Community 133`** (2 nodes): `quiz.js`, `Quiz()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 133`** (2 nodes): `index.js`, `Revise()`
+- **Thin community `Community 134`** (2 nodes): `index.js`, `Revise()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 134`** (2 nodes): `Fill()`, `fill.js`
+- **Thin community `Community 135`** (2 nodes): `Fill()`, `fill.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 135`** (2 nodes): `Answer()`, `answer.js`
+- **Thin community `Community 136`** (2 nodes): `Answer()`, `answer.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 136`** (2 nodes): `questionHeader.js`, `QuestionHeader()`
+- **Thin community `Community 137`** (2 nodes): `questionHeader.js`, `QuestionHeader()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 137`** (2 nodes): `index.js`, `CreateDeck()`
+- **Thin community `Community 138`** (2 nodes): `index.js`, `CreateDeck()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 138`** (2 nodes): `Migration`, `0015_remove_deck_background_url_deck_background.py`
+- **Thin community `Community 139`** (2 nodes): `Migration`, `0015_remove_deck_background_url_deck_background.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 139`** (2 nodes): `Migration`, `0012_deck_background_url.py`
+- **Thin community `Community 140`** (2 nodes): `Migration`, `0012_deck_background_url.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 140`** (2 nodes): `Migration`, `0031_merge_20230705_0016.py`
+- **Thin community `Community 141`** (2 nodes): `Migration`, `0031_merge_20230705_0016.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 141`** (2 nodes): `Migration`, `0033_add_user_setting.py`
+- **Thin community `Community 142`** (2 nodes): `Migration`, `0033_add_user_setting.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 142`** (2 nodes): `Migration`, `0008_user_is_superuser.py`
+- **Thin community `Community 143`** (2 nodes): `Migration`, `0008_user_is_superuser.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 143`** (2 nodes): `Migration`, `0017_rename_term_term_name.py`
+- **Thin community `Community 144`** (2 nodes): `Migration`, `0017_rename_term_term_name.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 144`** (2 nodes): `Migration`, `0011_remove_deck_visible_deck_is_public.py`
+- **Thin community `Community 145`** (2 nodes): `Migration`, `0011_remove_deck_visible_deck_is_public.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 145`** (2 nodes): `Migration`, `0023_alter_userlearningprogress_options_folder_decks.py`
+- **Thin community `Community 146`** (2 nodes): `Migration`, `0023_alter_userlearningprogress_options_folder_decks.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 146`** (2 nodes): `Migration`, `0013_alter_deck_background_url.py`
+- **Thin community `Community 147`** (2 nodes): `Migration`, `0013_alter_deck_background_url.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 147`** (2 nodes): `Migration`, `0029_userlearningprogress_is_skip.py`
+- **Thin community `Community 148`** (2 nodes): `Migration`, `0029_userlearningprogress_is_skip.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 148`** (2 nodes): `Migration`, `0024_deck_default_deck.py`
+- **Thin community `Community 149`** (2 nodes): `Migration`, `0024_deck_default_deck.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 149`** (2 nodes): `Migration`, `0022_alter_userlearningprogress_score.py`
+- **Thin community `Community 150`** (2 nodes): `Migration`, `0022_alter_userlearningprogress_score.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 150`** (2 nodes): `Migration`, `0030_alter_deck_options.py`
+- **Thin community `Community 151`** (2 nodes): `Migration`, `0030_alter_deck_options.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 151`** (2 nodes): `Migration`, `0035_user_learning_streak_remove_role_streaks.py`
+- **Thin community `Community 152`** (2 nodes): `Migration`, `0035_user_learning_streak_remove_role_streaks.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 152`** (2 nodes): `Migration`, `0005_user_first_name_user_is_active_user_is_staff_and_more.py`
+- **Thin community `Community 153`** (2 nodes): `Migration`, `0005_user_first_name_user_is_active_user_is_staff_and_more.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 153`** (2 nodes): `Migration`, `0021_remove_userdeckrole_last_term_learned_id.py`
+- **Thin community `Community 154`** (2 nodes): `Migration`, `0021_remove_userdeckrole_last_term_learned_id.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 154`** (2 nodes): `Migration`, `0019_rename_term_term_name.py`
+- **Thin community `Community 155`** (2 nodes): `Migration`, `0019_rename_term_term_name.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 155`** (2 nodes): `Migration`, `0029_alter_user_default_deck.py`
+- **Thin community `Community 156`** (2 nodes): `Migration`, `0029_alter_user_default_deck.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 156`** (2 nodes): `Migration`, `0003_remove_deck_owner_alter_deck_users.py`
+- **Thin community `Community 157`** (2 nodes): `Migration`, `0003_remove_deck_owner_alter_deck_users.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 157`** (2 nodes): `Migration`, `0007_deck_owner_alter_userdeckrole_role.py`
+- **Thin community `Community 158`** (2 nodes): `Migration`, `0007_deck_owner_alter_userdeckrole_role.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 158`** (2 nodes): `Migration`, `0027_alter_term_image.py`
+- **Thin community `Community 159`** (2 nodes): `Migration`, `0027_alter_term_image.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 159`** (2 nodes): `Migration`, `0026_alter_term_image.py`
+- **Thin community `Community 160`** (2 nodes): `Migration`, `0026_alter_term_image.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 160`** (2 nodes): `Migration`, `0006_rename_user_role_userdeckrole_role.py`
+- **Thin community `Community 161`** (2 nodes): `Migration`, `0006_rename_user_role_userdeckrole_role.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 161`** (2 nodes): `Migration`, `0009_remove_user_is_staff.py`
+- **Thin community `Community 162`** (2 nodes): `Migration`, `0009_remove_user_is_staff.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 162`** (2 nodes): `Migration`, `0028_alter_term_options_term_created_at_term_updated_at.py`
+- **Thin community `Community 163`** (2 nodes): `Migration`, `0028_alter_term_options_term_created_at_term_updated_at.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 163`** (2 nodes): `Migration`, `0010_deck_visible_alter_userdeckrole_streaks.py`
+- **Thin community `Community 164`** (2 nodes): `Migration`, `0010_deck_visible_alter_userdeckrole_streaks.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 164`** (2 nodes): `Migration`, `0032_userlearningprogress_last_revised_at_and_more.py`
+- **Thin community `Community 165`** (2 nodes): `Migration`, `0032_userlearningprogress_last_revised_at_and_more.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 165`** (2 nodes): `Migration`, `0004_remove_user_date_joined_remove_user_first_name_and_more.py`
+- **Thin community `Community 166`** (2 nodes): `Migration`, `0004_remove_user_date_joined_remove_user_first_name_and_more.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 166`** (2 nodes): `Migration`, `0025_remove_deck_default_deck_user_default_deck.py`
+- **Thin community `Community 167`** (2 nodes): `Migration`, `0025_remove_deck_default_deck_user_default_deck.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 167`** (2 nodes): `Migration`, `0001_initial.py`
+- **Thin community `Community 168`** (2 nodes): `Migration`, `0001_initial.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 168`** (2 nodes): `Migration`, `0016_alter_deck_background.py`
+- **Thin community `Community 169`** (2 nodes): `Migration`, `0016_alter_deck_background.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 169`** (2 nodes): `Migration`, `0020_userdeckrole_last_term_learned_id.py`
+- **Thin community `Community 170`** (2 nodes): `Migration`, `0020_userdeckrole_last_term_learned_id.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 170`** (2 nodes): `Migration`, `0014_alter_deck_background_url.py`
+- **Thin community `Community 171`** (2 nodes): `Migration`, `0014_alter_deck_background_url.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 171`** (2 nodes): `Migration`, `0018_rename_image_url_term_image_rename_name_term_term.py`
+- **Thin community `Community 172`** (2 nodes): `Migration`, `0018_rename_image_url_term_image_rename_name_term_term.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 172`** (2 nodes): `Migration`, `0002_userlearningprogress_userdeckrole_deck_users.py`
+- **Thin community `Community 173`** (2 nodes): `Migration`, `0002_userlearningprogress_userdeckrole_deck_users.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 173`** (2 nodes): `role.py`, `FULL_ROLE_CLASS`
+- **Thin community `Community 174`** (2 nodes): `role.py`, `FULL_ROLE_CLASS`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 174`** (2 nodes): `db_utils.py`, `execute_raw_sql()`
+- **Thin community `Community 175`** (2 nodes): `db_utils.py`, `execute_raw_sql()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 175`** (2 nodes): `registry.py`, `CronJob`
+- **Thin community `Community 176`** (2 nodes): `registry.py`, `CronJob`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 176`** (2 nodes): `run_phase1_crud()`, `phase1.rs`
+- **Thin community `Community 177`** (2 nodes): `run_phase1_crud()`, `phase1.rs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 177`** (2 nodes): `main()`, `main.rs`
+- **Thin community `Community 178`** (2 nodes): `main()`, `main.rs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 178`** (2 nodes): `Uuid`, `.from()`
+- **Thin community `Community 179`** (2 nodes): `Uuid`, `.from()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 179`** (2 nodes): `routes()`, `mod.rs`
+- **Thin community `Community 180`** (2 nodes): `routes()`, `mod.rs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 180`** (1 nodes): `asgi.py`
+- **Thin community `Community 181`** (1 nodes): `asgi.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 181`** (1 nodes): `__init__.py`
+- **Thin community `Community 182`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 182`** (1 nodes): `craco.config.js`
+- **Thin community `Community 183`** (1 nodes): `craco.config.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 183`** (1 nodes): `index.js`
+- **Thin community `Community 184`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 184`** (1 nodes): `setupTests.js`
+- **Thin community `Community 185`** (1 nodes): `setupTests.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 185`** (1 nodes): `__init__.py`
+- **Thin community `Community 186`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 186`** (1 nodes): `config-overrides.js`
+- **Thin community `Community 187`** (1 nodes): `config-overrides.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 187`** (1 nodes): `views.py`
+- **Thin community `Community 188`** (1 nodes): `views.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 188`** (1 nodes): `__init__.py`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 189`** (1 nodes): `index.js`
+- **Thin community `Community 189`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 190`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 191`** (1 nodes): `pageSize.js`
+- **Thin community `Community 191`** (1 nodes): `index.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 192`** (1 nodes): `questionTypes.js`
+- **Thin community `Community 192`** (1 nodes): `pageSize.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 193`** (1 nodes): `role.js`
+- **Thin community `Community 193`** (1 nodes): `questionTypes.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 194`** (1 nodes): `crawler.js`
+- **Thin community `Community 194`** (1 nodes): `role.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 195`** (1 nodes): `colors.js`
+- **Thin community `Community 195`** (1 nodes): `crawler.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 196`** (1 nodes): `theme.js`
+- **Thin community `Community 196`** (1 nodes): `colors.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 197`** (1 nodes): `history.js`
+- **Thin community `Community 197`** (1 nodes): `theme.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 198`** (1 nodes): `__init__.py`
+- **Thin community `Community 198`** (1 nodes): `history.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 199`** (1 nodes): `routing.py`
+- **Thin community `Community 199`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 200`** (1 nodes): `urls.py`
+- **Thin community `Community 200`** (1 nodes): `routing.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 201`** (1 nodes): `__init__.py`
+- **Thin community `Community 201`** (1 nodes): `urls.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 202`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 203`** (1 nodes): `user_settings.py`
+- **Thin community `Community 203`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 204`** (1 nodes): `__init__.py`
+- **Thin community `Community 204`** (1 nodes): `user_settings.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 205`** (1 nodes): `google.py`
+- **Thin community `Community 205`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 206`** (1 nodes): `raw_query.py`
+- **Thin community `Community 206`** (1 nodes): `google.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 207`** (1 nodes): `__init__.py`
+- **Thin community `Community 207`** (1 nodes): `raw_query.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 208`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -1515,29 +1518,29 @@ Nodes (0):
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 216`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 217`** (1 nodes): `Async (threaded) — use in Django views to avoid blocking the HTTP response.`
+- **Thin community `Community 217`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 218`** (1 nodes): `Synchronous — use inside RQ tasks; the worker IS the background process.`
+- **Thin community `Community 218`** (1 nodes): `Async (threaded) — use in Django views to avoid blocking the HTTP response.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 219`** (1 nodes): `__init__.py`
+- **Thin community `Community 219`** (1 nodes): `Synchronous — use inside RQ tasks; the worker IS the background process.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 220`** (1 nodes): `Run each provider sequentially and measure latency + URLs for verification.`
+- **Thin community `Community 220`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 221`** (1 nodes): `Human-readable report grouped by provider for manual image verification.`
+- **Thin community `Community 221`** (1 nodes): `Run each provider sequentially and measure latency + URLs for verification.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 222`** (1 nodes): `backup.py`
+- **Thin community `Community 222`** (1 nodes): `Human-readable report grouped by provider for manual image verification.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 223`** (1 nodes): `maintenance.py`
+- **Thin community `Community 223`** (1 nodes): `backup.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 224`** (1 nodes): `email.py`
+- **Thin community `Community 224`** (1 nodes): `maintenance.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 225`** (1 nodes): `images.py`
+- **Thin community `Community 225`** (1 nodes): `email.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 226`** (1 nodes): `mod.rs`
+- **Thin community `Community 226`** (1 nodes): `images.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 227`** (1 nodes): `lib.rs`
+- **Thin community `Community 227`** (1 nodes): `mod.rs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 228`** (1 nodes): `mod.rs`
+- **Thin community `Community 228`** (1 nodes): `lib.rs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 229`** (1 nodes): `mod.rs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -1557,24 +1560,28 @@ Nodes (0):
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 237`** (1 nodes): `mod.rs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 238`** (1 nodes): `__init__.py`
+- **Thin community `Community 238`** (1 nodes): `mod.rs`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 239`** (1 nodes): `admin.py`
+- **Thin community `Community 239`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 240`** (1 nodes): `tests.py`
+- **Thin community `Community 240`** (1 nodes): `admin.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 241`** (1 nodes): `__init__.py`
+- **Thin community `Community 241`** (1 nodes): `tests.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 242`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 243`** (1 nodes): `This method should be overridden         and return a Q() expression.`
+- **Thin community `Community 243`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 244`** (1 nodes): `__init__.py`
+- **Thin community `Community 244`** (1 nodes): `This method should be overridden         and return a Q() expression.`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 245`** (1 nodes): `__init__.py`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `DeckViewSet` connect `Community 1` to `Community 5`?**
+  _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **Are the 11 inferred relationships involving `UserSerializer` (e.g. with `DeckSerializer` and `Meta`) actually correct?**
   _`UserSerializer` has 11 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 7 inferred relationships involving `User` (e.g. with `Deck` and `Meta`) actually correct?**
@@ -1584,8 +1591,6 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `Run administrative tasks.`, `SKIP_REDIS`, `SMTP backend that uses certifi's CA bundle.      Needed on macOS/environments wh` to the rest of the system?**
   _140 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.02 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.04 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.04 - nodes in this community are weakly interconnected._
-- **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.07 - nodes in this community are weakly interconnected._
