@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-import subprocess
+import subprocess  # nosec B404
 import tempfile
 from datetime import UTC, datetime, timedelta
 
@@ -87,7 +87,7 @@ def dump_database_to_drive():
     from googleapiclient.http import MediaFileUpload
 
     db = settings.DATABASES["default"]
-    timestamp = datetime.utcnow().strftime("%y_%d_%m")
+    timestamp = datetime.utcnow().strftime("%y_%d_%m_%H_%M_%S")
     filename = f"{timestamp}.sql"
 
     tmp_path = None
@@ -107,7 +107,7 @@ def dump_database_to_drive():
             db["NAME"],
         ]
         with open(tmp_path, "w") as out:
-            result = subprocess.run(cmd, stdout=out, stderr=subprocess.PIPE, text=True)
+            result = subprocess.run(cmd, stdout=out, stderr=subprocess.PIPE, text=True)  # nosec B603
 
         if result.returncode != 0:
             raise RuntimeError(f"mysqldump failed: {result.stderr.strip()}")
