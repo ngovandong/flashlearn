@@ -79,9 +79,10 @@
 
                 .google-photos {
                     width: 100% !important;
+                    grid-template-columns: repeat(3, 1fr);
 
                     .google-image {
-                        width: 40%;
+                        height: 5rem;
                     }
                 }
 

@@ -98,7 +98,7 @@ const TermSpeaker = styled.button`
   padding: 6px;
   transition: all 0.2s;
   flex-shrink: 0;
-  
+
   & > img {
     height: 16px;
     width: 16px;
@@ -190,9 +190,11 @@ const ResourceLink = styled.a`
 const ImageGallery = styled.div`
   margin-top: 14px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   margin-bottom: 12px;
+  max-height: 360px;
+  overflow-y: auto;
 `;
 
 const ImageThumbnail = styled.img`
@@ -205,10 +207,10 @@ const ImageThumbnail = styled.img`
   border: 2px solid transparent;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
   transition: all 0.2s;
-  
+
   border-color: ${(props) => (props.selected ? primaryColor : "transparent")};
   box-shadow: ${(props) => (props.selected ? "0 4px 12px rgba(66, 85, 255, 0.15)" : "0 2px 4px rgba(0,0,0,0.04)")};
-  
+
   &:hover {
     border-color: ${primaryColor};
     transform: scale(1.02);
@@ -228,7 +230,7 @@ const AddToDeckButton = styled.button`
   margin-top: 12px;
   box-shadow: 0 4px 12px rgba(66, 85, 255, 0.15);
   transition: all 0.2s;
-  
+
   &:hover {
     background-color: ${primaryHoverColor};
     box-shadow: 0 6px 16px rgba(66, 85, 255, 0.25);
@@ -317,7 +319,7 @@ export default function TranslationPopup({
   const handleClick = (e) => {
     e.stopPropagation();
   };
-  
+
   const handleSpeak = () => {
     speak(term);
   };
@@ -361,7 +363,7 @@ export default function TranslationPopup({
             <img src={speakerURL} alt="speak term" />
           </TermSpeaker>
         </TermHeaderContainer>
-        
+
         <LinkGroup>
           <ResourceLink href={youglish} target="_blank" rel="noreferrer">
             YouGlish
@@ -370,7 +372,7 @@ export default function TranslationPopup({
             Google
           </ResourceLink>
         </LinkGroup>
-        
+
         <MeaningContainer>
           <p>Meaning</p>
           {!error && isLoading && (
@@ -394,7 +396,7 @@ export default function TranslationPopup({
             </SetupDeckHint>
           )}
         </MeaningContainer>
-        
+
         <ImageGallery>
           {images.map((i) => (
             <ImageThumbnail
@@ -410,4 +412,3 @@ export default function TranslationPopup({
     </PopupContainer>
   );
 }
-
