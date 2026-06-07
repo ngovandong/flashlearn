@@ -27,7 +27,7 @@ repos:
       - id: trailing-whitespace
         exclude: "^frontend/"
       - id: end-of-file-fixer
-        exclude: "^frontend/"
+        exclude: "^frontend/|^graphify-out/"
       - id: check-merge-conflict
       - id: check-added-large-files
         args: [--maxkb=1000]
