@@ -29,6 +29,47 @@ uv run python manage.py makemigrations
 python manage.py test backend.tests
 ```
 
+### Image crawler (`POST /api/images/`)
+
+Providers run in batches of 2: **Google + Bing**, then **Openverse + Wikimedia** if more URLs are needed.
+
+Google Images requires JavaScript. The crawler tries a fast HTTP pass first, then falls back to **Playwright** (headless Chromium) when Google returns a bot block page.
+
+One-time Playwright browser install (after `uv sync`):
+
+```bash
+uv run playwright install chromium
+```
+
+On Armbian / low-memory hosts you can disable the Playwright fallback:
+
+```bash
+CRAWLER_GOOGLE_SKIP_PLAYWRIGHT=1
+```
+
+#### Testing image crawler strategies
+
+Parser unit test (no network):
+
+```bash
+uv run python manage.py test backend.tests.test_crawler.GoogleImageParserTest -v 2
+```
+
+Live benchmark — all 4 providers, timings, and grouped URLs for manual verification:
+
+```bash
+CRAWLER_INTEGRATION=1 uv run python manage.py test backend.tests.test_crawler.CrawlerStrategyBenchmarkTest -v 2
+```
+
+Optional overrides:
+
+```bash
+CRAWLER_INTEGRATION=1 CRAWLER_BENCHMARK_QUERY="morning coffee" CRAWLER_BENCHMARK_COUNT=5 \
+  uv run python manage.py test backend.tests.test_crawler.CrawlerStrategyBenchmarkTest -v 2
+```
+
+The benchmark prints each provider's URLs separately plus the combined `BSCrawler` merge. Google typically takes ~3–4s when Playwright is used.
+
 ### Rust Backend
 ```bash
 cd rust_backend

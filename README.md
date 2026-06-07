@@ -242,3 +242,18 @@ Run backend tests:
 ```bash
 python manage.py test backend.tests
 ```
+
+### Image crawler testing
+
+The image search API lives at `POST /api/images/` (`backend/services/crawler.py`). Google uses Playwright when HTTP scraping is blocked — install the browser once:
+
+```bash
+uv run playwright install chromium
+```
+
+| Command | Purpose |
+|---------|---------|
+| `uv run python manage.py test backend.tests.test_crawler.GoogleImageParserTest -v 2` | Unit test (offline) |
+| `CRAWLER_INTEGRATION=1 uv run python manage.py test backend.tests.test_crawler.CrawlerStrategyBenchmarkTest -v 2` | Live benchmark all 4 providers |
+
+Use `CRAWLER_BENCHMARK_QUERY` and `CRAWLER_BENCHMARK_COUNT` to change the search term and result count. Set `CRAWLER_GOOGLE_SKIP_PLAYWRIGHT=1` to disable Google on low-memory servers.
