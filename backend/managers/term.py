@@ -1,13 +1,27 @@
-from django.db.models import ExpressionWrapper, F, IntegerField, Manager, Q, QuerySet
+from django.db.models import ExpressionWrapper, F, IntegerField, Manager, OuterRef, Q, QuerySet, Subquery
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
 
 class TermManager(Manager):
-    def get_terms_for_deck(self, deck_id: int) -> QuerySet:
+    def get_terms_for_deck(self, deck_id: int, user=None) -> QuerySet:
         """
         Returns the terms for the given deck.
+        When user is given, total_revisions is scoped to that user via Subquery
+        so the join does not duplicate rows (one row per other user's progress).
         """
-        return self.filter(deck_id=deck_id)
+        qs = self.filter(deck_id=deck_id)
+        if user is not None:
+            from ..models import UserLearningProgress
+
+            revisions_subquery = UserLearningProgress.objects.filter(
+                term_id=OuterRef("pk"),
+                user_id=user.id,
+            ).values("total_revisions")[:1]
+            qs = qs.annotate(
+                total_revisions=Coalesce(Subquery(revisions_subquery), 0),
+            )
+        return qs
 
     # query 2 time but better performance if has many learning progress
     # def get_learned_terms(self, user, deck_id: int) -> QuerySet:
@@ -88,6 +102,7 @@ class TermManager(Manager):
                 / (1000000 * 60 * 60 * 24),
             )
             .annotate(rank=F("delta_day") * -10 + F("learning_progress__score"))
+            .annotate(total_revisions=F("learning_progress__total_revisions"))
             .order_by("rank")[:5]
         )
         return revise_terms

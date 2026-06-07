@@ -51,6 +51,7 @@ class LearningViewSet(FlexibleViewSet):
             serializer.save()
         else:
             instance.last_learned_at = timezone.now()
+            instance.total_revisions += 1
             instance.save()
         learning_progress_cache.delete_combine(deck_id, user_id)
         LearningService.record_study_activity(self.request.user)
@@ -67,6 +68,7 @@ class LearningViewSet(FlexibleViewSet):
     def correct(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.score += 2
+        instance.total_revisions += 1
         instance.last_revised_at = timezone.now()
         instance.save()
         learning_progress_cache.delete_combine(instance.term.deck_id, request.user.id)
@@ -78,6 +80,7 @@ class LearningViewSet(FlexibleViewSet):
     def incorrect(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.score -= 3
+        instance.total_revisions += 1
         instance.last_revised_at = timezone.now()
         instance.save()
         learning_progress_cache.delete_combine(instance.term.deck_id, request.user.id)
@@ -117,7 +120,7 @@ class LearningViewSet(FlexibleViewSet):
         deck_id = request.query_params.get("deck_id")
         if deck_id is None:
             raise Http404("deck_id parameter is required")
-        deck_terms = Term.objects.get_terms_for_deck(deck_id=deck_id).all()
+        deck_terms = Term.objects.get_terms_for_deck(deck_id=deck_id, user=request.user).all()
         queryset = self.filter_queryset(deck_terms)
 
         page = self.paginate_queryset(queryset)
@@ -141,7 +144,7 @@ class LearningViewSet(FlexibleViewSet):
         deck_id = request.query_params.get("deck_id")
         if deck_id is None:
             raise Http404("deck_id parameter is required")
-        deck_terms = Term.objects.get_terms_for_deck(deck_id=deck_id).all()
+        deck_terms = Term.objects.get_terms_for_deck(deck_id=deck_id, user=request.user).all()
         last_learned_term = Term.objects.get_last_learned_term(request.user, deck_id)
         if last_learned_term:
             last_learned_index = last_learned_term.id

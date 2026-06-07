@@ -12,6 +12,7 @@ class UserLearningProgress(UUIDModel):
     last_learned_at = models.DateTimeField(auto_now_add=True)
     last_revised_at = models.DateTimeField(auto_now_add=True)
     score = models.IntegerField(default=0)
+    total_revisions = models.IntegerField(default=0)
     is_skip = models.BooleanField(default=False)
 
     class Meta:

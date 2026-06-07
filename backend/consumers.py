@@ -69,6 +69,7 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
     def save_learning_progress(self, term_id):
         learning_progress, _ = UserLearningProgress.objects.get_or_create(user=self.user, term_id=term_id)
         learning_progress.score += 1
+        learning_progress.total_revisions += 1
         learning_progress.last_revised_at = timezone.now()
         learning_progress.save()
         LearningService.record_study_activity(self.user)

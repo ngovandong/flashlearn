@@ -7,9 +7,11 @@ from ..services import url_to_base64
 
 
 class TermSerializer(serializers.ModelSerializer):
+    total_revisions = serializers.IntegerField(read_only=True, default=0)
+
     class Meta:
         model = Term
-        fields = ("id", "name", "description", "image", "deck")
+        fields = ("id", "name", "description", "image", "deck", "total_revisions")
 
     def to_internal_value(self, data):
         ret = super().to_internal_value(data)
@@ -42,10 +44,11 @@ class OnlyNameTermSerializer(serializers.ModelSerializer):
 class ProgressTermSerializer(serializers.ModelSerializer):
     image = serializers.URLField(allow_blank=True)
     learning_progress_id = serializers.UUIDField(read_only=True)
+    total_revisions = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Term
-        fields = ("id", "name", "description", "image", "learning_progress_id")
+        fields = ("id", "name", "description", "image", "learning_progress_id", "total_revisions")
 
 
 class ReviseTermSerializer(serializers.Serializer):

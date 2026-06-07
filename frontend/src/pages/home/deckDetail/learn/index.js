@@ -459,18 +459,10 @@ function LearnPage()
               <h3>Study Progress</h3>
               <div className="studystats">
                 <div className="stat-row">
-                  <span>Words Learned</span>
+                  <span>Total Revisions</span>
                   <span className="stat-value">
-                    {currentState.absolute_index}/{deck.number_of_term}
+                    {currentTerm.total_revisions ?? 0}
                   </span>
-                </div>
-                <div className="stat-row">
-                  <span>Study Streak</span>
-                  <span className="stat-value">5 days</span>
-                </div>
-                <div className="stat-row">
-                  <span>Time Studied</span>
-                  <span className="stat-value">23 min</span>
                 </div>
               </div>
             </div>
