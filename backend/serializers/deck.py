@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from ..constants import FULL_ROLE_CHOICES
 from ..models import Deck
-from ..services import LearningService
 from .learning_progress import ProgressSerializer
 from .role import AddUserSerializer
 from .user import UserSerializer
@@ -40,8 +39,9 @@ class DeckDetailSerializer(DeckSerializer):
         request = self.context["request"]
         user = request.user
         ret = super().to_representation(instance)
-        permission = instance.get_user_permission(user)
-        ret["my_permission"] = permission
+        ret["my_permission"] = instance.get_user_permission(user)
+        from ..services import LearningService
+
         ret["number_of_term"], ret["learning_progress"] = LearningService.get_learning_progress(instance.id, user)
         return ret
 
@@ -52,7 +52,3 @@ class MyDeckSerializer(DeckSerializer):
 
     class Meta(DeckSerializer.Meta):
         fields = (*DeckSerializer.Meta.fields, "my_permission", "learned")
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        return ret

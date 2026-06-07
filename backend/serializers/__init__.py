@@ -8,6 +8,7 @@ from .learning_progress import (
 )
 from .role import (
     AddUserSerializer,
+    AddUserToDeckSerializer,
     InviteSerializer,
     RemoveUserSerializer,
     UpdateRoleSerializer,

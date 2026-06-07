@@ -177,10 +177,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
         "core.authentication.CustomTokenAuthentication",
         "rest_framework.authentication.BasicAuthentication",
-        # 'rest_framework.authentication.SessionAuthentication',
     ),
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
@@ -190,6 +188,7 @@ REST_FRAMEWORK = {
         "anon": "60/minute",
         "user": "300/minute",
     },
+    "EXCEPTION_HANDLER": "backend.shared.interfaces.exception_handler.domain_exception_handler",
 }
 
 

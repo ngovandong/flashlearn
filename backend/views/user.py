@@ -9,9 +9,10 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
-from base.views import FlexibleViewSet
+from backend.shared.application.exceptions import ValidationError as DomainValidationError
+from backend.shared.interfaces.viewsets import FlexibleViewSet
 
-from ..models import User, UserSetting
+from ..models import User
 from ..serializers import (
     ActiveAccountSerializer,
     ChangePasswordSerializer,
@@ -70,14 +71,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
     @action(detail=False, methods=["GET", "PATCH"])
     def my_settings(self, request, *args, **kwargs):
         if request.method == "GET":
-            qs = UserSetting.objects.filter(user=request.user)
-            return Response({s.key: s.value for s in qs})
-
-        # PATCH: update or create each key sent in the request body
-        for key, value in request.data.items():
-            UserSetting.objects.update_or_create(user=request.user, key=key, defaults={"value": value})
-        qs = UserSetting.objects.filter(user=request.user)
-        return Response({s.key: s.value for s in qs})
+            return Response(UserService.get_settings(request.user))
+        return Response(UserService.update_settings(request.user, request.data))
 
     @action(detail=False, methods=["POST"])
     def login(self, request, *args, **kwargs):
@@ -95,7 +90,6 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
             raise InvalidToken(e.args[0]) from e
-
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["POST"])
@@ -107,9 +101,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
         domain = settings.BASE_BACKEND_URL
         api_url = reverse("user-active-account")
         active_account_url = f"{domain}{api_url}"
-
         token = AuthService.get_verify_email_token(user)
-
         params = urlencode({"token": token})
         link = f"{active_account_url}?{params}"
 
@@ -121,12 +113,14 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
         user = self.get_object()
         serializer = ChangePasswordSerializer(data=request.data)
         if serializer.is_valid():
-            # Check old password
-            if not user.check_password(serializer.data.get("old_password")):
+            try:
+                UserService.change_password(
+                    user,
+                    serializer.validated_data.get("old_password"),
+                    serializer.validated_data.get("new_password"),
+                )
+            except DomainValidationError:
                 return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
-            # Set new password
-            user.set_password(serializer.data.get("new_password"))
-            user.save()
             return Response({"status": "password changed"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -150,7 +144,6 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
             import json
 
             try:
-                # Add padding if needed for base64 decoding
                 padded_state = state + "=" * (-len(state) % 4)
                 decoded_state = json.loads(base64.b64decode(padded_state).decode("utf-8"))
                 redirect_uri = decoded_state.get("r")
@@ -163,19 +156,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
             redirect_uri = f"{domain}{api_uri}"
 
         access_token = AuthService.google_get_access_token(code=code, redirect_uri=redirect_uri)
-
         user_data = AuthService.google_get_user_info(access_token=access_token)
-
-        profile_data = {
-            "email": user_data["email"],
-            "first_name": user_data.get("given_name", ""),
-            "last_name": user_data.get("family_name", ""),
-            "name": user_data.get("name", ""),
-            "image_url": user_data.get("picture", ""),
-        }
-
-        # We use get-or-create logic here for the sake of the example.
-        # We don't have a sign-up flow.
+        profile_data = AuthService.google_profile_from_user_data(user_data)
         user, _ = UserService.user_get_or_create_validated_email_user(**profile_data)
 
         if not user.is_google_account:
@@ -183,27 +165,17 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
             return redirect(f"{login_url}?{params}")
 
         token = AuthService.get_token(user)
-
         params = urlencode(token)
         return redirect(f"{login_url}?{params}")
 
     @action(detail=False, methods=["GET"])
     def init(self, request, *args, **kwargs):
         id_token = request.headers.get("Authorization")
-
         if not id_token:
             return Response({"error": "token is require"}, status=status.HTTP_400_BAD_REQUEST)
 
         user_data = AuthService.google_validate_id_token(id_token)
-
-        profile_data = {
-            "email": user_data["email"],
-            "first_name": user_data.get("given_name", ""),
-            "last_name": user_data.get("family_name", ""),
-            "name": user_data.get("name", ""),
-            "image_url": user_data.get("picture", ""),
-        }
-
+        profile_data = AuthService.google_profile_from_user_data(user_data)
         user, _ = UserService.user_get_or_create_validated_email_user(**profile_data)
 
         if not user.is_google_account:

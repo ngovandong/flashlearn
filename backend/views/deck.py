@@ -1,29 +1,27 @@
 from urllib.parse import urlencode
 
 from django.conf import settings
-from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from elasticsearch_dsl import Q
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from base.views import FlexibleViewSet, SearchViewSet
+from backend.deck.infrastructure.search import DeckSearchQuery
+from backend.shared.interfaces.viewsets import FlexibleViewSet, SearchViewSet
 
-from ..constants import FULL_ROLE_CLASS
 from ..documents import DeckDocument
-from ..models import Deck, User
+from ..models import Deck
 from ..permissions import EditableDeck, IsOwnerPermission
 from ..serializers import (
-    AddUserSerializer,
+    AddUserToDeckSerializer,
     DeckDetailSerializer,
     DeckSerializer,
     InviteSerializer,
     MyDeckSerializer,
     RemoveUserSerializer,
 )
-from ..services import AuthService, DeckService, LearningService, UserService
+from ..services import AuthService, DeckService
 
 
 class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
@@ -38,7 +36,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     permission_map = {
         "add_user_to_deck": owner_permission,
         "destroy": owner_permission,
-        "remove_user_to_deck": owner_permission,
+        "remove_user_from_deck": owner_permission,
         "get_invite_url": owner_permission,
         "clear_learning_process": permissions.IsAuthenticated,
         "join_deck": permissions.IsAuthenticated,
@@ -49,8 +47,8 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     }
 
     serializer_map = {
-        "add_user_to_deck": AddUserSerializer,
-        "remove_user_to_deck": RemoveUserSerializer,
+        "add_user_to_deck": AddUserToDeckSerializer,
+        "remove_user_from_deck": RemoveUserSerializer,
         "my_decks": MyDeckSerializer,
         "my_own_decks": MyDeckSerializer,
         "others_deck": MyDeckSerializer,
@@ -66,35 +64,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         return super().get_queryset()
 
     def generate_q_expression(self, query, **kwargs):
-        user = kwargs.get("user")
-        search_query = Q("bool", should=[])
-
-        # Use multi_match query to search the query across multiple fields
-        search_query.should.append(
-            Q(
-                "multi_match",
-                query=query,
-                fields=["owner.email", "name", "description", "owner.name^2.0"],
-            )
-        )
-
-        # Add the condition: (owner = user or user in users)
-        user_condition_query = Q(
-            "bool",
-            should=[
-                # Match documents where owner.id is the same as user.id
-                Q("match", owner__id=user.id),
-                Q("term", is_public=True),
-                Q("nested", path="users", query=Q("match", **{"users.id": user.id})),  # Match user in users
-            ],
-            minimum_should_match=1,
-        )
-
-        # Add the user_condition_query as a must clause to satisfy the overall condition
-        if query.strip():
-            return search_query & user_condition_query
-        else:
-            return user_condition_query
+        return DeckSearchQuery.build(query, kwargs.get("user"))
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -114,8 +84,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.updated_at = timezone.now()
-        instance.save()
+        DeckService.touch_on_retrieve(instance)
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
@@ -131,14 +100,12 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     )
     def list(self, request, *args, **kwargs):
         search_query = request.query_params.get("search")
-
         self.queryset = DeckService.get_search_queryset(request.user, search_query)
         return super().list(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        User.objects.filter(default_deck=instance).update(default_deck=None)
-        self.perform_destroy(instance)
+        DeckService.destroy_deck(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=["GET"])
@@ -173,41 +140,21 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        email = serializer.validated_data["email"]
-        user_role = serializer.validated_data["role"]
-
-        user_to_add = User.objects.get_by_email(email)
-
-        if user_to_add:
-            if user_to_add in instance.users.all() or user_to_add == request.user:
-                return Response(
-                    {"errors": "user is already in deck"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        else:
-            return Response({"errors": "user not found"}, status=status.HTTP_400_BAD_REQUEST)
-        instance.users.add(user_to_add, through_defaults={"role": user_role})
-
-        deck_serializer = DeckSerializer(instance)
-        return Response(deck_serializer.data)
+        DeckService.add_user_to_deck(
+            instance,
+            request.user,
+            serializer.validated_data["email"],
+            serializer.validated_data["role"],
+        )
+        return Response(DeckSerializer(instance).data)
 
     @action(detail=True, methods=["POST"])
     def remove_user_from_deck(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data["email"]
-
-        user = User.objects.get_by_email(email)
-
-        if user:
-            if user in instance.users.all() or user == request.user:
-                instance.users.remove(user)
-                return Response(status=status.HTTP_200_OK)
-            return Response({"errors": "user isn't in deck"}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({"errors": "user not found"}, status=status.HTTP_400_BAD_REQUEST)
+        DeckService.remove_user_from_deck(instance, request.user, serializer.validated_data["email"])
+        return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["POST"])
     def get_invite_url(self, request, pk=None, *args, **kwargs):
@@ -221,7 +168,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
 
     @action(detail=True, methods=["PUT"])
     def clear_learning_process(self, request, pk=None, *args, **kwargs):
-        LearningService.clear_learning_progress(pk, request.user)
+        DeckService.clear_learning_process(pk, request.user)
         return Response(
             {"message": "clear learning progress success"},
             status=status.HTTP_204_NO_CONTENT,
@@ -229,48 +176,27 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
 
     @action(detail=True, methods=["POST"])
     def join_deck(self, request, pk=None, *args, **kwargs):
-        user = request.user
-        instance = self.get_object()
-        if not instance.is_public:
-            return Response(
-                {"errors": "You have not permission"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if user in instance.users.all():
-            return Response(
-                {"errors": "user is already in deck"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        instance.users.add(user, through_defaults={"role": FULL_ROLE_CLASS.VIEW_ONLY})
+        DeckService.join_deck(self.get_object(), request.user)
         return Response({"message": "join deck success"}, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["POST"])
     def leave_deck(self, request, pk=None, *args, **kwargs):
-        user = request.user
-        instance = self.get_object()
-        if user not in instance.users.all():
-            return Response({"errors": "user is not in deck"}, status=status.HTTP_400_BAD_REQUEST)
-        DeckService.leave_deck(instance, user)
+        DeckService.leave_deck(self.get_object(), request.user)
         return Response({"message": "leave deck success"}, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["PUT"])
     def set_default_deck(self, request, *args, **kwargs):
-        user = request.user
-        instance = self.get_object()
-        user.default_deck = instance
-        user.save()
-        UserService.clear_cache(user.id)
+        DeckService.set_default_deck(request.user, self.get_object())
         return Response({"message": "update successfully"}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["GET"])
     def clone(self, request, *args, **kwargs):
-        instance = self.get_object()
         try:
-            new_deck = DeckService.clone_deck(instance, request.user)
-            serializer = self.get_serializer(new_deck)
-            return Response(serializer.data)
+            new_deck = DeckService.clone_deck(self.get_object(), request.user)
         except Exception:
             return Response({"errors": "Clone deck fail"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(new_deck)
+        return Response(serializer.data)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

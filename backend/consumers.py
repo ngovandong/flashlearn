@@ -7,10 +7,9 @@ from urllib.parse import parse_qs
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
-from django.utils import timezone
 from rest_framework_simplejwt.tokens import AccessToken, TokenError
 
-from backend.models import Deck, UserLearningProgress
+from backend.models import Deck
 from backend.serializers import ReviseTermSerializer
 from backend.services import LearningService, TermService, learning_progress_cache
 
@@ -67,12 +66,7 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def save_learning_progress(self, term_id):
-        learning_progress, _ = UserLearningProgress.objects.get_or_create(user=self.user, term_id=term_id)
-        learning_progress.score += 1
-        learning_progress.total_revisions += 1
-        learning_progress.last_revised_at = timezone.now()
-        learning_progress.save()
-        LearningService.record_study_activity(self.user)
+        LearningService.record_quick_revise_answer(self.user, term_id)
 
     @database_sync_to_async
     def get_revise_terms(self):

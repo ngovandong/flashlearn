@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from ..constants import USER_ROLE_CHOICES
 from ..models import UserDeckRole
 
 
@@ -18,11 +19,24 @@ class UpdateRoleSerializer(serializers.ModelSerializer):
 
 
 class AddUserSerializer(serializers.ModelSerializer):
+    """Read-only representation of a deck membership (used in DeckDetailSerializer.user_roles)."""
+
     email = serializers.EmailField(source="user.email")
 
     class Meta:
         model = UserDeckRole
         fields = ("email", "role")
+
+
+class AddUserToDeckSerializer(serializers.Serializer):
+    """Input serializer for the add_user_to_deck action.
+
+    Kept separate from AddUserSerializer (which has source="user.email" for output)
+    so validated_data exposes a flat "email" key.
+    """
+
+    email = serializers.EmailField()
+    role = serializers.ChoiceField(choices=USER_ROLE_CHOICES)
 
 
 class RemoveUserSerializer(serializers.Serializer):
