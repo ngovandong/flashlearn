@@ -47,6 +47,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
         "change_password": [permissions.IsAuthenticated],
         "get_profile": [permissions.IsAuthenticated],
         "learning_streak": [permissions.IsAuthenticated],
+        "record_study": [permissions.IsAuthenticated],
         "my_settings": [permissions.IsAuthenticated],
     }
 
@@ -60,6 +61,11 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
         user = User.objects.get(pk=request.user.pk)
         data = LearningService.get_learning_streak(user)
         return Response(LearningStreakSerializer(data).data)
+
+    @action(detail=False, methods=["POST"])
+    def record_study(self, request, *args, **kwargs):
+        LearningService.record_study_activity(request.user)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=["GET", "PATCH"])
     def my_settings(self, request, *args, **kwargs):

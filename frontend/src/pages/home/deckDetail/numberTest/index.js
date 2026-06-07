@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { deckService } from "@api-services/deckService";
-import { LocalLoadingWrapper } from "@components/loading";
-import { getFirstError } from "@utils/errorHandler";
+import { userSettingService } from "@api-services/userSettingService";
 import { toast } from "react-toastify";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
@@ -59,10 +57,6 @@ function NumberTest() {
   const { deckID } = useParams();
   const navigate = useNavigate();
 
-  // Deck details
-  const [deck, setDeck] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-
   // Settings state
   const [mode, setMode] = useState("teens-tens"); // digits, teens-tens, hundreds, thousands, millions, custom
   const [customMin, setCustomMin] = useState(1);
@@ -91,27 +85,6 @@ function NumberTest() {
 
   // Audio references
   const audioTimeoutRef = useRef(null);
-
-  // Load deck info
-  useEffect(() => {
-    const fetchDeck = async () => {
-      if (!deckID) return;
-      try {
-        setIsLoading(true);
-        const res = await deckService.retrieve(deckID);
-        if (!res.error) {
-          setDeck(res.data);
-        } else {
-          toast.error(getFirstError(res.error));
-        }
-      } catch (error) {
-        console.error("Error retrieving deck:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchDeck();
-  }, [deckID]);
 
   // Load synthesis voices
   useEffect(() => {
@@ -313,6 +286,17 @@ function NumberTest() {
     setShowSpelling(true);
   };
 
+  const recordStudyStreak = async () => {
+    try {
+      const res = await userSettingService.recordStudyActivity();
+      if (res.error) {
+        console.error("Failed to record study streak:", res.error);
+      }
+    } catch (error) {
+      console.error("Error recording study streak:", error);
+    }
+  };
+
   const handleNext = () => {
     // Record current result in history
     const record = {
@@ -338,6 +322,7 @@ function NumberTest() {
       }, 400);
     } else {
       setGameState("finished");
+      recordStudyStreak();
     }
   };
 
@@ -370,8 +355,6 @@ function NumberTest() {
 
   return (
     <div className="number-test-wrapper">
-      <LocalLoadingWrapper open={isLoading} />
-      
       {/* HEADER SECTION */}
       <div className="number-test-header">
         <button className="back-btn" onClick={exitTest}>
@@ -380,7 +363,6 @@ function NumberTest() {
         </button>
         <div className="title-area">
           <h2>English Number Test</h2>
-          {deck && <span className="deck-tag">{deck.name}</span>}
         </div>
         <div className="actions-area">
           {gameState === "playing" && (

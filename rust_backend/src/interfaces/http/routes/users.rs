@@ -41,6 +41,8 @@ pub fn protected_routes() -> Router<Arc<AppState>> {
         .route("/api/users/get_profile", get(get_profile))
         .route("/api/users/learning_streak/", get(learning_streak))
         .route("/api/users/learning_streak", get(learning_streak))
+        .route("/api/users/record_study/", post(record_study))
+        .route("/api/users/record_study", post(record_study))
         .route("/api/users/", get(list_users))
         .route("/api/users", get(list_users))
         .route("/api/users/:id/change_password/", post(change_password))
@@ -170,6 +172,16 @@ async fn learning_streak(
         "streak": streak.streak,
         "studied_today": streak.studied_today,
     })))
+}
+
+async fn record_study(
+    State(state): State<Arc<AppState>>,
+    AuthUser(u): AuthUser,
+) -> Result<StatusCode, AppError> {
+    learning_service::record_study_activity(&state, u.id)
+        .await
+        .map_err(|e| AppError::Anyhow(e.into()))?;
+    Ok(StatusCode::NO_CONTENT)
 }
 
 async fn list_users(AuthUser(_): AuthUser) -> Json<serde_json::Value> {
