@@ -4,8 +4,10 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from backend.shared.infrastructure.sqlalchemy.tables import SQLAlchemyTableMixin
 
-class UUIDModel(models.Model):
+
+class UUIDModel(SQLAlchemyTableMixin, models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True, db_index=True)
 
     class Meta:

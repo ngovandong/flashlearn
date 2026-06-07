@@ -1,4 +1,5 @@
 from backend.models import Deck, Term
+from backend.term.infrastructure.sql_queries import fetch_latest_learned_term_info, fetch_revise_terms
 
 
 class TermRepository:
@@ -20,7 +21,11 @@ class TermRepository:
 
     @staticmethod
     def get_revise_terms(user, deck_id):
-        return Term.objects.get_revise_terms(user, deck_id)
+        return fetch_revise_terms(user.id, deck_id)
+
+    @staticmethod
+    def get_latest_learned_term_info(user, deck_id, page_size=10):
+        return fetch_latest_learned_term_info(user.id, deck_id, page_size)
 
     @staticmethod
     def get_random_terms(deck_id):

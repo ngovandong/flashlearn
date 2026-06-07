@@ -1,4 +1,4 @@
-from django.db.models import ExpressionWrapper, F, IntegerField, Manager, OuterRef, Q, QuerySet, Subquery
+from django.db.models import Manager, OuterRef, Q, QuerySet, Subquery
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
@@ -55,26 +55,6 @@ class TermManager(Manager):
     def get_unlearned_terms(self, user, deck_id: int) -> QuerySet:
         learned_terms = self.get_learned_terms(user, deck_id)
         return self.get_terms_for_deck(deck_id).exclude(pk__in=learned_terms)
-
-    def get_revise_terms(self, user, deck_id: int) -> QuerySet:
-        now = timezone.now()
-        filter = Q(deck_id=deck_id)
-        filter &= Q(learning_progress__is_skip=False)
-        filter &= Q(learning_progress__user=user)
-        revise_terms = (
-            self.filter(filter)
-            .annotate(
-                learning_progress_id=F("learning_progress__id"),
-                delta_day=ExpressionWrapper(
-                    (now - F("learning_progress__last_revised_at")), output_field=IntegerField()
-                )
-                / (1000000 * 60 * 60 * 24),
-            )
-            .annotate(rank=F("delta_day") * -10 + F("learning_progress__score"))
-            .annotate(total_revisions=F("learning_progress__total_revisions"))
-            .order_by("rank")[:5]
-        )
-        return revise_terms
 
     def get_random_terms(self, deck_id: int) -> QuerySet:
         all_deck_terms = self.get_terms_for_deck(deck_id=deck_id).values("id", "name")

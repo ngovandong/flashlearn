@@ -17,25 +17,8 @@ class LearningService:
         if progress:
             return progress
 
-        queryset = LearningRepository.get_progress_for_user_deck(user.id, deck_id)
-        deck_term = LearningRepository.count_deck_terms(deck_id)
-        total = len(queryset)
         today = timezone.localtime(timezone.now()).date()
-
-        left = deck_term - total
-        completed = 0
-        learned_today = 0
-
-        for term in queryset:
-            if term[2].date() == today or term[3].date() == today:
-                learned_today += 1
-            if term[1] and term[1] > 5:
-                completed += 1
-
-        progress = (
-            deck_term,
-            {"learning": total - completed, "completed": completed, "left": left, "learned_today": learned_today},
-        )
+        progress = LearningRepository.get_learning_progress_stats(user.id, deck_id, today)
         learning_progress_cache.set_combine(deck_id, user.id, progress)
         return progress
 
@@ -121,17 +104,4 @@ class LearningService:
 
     @staticmethod
     def get_latest_learned_term_info(user, deck_id, page_size=10):
-        deck_terms = TermRepository.get_terms_for_deck(deck_id=deck_id, user=user).all()
-        last_learned_term = TermRepository.get_last_learned_term(user, deck_id)
-        if last_learned_term:
-            last_learned_index = last_learned_term.id
-            for index, t in enumerate(deck_terms):
-                if t.id == last_learned_term.id:
-                    last_learned_index = index
-            default_page = last_learned_index // page_size + 1
-            return {
-                "default_page": default_page,
-                "latest_id": last_learned_term.id,
-                "last_learned_index": last_learned_index,
-            }
-        return {"default_page": 1, "latest_id": "", "last_learned_index": 0}
+        return TermRepository.get_latest_learned_term_info(user, deck_id, page_size)

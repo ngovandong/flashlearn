@@ -1,6 +1,11 @@
 from django.db import transaction
 from django.db.models import Count, Prefetch, Q
 
+from backend.deck.infrastructure.sql_queries import (
+    fetch_member_deck_ids,
+    fetch_top_public_deck_ids,
+    fetch_user_deck_ids,
+)
 from backend.models import Deck, Term, User, UserDeckRole
 
 
@@ -37,35 +42,30 @@ class DeckRepository:
         return user.my_own_decks.annotate(number_of_term=Count("terms", distinct=True))
 
     @staticmethod
-    def get_my_others_deck(user):
-        deck_ids = list(UserDeckRole.objects.filter(user_id=user.id).values_list("deck_id", flat=True))
+    def _decks_with_term_count(deck_ids):
+        if not deck_ids:
+            return Deck.objects.none()
         return (
             Deck.objects.filter(id__in=deck_ids)
             .select_related("owner")
             .annotate(number_of_term=Count("terms", distinct=True))
         )
+
+    @staticmethod
+    def get_my_others_deck(user):
+        return DeckRepository._decks_with_term_count(fetch_member_deck_ids(user.id))
 
     @staticmethod
     def get_my_decks(user):
-        deck_ids = list(UserDeckRole.objects.filter(user_id=user.id).values_list("deck_id", flat=True))
-        deck_ids += list(Deck.objects.filter(owner_id=user.id).values_list("id", flat=True))
-        return (
-            Deck.objects.filter(id__in=deck_ids)
-            .select_related("owner")
-            .annotate(number_of_term=Count("terms", distinct=True))
-        )
+        return DeckRepository._decks_with_term_count(fetch_user_deck_ids(user.id))
 
     @staticmethod
     def get_public_decks(user):
-        deck_ids = list(UserDeckRole.objects.filter(user_id=user.id).values_list("deck_id", flat=True))
-        deck_ids += list(Deck.objects.filter(owner_id=user.id).values_list("id", flat=True))
-        return (
-            Deck.objects.filter(is_public=True)
-            .exclude(id__in=deck_ids)
-            .select_related("owner")
-            .annotate(number_of_term=Count("terms", distinct=True))
-            .order_by("-number_of_term")[:5]
-        )
+        deck_ids = fetch_top_public_deck_ids(user.id)
+        if not deck_ids:
+            return Deck.objects.none()
+        decks = {str(deck.id).replace("-", ""): deck for deck in DeckRepository._decks_with_term_count(deck_ids)}
+        return [decks[deck_id] for deck_id in deck_ids if deck_id in decks]
 
     @staticmethod
     def get_latest_decks(user):

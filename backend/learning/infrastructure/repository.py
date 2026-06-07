@@ -1,18 +1,13 @@
 from django.utils import timezone
 
-from backend.constants.raw_query import LEARNING_PROGRESS_QUERY
-from backend.models import Term, UserLearningProgress
-from backend.utils.db_utils import execute_raw_sql
+from backend.learning.infrastructure.sql_queries import fetch_learning_progress_stats
+from backend.models import UserLearningProgress
 
 
 class LearningRepository:
     @staticmethod
-    def get_progress_for_user_deck(user_id, deck_id):
-        return execute_raw_sql(LEARNING_PROGRESS_QUERY, [user_id, deck_id])
-
-    @staticmethod
-    def count_deck_terms(deck_id):
-        return Term.objects.filter(deck_id=deck_id).count()
+    def get_learning_progress_stats(user_id, deck_id, today):
+        return fetch_learning_progress_stats(user_id, deck_id, today)
 
     @staticmethod
     def get_by_user_and_term(user, term_id):
