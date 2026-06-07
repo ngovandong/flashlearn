@@ -4,7 +4,7 @@ from core.cache import cache
 
 from ..constants import DEFAULT_USER_SETTINGS
 from ..models import Deck, User, UserSetting
-from ..tasks import setup_new_user as setup_new_user_task
+from ..tasks.user import setup_new_user as setup_new_user_task
 from ..utils.dispatch import dispatch
 
 DEFAULT_DECK_NAME_TEMPLATE = "{name}'s Default deck"

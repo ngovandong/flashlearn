@@ -246,6 +246,10 @@ cloudinary.config(
 
 BASE_CLOUDINARY_URL = f"https://res.cloudinary.com/{os.environ.get('CLOUDINARY_CLOUD_NAME')}/"
 
+# Term images stored as base64 in the DB — compress when raw bytes exceed this limit
+TERM_IMAGE_MAX_BYTES = int(os.getenv("TERM_IMAGE_MAX_BYTES", "200000"))
+TERM_IMAGE_MAX_DIMENSION = int(os.getenv("TERM_IMAGE_MAX_DIMENSION", "800"))
+
 if os.getenv("REDIS_URL"):
     RQ_QUEUES = {
         "default": {
