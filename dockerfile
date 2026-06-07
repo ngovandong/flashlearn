@@ -23,9 +23,9 @@ RUN ARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH) && \
 # Stage 2: Runtime — only what's needed to run
 FROM python:3.11-slim
 
-# Only the runtime MySQL shared library (no gcc, no dev headers, no CLI)
+# Runtime MySQL library (Python mysqlclient) + mariadb-client (mysqldump for backups)
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libmariadb3 \
+    && apt-get install -y --no-install-recommends libmariadb3 mariadb-client \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
