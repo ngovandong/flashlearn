@@ -101,7 +101,6 @@ dependencies = [
     { name = "curl-cffi" },
     { name = "django" },
     { name = "django-cors-headers" },
-    { name = "django-debug-toolbar" },
     { name = "django-elasticsearch-dsl" },
     { name = "django-redis" },
     { name = "django-revproxy" },
@@ -118,7 +117,6 @@ dependencies = [
     { name = "gunicorn" },
     { name = "mysqlclient" },
     { name = "pillow" },
-    { name = "playwright" },
     { name = "python-dotenv" },
     { name = "requests" },
     { name = "rq-scheduler" },
@@ -132,8 +130,12 @@ dev = [
 ]
 
 [package.dev-dependencies]
+crawler = [
+    { name = "playwright" },
+]
 dev = [
     { name = "debugpy" },
+    { name = "django-debug-toolbar" },
     { name = "pre-commit" },
     { name = "ruff" },
 ]
@@ -147,7 +149,6 @@ requires-dist = [
     { name = "curl-cffi", specifier = ">=0.15.0" },
     { name = "django", specifier = ">=4.2.0,<5.0.0" },
     { name = "django-cors-headers", specifier = ">=4.3.0,<5.0.0" },
-    { name = "django-debug-toolbar", specifier = ">=4.2.0,<5.0.0" },
     { name = "django-elasticsearch-dsl", specifier = ">=8.0.0,<9.0.0" },
     { name = "django-redis", specifier = ">=5.4.0,<6.0.0" },
     { name = "django-revproxy", specifier = ">=0.12.0,<1.0.0" },
@@ -164,7 +165,6 @@ requires-dist = [
     { name = "gunicorn", specifier = ">=21.2.0,<22.0.0" },
     { name = "mysqlclient", specifier = ">=2.2.0,<3.0.0" },
     { name = "pillow", specifier = ">=10.0.0,<11.0.0" },
-    { name = "playwright", specifier = ">=1.60.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.0" },
     { name = "python-dotenv", specifier = ">=1.0.0,<2.0.0" },
     { name = "requests", specifier = ">=2.31.0,<3.0.0" },
@@ -175,8 +175,10 @@ requires-dist = [
 provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
+crawler = [{ name = "playwright", specifier = ">=1.60.0" }]
 dev = [
     { name = "debugpy", specifier = ">=1.8.20" },
+    { name = "django-debug-toolbar", specifier = ">=4.2.0,<5.0.0" },
     { name = "pre-commit", specifier = ">=4.0.0" },
     { name = "ruff", specifier = ">=0.9.0" },
 ]

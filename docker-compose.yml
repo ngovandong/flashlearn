@@ -22,9 +22,11 @@ services:
       - "6379:6379"
 
   backend:
-    build: .
+    build:
+      context: .
+      target: backend
     container_name: flashlearn_backend
-    # Uses CMD from Dockerfile (gunicorn)
+    # Uses CMD from Dockerfile (daphne)
     env_file:
       - .env.docker
     environment:
@@ -39,9 +41,10 @@ services:
         condition: service_started
 
   worker:
-    build: .
+    build:
+      context: .
+      target: worker
     container_name: flashlearn_worker
-    command: uv run python manage.py start_worker
     env_file:
       - .env.docker
     environment:

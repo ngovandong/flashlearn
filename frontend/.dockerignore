@@ -1,0 +1,13 @@
+node_modules
+build
+.git
+.gitignore
+.env
+.env.*
+!.env.sample
+*.md
+.cursor
+.vscode
+.idea
+coverage
+.nyc_output

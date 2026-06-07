@@ -1,3 +1,4 @@
+import importlib.util
 import os
 
 from django.conf import settings
@@ -33,5 +34,5 @@ urlpatterns = [
     path("images/<str:path>/", serve_image, name="serve_image"),
 ]
 
-if settings.DEBUG:
+if settings.DEBUG and importlib.util.find_spec("debug_toolbar"):
     urlpatterns += [path("__debug__/", include("debug_toolbar.urls"))]

@@ -1,5 +1,42 @@
-# Exclude the .venv and frontend directories
+# Virtualenv and local deps
 .venv
+**/__pycache__
+**/*.py[cod]
+**/*.pyo
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+
+# Other app trees (not needed by Django backend image)
 frontend
-dump
 rust_backend
+extension
+dump
+
+# VCS and editor
+.git
+.gitignore
+.cursor
+.vscode
+.idea
+
+# Build artifacts and generated output
+graphify-out
+static
+media
+*.log
+django_queries.log
+
+# Env and secrets
+.env
+.env.*
+!.env.sample
+
+# Docs and CI (not needed at runtime)
+*.md
+.github
+.pre-commit-config.yaml
+docker-compose*.yml
+build.sh
+Dockerfile
+dockerfile

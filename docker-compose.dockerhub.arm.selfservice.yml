@@ -25,11 +25,10 @@ services:
       - redis
 
   worker:
-    image: ngovandong/flashlearn_backend:arm64
+    image: ngovandong/flashlearn_worker:arm64
     platform: linux/arm64
     container_name: flashlearn_worker
     restart: unless-stopped
-    command: uv run python manage.py start_worker
     env_file:
       - .env.docker
     networks:
