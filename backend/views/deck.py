@@ -8,6 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from backend.deck.infrastructure.search import DeckSearchQuery
+from backend.shared.interfaces.pagination import DeckPageNumberPagination
 from backend.shared.interfaces.viewsets import FlexibleViewSet, SearchViewSet
 
 from ..documents import DeckDocument
@@ -43,6 +44,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         "leave_deck": permissions.IsAuthenticated,
         "others_deck": permissions.IsAuthenticated,
         "latest_decks": permissions.IsAuthenticated,
+        "public_decks": permissions.IsAuthenticated,
         "set_default_deck": permissions.IsAuthenticated,
     }
 
@@ -53,6 +55,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         "my_own_decks": MyDeckSerializer,
         "others_deck": MyDeckSerializer,
         "latest_decks": MyDeckSerializer,
+        "public_decks": MyDeckSerializer,
         "retrieve": DeckDetailSerializer,
         "clone": DeckDetailSerializer,
         "get_invite_url": InviteSerializer,
@@ -62,6 +65,12 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         if self.action == "retrieve":
             return deck_service.get_retrieve_queryset(self.request.user)
         return super().get_queryset()
+
+    def paginate_queryset(self, queryset):
+        if self.action not in ("my_own_decks", "others_deck", "public_decks"):
+            return None
+        self._paginator = DeckPageNumberPagination()
+        return self._paginator.paginate_queryset(queryset, self.request, view=self)
 
     def generate_q_expression(self, query, **kwargs):
         return DeckSearchQuery.build(query, kwargs.get("user"))
@@ -132,8 +141,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     @action(detail=False, methods=["GET"])
     def public_decks(self, request, *args, **kwargs):
         queryset = deck_service.get_public_decks(request.user)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return self.perform_get_list(queryset)
 
     @action(detail=True, methods=["POST"])
     def add_user_to_deck(self, request, *args, **kwargs):

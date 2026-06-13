@@ -16,20 +16,6 @@ export function useLatestDecks() {
   });
 }
 
-export function usePublicDecks(enabled) {
-  return useQuery({
-    queryKey: ["decks", "public"],
-    queryFn: async () => {
-      const res = await deckService.getPublicDecks();
-      if (res.error) {
-        throw new Error(getFirstError(res.error));
-      }
-      return res.data;
-    },
-    enabled,
-  });
-}
-
 export function useLearningStreak() {
   return useQuery({
     queryKey: ["user", "learningStreak"],

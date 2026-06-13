@@ -70,6 +70,10 @@
             column-gap: 1rem;
             margin-bottom: 2rem;
 
+            &--loading {
+                opacity: 0.6;
+            }
+
             .set-card {
                 @include app_radius;
                 @include border_bottom_purple;
@@ -129,6 +133,12 @@
                     }
                 }
             }
+        }
+
+        .section-pagination {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
         }
     }
 }

@@ -1,8 +1,9 @@
 import { LocalLoadingWrapper } from "@components/loading";
 import { Alert, Snackbar } from "@mui/material";
-import { useLatestDecks, useLearningStreak, usePublicDecks } from "@hooks/useLatestDecks";
+import { useLatestDecks, useLearningStreak } from "@hooks/useLatestDecks";
 import React, { useState } from "react";
 import DeckCard from "./deckCard";
+import PaginatedDeckSection, { fetchPublicDecksPage } from "./paginatedDeckSection";
 import { useSelector } from "react-redux";
 import { selectUser } from "@app/store/authSlice";
 
@@ -30,18 +31,15 @@ function Home() {
     isLoading: decksLoading,
     error: decksError,
   } = useLatestDecks();
-  const showPublic = mydecks != null && mydecks.length < 3;
-  const { data: publicDecks, isLoading: publicLoading } = usePublicDecks(showPublic);
   const { data: learningStreak } = useLearningStreak();
 
-  const isLoading = decksLoading || (showPublic && publicLoading);
   const queryError = decksError?.message;
 
   const streakText = learningStreak ? streakCopy(learningStreak) : null;
 
   return user ? (
     <div className="home-page">
-      <LocalLoadingWrapper open={isLoading} />
+      <LocalLoadingWrapper open={decksLoading} />
       <Snackbar
         anchorOrigin={{
           vertical: "bottom",
@@ -96,25 +94,12 @@ function Home() {
           </div>
         </section>
       )}
-      {publicDecks && (
-        <section>
-          <div className="section-header">
-            <h5>Public decks</h5>
-          </div>
-          <div className="section-cards">
-            {publicDecks.map((d) => (
-              <DeckCard
-                key={d.id}
-                id={d.id}
-                name={d.name}
-                owner={d.owner}
-                terms={d.number_of_term}
-                background={d.background}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+      <PaginatedDeckSection
+        title="Public decks"
+        queryKey={["decks", "public"]}
+        fetchPage={fetchPublicDecksPage}
+        onError={setError}
+      />
     </div>
   ) : (
     <></>

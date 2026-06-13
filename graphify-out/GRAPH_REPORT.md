@@ -1,16 +1,16 @@
 # Graph Report - flashlearn  (2026-06-13)
 
 ## Corpus Check
-- 378 files · ~89,718 words
+- 380 files · ~89,847 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1583 nodes · 1657 edges · 311 communities (209 shown, 102 thin omitted)
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 93 edges (avg confidence: 0.53)
+- 1457 nodes · 1552 edges · 307 communities (217 shown, 90 thin omitted)
+- Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 169 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `13647aa3`
+- Built from commit: `979d6dee`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -57,7 +57,6 @@
 - [[_COMMUNITY_Community 39|Community 39]]
 - [[_COMMUNITY_Community 40|Community 40]]
 - [[_COMMUNITY_Community 41|Community 41]]
-- [[_COMMUNITY_Community 42|Community 42]]
 - [[_COMMUNITY_Community 43|Community 43]]
 - [[_COMMUNITY_Community 44|Community 44]]
 - [[_COMMUNITY_Community 45|Community 45]]
@@ -65,18 +64,17 @@
 - [[_COMMUNITY_Community 47|Community 47]]
 - [[_COMMUNITY_Community 48|Community 48]]
 - [[_COMMUNITY_Community 49|Community 49]]
+- [[_COMMUNITY_Community 50|Community 50]]
 - [[_COMMUNITY_Community 51|Community 51]]
-- [[_COMMUNITY_Community 52|Community 52]]
 - [[_COMMUNITY_Community 53|Community 53]]
 - [[_COMMUNITY_Community 54|Community 54]]
-- [[_COMMUNITY_Community 57|Community 57]]
-- [[_COMMUNITY_Community 58|Community 58]]
+- [[_COMMUNITY_Community 55|Community 55]]
+- [[_COMMUNITY_Community 56|Community 56]]
 - [[_COMMUNITY_Community 59|Community 59]]
 - [[_COMMUNITY_Community 60|Community 60]]
 - [[_COMMUNITY_Community 61|Community 61]]
 - [[_COMMUNITY_Community 62|Community 62]]
 - [[_COMMUNITY_Community 64|Community 64]]
-- [[_COMMUNITY_Community 65|Community 65]]
 - [[_COMMUNITY_Community 66|Community 66]]
 - [[_COMMUNITY_Community 67|Community 67]]
 - [[_COMMUNITY_Community 68|Community 68]]
@@ -87,35 +85,24 @@
 - [[_COMMUNITY_Community 73|Community 73]]
 - [[_COMMUNITY_Community 74|Community 74]]
 - [[_COMMUNITY_Community 75|Community 75]]
-- [[_COMMUNITY_Community 81|Community 81]]
+- [[_COMMUNITY_Community 76|Community 76]]
 - [[_COMMUNITY_Community 82|Community 82]]
-- [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 83|Community 83]]
 - [[_COMMUNITY_Community 85|Community 85]]
-- [[_COMMUNITY_Community 89|Community 89]]
+- [[_COMMUNITY_Community 86|Community 86]]
+- [[_COMMUNITY_Community 90|Community 90]]
 - [[_COMMUNITY_Community 91|Community 91]]
-- [[_COMMUNITY_Community 92|Community 92]]
 - [[_COMMUNITY_Community 93|Community 93]]
+- [[_COMMUNITY_Community 94|Community 94]]
 - [[_COMMUNITY_Community 95|Community 95]]
-- [[_COMMUNITY_Community 96|Community 96]]
 - [[_COMMUNITY_Community 98|Community 98]]
-- [[_COMMUNITY_Community 99|Community 99]]
 - [[_COMMUNITY_Community 100|Community 100]]
-- [[_COMMUNITY_Community 103|Community 103]]
-- [[_COMMUNITY_Community 104|Community 104]]
+- [[_COMMUNITY_Community 101|Community 101]]
+- [[_COMMUNITY_Community 102|Community 102]]
+- [[_COMMUNITY_Community 105|Community 105]]
 - [[_COMMUNITY_Community 106|Community 106]]
-- [[_COMMUNITY_Community 114|Community 114]]
-- [[_COMMUNITY_Community 116|Community 116]]
-- [[_COMMUNITY_Community 121|Community 121]]
-- [[_COMMUNITY_Community 128|Community 128]]
-- [[_COMMUNITY_Community 129|Community 129]]
-- [[_COMMUNITY_Community 130|Community 130]]
-- [[_COMMUNITY_Community 135|Community 135]]
-- [[_COMMUNITY_Community 141|Community 141]]
-- [[_COMMUNITY_Community 142|Community 142]]
-- [[_COMMUNITY_Community 143|Community 143]]
-- [[_COMMUNITY_Community 149|Community 149]]
-- [[_COMMUNITY_Community 154|Community 154]]
-- [[_COMMUNITY_Community 155|Community 155]]
+- [[_COMMUNITY_Community 108|Community 108]]
+- [[_COMMUNITY_Community 140|Community 140]]
 - [[_COMMUNITY_Community 156|Community 156]]
 - [[_COMMUNITY_Community 157|Community 157]]
 - [[_COMMUNITY_Community 158|Community 158]]
@@ -150,24 +137,17 @@
 - [[_COMMUNITY_Community 187|Community 187]]
 - [[_COMMUNITY_Community 188|Community 188]]
 - [[_COMMUNITY_Community 189|Community 189]]
+- [[_COMMUNITY_Community 190|Community 190]]
 - [[_COMMUNITY_Community 191|Community 191]]
 - [[_COMMUNITY_Community 193|Community 193]]
-- [[_COMMUNITY_Community 196|Community 196]]
-- [[_COMMUNITY_Community 204|Community 204]]
-- [[_COMMUNITY_Community 207|Community 207]]
-- [[_COMMUNITY_Community 208|Community 208]]
-- [[_COMMUNITY_Community 214|Community 214]]
-- [[_COMMUNITY_Community 215|Community 215]]
-- [[_COMMUNITY_Community 216|Community 216]]
-- [[_COMMUNITY_Community 218|Community 218]]
-- [[_COMMUNITY_Community 220|Community 220]]
-- [[_COMMUNITY_Community 251|Community 251]]
-- [[_COMMUNITY_Community 258|Community 258]]
-- [[_COMMUNITY_Community 259|Community 259]]
+- [[_COMMUNITY_Community 195|Community 195]]
+- [[_COMMUNITY_Community 198|Community 198]]
+- [[_COMMUNITY_Community 212|Community 212]]
+- [[_COMMUNITY_Community 253|Community 253]]
 - [[_COMMUNITY_Community 260|Community 260]]
 - [[_COMMUNITY_Community 261|Community 261]]
-- [[_COMMUNITY_Community 289|Community 289]]
-- [[_COMMUNITY_Community 290|Community 290]]
+- [[_COMMUNITY_Community 262|Community 262]]
+- [[_COMMUNITY_Community 263|Community 263]]
 - [[_COMMUNITY_Community 291|Community 291]]
 - [[_COMMUNITY_Community 292|Community 292]]
 - [[_COMMUNITY_Community 293|Community 293]]
@@ -183,20 +163,18 @@
 - [[_COMMUNITY_Community 303|Community 303]]
 - [[_COMMUNITY_Community 304|Community 304]]
 - [[_COMMUNITY_Community 305|Community 305]]
-- [[_COMMUNITY_Community 306|Community 306]]
-- [[_COMMUNITY_Community 308|Community 308]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `DeckAccessPolicy` - 27 edges
-2. `TermService` - 25 edges
-3. `DeckViewSet` - 23 edges
-4. `DeckService` - 21 edges
-5. `QuickReviseConsumer` - 15 edges
-6. `LearningService` - 15 edges
-7. `_CacheNamespace` - 14 edges
-8. `FakeTermRepository` - 13 edges
-9. `UserService` - 13 edges
-10. `UserViewSet` - 13 edges
+1. `TermService` - 30 edges
+2. `DeckViewSet` - 25 edges
+3. `DeckService` - 25 edges
+4. `DeckRepository` - 18 edges
+5. `LearningService` - 18 edges
+6. `ValidationError` - 16 edges
+7. `DeckAccessPolicy` - 16 edges
+8. `FakeTermRepository` - 15 edges
+9. `AuthService` - 15 edges
+10. `_CacheNamespace` - 14 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `SQLAlchemyTableMixin` --uses--> `Meta`  [INFERRED]
@@ -205,309 +183,267 @@
   backend/shared/infrastructure/sqlalchemy/tables.py → base/models/custom_model.py
 - `SQLAlchemyTableMixin` --uses--> `Return the first_name plus the last_name, with a space in between.`  [INFERRED]
   backend/shared/infrastructure/sqlalchemy/tables.py → base/models/custom_model.py
-- `SQLAlchemyTableMixin` --uses--> `CustomAbstractUser`  [INFERRED]
-  backend/shared/infrastructure/sqlalchemy/tables.py → base/models/custom_model.py
-- `SQLAlchemyTableMixin` --uses--> `DateTimeModel`  [INFERRED]
-  backend/shared/infrastructure/sqlalchemy/tables.py → base/models/custom_model.py
+- `CustomTokenAuthentication` --uses--> `UserRepository`  [INFERRED]
+  core/authentication.py → backend/user/infrastructure/repository.py
+- `RoleService` --uses--> `RoleRepository`  [INFERRED]
+  backend/role/application/services.py → backend/role/infrastructure/repository.py
 
 ## Import Cycles
-- 1-file cycle: `backend/shared/infrastructure/sqlalchemy/engine.py -> backend/shared/infrastructure/sqlalchemy/engine.py`
-- 1-file cycle: `backend/shared/infrastructure/sqlalchemy/utils.py -> backend/shared/infrastructure/sqlalchemy/utils.py`
-- 1-file cycle: `backend/tasks/user.py -> backend/tasks/user.py`
+- None detected.
 
-## Communities (311 total, 102 thin omitted)
+## Communities (307 total, 90 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.17
-Nodes (4): FlexibleViewSet, FolderViewSet, RoleViewSet, FlexibleViewSet
+Cohesion: 0.10
+Nodes (16): can_edit(), can_view(), DeckAccessPolicy, get_user_role(), is_member(), Deck access rules — domain policy, independent of Django ORM., TermAccessPolicy, EditableDeck (+8 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.27
-Nodes (9): FolderSerializer, Meta, CreateLearningProgressSerializer, LearningStreakSerializer, Meta, ProgressSerializer, UserLearningProgressSerializer, TermSerializer (+1 more)
+Cohesion: 0.12
+Nodes (5): Composition root — wire concrete infrastructure into application services., LearningContextApi, Public API for user-related operations from other contexts., TermContextApi, UserContextApi
 
 ### Community 2 - "Community 2"
-Cohesion: 0.21
-Nodes (9): adjust_priority(), create(), LearningRepository, record_correct(), record_incorrect(), record_quick_revise_answer(), save(), toggle_skip() (+1 more)
+Cohesion: 0.26
+Nodes (10): DeckDetailSerializer, DeckSerializer, Meta, MyDeckSerializer, FolderSerializer, Meta, ProgressSerializer, AddUserSerializer (+2 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.15
-Nodes (9): Exception, ConflictError, DomainError, NotFoundError, PermissionDeniedError, Base class for domain/application errors., ValidationError, GoogleOAuthClient (+1 more)
+Cohesion: 0.05
+Nodes (17): DeckRef, ReviseTermRow, Exception, ConflictError, DomainError, NotFoundError, PermissionDeniedError, Base class for domain/application errors. (+9 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.07
-Nodes (24): ABC, benchmark_strategies(), BingImageSearchStrategy, BSCrawler, _fetch_batch(), _fetch_from_providers(), get_preview_images(), GetImagesUrlView (+16 more)
+Cohesion: 0.06
+Nodes (22): benchmark_strategies(), BingImageSearchStrategy, BSCrawler, _fetch_batch(), _fetch_from_providers(), get_preview_images(), GetImagesUrlView, GoogleImageSearchStrategy (+14 more)
+
+### Community 5 - "Community 5"
+Cohesion: 0.15
+Nodes (3): Backward-compatible re-exports., AuthService, Backward-compatible re-exports.
 
 ### Community 6 - "Community 6"
-Cohesion: 0.15
-Nodes (6): DeckRepository, _decks_with_term_count(), get_latest_decks(), get_my_decks(), get_my_others_deck(), get_public_decks()
-
-### Community 7 - "Community 7"
 Cohesion: 0.08
 Nodes (25): add_user_to_deck(), clone_deck(), CreateDeck, deck_detail(), deck_list_query(), deck_permission(), deck_rows_to_json(), delete_deck() (+17 more)
 
+### Community 7 - "Community 7"
+Cohesion: 0.09
+Nodes (14): cache_factory(), _CacheNamespace, CacheService, _DeckTermsCache, delete(), get(), _LearningProgressCache, Backward-compatible cache re-exports. (+6 more)
+
 ### Community 8 - "Community 8"
-Cohesion: 0.15
-Nodes (10): CacheService, _DeckTermsCache, delete(), get(), _LearningProgressCache, Backward-compatible cache re-exports., set(), SKIP_REDIS (+2 more)
-
-### Community 9 - "Community 9"
-Cohesion: 0.05
-Nodes (25): Deck access rules — domain policy, independent of Django ORM., EditableDeck, EditableLearningProgress, EditableTerm, IsOwnerOfRolePermission, IsOwnerPermission, Term access rules — domain policy., CursorPagination (+17 more)
-
-### Community 10 - "Community 10"
 Cohesion: 0.07
 Nodes (11): Command, BaseCommand, Command, Command, Command, Command, Command, Command (+3 more)
 
-### Community 11 - "Community 11"
+### Community 9 - "Community 9"
 Cohesion: 0.11
 Nodes (14): ActiveQ, ChangePasswordBody, get_profile(), google_exchange_code(), google_login(), google_user_info(), GoogleCb, login() (+6 more)
 
-### Community 12 - "Community 12"
+### Community 10 - "Community 10"
 Cohesion: 0.11
 Nodes (13): add_to_default_deck(), AddDefault, AddTerms, create_term(), CreateTerm, DeckIdQ, delete_term(), get_term() (+5 more)
 
-### Community 13 - "Community 13"
-Cohesion: 0.13
-Nodes (4): QuickReviseGame, AsyncWebsocketConsumer, QuickReviseConsumer, QuickReviseGameTest
+### Community 11 - "Community 11"
+Cohesion: 0.05
+Nodes (10): Backward-compatible re-exports., Service layer entry point — prefer composition singletons for new code., MailService, send_template_mail(), SendMailThread, FolderRepository, DeckService, FolderService (+2 more)
 
-### Community 14 - "Community 14"
+### Community 12 - "Community 12"
+Cohesion: 0.16
+Nodes (9): AsyncWebsocketConsumer, get_revise_terms(), get_user_and_deck(), QuickReviseConsumer, save_learning_progress(), calculate_base_time(), calculate_leftover(), calculate_time_limit() (+1 more)
+
+### Community 13 - "Community 13"
 Cohesion: 0.15
 Nodes (15): AbstractBaseUser, CustomAbstractUser, DateTimeModel, DateTimeUUIDModel, Meta, An abstract base class implementing a fully featured User model with     admin-c, Return the first_name plus the last_name, with a space in between., UUIDModel (+7 more)
 
-### Community 15 - "Community 15"
+### Community 14 - "Community 14"
 Cohesion: 0.12
 Nodes (6): APITestCase, DeckUserManagementTest, Regression tests guarding the DDD refactor against behavior changes.  These cove, add_user_to_deck / remove_user_from_deck end-to-end.      Guards both the unknow, RoleInviteErrorPathTest, TermErrorPathTest
 
 ### Community 16 - "Community 16"
+Cohesion: 0.14
+Nodes (6): google_login(), init(), Serialize user at the view boundary; AuthService returns tokens only., URL-safe token params for OAuth redirect (user encoded separately)., token_redirect_params(), token_response()
+
+### Community 17 - "Community 17"
+Cohesion: 0.08
+Nodes (3): DeckPageNumberPagination, PageNumberPagination, DeckViewSet
+
+### Community 18 - "Community 18"
 Cohesion: 0.15
 Nodes (4): CachePort, ImageStoragePort, OAuthPort, Protocol
 
-### Community 18 - "Community 18"
+### Community 20 - "Community 20"
 Cohesion: 0.16
 Nodes (4): SQLAlchemyDeckQueryTest, SQLAlchemyLearningQueryTest, SQLAlchemyTablePropertyTest, TransactionTestCase
 
-### Community 20 - "Community 20"
-Cohesion: 0.17
-Nodes (4): delete_folder(), FolderBody, update_folder(), UpdateFolder
-
-### Community 21 - "Community 21"
+### Community 22 - "Community 22"
 Cohesion: 0.15
 Nodes (3): CreateLp, DeckIdP, PriorityBody
 
-### Community 22 - "Community 22"
-Cohesion: 0.06
-Nodes (11): DeckRef, ReviseTermRow, TermService, Any, Any, TermRepository, _EmptyRoles, FakeDeck (+3 more)
-
 ### Community 23 - "Community 23"
-Cohesion: 0.23
-Nodes (3): Manager, Returns the terms for the given deck.         When user is given, total_revision, TermManager
+Cohesion: 0.17
+Nodes (4): delete_folder(), FolderBody, update_folder(), UpdateFolder
 
 ### Community 24 - "Community 24"
-Cohesion: 0.20
-Nodes (7): AccessClaims, InviteClaims, issue_token_pair(), new_jti(), now_ts(), RefreshClaims, TokenPair
-
-### Community 26 - "Community 26"
-Cohesion: 0.18
-Nodes (6): Service layer entry point — prefer composition singletons for new code., MailService, Async (threaded) — use in Django views to avoid blocking the HTTP response., Synchronous — use inside RQ tasks; the worker IS the background process., SendMailThread, Thread
-
-### Community 27 - "Community 27"
-Cohesion: 0.33
-Nodes (6): appendHeader(), createRefreshHandler(), createRequest(), getCurrentToken(), processQueue(), refreshToken()
-
-### Community 28 - "Community 28"
-Cohesion: 0.22
-Nodes (7): DeckDocument, Django, Index, Document, Django, Index, TermDocument
-
-### Community 29 - "Community 29"
-Cohesion: 0.47
-Nodes (8): bearer_headers(), delete_both(), DualResponse, get_json_both(), post_json_both(), post_json_pair(), put_json_both(), request_json()
-
-### Community 31 - "Community 31"
-Cohesion: 0.39
-Nodes (3): env_optional(), env_var(), Settings
-
-### Community 32 - "Community 32"
-Cohesion: 0.29
-Nodes (4): get_learning_progress(), LearningStreak, ProgressBreakdown, utc_naive_to_local_date()
-
-### Community 33 - "Community 33"
-Cohesion: 0.29
-Nodes (4): AppConfig, BackendConfig, BaseConfig, FrontendConfig
-
-### Community 35 - "Community 35"
-Cohesion: 0.33
-Nodes (3): BaseUserManager, CustomUserManager, Create and save a user.py with the given email, and password.
-
-### Community 37 - "Community 37"
-Cohesion: 0.38
-Nodes (3): legacy_api_base(), migrate_context_ready(), rust_api_base()
-
-### Community 38 - "Community 38"
-Cohesion: 0.29
-Nodes (6): DeckRow, FolderRow, TermRow, UserDeckRoleRow, UserLearningProgressRow, UserRow
-
-### Community 40 - "Community 40"
-Cohesion: 0.48
-Nodes (6): GameState, handle_answer(), handle_socket(), quick_revise_ws(), send_next(), WsParams
-
-### Community 41 - "Community 41"
-Cohesion: 0.07
-Nodes (28): dependencies, axios, @emotion/react, @emotion/styled, jwt-decode, @mui/icons-material, @mui/material, react (+20 more)
-
-### Community 42 - "Community 42"
-Cohesion: 0.33
-Nodes (3): BasicConnectivityTest, Test that the admin login page loads successfully., TestCase
-
-### Community 43 - "Community 43"
-Cohesion: 0.47
-Nodes (4): bytes_to_data_uri(), optimize_image_bytes(), Resize and re-encode an image until it fits within max_bytes., url_to_base64()
-
-### Community 44 - "Community 44"
-Cohesion: 0.40
-Nodes (3): print_inspect_snapshot(), SqlCleanup, table_counts()
-
-### Community 45 - "Community 45"
-Cohesion: 0.53
-Nodes (4): normalize_response(), strip_recursive(), strips_root_and_array_item_ids(), strips_timestamps_on_object()
-
-### Community 46 - "Community 46"
-Cohesion: 0.33
-Nodes (3): OnlyName, ProgressTerm, ReviseTermsPayload
-
-### Community 49 - "Community 49"
-Cohesion: 0.40
-Nodes (3): BaseEmailBackend, EmailBackend, SMTP backend that uses certifi's CA bundle.      Needed on macOS/environments wh
-
-### Community 58 - "Community 58"
-Cohesion: 0.60
-Nodes (3): authenticate(), AuthUser, user_to_json_value()
-
-### Community 59 - "Community 59"
-Cohesion: 0.60
-Nodes (3): build_cors(), create_router(), serve()
-
-### Community 60 - "Community 60"
-Cohesion: 0.06
-Nodes (27): CreateDeck, DeckDetail, DeckPage, EditDeck, Folder, Home, Invite, LearnPage (+19 more)
-
-### Community 66 - "Community 66"
-Cohesion: 0.67
-Nodes (3): dispatch(), _has_active_worker(), Enqueue func if an RQ worker is running on queue_name, otherwise call it directl
-
-### Community 67 - "Community 67"
-Cohesion: 0.20
-Nodes (6): Enum, cache_factory(), _CacheNamespace, DeckTermsCache, LearningProgressCache, RESOURCE
-
-### Community 68 - "Community 68"
-Cohesion: 0.83
-Nodes (3): clear_db_env(), database_url_from_env_builds_from_db_vars(), database_url_from_env_uses_database_url_when_set()
-
-### Community 85 - "Community 85"
-Cohesion: 0.12
-Nodes (6): Any, Serialize user at the view boundary; AuthService returns tokens only., URL-safe token params for OAuth redirect (user encoded separately)., token_redirect_params(), token_response(), UserViewSet
-
-### Community 89 - "Community 89"
-Cohesion: 0.15
-Nodes (4): LearningService, Any, LearningRepository, User
-
-### Community 95 - "Community 95"
-Cohesion: 0.19
-Nodes (3): UserService, Any, UserRepository
-
-### Community 114 - "Community 114"
-Cohesion: 0.15
-Nodes (12): compilerOptions, baseUrl, paths, exclude, @api-services/*, @app/*, @components/*, @constants/* (+4 more)
-
-### Community 116 - "Community 116"
-Cohesion: 0.15
-Nodes (12): exclude, include, pythonVersion, reportAttributeAccessIssue, reportGeneralTypeIssues, reportIncompatibleMethodOverride, reportIncompatibleVariableOverride, reportMissingImports (+4 more)
-
-### Community 121 - "Community 121"
 Cohesion: 0.35
 Nodes (11): _backup_files_query(), _delete_old_backups(), _download_drive_file(), dump_database_to_drive(), _get_drive_service(), get_latest_backup_file(), _list_backup_files(), _load_oauth_client() (+3 more)
 
-### Community 128 - "Community 128"
-Cohesion: 0.18
-Nodes (9): AddUserSerializer, AddUserToDeckSerializer, InviteSerializer, Read-only representation of a deck membership (used in DeckDetailSerializer.user, Input serializer for the add_user_to_deck action.      Kept separate from AddUse, Ensure that the role is valid., RemoveUserSerializer, UpdateRoleSerializer (+1 more)
+### Community 25 - "Community 25"
+Cohesion: 0.23
+Nodes (3): Manager, Returns the terms for the given deck.         When user is given, total_revision, TermManager
 
-### Community 129 - "Community 129"
-Cohesion: 0.18
-Nodes (10): browserslist, development, production, eslintConfig, extends, name, overrides, typescript (+2 more)
+### Community 26 - "Community 26"
+Cohesion: 0.20
+Nodes (7): AccessClaims, InviteClaims, issue_token_pair(), new_jti(), now_ts(), RefreshClaims, TokenPair
 
-### Community 135 - "Community 135"
-Cohesion: 0.27
-Nodes (6): CustomAbstractUser, UserLearningProgress, Meta, UserDeckRole, User, UUIDModel
+### Community 28 - "Community 28"
+Cohesion: 0.33
+Nodes (6): appendHeader(), createRefreshHandler(), createRequest(), getCurrentToken(), processQueue(), refreshToken()
 
-### Community 149 - "Community 149"
+### Community 29 - "Community 29"
 Cohesion: 0.22
-Nodes (5): add_user_to_deck(), FolderRepository, get_by_id(), RoleRepository, user_in_deck()
+Nodes (7): DeckDocument, Django, Index, Document, Django, Index, TermDocument
 
-### Community 204 - "Community 204"
+### Community 30 - "Community 30"
+Cohesion: 0.47
+Nodes (8): bearer_headers(), delete_both(), DualResponse, get_json_both(), post_json_both(), post_json_pair(), put_json_both(), request_json()
+
+### Community 32 - "Community 32"
+Cohesion: 0.39
+Nodes (3): env_optional(), env_var(), Settings
+
+### Community 33 - "Community 33"
+Cohesion: 0.29
+Nodes (4): get_learning_progress(), LearningStreak, ProgressBreakdown, utc_naive_to_local_date()
+
+### Community 34 - "Community 34"
+Cohesion: 0.29
+Nodes (4): AppConfig, BackendConfig, BaseConfig, FrontendConfig
+
+### Community 36 - "Community 36"
+Cohesion: 0.33
+Nodes (3): BaseUserManager, CustomUserManager, Create and save a user.py with the given email, and password.
+
+### Community 38 - "Community 38"
+Cohesion: 0.38
+Nodes (3): legacy_api_base(), migrate_context_ready(), rust_api_base()
+
+### Community 39 - "Community 39"
+Cohesion: 0.29
+Nodes (6): DeckRow, FolderRow, TermRow, UserDeckRoleRow, UserLearningProgressRow, UserRow
+
+### Community 41 - "Community 41"
+Cohesion: 0.48
+Nodes (6): GameState, handle_answer(), handle_socket(), quick_revise_ws(), send_next(), WsParams
+
+### Community 44 - "Community 44"
+Cohesion: 0.33
+Nodes (3): BasicConnectivityTest, Test that the admin login page loads successfully., TestCase
+
+### Community 45 - "Community 45"
+Cohesion: 0.47
+Nodes (4): bytes_to_data_uri(), optimize_image_bytes(), Resize and re-encode an image until it fits within max_bytes., url_to_base64()
+
+### Community 46 - "Community 46"
+Cohesion: 0.40
+Nodes (3): print_inspect_snapshot(), SqlCleanup, table_counts()
+
+### Community 47 - "Community 47"
+Cohesion: 0.53
+Nodes (4): normalize_response(), strip_recursive(), strips_root_and_array_item_ids(), strips_timestamps_on_object()
+
+### Community 48 - "Community 48"
+Cohesion: 0.33
+Nodes (3): OnlyName, ProgressTerm, ReviseTermsPayload
+
+### Community 51 - "Community 51"
+Cohesion: 0.40
+Nodes (3): BaseEmailBackend, EmailBackend, SMTP backend that uses certifi's CA bundle.      Needed on macOS/environments wh
+
+### Community 60 - "Community 60"
+Cohesion: 0.60
+Nodes (3): authenticate(), AuthUser, user_to_json_value()
+
+### Community 61 - "Community 61"
+Cohesion: 0.60
+Nodes (3): build_cors(), create_router(), serve()
+
+### Community 66 - "Community 66"
+Cohesion: 0.83
+Nodes (3): generateFillQuestions(), generateQuestions(), generateQuizQuestions()
+
+### Community 67 - "Community 67"
+Cohesion: 0.67
+Nodes (3): dispatch(), _has_active_worker(), Enqueue func if an RQ worker is running on queue_name, otherwise call it directl
+
+### Community 68 - "Community 68"
+Cohesion: 0.83
+Nodes (3): _build_url(), get_connection(), get_engine()
+
+### Community 69 - "Community 69"
+Cohesion: 0.83
+Nodes (3): clear_db_env(), database_url_from_env_builds_from_db_vars(), database_url_from_env_uses_database_url_when_set()
+
+### Community 90 - "Community 90"
+Cohesion: 0.16
+Nodes (11): add_user_to_deck(), adjust_priority(), create(), LearningRepository, record_correct(), record_incorrect(), record_quick_revise_answer(), RoleRepository (+3 more)
+
+### Community 140 - "Community 140"
+Cohesion: 0.16
+Nodes (5): FlexibleViewSet, FolderViewSet, RoleViewSet, UserViewSet, FlexibleViewSet
+
+### Community 212 - "Community 212"
+Cohesion: 0.22
+Nodes (9): Home(), streakCopy(), fetchMyOwnDecksPage(), fetchOthersDeckPage(), fetchPublicDecksPage(), normalizeDeckPage(), PaginatedDeckSection(), useLatestDecks() (+1 more)
+
+### Community 291 - "Community 291"
+Cohesion: 0.22
+Nodes (8): CustomAbstractUser, Meta, UserLearningProgress, Meta, UserDeckRole, Term, User, UUIDModel
+
+### Community 293 - "Community 293"
+Cohesion: 0.18
+Nodes (5): build(), DeckSearchQuery, TermSearchQuery, SearchViewSet, TermViewSet
+
+### Community 295 - "Community 295"
+Cohesion: 0.20
+Nodes (5): DateTimeUUIDModel, Folder, Meta, UserSetting, UserSettingSerializer
+
+### Community 296 - "Community 296"
+Cohesion: 0.22
+Nodes (7): AddTermsToDeckSerializer, LearningTermSerializer, Meta, OnlyNameTermSerializer, ProgressTermSerializer, ReviseTermSerializer, TermNestInDeckSerializer
+
+### Community 297 - "Community 297"
 Cohesion: 0.22
 Nodes (5): ChangePasswordSerializer, GoogleCallbackSerializer, GoogleUserSerializer, Meta, SetPasswordSerializer
 
-### Community 207 - "Community 207"
+### Community 298 - "Community 298"
 Cohesion: 0.22
-Nodes (9): scripts, build, eject, format, format:check, lint, lint:fix, start (+1 more)
+Nodes (7): AddUserToDeckSerializer, InviteSerializer, Input serializer for the add_user_to_deck action.      Kept separate from AddUse, Ensure that the role is valid., RemoveUserSerializer, UpdateRoleSerializer, UserDeckRoleSerializer
 
-### Community 208 - "Community 208"
-Cohesion: 0.25
-Nodes (7): AddTermsToDeckSerializer, LearningTermSerializer, Meta, OnlyNameTermSerializer, ProgressTermSerializer, ReviseTermSerializer, TermNestInDeckSerializer
-
-### Community 214 - "Community 214"
-Cohesion: 0.25
-Nodes (4): useReviseTerms(), useStudySounds(), useSwipeGesture(), Revise()
-
-### Community 216 - "Community 216"
-Cohesion: 0.29
-Nodes (3): UserContextApi, Public API for user-related operations from other contexts., Composition root — wire concrete infrastructure into application services.
-
-### Community 218 - "Community 218"
-Cohesion: 0.43
-Nodes (5): Home(), streakCopy(), useLatestDecks(), useLearningStreak(), usePublicDecks()
-
-### Community 220 - "Community 220"
-Cohesion: 0.38
-Nodes (4): DeckDetailSerializer, DeckSerializer, Meta, MyDeckSerializer
-
-### Community 259 - "Community 259"
-Cohesion: 0.73
-Nodes (5): Connection, Engine, _build_url(), get_connection(), get_engine()
-
-### Community 289 - "Community 289"
-Cohesion: 0.40
-Nodes (3): build(), DeckSearchQuery, TermSearchQuery
-
-### Community 290 - "Community 290"
+### Community 302 - "Community 302"
 Cohesion: 0.50
-Nodes (3): UUID, Run all async setup for a newly created user: settings, default deck,     and th, setup_new_user()
+Nodes (3): ABC, generate_q_expression(), SearchViewSet
 
-### Community 291 - "Community 291"
+### Community 303 - "Community 303"
 Cohesion: 0.40
-Nodes (5): devDependencies, prettier, react-app-rewire-alias, react-app-rewired, sass
+Nodes (3): CustomTokenAuthentication, JWTAuthentication, UserRepository
 
-### Community 292 - "Community 292"
-Cohesion: 0.90
-Nodes (3): generateFillQuestions(), generateQuestions(), generateQuizQuestions()
+### Community 304 - "Community 304"
+Cohesion: 0.60
+Nodes (4): CreateLearningProgressSerializer, LearningStreakSerializer, UserLearningProgressSerializer, TermSerializer
 
 ## Knowledge Gaps
-- **220 isolated node(s):** `DeckRepository`, `Any`, `LearningRepository`, `Any`, `Meta` (+215 more)
+- **106 isolated node(s):** `SKIP_REDIS`, `Migration`, `Migration`, `Migration`, `Migration` (+101 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **102 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **90 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DeckAccessPolicy` connect `Community 9` to `Community 13`, `Community 22`?**
-  _High betweenness centrality (0.051) - this node is a cross-community bridge._
-- **Why does `TermService` connect `Community 22` to `Community 216`, `Community 9`, `Community 26`?**
-  _High betweenness centrality (0.047) - this node is a cross-community bridge._
-- **Why does `DeckViewSet` connect `Community 64` to `Community 0`, `Community 9`, `Community 130`, `Community 220`?**
-  _High betweenness centrality (0.020) - this node is a cross-community bridge._
-- **Are the 16 inferred relationships involving `DeckAccessPolicy` (e.g. with `TermService` and `QuickReviseConsumer`) actually correct?**
-  _`DeckAccessPolicy` has 16 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 7 inferred relationships involving `TermService` (e.g. with `ReviseTermRow` and `DeckAccessPolicy`) actually correct?**
-  _`TermService` has 7 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `DeckRepository`, `Any`, `Deck access rules — domain policy, independent of Django ORM.` to the rest of the system?**
-  _264 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.14705882352941177 - nodes in this community are weakly interconnected._
+- **Why does `TermService` connect `Community 3` to `Community 0`, `Community 1`, `Community 91`, `Community 11`?**
+  _High betweenness centrality (0.041) - this node is a cross-community bridge._
+- **Why does `DeckAccessPolicy` connect `Community 0` to `Community 2`, `Community 3`, `Community 12`, `Community 300`?**
+  _High betweenness centrality (0.040) - this node is a cross-community bridge._
+- **Why does `Composition root — wire concrete infrastructure into application services.` connect `Community 1` to `Community 3`, `Community 292`, `Community 5`, `Community 11`, `Community 303`, `Community 15`, `Community 90`, `Community 91`?**
+  _High betweenness centrality (0.022) - this node is a cross-community bridge._
+- **Are the 15 inferred relationships involving `TermService` (e.g. with `DeckAccessPolicy` and `Composition root — wire concrete infrastructure into application services.`) actually correct?**
+  _`TermService` has 15 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 6 inferred relationships involving `DeckService` (e.g. with `Composition root — wire concrete infrastructure into application services.` and `Backward-compatible re-exports.`) actually correct?**
+  _`DeckService` has 6 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 5 inferred relationships involving `LearningService` (e.g. with `Composition root — wire concrete infrastructure into application services.` and `NotFoundError`) actually correct?**
+  _`LearningService` has 5 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `Run administrative tasks.`, `SKIP_REDIS`, `SMTP backend that uses certifi's CA bundle.      Needed on macOS/environments wh` to the rest of the system?**
+  _136 weakly-connected nodes found - possible documentation gaps or missing edges._

@@ -1,11 +1,7 @@
 from django.db import transaction
 from django.db.models import Count, Prefetch, Q
 
-from backend.deck.infrastructure.sql_queries import (
-    fetch_member_deck_ids,
-    fetch_top_public_deck_ids,
-    fetch_user_deck_ids,
-)
+from backend.deck.infrastructure.sql_queries import fetch_member_deck_ids, fetch_user_deck_ids
 from backend.models import Deck, Term, User, UserDeckRole
 
 
@@ -39,7 +35,7 @@ class DeckRepository:
 
     @staticmethod
     def get_my_own_decks(user):
-        return user.my_own_decks.annotate(number_of_term=Count("terms", distinct=True))
+        return user.my_own_decks.annotate(number_of_term=Count("terms", distinct=True)).order_by("-updated_at")
 
     @staticmethod
     def _decks_with_term_count(deck_ids):
@@ -53,7 +49,7 @@ class DeckRepository:
 
     @staticmethod
     def get_my_others_deck(user):
-        return DeckRepository._decks_with_term_count(fetch_member_deck_ids(user.id))
+        return DeckRepository._decks_with_term_count(fetch_member_deck_ids(user.id)).order_by("-updated_at")
 
     @staticmethod
     def get_my_decks(user):
@@ -61,11 +57,12 @@ class DeckRepository:
 
     @staticmethod
     def get_public_decks(user):
-        deck_ids = fetch_top_public_deck_ids(user.id)
-        if not deck_ids:
-            return Deck.objects.none()
-        decks = {str(deck.id).replace("-", ""): deck for deck in DeckRepository._decks_with_term_count(deck_ids)}
-        return [decks[deck_id] for deck_id in deck_ids if deck_id in decks]
+        return (
+            Deck.objects.filter(is_public=True)
+            .select_related("owner")
+            .annotate(number_of_term=Count("terms", distinct=True))
+            .order_by("-number_of_term", "-updated_at")
+        )
 
     @staticmethod
     def get_latest_decks(user):
