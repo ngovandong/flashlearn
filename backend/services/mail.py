@@ -8,7 +8,7 @@ from django.core.mail import EmailMessage
 from django.template.loader import get_template
 from rest_framework.parsers import JSONParser
 
-api_key = os.getenv("ABSTRACT_API_KEY")
+api_key = os.getenv("ABSTRACT_API_KEY") or ""
 
 api_url = "https://emailvalidation.abstractapi.com/v1/?api_key=" + api_key + "&email="
 

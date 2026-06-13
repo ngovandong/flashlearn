@@ -34,22 +34,6 @@ function LearnPage()
   let currentTerm = null;
   let youglish = null;
   let google = null;
-  const MOCK_DATA = {
-    sentence:
-      '"The keynote speaker was incredibly eloquent, captivating the entire audience with her powerful words and clear delivery."',
-    synonyms: [
-      "Articulate",
-      "Fluent",
-      "Expressive",
-      "Persuasive",
-      "Silver-tongued",
-      "Well-spoken",
-    ],
-    partOfSpeech: "Adjective",
-    pronunciation: "/ˈeləkwənt/",
-    definition:
-      "Having or showing the ability to use language clearly and effectively; expressing oneself readily, clearly, and effectively.",
-  };
 
   if (terms && terms.length > 0) {
     currentTerm = terms[currentState.index];
@@ -418,42 +402,13 @@ function LearnPage()
             <div className="definition-card">
               <h3>Definition</h3>
               <div className="definition-content">
-                <p>{MOCK_DATA.definition}</p>
-                <div className="definition-meta">
-                  <p>Part of Speech: {MOCK_DATA.partOfSpeech}</p>
-                  <p>Pronunciation: {MOCK_DATA.pronunciation}</p>
-                </div>
+                <p>{currentTerm?.description || "No definition available for this term."}</p>
               </div>
             </div>
           </div>
 
           {/* --- Right Column --- */}
           <div className="learn-right-col">
-            {/* Sentence Example */}
-            <div className="info-card">
-              <h3>Sentence Example</h3>
-              <div className="sentence-box">
-                <p>{MOCK_DATA.sentence}</p>
-              </div>
-              <div className="audio-actions">
-                <button className="audio-btn" onClick={speakTerm}>
-                  <VolumeUpIcon /> Listen to pronunciation
-                </button>
-              </div>
-            </div>
-
-            {/* Synonyms */}
-            <div className="info-card">
-              <h3>Synonyms</h3>
-              <div className="synonyms-list">
-                {MOCK_DATA.synonyms.map((s, i) => (
-                  <span key={i} className="synonym-chip">
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-
             {/* Study Progress */}
             <div className="info-card">
               <h3>Study Progress</h3>

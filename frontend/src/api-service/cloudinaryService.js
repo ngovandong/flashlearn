@@ -11,8 +11,12 @@ const uploadImage = (file) => {
     body: data,
   })
     .then((resp) => resp.json())
-    .then((data) => data.url)
-    .catch(() => {});
+    .then((data) => {
+      if (!data.url) {
+        throw new Error(data.error?.message || "Image upload failed");
+      }
+      return data.url;
+    });
 };
 
 const cloudinaryService = { uploadImage };

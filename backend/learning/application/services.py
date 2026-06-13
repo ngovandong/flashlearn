@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Any
 
 from django.utils import timezone
 
@@ -6,26 +7,32 @@ from backend.learning.infrastructure.cache import learning_progress_cache
 from backend.learning.infrastructure.repository import LearningRepository
 from backend.models import User
 from backend.shared.application.exceptions import NotFoundError
-from backend.term.infrastructure.repository import TermRepository
-from backend.user.infrastructure.repository import UserRepository
 
 
 class LearningService:
-    @staticmethod
-    def get_learning_progress(deck_id, user):
-        progress = learning_progress_cache.get_combine(deck_id, user.id)
+    def __init__(
+        self,
+        learning_repo: type[LearningRepository] | LearningRepository = LearningRepository,
+        term_context: Any = None,
+        user_context: Any = None,
+        learning_cache: Any = learning_progress_cache,
+    ):
+        self._learning_repo = learning_repo
+        self._term_context = term_context
+        self._user_context = user_context
+        self._learning_cache = learning_cache
+
+    def get_learning_progress(self, deck_id, user):
+        progress = self._learning_cache.get_combine(deck_id, user.id)
         if progress:
             return progress
 
         today = timezone.localtime(timezone.now()).date()
-        progress = LearningRepository.get_learning_progress_stats(user.id, deck_id, today)
-        learning_progress_cache.set_combine(deck_id, user.id, progress)
+        progress = self._learning_repo.get_learning_progress_stats(user.id, deck_id, today)
+        self._learning_cache.set_combine(deck_id, user.id, progress)
         return progress
 
-    @classmethod
-    def record_study_activity(cls, user: User, cache=None) -> None:
-        from backend.shared.infrastructure.cache import default_cache
-
+    def record_study_activity(self, user: User, cache=None) -> None:
         today = timezone.localdate()
         if user.last_study_date == today:
             return
@@ -38,10 +45,10 @@ class LearningService:
 
         user.last_study_date = today
         user.save(update_fields=["learning_streak_count", "last_study_date"])
-        UserRepository.clear_cache(user.id, cache or default_cache)
+        if self._user_context:
+            self._user_context.clear_cache(user.id, cache)
 
-    @staticmethod
-    def get_learning_streak(user: User) -> dict:
+    def get_learning_streak(self, user: User) -> dict:
         today = timezone.localdate()
         yesterday = today - timedelta(days=1)
         last = user.last_study_date
@@ -54,54 +61,50 @@ class LearningService:
 
         return {"streak": streak, "studied_today": studied_today}
 
-    @staticmethod
-    def clear_learning_progress(deck_id, user):
-        LearningRepository.clear_for_deck(deck_id, user)
-        learning_progress_cache.delete_combine(deck_id, user.id)
+    def clear_learning_progress(self, deck_id, user):
+        self._learning_repo.clear_for_deck(deck_id, user)
+        self._learning_cache.delete_combine(deck_id, user.id)
 
-    @staticmethod
-    def create_or_touch_progress(user, term_id, user_id):
-        term = TermRepository.get_by_id(term_id)
+    def create_or_touch_progress(self, user, term_id, user_id):
+        if self._term_context is None:
+            raise RuntimeError("term_context is not configured")
+        term = self._term_context.get_by_id(term_id)
         if term is None:
             raise NotFoundError("term not found")
         deck_id = term.deck_id
-        instance = LearningRepository.get_by_user_and_term(user, term_id)
+        instance = self._learning_repo.get_by_user_and_term(user, term_id)
         if instance is None:
-            instance = LearningRepository.create(user_id, term_id)
+            instance = self._learning_repo.create(user_id, term_id)
         else:
-            LearningRepository.touch_learned(instance)
-        learning_progress_cache.delete_combine(deck_id, user_id)
-        LearningService.record_study_activity(user)
+            self._learning_repo.touch_learned(instance)
+        self._learning_cache.delete_combine(deck_id, user_id)
+        self.record_study_activity(user)
         return instance
 
-    @staticmethod
-    def record_correct(progress, user):
-        LearningRepository.record_correct(progress)
-        learning_progress_cache.delete_combine(progress.term.deck_id, user.id)
-        LearningService.record_study_activity(user)
+    def record_correct(self, progress, user):
+        self._learning_repo.record_correct(progress)
+        self._learning_cache.delete_combine(progress.term.deck_id, user.id)
+        self.record_study_activity(user)
 
-    @staticmethod
-    def record_incorrect(progress, user):
-        LearningRepository.record_incorrect(progress)
-        learning_progress_cache.delete_combine(progress.term.deck_id, user.id)
-        LearningService.record_study_activity(user)
+    def record_incorrect(self, progress, user):
+        self._learning_repo.record_incorrect(progress)
+        self._learning_cache.delete_combine(progress.term.deck_id, user.id)
+        self.record_study_activity(user)
 
-    @staticmethod
-    def toggle_remember(progress):
-        LearningRepository.toggle_skip(progress)
+    def toggle_remember(self, progress):
+        self._learning_repo.toggle_skip(progress)
 
-    @staticmethod
-    def adjust_priority(progress, adjust_point):
+    def adjust_priority(self, progress, adjust_point):
         if adjust_point:
-            LearningRepository.adjust_priority(progress, adjust_point)
+            self._learning_repo.adjust_priority(progress, adjust_point)
 
-    @staticmethod
-    def record_quick_revise_answer(user, term_id):
-        progress, _ = LearningRepository.get_or_create(user, term_id)
-        LearningRepository.record_quick_revise_answer(progress)
-        learning_progress_cache.delete_combine(progress.term.deck_id, user.id)
-        LearningService.record_study_activity(user)
+    def record_quick_revise_answer(self, user, term_id):
+        progress, _ = self._learning_repo.get_or_create(user, term_id)
+        self._learning_repo.record_quick_revise_answer(progress)
+        self._learning_cache.delete_combine(progress.term.deck_id, user.id)
+        self.record_study_activity(user)
 
-    @staticmethod
-    def get_latest_learned_term_info(user, deck_id, page_size=10):
-        return TermRepository.get_latest_learned_term_info(user, deck_id, page_size)
+    def get_latest_learned_term_info(self, user, deck_id, page_size=10):
+        if self._term_context is None:
+            raise RuntimeError("term_context is not configured")
+        return self._term_context.get_latest_learned_term_info(user, deck_id, page_size)

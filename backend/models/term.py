@@ -3,6 +3,7 @@ from django.db import models
 from base.models import DateTimeUUIDModel
 
 from ..managers import TermManager
+from ..term.domain.access import TermAccessPolicy
 from .deck import Deck
 
 
@@ -18,4 +19,4 @@ class Term(DateTimeUUIDModel):
         ordering = ["-created_at", "name"]
 
     def can_edit_term(self, user):
-        return self.deck.owner == user or self.deck.user_roles.filter(user=user, role="E").first() is not None
+        return TermAccessPolicy.can_edit(self, user)

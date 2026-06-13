@@ -40,9 +40,9 @@ class DeckDetailSerializer(DeckSerializer):
         user = request.user
         ret = super().to_representation(instance)
         ret["my_permission"] = instance.get_user_permission(user)
-        from ..services import LearningService
+        from ..services import learning_context
 
-        ret["number_of_term"], ret["learning_progress"] = LearningService.get_learning_progress(instance.id, user)
+        ret["number_of_term"], ret["learning_progress"] = learning_context.get_learning_progress(instance.id, user)
         return ret
 
 

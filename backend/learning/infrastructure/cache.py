@@ -27,22 +27,38 @@ class _CacheNamespace:
             return "_".join([self.PREFIX, str(key).strip()])
 
     def get(self, key):
-        return self._cache.get(self.get_key(key))
+        cache_key = self.get_key(key)
+        if cache_key is None:
+            return None
+        return self._cache.get(cache_key)
 
     def get_combine(self, first_key, second_key):
-        return self._cache.get(self.get_combine_key(first_key, second_key))
+        cache_key = self.get_combine_key(first_key, second_key)
+        if cache_key is None:
+            return None
+        return self._cache.get(cache_key)
 
     def set(self, key, value):
-        return self._cache.set(self.get_key(key), value, self.LIVE_TIME)
+        cache_key = self.get_key(key)
+        if cache_key is None:
+            return None
+        return self._cache.set(cache_key, value, self.LIVE_TIME)
 
     def set_combine(self, first_key, second_key, value):
-        return self._cache.set(self.get_combine_key(first_key, second_key), value, self.LIVE_TIME)
+        cache_key = self.get_combine_key(first_key, second_key)
+        if cache_key is None:
+            return None
+        return self._cache.set(cache_key, value, self.LIVE_TIME)
 
     def delete(self, key):
-        self._cache.delete(self.get_key(key))
+        cache_key = self.get_key(key)
+        if cache_key is not None:
+            self._cache.delete(cache_key)
 
     def delete_combine(self, first_key, second_key):
-        self._cache.delete(self.get_combine_key(first_key, second_key))
+        cache_key = self.get_combine_key(first_key, second_key)
+        if cache_key is not None:
+            self._cache.delete(cache_key)
 
     def clear_all(self):
         self._cache.delete_pattern(f"{self.PREFIX}_*")

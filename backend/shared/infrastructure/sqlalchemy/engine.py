@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from contextlib import contextmanager
 from urllib.parse import quote_plus
 
@@ -27,7 +28,7 @@ def get_engine() -> Engine:
 
 
 @contextmanager
-def get_connection() -> Connection:
+def get_connection() -> Iterator[Connection]:
     conn = get_engine().connect()
     try:
         yield conn

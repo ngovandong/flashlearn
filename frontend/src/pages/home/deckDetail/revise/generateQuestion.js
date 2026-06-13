@@ -1,6 +1,5 @@
 import { shuffleArray } from "@utils/array";
-
-const { QUESTION_TYPES } = require("@constants/questionTypes");
+import { QUESTION_TYPES } from "@constants/questionTypes";
 
 export function generateQuizQuestions(reviseTerms, allTerms) {
   // Shuffle terms array

@@ -1,12 +1,16 @@
+import { themeTokens } from "@utils/theme";
+
+/** Backward-compatible color constants — values mirror MUI theme tokens. */
 export const COLORS = {
-  PURPLE: "#4255ff",
-  DARK_PURPLE: "#423ed8",
-  YELLOW: "#ffcd1f",
-  ERROR_RED: "#ff7873",
-  BLUE: "#3ccfcf",
-  LIGHT_BLUE: "#59e8b5",
-  APP_BACKGROUND: "#f6f7fb",
-  MAIN_TEXT: "#282e3e",
-  MINOR_TEXT: "#646f90",
-  GRAY_TEXT: "#939bb4",
+  PRIMARY: themeTokens.primary,
+  PURPLE: themeTokens.purple,
+  DARK_PURPLE: themeTokens.darkPurple,
+  YELLOW: themeTokens.yellow,
+  ERROR_RED: themeTokens.errorRed,
+  BLUE: themeTokens.blue,
+  LIGHT_BLUE: themeTokens.lightBlue,
+  APP_BACKGROUND: themeTokens.appBackground,
+  MAIN_TEXT: themeTokens.mainText,
+  MINOR_TEXT: themeTokens.minorText,
+  GRAY_TEXT: themeTokens.grayText,
 };

@@ -1,5 +1,8 @@
 from rest_framework import permissions
 
+from backend.deck.domain.access import DeckAccessPolicy
+from backend.term.domain.access import TermAccessPolicy
+
 from .models import Deck, Term
 
 
@@ -17,15 +20,15 @@ class IsOwnerOfRolePermission(permissions.BasePermission):
 class EditableDeck(permissions.BasePermission):
     def has_object_permission(self, request, view, obj: Deck):
         if request.method in permissions.SAFE_METHODS:
-            return obj.user_can_view_deck(request.user)
-        return obj.user_can_edit_deck(request.user)
+            return DeckAccessPolicy.can_view(obj, request.user)
+        return DeckAccessPolicy.can_edit(obj, request.user)
 
 
 class EditableTerm(permissions.BasePermission):
     def has_object_permission(self, request, view, obj: Term):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return obj.can_edit_term(request.user)
+        return TermAccessPolicy.can_edit(obj, request.user)
 
 
 class EditableLearningProgress(permissions.BasePermission):

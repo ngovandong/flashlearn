@@ -15,4 +15,4 @@ def as_uuid(value) -> UUID | str:
 def normalize_uuid(value) -> str:
     if isinstance(value, UUID):
         return str(value).replace("-", "")
-    return str(value).replace("-", "") if value is not None else value
+    return str(value).replace("-", "") if value is not None else ""

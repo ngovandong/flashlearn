@@ -4,6 +4,7 @@ import os
 import subprocess  # nosec B404
 import tempfile
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +94,7 @@ def _backup_files_query():
 
 
 def _list_backup_files(service, *, latest_only=False):
-    kwargs = {"q": _backup_files_query(), "fields": "files(id, name, createdTime)"}
+    kwargs: dict[str, Any] = {"q": _backup_files_query(), "fields": "files(id, name, createdTime)"}
     if latest_only:
         kwargs["orderBy"] = "createdTime desc"
         kwargs["pageSize"] = 1
@@ -157,7 +158,7 @@ def dump_database_to_drive():
 
         service = _get_drive_service()
         _delete_old_backups(service)
-        file_metadata = {"name": filename}
+        file_metadata: dict[str, Any] = {"name": filename}
         if DRIVE_BACKUP_FOLDER_ID:
             file_metadata["parents"] = [DRIVE_BACKUP_FOLDER_ID]
 

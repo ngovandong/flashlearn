@@ -54,9 +54,19 @@ function Login() {
 
     const access = searchParams.get("access");
     const refresh = searchParams.get("refresh");
+    const userParam = searchParams.get("user");
     if (access && refresh) {
-      sendTokenToExtension({ access, refresh });
-      dispatch(setToken({ access, refresh }));
+      let user = null;
+      if (userParam) {
+        try {
+          user = JSON.parse(atob(userParam));
+        } catch {
+          // ignore malformed user payload
+        }
+      }
+      const tokenPayload = user ? { access, refresh, user } : { access, refresh };
+      sendTokenToExtension(tokenPayload);
+      dispatch(setToken(tokenPayload));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

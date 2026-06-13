@@ -1,8 +1,9 @@
 from django.core.management.base import BaseCommand
 
+from backend.user.application.services import DEFAULT_DECK_NAME_TEMPLATE
+
 from ...models import User
-from ...services import UserService
-from ...services.user import DEFAULT_DECK_NAME_TEMPLATE
+from ...services import user_service
 
 
 class Command(BaseCommand):
@@ -34,7 +35,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"[dry-run] Would create '{deck_name}' for {user.email}")
                 continue
 
-            deck = UserService.create_default_deck_for_user(user)
+            deck = user_service.create_default_deck_for_user(user)
             created_count += 1
             self.stdout.write(self.style.SUCCESS(f"Created '{deck.name}' for {user.email}"))
 

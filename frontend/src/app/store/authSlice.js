@@ -1,7 +1,7 @@
 import { googleLogout } from "@react-oauth/google";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authService from "@api-services/authService";
-import { decodeUser } from "@utils/jwt";
+import { decodeUser, resolveAuthUser } from "@utils/jwt";
 import { getFirstError } from "@utils/errorHandler";
 import { sendTokenToExtension } from "@utils/extensionLogin";
 
@@ -27,7 +27,7 @@ let tokenString = null;
 let localUser = null;
 try {
   tokenString = JSON.parse(localStorage.getItem("token"));
-  localUser = decodeUser(tokenString.access).user;
+  localUser = resolveAuthUser(tokenString);
 } catch {}
 
 const initialState = {
@@ -50,7 +50,7 @@ const userSlice = createSlice({
     },
     setToken: (state, action) => {
       state.token = action.payload;
-      state.user = decodeUser(action.payload.access).user;
+      state.user = resolveAuthUser(action.payload);
       localStorage.setItem("token", JSON.stringify(action.payload));
     },
     logout: (state) => {
@@ -70,7 +70,7 @@ const userSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.token = action.payload;
-        state.user = decodeUser(action.payload.access).user;
+        state.user = resolveAuthUser(action.payload);
         localStorage.setItem("token", JSON.stringify(action.payload));
         state.loading = false;
       })

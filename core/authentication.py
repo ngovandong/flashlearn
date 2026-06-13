@@ -12,13 +12,13 @@ class CustomTokenAuthentication(JWTAuthentication):
         try:
             user_id = validated_token[api_settings.USER_ID_CLAIM]
         except KeyError:
-            raise InvalidToken(_("Token contained no recognizable user identification"))
+            raise InvalidToken(str(_("Token contained no recognizable user identification")))
 
         user = UserRepository.get_cached(user_id, default_cache)
         if user is None:
-            raise AuthenticationFailed(_("User not found"), code="user_not_found")
+            raise AuthenticationFailed(str(_("User not found")), code="user_not_found")
 
         if not user.is_active:
-            raise AuthenticationFailed(_("User is inactive"), code="user_inactive")
+            raise AuthenticationFailed(str(_("User is inactive")), code="user_inactive")
 
         return user

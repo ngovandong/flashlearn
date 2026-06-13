@@ -9,10 +9,10 @@ from backend.shared.interfaces.viewsets import FlexibleViewSet, SearchViewSet
 from backend.term.infrastructure.search import TermSearchQuery
 
 from ..documents import TermDocument
-from ..models import Deck, Term
+from ..models import Term
 from ..permissions import EditableTerm
 from ..serializers import AddTermsToDeckSerializer, TermNestInDeckSerializer, TermSerializer
-from ..services import TermService
+from ..services import deck_service, term_service
 
 
 class LatestlCursorPagination(CursorPagination):
@@ -34,10 +34,10 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
 
     def perform_create(self, serializer):
         term = serializer.save()
-        TermService.invalidate_learning_cache(term.deck_id, self.request.user.id)
+        term_service.invalidate_learning_cache(term.deck_id, self.request.user.id)
 
     def perform_destroy(self, instance):
-        TermService.invalidate_learning_cache(instance.deck_id, self.request.user.id)
+        term_service.invalidate_learning_cache(instance.deck_id, self.request.user.id)
         instance.delete()
 
     @swagger_auto_schema(
@@ -76,36 +76,36 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         deck_id = data.get("deck")
         if not deck_id:
             return Response({"errors": "deck is required"}, status=status.HTTP_400_BAD_REQUEST)
-        deck = Deck.objects.filter(pk=deck_id).first()
+        deck = deck_service.get_deck_by_id(deck_id)
         if "image" in request.FILES:
             data["image"] = request.FILES["image"]
-        term = TermService.create_term(deck, request.user, data)
-        TermService.invalidate_learning_cache(term.deck_id, request.user.id)
+        term = term_service.create_term(deck, request.user, data)
+        term_service.invalidate_learning_cache(term.deck_id, request.user.id)
         serializer = self.get_serializer(term)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     @action(detail=False, methods=["POST"])
     def add_to_default_deck(self, request, *args, **kwargs):
-        term = TermService.add_to_default_deck(request.user, dict(request.data))
-        TermService.invalidate_learning_cache(term.deck_id, request.user.id)
+        term = term_service.add_to_default_deck(request.user, dict(request.data))
+        term_service.invalidate_learning_cache(term.deck_id, request.user.id)
         serializer = self.get_serializer(term)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     @action(detail=False, methods=["POST"])
     def add_terms(self, request, *args, **kwargs):
-        parsed = TermService.parse_add_terms_payload(request.data)
+        parsed = term_service.parse_add_terms_payload(request.data)
         deck_id = parsed.get("deck_id")
         if not deck_id:
             return Response({"errors": "deck_id is required"}, status=status.HTTP_400_BAD_REQUEST)
-        deck = Deck.objects.filter(pk=deck_id).first()
-        TermService.add_terms(deck, request.user, parsed["terms"])
-        TermService.invalidate_learning_cache(deck_id, request.user.id)
+        deck = deck_service.get_deck_by_id(deck_id)
+        term_service.add_terms(deck, request.user, parsed["terms"])
+        term_service.invalidate_learning_cache(deck_id, request.user.id)
         return Response({"message": "Terms created successfully"})
 
     @action(detail=False, methods=["PUT"])
     def update_terms(self, request, *args, **kwargs):
-        parsed_data = TermService.parse_multipart_terms(request.data)
-        TermService.bulk_update_terms(parsed_data)
+        parsed_data = term_service.parse_multipart_terms(request.data)
+        term_service.bulk_update_terms(parsed_data)
         return Response({"message": "Terms updated successfully"})

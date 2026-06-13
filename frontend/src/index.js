@@ -2,7 +2,9 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux";
+import { QueryClientProvider } from "@tanstack/react-query";
 import store from "./app/store";
+import queryClient from "./app/queryClient";
 import App from "./app/App";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import "./styles/sass/index.scss";
@@ -13,15 +15,15 @@ const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  // <React.StrictMode>
   <ThemeProvider theme={theme}>
     <Provider store={store}>
-      <GoogleOAuthProvider clientId={clientId}>
-        <App />
-      </GoogleOAuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <GoogleOAuthProvider clientId={clientId}>
+          <App />
+        </GoogleOAuthProvider>
+      </QueryClientProvider>
     </Provider>
   </ThemeProvider>
-  // </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

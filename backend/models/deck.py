@@ -7,7 +7,7 @@ from django.db import models
 
 from base.models import DateTimeUUIDModel
 
-from ..constants import FULL_ROLE_CLASS
+from ..deck.domain.access import DeckAccessPolicy
 from .user import User
 
 
@@ -25,26 +25,16 @@ class Deck(DateTimeUUIDModel):
         ordering = ("created_at",)
 
     def get_user_permission(self, user):
-        if user == self.owner or user.is_superuser:
-            return FULL_ROLE_CLASS.OWNER
-        for role in self.user_roles.all():
-            if role.user == user:
-                return role.role
-        return None
+        return DeckAccessPolicy.get_user_role(self, user)
 
     def user_can_edit_deck(self, user):
-        if user.is_superuser:
-            return True
-        user_role = self.get_user_permission(user)
-        if user_role is None:
-            return False
-        return user_role in [FULL_ROLE_CLASS.EDIT, FULL_ROLE_CLASS.OWNER]
+        return DeckAccessPolicy.can_edit(self, user)
 
     def user_is_in_deck(self, user):
-        return self.get_user_permission(user) is not None
+        return DeckAccessPolicy.is_member(self, user)
 
     def user_can_view_deck(self, user):
-        return self.is_public or self.get_user_permission(user) or user.is_superuser
+        return DeckAccessPolicy.can_view(self, user)
 
     @staticmethod
     def default_background_path():

@@ -21,7 +21,7 @@ from ..serializers import (
     MyDeckSerializer,
     RemoveUserSerializer,
 )
-from ..services import AuthService, DeckService
+from ..services import auth_service, deck_service
 
 
 class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
@@ -60,7 +60,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
 
     def get_queryset(self):
         if self.action == "retrieve":
-            return DeckService.get_retrieve_queryset(self.request.user)
+            return deck_service.get_retrieve_queryset(self.request.user)
         return super().get_queryset()
 
     def generate_q_expression(self, query, **kwargs):
@@ -84,7 +84,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        DeckService.touch_on_retrieve(instance)
+        deck_service.touch_on_retrieve(instance)
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
@@ -100,38 +100,38 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     )
     def list(self, request, *args, **kwargs):
         search_query = request.query_params.get("search")
-        self.queryset = DeckService.get_search_queryset(request.user, search_query)
+        self.queryset = deck_service.get_search_queryset(request.user, search_query)
         return super().list(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        DeckService.destroy_deck(instance)
+        deck_service.destroy_deck(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=["GET"])
     def my_own_decks(self, request, *args, **kwargs):
-        queryset = DeckService.get_my_own_decks(request.user)
+        queryset = deck_service.get_my_own_decks(request.user)
         return self.perform_get_list(queryset)
 
     @action(detail=False, methods=["GET"])
     def others_deck(self, request, *args, **kwargs):
-        queryset = DeckService.get_my_others_deck(request.user)
+        queryset = deck_service.get_my_others_deck(request.user)
         return self.perform_get_list(queryset)
 
     @action(detail=False, methods=["GET"])
     def latest_decks(self, request, *args, **kwargs):
-        queryset = DeckService.get_latest_decks(request.user)
+        queryset = deck_service.get_latest_decks(request.user)
         return self.perform_get_list(queryset)
 
     @action(detail=False, methods=["GET"])
     def my_decks(self, request, *args, **kwargs):
-        queryset = DeckService.get_my_decks(request.user)
+        queryset = deck_service.get_my_decks(request.user)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=["GET"])
     def public_decks(self, request, *args, **kwargs):
-        queryset = DeckService.get_public_decks(request.user)
+        queryset = deck_service.get_public_decks(request.user)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -140,7 +140,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        DeckService.add_user_to_deck(
+        deck_service.add_user_to_deck(
             instance,
             request.user,
             serializer.validated_data["email"],
@@ -153,7 +153,7 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        DeckService.remove_user_from_deck(instance, request.user, serializer.validated_data["email"])
+        deck_service.remove_user_from_deck(instance, request.user, serializer.validated_data["email"])
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["POST"])
@@ -161,14 +161,14 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         role = serializer.validated_data["role"]
-        token = AuthService.get_invite_token(pk, role)
+        token = auth_service.get_invite_token(pk, role)
         params = urlencode({"token": token})
         invite_url = f"{settings.BASE_FRONTEND_URL}/invite?{params}"
         return Response(invite_url, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=["PUT"])
     def clear_learning_process(self, request, pk=None, *args, **kwargs):
-        DeckService.clear_learning_process(pk, request.user)
+        deck_service.clear_learning_process(pk, request.user)
         return Response(
             {"message": "clear learning progress success"},
             status=status.HTTP_204_NO_CONTENT,
@@ -176,23 +176,23 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
 
     @action(detail=True, methods=["POST"])
     def join_deck(self, request, pk=None, *args, **kwargs):
-        DeckService.join_deck(self.get_object(), request.user)
+        deck_service.join_deck(self.get_object(), request.user)
         return Response({"message": "join deck success"}, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["POST"])
     def leave_deck(self, request, pk=None, *args, **kwargs):
-        DeckService.leave_deck(self.get_object(), request.user)
+        deck_service.leave_deck(self.get_object(), request.user)
         return Response({"message": "leave deck success"}, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["PUT"])
     def set_default_deck(self, request, *args, **kwargs):
-        DeckService.set_default_deck(request.user, self.get_object())
+        deck_service.set_default_deck(request.user, self.get_object())
         return Response({"message": "update successfully"}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["GET"])
     def clone(self, request, *args, **kwargs):
         try:
-            new_deck = DeckService.clone_deck(self.get_object(), request.user)
+            new_deck = deck_service.clone_deck(self.get_object(), request.user)
         except Exception:
             return Response({"errors": "Clone deck fail"}, status=status.HTTP_400_BAD_REQUEST)
         serializer = self.get_serializer(new_deck)

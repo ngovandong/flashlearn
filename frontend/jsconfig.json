@@ -8,7 +8,8 @@
         "@constants/*": ["src/constants/*"],
         "@app/*": ["src/app/*"],
         "@pages/*": ["src/pages/*"],
-        "@api-services/*": ["src/api-service/*"]
+        "@api-services/*": ["src/api-service/*"],
+        "@hooks/*": ["src/hooks/*"]
       }
     },
     "exclude": ["node_modules", "build"]

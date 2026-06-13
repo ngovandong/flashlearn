@@ -1,7 +1,7 @@
 import { Alert, Button, Snackbar } from "@mui/material";
 import TermCard from "./termCard";
 import AddIcon from "@mui/icons-material/Add";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { termService } from "@api-services/termService";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { LocalLoadingWrapper } from "@components/loading";
@@ -17,18 +17,17 @@ const emptyTerm = {
 };
 
 const initTerms = [emptyTerm, emptyTerm, emptyTerm, emptyTerm];
-let oldTerms = initTerms;
-
-let isLoadMore = false;
 
 function AddTermsTab({ handleClickBack }) {
+  const oldTermsRef = useRef(initTerms);
+  const isLoadMoreRef = useRef(false);
   const [terms, setTerms] = useState(initTerms);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
   const [isSuccess, setIsSuccess] = useState(false);
   const { deckID } = useParams();
   const isUpdate = terms.some((t) => t.id);
-  const isSateChanged = isChangeState(oldTerms, terms);
+  const isSateChanged = isChangeState(oldTermsRef.current, terms);
   const [fetchState, setFetchState] = useState({
     cursor: null,
     next: "",
@@ -148,7 +147,7 @@ function AddTermsTab({ handleClickBack }) {
                 setError(res.error);
               }
             }
-            const updatedTerms = filterChangedTerms(oldTerms, result);
+            const updatedTerms = filterChangedTerms(oldTermsRef.current, result);
             if (updatedTerms.length > 0) {
               const res = await termService.updateTerms(updatedTerms);
               ischangedState = true;
@@ -202,7 +201,7 @@ function AddTermsTab({ handleClickBack }) {
           const fetchedTerms = isUpdate
             ? [...(refresh ? [] : terms), ...convertTerms(res.data.results)]
             : convertTerms(res.data.results);
-          oldTerms = fetchedTerms;
+          oldTermsRef.current = fetchedTerms;
           setTerms(fetchedTerms);
         }
       } else {
@@ -213,7 +212,7 @@ function AddTermsTab({ handleClickBack }) {
       setError("Something wrong!");
     } finally {
       setIsLoading(false);
-      isLoadMore = false;
+      isLoadMoreRef.current = false;
     }
   };
 
@@ -229,8 +228,8 @@ function AddTermsTab({ handleClickBack }) {
     const isAtBottom =
       window.innerHeight + window.scrollY >= document.body.offsetHeight - 50;
     // Update the state based on whether the user is at the end of the page
-    if (!isLoadMore && isAtBottom && fetchState.next) {
-      isLoadMore = true;
+    if (!isLoadMoreRef.current && isAtBottom && fetchState.next) {
+      isLoadMoreRef.current = true;
       fetchTerms();
     }
   };
