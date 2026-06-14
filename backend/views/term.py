@@ -76,7 +76,7 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         data = dict(request.data)
         deck_id = data.get("deck")
         if not deck_id:
-            return Response({"errors": "deck is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": "Please select a deck."}, status=status.HTTP_400_BAD_REQUEST)
         deck = deck_service.get_deck_by_id(deck_id)
         if "image" in request.FILES:
             data["image"] = request.FILES["image"]
@@ -99,7 +99,7 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         parsed = term_service.parse_add_terms_payload(request.data)
         deck_id = parsed.get("deck_id")
         if not deck_id:
-            return Response({"errors": "deck_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": "Please select a deck."}, status=status.HTTP_400_BAD_REQUEST)
         deck = deck_service.get_deck_by_id(deck_id)
         term_service.add_terms(deck, request.user, parsed["terms"])
         term_service.invalidate_learning_cache(deck_id, request.user.id)
@@ -127,7 +127,7 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         name = (request.data.get("name") or "").strip()
         meaning = request.data.get("meaning") or ""
         if not name:
-            return Response({"errors": "name is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": "Name is required."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             # Cache by name+meaning so re-enriching the same term (e.g. re-opening
             # a noted word in the Speaking Coach) is served without a new AI call.

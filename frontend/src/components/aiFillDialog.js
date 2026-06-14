@@ -131,7 +131,7 @@ export default function AiFillDialog({ open, name, meaning, initial, onClose, on
               size="small"
               value={fields.word_type}
               onChange={setField("word_type")}
-              placeholder="Noun, Verb, Adjective..."
+              placeholder="Noun, verb, adjective…"
             />
             <TextField
               label="Pronunciation (IPA)"

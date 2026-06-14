@@ -13,9 +13,9 @@ import InsightsIcon from "@mui/icons-material/Insights";
 const scoreLevel = (score) => (score >= 80 ? "good" : score >= 50 ? "mid" : "low");
 
 const wpmStatus = (wpm) => {
-  if (wpm < 100) return { label: "Slow & Deliberate", level: "mid" };
-  if (wpm <= 160) return { label: "Optimal Pace", level: "good" };
-  return { label: "Fast Speech", level: "low" };
+  if (wpm < 100) return { label: "Slow & deliberate", level: "mid" };
+  if (wpm <= 160) return { label: "Optimal pace", level: "good" };
+  return { label: "Fast speech", level: "low" };
 };
 
 /**
@@ -74,19 +74,19 @@ export default function LineAnalysis({
             <InsightsIcon fontSize="small" />
           </span>
           <div>
-            <h3>Pronunciation Diagnostics</h3>
+            <h3>Pronunciation diagnostics</h3>
             <p>Syllable stress, phonetics, and physical correction guidance.</p>
           </div>
         </div>
         <button className="sc-btn sc-btn--ghost" onClick={onSaveSentence}>
           <BookmarkBorderIcon fontSize="small" />
-          Save Sentence
+          Save sentence
         </button>
       </div>
 
       <div className="sc-metrics">
         <div className="sc-gauge">
-          <span className="sc-gauge__label">Overall Accuracy</span>
+          <span className="sc-gauge__label">Overall accuracy</span>
           <div className="sc-gauge__ring">
             <svg viewBox="0 0 80 80">
               <circle className="sc-gauge__bg" cx="40" cy="40" r="34" strokeWidth="6" />
@@ -129,7 +129,7 @@ export default function LineAnalysis({
             <VolumeUpIcon fontSize="small" />
           </span>
           <div>
-            <h4>Audio Comparison</h4>
+            <h4>Audio comparison</h4>
             <p>Listen to the reference voice and your recording.</p>
           </div>
         </div>
@@ -137,7 +137,7 @@ export default function LineAnalysis({
           {onPlayReference && (
             <button className="sc-btn sc-btn--ghost" onClick={onPlayReference}>
               <VolumeUpIcon fontSize="small" />
-              Listen Reference
+              Listen to reference
             </button>
           )}
           {result.userAudioUrl ? (
@@ -146,7 +146,7 @@ export default function LineAnalysis({
               onClick={handlePlayUserAudio}
             >
               <MicIcon fontSize="small" />
-              {isUserPlaying ? "Playing…" : "My Recording"}
+              {isUserPlaying ? "Playing…" : "My recording"}
             </button>
           ) : (
             <span className="sc-muted-pill">Recording replay unavailable</span>
@@ -173,7 +173,7 @@ export default function LineAnalysis({
         <div className="sc-callout sc-callout--warn">
           <WarningAmberIcon fontSize="small" />
           <div>
-            <h5>Accent & Intonation Insight</h5>
+            <h5>Accent & intonation insight</h5>
             <p>{result.accentAnalysis}</p>
           </div>
         </div>
@@ -181,7 +181,7 @@ export default function LineAnalysis({
 
       {result.keyStruggles?.length > 0 && (
         <div className="sc-struggles">
-          <span className="sc-section-label">Key Vocal Challenges</span>
+          <span className="sc-section-label">Key vocal challenges</span>
           <div className="sc-struggles__grid">
             {result.keyStruggles.map((s, i) => (
               <div key={i} className="sc-struggle">
@@ -200,7 +200,7 @@ export default function LineAnalysis({
 
       {result.wordAnalysis.length > 0 && (
         <div className="sc-wordmap">
-          <span className="sc-section-label">Interactive Sentence Map</span>
+          <span className="sc-section-label">Interactive sentence map</span>
           <p className="sc-hint">Tap any word to view its acoustic guide.</p>
           <div className="sc-wordmap__words">
             {result.wordAnalysis.map((word, idx) => (
@@ -236,7 +236,7 @@ export default function LineAnalysis({
               disabled={savedWords[selectedWord.word]}
             >
               <AddIcon fontSize="small" />
-              {savedWords[selectedWord.word] ? "Saved" : "Save as Term"}
+              {savedWords[selectedWord.word] ? "Saved" : "Save as term"}
             </button>
           </div>
 
@@ -258,7 +258,7 @@ export default function LineAnalysis({
               )}
             </div>
             <div className="sc-word-cell">
-              <span className="sc-cell-label">Syllable Stress</span>
+              <span className="sc-cell-label">Syllable stress</span>
               <span className="sc-cell-note">
                 {selectedWord.syllableStress || "No stress details noted."}
               </span>
@@ -269,7 +269,7 @@ export default function LineAnalysis({
             <div className="sc-word-detail__tip">
               <AutoAwesomeIcon fontSize="small" />
               <div>
-                <h6>Vocal Correction Tip</h6>
+                <h6>Vocal correction tip</h6>
                 <p>{selectedWord.mouthTip}</p>
               </div>
             </div>

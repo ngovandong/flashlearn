@@ -90,7 +90,9 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             logger.error(f"Error in receive handler: {e}", exc_info=True)
             try:
-                await self.send(text_data=json.dumps({"type": "error", "message": "Server error"}))
+                await self.send(
+                    text_data=json.dumps({"type": "error", "message": "Something went wrong. Please try again."})
+                )
             except Exception:
                 pass
 

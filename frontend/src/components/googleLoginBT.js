@@ -30,7 +30,7 @@ function CustomPopupGoogleLoginBT() {
       .initUser(id_token)
       .then(handleUserInit)
       .catch((err) => {
-        toast.error(getFirstError(err) || "Google login failed");
+        toast.error(getFirstError(err) || "Google login failed.");
       });
   };
   const openGoogleLoginPage = () => {
@@ -53,13 +53,13 @@ function CustomPopupGoogleLoginBT() {
   useGoogleOneTapLogin({
     onSuccess: onPopupSuccess,
     onError: () => {
-      dispatch(setError("Login Failed!"));
+      dispatch(setError("Google login failed."));
     },
   });
   return (
     <button onClick={openGoogleLoginPage} className="loginBT">
       <img src="icons/google.svg" alt="google login" className="icon"></img>
-      <span className="buttonText">Login with Google</span>
+      <span className="buttonText">Continue with Google</span>
     </button>
   );
 }

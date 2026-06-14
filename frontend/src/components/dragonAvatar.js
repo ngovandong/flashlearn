@@ -1,7 +1,7 @@
 import React from "react";
 
 /**
- * Dragon — the Flashlearn AI buddy.
+ * Dragon — the FlashLearn AI buddy.
  *
  * "Dragon" is the dragon fruit (thanh long, a Vietnamese fruit): magenta skin,
  * green flame-like bracts, and white seed-speckled flesh. Drawn anime-cute with
@@ -19,7 +19,7 @@ function DragonAvatar({ size = 48, withBackground = true, idleAnimation = false 
       height={size}
       viewBox="0 0 120 120"
       role="img"
-      aria-label="Dragon, the Flashlearn assistant"
+      aria-label="Dragon, the FlashLearn assistant"
       style={{
         display: "block",
         animation: idleAnimation ? "dragon-bob 3.2s ease-in-out infinite" : undefined,

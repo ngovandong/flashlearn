@@ -37,7 +37,7 @@ class SetPasswordSerializer(serializers.Serializer):
         old_password = attrs["old_password"]
         new_password = attrs["new_password"]
         if old_password == new_password:
-            raise serializers.ValidationError({"new_password": "new password must be difference!"})
+            raise serializers.ValidationError({"new_password": "New password must be different from your current one."})
         return attrs
 
 

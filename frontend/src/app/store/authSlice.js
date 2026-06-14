@@ -82,7 +82,7 @@ const userSlice = createSlice({
         state.loading = true;
       })
       .addCase(getUser.rejected, (state, _) => {
-        state.error = "Get user failed";
+        state.error = "Couldn't load your account. Please try again.";
         state.loading = false;
       })
       .addCase(getUser.fulfilled, (state, action) => {

@@ -72,10 +72,10 @@ function AddTermsTab({ handleClickBack }) {
           if (res.status === 204) {
             setTerms((pre) => pre.filter((t) => t.id !== term.id));
           } else {
-            setError("Delete Fail!");
+            setError("Couldn't delete the term. Please try again.");
           }
         } catch (error) {
-          setError("Something Wrong!");
+          setError("Something went wrong. Please try again.");
         } finally {
           setIsLoading(false);
         }
@@ -84,7 +84,7 @@ function AddTermsTab({ handleClickBack }) {
         setTerms(newTerms);
       }
     } else {
-      setError("Decks must have more than 4 terms");
+      setError("A deck needs at least 4 terms.");
     }
   };
   const handleAddTerm = () => {
@@ -127,7 +127,7 @@ function AddTermsTab({ handleClickBack }) {
         (index) =>
           (newterms[
             index
-          ].error = `Term '${newterms[index].name}' is already used`)
+          ].error = `Term '${newterms[index].name}' is already in this deck`)
       );
     }
 
@@ -141,7 +141,7 @@ function AddTermsTab({ handleClickBack }) {
   const handleClickSave = async () => {
     let ischangedState = false;
     if (terms.length < 4) {
-      setError("You must add at least four terms!");
+      setError("A deck needs at least 4 terms.");
     } else {
       const [success, result] = validate();
       if (success === true) {
@@ -172,7 +172,7 @@ function AddTermsTab({ handleClickBack }) {
             }
           }
         } catch (error) {
-          setError("Something wrong!");
+          setError("Something went wrong. Please try again.");
         } finally {
           setFetchState({
             cursor: null,
@@ -218,7 +218,7 @@ function AddTermsTab({ handleClickBack }) {
         setError(errorMessage);
       }
     } catch (error) {
-      setError("Something wrong!");
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
       isLoadMoreRef.current = false;
@@ -276,7 +276,7 @@ function AddTermsTab({ handleClickBack }) {
         onClose={() => setError(null)}
       >
         <Alert onClose={() => setIsSuccess(false)} severity="success">
-          Update terms success
+          Terms updated
         </Alert>
       </Snackbar>
       {isLoading && <LocalLoadingWrapper />}
@@ -317,7 +317,7 @@ function AddTermsTab({ handleClickBack }) {
             startIcon={<AddIcon />}
             onClick={handleAddTerm}
           >
-            <span className="button-text">Add Term</span>
+            <span className="button-text">Add term</span>
           </Button>
         </div>
         {terms.map((t, i) => (

@@ -103,7 +103,7 @@ function InstallExtensionReminder() {
                 lineHeight: 1.3,
               }}
             >
-              Install the Flashlearn extension
+              Install the FlashLearn extension
             </Box>
             <Box
               sx={{

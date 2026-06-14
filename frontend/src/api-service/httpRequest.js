@@ -26,7 +26,7 @@ let failedQueue = [];
 
 const refreshToken = async (error) => {
   if (error.code === "ERR_NETWORK") {
-    return { error: "Server Error" };
+    return { error: "Network error. Please check your connection." };
   }
   const token = getCurrentToken();
   if (error.response?.status === 401 && token) {

@@ -80,7 +80,7 @@ function writeHiddenUntil(ts) {
 }
 
 const WELCOME_TEXT =
-  `Hi, I'm ${ASSISTANT_NAME} — your Flashlearn study buddy! 🐉 ` +
+  `Hi, I'm ${ASSISTANT_NAME} — your FlashLearn study buddy! 🐉 ` +
   `I can help you create decks, learn, revise, and more. ` +
   `Want a quick tour of what you can do here?`;
 
@@ -94,14 +94,14 @@ const nextId = () => {
  * Placeholder reply generator.
  *
  * TODO(ai-infra): wire this to the real AI backend. The assistant should be able
- * to call Flashlearn webpage functions (create/clone deck, start learn/revise/
+ * to call FlashLearn webpage functions (create/clone deck, start learn/revise/
  * quick-revise, number listening, open settings) on the user's behalf.
  */
 async function requestAiReply() {
   await new Promise((resolve) => setTimeout(resolve, 700));
   return (
     "I'm still learning to chat! 🐲 My smart replies are coming soon. " +
-    "Meanwhile, tap “Show me the guide” and I'll walk you through everything Flashlearn can do."
+    "Meanwhile, tap “Show me the guide” and I'll walk you through everything FlashLearn can do."
   );
 }
 

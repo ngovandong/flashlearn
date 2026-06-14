@@ -88,7 +88,7 @@ function ResponsiveAppBar()
         <Toolbar disableGutters>
           <img
             src="/icons/flashlearn.svg"
-            alt="flash learn logo"
+            alt="FlashLearn logo"
             className="flash-learn-icon"
           />
 
@@ -378,7 +378,7 @@ function ResponsiveAppBar()
                 <ListItemText
                   primaryTypographyProps={{ fontSize: "0.875rem", fontWeight: 600 }}
                 >
-                  Logout
+                  Log out
                 </ListItemText>
               </MenuItem>
             </Menu>

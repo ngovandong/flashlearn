@@ -145,9 +145,11 @@ class SpeakingViewSet(viewsets.ViewSet):
         kind = request.data.get("kind") or SpeakingAnalysis.KIND_SINGLE
         conversation_id = request.data.get("conversation_id")
         if not target_text:
-            return Response({"errors": "target_text is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"errors": "Please provide the text you're practicing."}, status=status.HTTP_400_BAD_REQUEST
+            )
         if not audio:
-            return Response({"errors": "audio is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": "Please record your audio first."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             result = speaking_coach_service.analyze_pronunciation(
@@ -194,7 +196,7 @@ class SpeakingViewSet(viewsets.ViewSet):
         text = (request.data.get("text") or "").strip()
         voice = self._clean_voice(request.data.get("voice"))
         if not text:
-            return Response({"errors": "text is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": "Please enter some text."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             clip = self._get_or_create_clip(text, voice)
         except AiProviderError as exc:
@@ -229,7 +231,7 @@ class SpeakingViewSet(viewsets.ViewSet):
         text = (request.data.get("text") or "").strip()
         context = request.data.get("context") or ""
         if not text:
-            return Response({"errors": "text is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": "Please enter some text."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             # Same word in the same line context returns identical guidance, so
             # re-opening a noted highlight is a cache hit (no extra AI call).
@@ -257,14 +259,14 @@ class SpeakingViewSet(viewsets.ViewSet):
         """Load a saved conversation by id so it can be opened by URL."""
         conversation = SpeakingConversation.objects.filter(id=pk, user=request.user).first()
         if conversation is None:
-            return Response({"errors": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"errors": "Conversation not found."}, status=status.HTTP_404_NOT_FOUND)
         return Response(SpeakingConversationSerializer(conversation).data)
 
     def destroy(self, request, pk=None, *args, **kwargs):
         """Delete a single conversation from the user's history."""
         deleted, _ = SpeakingConversation.objects.filter(id=pk, user=request.user).delete()
         if not deleted:
-            return Response({"errors": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"errors": "Conversation not found."}, status=status.HTTP_404_NOT_FOUND)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["POST"])
@@ -272,7 +274,7 @@ class SpeakingViewSet(viewsets.ViewSet):
         """Star or unstar a conversation so it sorts to the top of history."""
         conversation = SpeakingConversation.objects.filter(id=pk, user=request.user).first()
         if conversation is None:
-            return Response({"errors": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"errors": "Conversation not found."}, status=status.HTTP_404_NOT_FOUND)
         starred = request.data.get("starred")
         conversation.starred = (not conversation.starred) if starred is None else bool(starred)
         conversation.save(update_fields=["starred", "updated_at"])
@@ -287,10 +289,10 @@ class SpeakingViewSet(viewsets.ViewSet):
         """
         conversation = SpeakingConversation.objects.filter(id=pk, user=request.user).first()
         if conversation is None:
-            return Response({"errors": "Conversation not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"errors": "Conversation not found."}, status=status.HTTP_404_NOT_FOUND)
         text = (request.data.get("text") or "").strip()
         if not text:
-            return Response({"errors": "text is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": "Please enter some text."}, status=status.HTTP_400_BAD_REQUEST)
         note = (request.data.get("note") or "").strip()
         remove = bool(request.data.get("remove"))
 
@@ -349,6 +351,6 @@ class SpeakingViewSet(viewsets.ViewSet):
         """Delete many conversations at once by id."""
         ids = request.data.get("ids")
         if not isinstance(ids, list) or not ids:
-            return Response({"errors": "ids must be a non-empty list"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"errors": "Please select at least one conversation."}, status=status.HTTP_400_BAD_REQUEST)
         deleted, _ = SpeakingConversation.objects.filter(id__in=ids, user=request.user).delete()
         return Response({"deleted": deleted})

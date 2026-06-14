@@ -110,7 +110,7 @@ function ThemeSuggestion() {
                 lineHeight: 1.3,
               }}
             >
-              Make Flashlearn yours
+              Make FlashLearn yours
             </Box>
             <Box
               sx={{

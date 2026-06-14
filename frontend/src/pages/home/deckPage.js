@@ -31,7 +31,7 @@ function DeckPage() {
         onError={setError}
       />
       <PaginatedDeckSection
-        title="Others deck"
+        title="Shared with you"
         queryKey={["decks", "others"]}
         fetchPage={fetchOthersDeckPage}
         hideWhenEmpty

@@ -15,7 +15,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
         user = cast(User, self.user)
         if not user.is_validated_email:
-            raise serializers.ValidationError({"errors": "Please activate your email account!"})
+            raise serializers.ValidationError({"errors": "Please activate your account from the link we emailed you."})
         data = cast(dict[str, Any], data)
         data["user"] = UserSerializer(user).data
         return data
@@ -35,7 +35,7 @@ class ActiveAccountSerializer(TokenRefreshSerializer):
         self.user_id = user_id
         user = User.objects.filter(id=user_id).first()
         if user is None:
-            raise ValidationError("User not found")
+            raise ValidationError("User not found.")
         refresh = self.get_token(user)
 
         data = cast(dict[str, Any], data)

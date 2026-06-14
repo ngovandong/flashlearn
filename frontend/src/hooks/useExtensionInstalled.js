@@ -4,7 +4,7 @@ import {
   isChromiumBrowser,
 } from "@utils/detectExtension";
 
-// Returns the install state of the Flashlearn browser extension.
+// Returns the install state of the FlashLearn browser extension.
 //   null    -> still checking
 //   true    -> installed (or not a Chromium browser, so we shouldn't nag)
 //   false   -> Chromium browser without the extension

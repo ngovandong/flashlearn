@@ -367,7 +367,7 @@ function NumberTest() {
           <span>Back</span>
         </button>
         <div className="title-area">
-          <h2>English Number Test</h2>
+          <h2>English number test</h2>
         </div>
         <div className="actions-area">
           {gameState === "playing" && (
@@ -390,7 +390,7 @@ function NumberTest() {
             <div className="settings-grid">
               {/* Difficulty range */}
               <div className="setting-section">
-                <label className="section-label">Number Range Difficulty</label>
+                <label className="section-label">Number range difficulty</label>
                 <div className="modes-row">
                   <button
                     className={`mode-option ${mode === "digits" ? "active" : ""}`}
@@ -404,7 +404,7 @@ function NumberTest() {
                     onClick={() => setMode("teens-tens")}
                     title="Targets teen/ty confusion (13 vs 30, 14 vs 40, etc.)"
                   >
-                    <h4>Teens & Tens</h4>
+                    <h4>Teens & tens</h4>
                     <span>10 – 90</span>
                   </button>
                   <button
@@ -433,7 +433,7 @@ function NumberTest() {
                     onClick={() => setMode("sequence")}
                     title="Listen to phone, tax, or ID numbers read digit by digit"
                   >
-                    <h4>Phone / Tax / ID</h4>
+                    <h4>Phone / tax / ID</h4>
                     <span>Digit by digit</span>
                   </button>
                   <button
@@ -441,14 +441,14 @@ function NumberTest() {
                     onClick={() => setMode("custom")}
                   >
                     <h4>Custom</h4>
-                    <span>Custom Range</span>
+                    <span>Custom range</span>
                   </button>
                 </div>
 
                 {mode === "custom" && (
                   <div className="custom-range-inputs">
                     <div className="input-field">
-                      <label>Min Value</label>
+                      <label>Min value</label>
                       <input
                         type="number"
                         value={customMin}
@@ -457,7 +457,7 @@ function NumberTest() {
                       />
                     </div>
                     <div className="input-field">
-                      <label>Max Value</label>
+                      <label>Max value</label>
                       <input
                         type="number"
                         value={customMax}
@@ -472,24 +472,24 @@ function NumberTest() {
               {/* Round size, voice accent, rate, pitch */}
               <div className="setting-section flex-row-settings">
                 <div className="setting-item">
-                  <label>Round Size</label>
+                  <label>Round size</label>
                   <select value={roundSize} onChange={(e) => setRoundSize(parseInt(e.target.value))}>
-                    <option value={5}>5 Questions</option>
-                    <option value={10}>10 Questions</option>
-                    <option value={20}>20 Questions</option>
-                    <option value={50}>50 Questions</option>
+                    <option value={5}>5 questions</option>
+                    <option value={10}>10 questions</option>
+                    <option value={20}>20 questions</option>
+                    <option value={50}>50 questions</option>
                   </select>
                 </div>
 
                 <div className="setting-item">
-                  <label>Voice Accent</label>
+                  <label>Voice accent</label>
                   <select
                     value={selectedVoiceName}
                     onChange={(e) => setSelectedVoiceName(e.target.value)}
                     disabled={voices.length === 0}
                   >
                     {voices.length === 0 ? (
-                      <option>System Default (English)</option>
+                      <option>System default (English)</option>
                     ) : (
                       voices.map((v) => (
                         <option key={v.name} value={v.name}>
@@ -504,7 +504,7 @@ function NumberTest() {
               <div className="setting-section range-sliders">
                 <div className="slider-item">
                   <div className="slider-header">
-                    <label>Speech Speed: {speed}x</label>
+                    <label>Speech speed: {speed}x</label>
                     <button className="reset-sub-btn" onClick={() => setSpeed(1.0)}>Reset</button>
                   </div>
                   <input
@@ -519,7 +519,7 @@ function NumberTest() {
 
                 <div className="slider-item">
                   <div className="slider-header">
-                    <label>Voice Pitch: {pitch}</label>
+                    <label>Voice pitch: {pitch}</label>
                     <button className="reset-sub-btn" onClick={() => setPitch(1.0)}>Reset</button>
                   </div>
                   <input
@@ -536,7 +536,7 @@ function NumberTest() {
 
             <button className="start-test-btn" onClick={startTest}>
               <PlayArrowIcon />
-              <span>Start Practice</span>
+              <span>Start practice</span>
             </button>
           </div>
         )}
@@ -548,7 +548,7 @@ function NumberTest() {
             <div className="progress-container">
               <div className="progress-text">
                 <span>Question {currentIndex + 1} of {numbers.length}</span>
-                <span>Play Count: {playCount}</span>
+                <span>Play count: {playCount}</span>
               </div>
               <div className="progress-track">
                 <div
@@ -575,7 +575,7 @@ function NumberTest() {
                 )}
               </button>
               <span className="audio-prompt-text">
-                {isPlayingAudio ? "Speaking..." : "Tap to Listen"}
+                {isPlayingAudio ? "Speaking…" : "Tap to listen"}
               </span>
             </div>
 
@@ -607,7 +607,7 @@ function NumberTest() {
                 type="text"
                 value={userInput}
                 readOnly
-                placeholder="Type the number..."
+                placeholder="Type the number…"
                 className="digits-input-box"
               />
             </div>
@@ -620,7 +620,7 @@ function NumberTest() {
                     Clear
                   </button>
                   <button className="control-btn show-btn" onClick={handleShowAnswer}>
-                    Show Answer
+                    Show answer
                   </button>
                   <button className="control-btn check-btn" onClick={handleCheck}>
                     Check
@@ -628,7 +628,7 @@ function NumberTest() {
                 </>
               ) : (
                 <button className="control-btn next-btn" onClick={handleNext}>
-                  Next Question
+                  Next question
                 </button>
               )}
             </div>
@@ -658,7 +658,7 @@ function NumberTest() {
         {/* RESULTS SCREEN */}
         {gameState === "finished" && (
           <div className="test-card result-card">
-            <h3>Round Completed!</h3>
+            <h3>Round completed!</h3>
             
             <div className="result-stats-dashboard">
               <div className="stat-circle-box">
@@ -684,11 +684,11 @@ function NumberTest() {
 
               <div className="stats-details">
                 <div className="stat-row">
-                  <span className="stat-label">Correct Answers:</span>
+                  <span className="stat-label">Correct answers:</span>
                   <span className="stat-value">{getCorrectCount()} / {history.length}</span>
                 </div>
                 <div className="stat-row">
-                  <span className="stat-label">Average Playback:</span>
+                  <span className="stat-label">Average playback:</span>
                   <span className="stat-value">{getAveragePlayCount()} times</span>
                 </div>
                 <div className="motivational-message">
@@ -705,16 +705,16 @@ function NumberTest() {
 
             {/* History Table */}
             <div className="history-table-container">
-              <h4>Review Session Details</h4>
+              <h4>Review session details</h4>
               <div className="table-responsive">
                 <table className="review-table">
                   <thead>
                     <tr>
                       <th>#</th>
                       <th>Audio</th>
-                      <th>Target Number</th>
+                      <th>Target number</th>
                       <th>Spelling</th>
-                      <th>Your Input</th>
+                      <th>Your input</th>
                       <th>Result</th>
                     </tr>
                   </thead>
@@ -759,11 +759,11 @@ function NumberTest() {
             <div className="results-actions">
               <button className="res-action-btn secondary" onClick={() => setGameState("setup")}>
                 <SettingsIcon />
-                <span>Adjust Settings</span>
+                <span>Adjust settings</span>
               </button>
               <button className="res-action-btn primary" onClick={restartSameConfig}>
                 <RefreshIcon />
-                <span>Another Round</span>
+                <span>Another round</span>
               </button>
             </div>
           </div>

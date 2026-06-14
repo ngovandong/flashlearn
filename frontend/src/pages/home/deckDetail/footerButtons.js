@@ -106,14 +106,14 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
       setIsLoading(true);
       const res = await deckService.clearLearningProgress(deckID);
       if (!res.error) {
-        toast.success("Reset learning progress success!");
+        toast.success("Learning progress reset");
         fetchDeck();
       } else {
         const errorMessage = getFirstError(res.error);
         toast.error(errorMessage);
       }
     } catch (error) {
-      toast.error("Something went wrong!");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -126,14 +126,14 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
         setIsLoading(true);
         const res = await deckService.delete(deckID);
         if (!res.error) {
-          toast.success("Delete deck success!");
+          toast.success("Deck deleted");
           navigate("/deck");
         } else {
           const errorMessage = getFirstError(res.error);
           toast.error(errorMessage);
         }
       } catch (error) {
-        toast.error("Something went wrong!");
+        toast.error("Something went wrong. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -148,13 +148,13 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
       if (!res.error) {
         const url = res.data;
         await navigator.clipboard.writeText(url);
-        toast.success("Invite link is copied to clipboard");
+        toast.success("Invite link copied to clipboard");
       } else {
         const errorMessage = getFirstError(res.error);
         toast.error(errorMessage);
       }
     } catch (err) {
-      toast.error("Getting invite link failed!");
+      toast.error("Couldn't get the invite link");
     }
   };
 
@@ -163,14 +163,14 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
       setIsLoading(true);
       const res = await deckService.joinDeck(deckID);
       if (!res.error) {
-        toast.success("Join deck success!");
+        toast.success("Joined deck");
         fetchDeck();
       } else {
         const errorMessage = getFirstError(res.error);
         toast.error(errorMessage);
       }
     } catch (error) {
-      toast.error("Something went wrong!");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -181,14 +181,14 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
       setIsLoading(true);
       const res = await deckService.cloneDeck(deckID);
       if (!res.error) {
-        toast.success("Clone deck success!");
+        toast.success("Deck cloned");
         navigate(`/deck/${res.data.id}`);
       } else {
         const errorMessage = getFirstError(res.error);
         toast.error(errorMessage);
       }
     } catch (error) {
-      toast.error("Something went wrong!");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -198,14 +198,14 @@ function FooterBTNs({ deck, setIsLoading, fetchDeck }) {
       setIsLoading(true);
       const res = await deckService.leaveDeck(deckID);
       if (!res.error) {
-        toast.success("Deck is removed from your deck!");
+        toast.success("Deck removed from your library");
         navigate("/deck");
       } else {
         const errorMessage = getFirstError(res.error);
         toast.error(errorMessage);
       }
     } catch (error) {
-      toast.error("Something went wrong!");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }

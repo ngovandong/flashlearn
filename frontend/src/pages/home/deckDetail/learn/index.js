@@ -490,7 +490,7 @@ function LearnPage()
                 )}
                 {google && (
                   <a href={google} target="_blank" rel="noreferrer">
-                    Search on google
+                    Search on Google
                   </a>
                 )}
               </div>
@@ -525,7 +525,7 @@ function LearnPage()
                 sx={{ marginTop: "0.75rem" }}
               >
                 {aiLoading
-                  ? "Generating..."
+                  ? "Generating…"
                   : currentTerm?.ai_filled
                   ? "Regenerate with AI"
                   : "Fill with AI"}
@@ -537,10 +537,10 @@ function LearnPage()
           <div className="learn-right-col">
             {/* Study Progress */}
             <div className="info-card">
-              <h3>Study Progress</h3>
+              <h3>Study progress</h3>
               <div className="studystats">
                 <div className="stat-row">
-                  <span>Total Revisions</span>
+                  <span>Total revisions</span>
                   <span className="stat-value">
                     {currentTerm.total_revisions ?? 0}
                   </span>

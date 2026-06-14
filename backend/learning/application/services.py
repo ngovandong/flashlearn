@@ -70,7 +70,7 @@ class LearningService:
             raise RuntimeError("term_context is not configured")
         term = self._term_context.get_by_id(term_id)
         if term is None:
-            raise NotFoundError("term not found")
+            raise NotFoundError("Term not found.")
         deck_id = term.deck_id
         instance = self._learning_repo.get_by_user_and_term(user, term_id)
         if instance is None:

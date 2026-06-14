@@ -120,7 +120,7 @@ function ItemList({ items, loading, setIsFocus }) {
             <ItemText primary={item.name} />
           </Item>
         ))}
-      {!loading && items.length === 0 && <div>0 matching results</div>}
+      {!loading && items.length === 0 && <div>No matching decks</div>}
     </ItemContainer>
   );
 }
@@ -140,7 +140,7 @@ function SearchDeckInput() {
         toast.error(errorMessage);
       }
     } catch (error) {
-      toast.error("Search failed");
+      toast.error("Search failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -179,7 +179,7 @@ function SearchDeckInput() {
           <SearchIcon />
         </SearchIconWrapper>
         <StyledInputBase
-          placeholder="Search public deck"
+          placeholder="Search public decks"
           onChange={handleSearchChange}
           value={searchValue}
           onFocus={() => setIsFocus(true)}

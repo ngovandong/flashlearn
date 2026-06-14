@@ -63,9 +63,9 @@ class TermService:
 
     def _validate_name(self, name):
         if not name or not str(name).strip():
-            raise ValidationError("name may not be blank")
+            raise ValidationError("Name can't be blank.")
         if len(str(name)) > 255:
-            raise ValidationError("name may not exceed 255 characters")
+            raise ValidationError("Name can't be longer than 255 characters.")
 
     def get_terms_from_deck_id(self, deck_id: int):
         return self._term_repo.filter_by_deck(deck_id)
@@ -91,9 +91,9 @@ class TermService:
 
     def create_term(self, deck, user, data, image_storage=None):
         if not deck:
-            raise NotFoundError("deck not found")
+            raise NotFoundError("Deck not found.")
         if not DeckAccessPolicy.can_edit(deck, user):
-            raise PermissionDeniedError("user has no permission.")
+            raise PermissionDeniedError("You don't have permission to edit this deck.")
         name = data.get("name")
         self._validate_name(name)
         deck_id = data.get("deck", deck.id)
@@ -112,19 +112,19 @@ class TermService:
     def add_to_default_deck(self, user, data, image_storage=None):
         default_deck_id = user.default_deck_id
         if not default_deck_id:
-            raise ValidationError("Please setup your default deck")
+            raise ValidationError("Please set up your default deck first.")
         data = {**data, "deck": default_deck_id}
         name = data.get("name")
         self._validate_name(name)
         if self._term_repo.find_by_name_in_deck(default_deck_id, name):
-            raise ConflictError("term is already existed")
+            raise ConflictError("This term already exists in the deck.")
         return self.create_term(user.default_deck, user, data, image_storage)
 
     def add_terms(self, deck, user, terms_data):
         if not deck:
-            raise NotFoundError("deck not found")
+            raise NotFoundError("Deck not found.")
         if not DeckAccessPolicy.can_edit(deck, user):
-            raise PermissionDeniedError("user has no permission.")
+            raise PermissionDeniedError("You don't have permission to edit this deck.")
         normalized = []
         for term in terms_data:
             self._validate_name(term.get("name"))
@@ -141,7 +141,7 @@ class TermService:
     def bulk_update_terms(self, terms_data):
         for item in terms_data:
             if not item.get("id"):
-                raise ValidationError("term id is required")
+                raise ValidationError("Term ID is required.")
             self._validate_name(item.get("name"))
             self._term_repo.update_term(
                 item["id"],
@@ -190,7 +190,7 @@ class TermService:
         ]
         deck_name = self._term_repo.get_deck_name(deck_id)
         if deck_name is None:
-            raise NotFoundError("deck not found")
+            raise NotFoundError("Deck not found.")
         return {
             "deck_name": deck_name,
             "all_terms": all_terms,

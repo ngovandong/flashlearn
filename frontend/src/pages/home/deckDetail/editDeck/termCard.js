@@ -190,7 +190,7 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
             <img
               className="loading-image"
               src="/imgs/loading.png"
-              alt="Loading..."
+              alt="Loading…"
             />
           )}
           {!isLoading &&

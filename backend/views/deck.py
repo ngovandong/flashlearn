@@ -202,7 +202,9 @@ class DeckViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         try:
             new_deck = deck_service.clone_deck(self.get_object(), request.user)
         except Exception:
-            return Response({"errors": "Clone deck fail"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"errors": "Couldn't clone the deck. Please try again."}, status=status.HTTP_400_BAD_REQUEST
+            )
         serializer = self.get_serializer(new_deck)
         return Response(serializer.data)
 

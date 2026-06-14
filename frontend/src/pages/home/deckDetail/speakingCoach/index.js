@@ -919,13 +919,13 @@ export default function SpeakingCoach() {
                   className={mode === "topic" ? "active" : ""}
                   onClick={() => setMode("topic")}
                 >
-                  <AutoAwesomeIcon fontSize="small" /> AI Topic
+                  <AutoAwesomeIcon fontSize="small" /> AI topic
                 </button>
                 <button
                   className={mode === "custom" ? "active" : ""}
                   onClick={() => setMode("custom")}
                 >
-                  <MenuBookIcon fontSize="small" /> Custom Text
+                  <MenuBookIcon fontSize="small" /> Custom text
                 </button>
               </div>
 
@@ -1079,7 +1079,7 @@ export default function SpeakingCoach() {
                 disabled={loading}
                 data-tour="sc-generate"
               >
-                {loading ? "Assembling dialogue…" : "Generate Conversation"}
+                {loading ? "Assembling dialogue…" : "Generate conversation"}
               </button>
             </section>
 
@@ -1097,7 +1097,7 @@ export default function SpeakingCoach() {
                         onClick={playFull}
                         disabled={busy}
                       >
-                        <PlayArrowIcon fontSize="small" /> Listen Full
+                        <PlayArrowIcon fontSize="small" /> Listen to full
                       </button>
                     )}
                     <button
@@ -1106,7 +1106,7 @@ export default function SpeakingCoach() {
                       disabled={busy}
                     >
                       <MicIcon fontSize="small" />
-                      {rolePlayIndex !== null ? "Role-playing…" : "Live Role Play"}
+                      {rolePlayIndex !== null ? "Role-playing…" : "Live role play"}
                     </button>
                   </div>
                   <div className="sc-action-group">
@@ -1192,7 +1192,7 @@ export default function SpeakingCoach() {
                                 <button
                                   className="sc-icon-btn"
                                   onClick={() => startRecording(line.id)}
-                                  title="Practise"
+                                  title="Practice"
                                 >
                                   <MicIcon fontSize="small" />
                                 </button>
@@ -1207,7 +1207,7 @@ export default function SpeakingCoach() {
                                     className="sc-btn sc-btn--danger sc-btn--sm"
                                     onClick={() => stopRecording(line.text)}
                                   >
-                                    <StopIcon fontSize="small" /> Stop & Continue
+                                    <StopIcon fontSize="small" /> Stop & continue
                                   </button>
                                 ) : (
                                   <button
@@ -1240,7 +1240,7 @@ export default function SpeakingCoach() {
                       <div className="sc-callout sc-callout--brand">
                         <EmojiEventsIcon fontSize="small" />
                         <div>
-                          <h4>Session Overview</h4>
+                          <h4>Session overview</h4>
                           <p>"{analysisResult.overallFeedback}"</p>
                         </div>
                       </div>
@@ -1269,7 +1269,7 @@ export default function SpeakingCoach() {
                 <HistoryIcon fontSize="small" />
               </span>
               <div>
-                <h3>Your Practice History</h3>
+                <h3>Your practice history</h3>
                 <p>Revisit past conversations and pronunciation scores.</p>
               </div>
             </div>
@@ -1277,7 +1277,7 @@ export default function SpeakingCoach() {
             <div className="sc-history__cols">
               <div className="sc-history__col">
                 <div className="sc-history__colhead">
-                  <h4>Recent Conversations ({history.conversations.length})</h4>
+                  <h4>Recent conversations ({history.conversations.length})</h4>
                   {selectedIds.size > 0 && (
                     <div className="sc-history__bulk">
                       <button
@@ -1355,7 +1355,7 @@ export default function SpeakingCoach() {
               </div>
 
               <div className="sc-history__col">
-                <h4>Pronunciation Scores ({history.analyses.length})</h4>
+                <h4>Pronunciation scores ({history.analyses.length})</h4>
                 {history.analyses.length ? (
                   history.analyses.map((a) => (
                     <div key={a.id} className="sc-history-item">
@@ -1382,7 +1382,7 @@ export default function SpeakingCoach() {
           <div className="sc-modal__card" onClick={(e) => e.stopPropagation()}>
             <div className="sc-modal__head">
               <div>
-                <span className="sc-modal__eyebrow">Vocabulary Coach</span>
+                <span className="sc-modal__eyebrow">Vocabulary coach</span>
                 <h3>"{selected.text}"</h3>
               </div>
               <button className="sc-icon-btn sc-icon-btn--light" onClick={() => setSelected(null)}>
@@ -1477,7 +1477,7 @@ export default function SpeakingCoach() {
                       <VolumeUpIcon fontSize="small" /> Listen
                     </button>
                     <button className="sc-btn sc-btn--primary" onClick={saveSelectionAsTerm}>
-                      <AddIcon fontSize="small" /> Save as Term
+                      <AddIcon fontSize="small" /> Save as term
                     </button>
                   </div>
                 </>

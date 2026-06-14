@@ -180,7 +180,9 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
         user, _ = user_service.user_get_or_create_validated_email_user(**profile_data)
 
         if not user.is_google_account:
-            params = urlencode({"error": "It looks like you already have an account with that email"})
+            params = urlencode(
+                {"error": "You already have an account with that email. Please log in with your password."}
+            )
             return redirect(f"{login_url}?{params}")
 
         params = urlencode(token_redirect_params(user))
@@ -190,7 +192,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
     def init(self, request, *args, **kwargs):
         id_token = request.headers.get("Authorization")
         if not id_token:
-            return Response({"error": "token is require"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Token is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         user_data = auth_service.google_validate_id_token(id_token)
         profile_data = auth_service.google_profile_from_user_data(user_data)
@@ -198,7 +200,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
 
         if not user.is_google_account:
             return Response(
-                {"error": "It looks like you already have an account with that email"},
+                {"error": "You already have an account with that email. Please log in with your password."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

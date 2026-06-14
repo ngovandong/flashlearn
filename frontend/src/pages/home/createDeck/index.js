@@ -35,12 +35,12 @@ function CreateDeck() {
           setError(responseError);
         }
       } catch (error) {
-        setError("Something wrong!");
+        setError("Something went wrong. Please try again.");
       } finally {
         setIsLoading(false);
       }
     } else {
-      setError("Please fill all fields!");
+      setError("Please fill in all fields.");
     }
   };
 

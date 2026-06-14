@@ -52,12 +52,12 @@ function EditDeck() {
             setError(responseError);
           }
         } catch (error) {
-          setError("Something Wrong!");
+          setError("Something went wrong. Please try again.");
         } finally {
           setIsLoading(false);
         }
       } else {
-        setError("Please fill all fields!");
+        setError("Please fill in all fields.");
       }
     } else {
       setCurrentTab({ tab: 1, start: 0 });
@@ -89,7 +89,7 @@ function EditDeck() {
         setError(responseError);
       }
     } catch (error) {
-      setError("Something Wrong!");
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }

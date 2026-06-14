@@ -53,7 +53,7 @@ class DeckService:
         if not user_to_add:
             raise ValidationError("user not found")
         if user_to_add in deck.users.all() or user_to_add == request_user:
-            raise ConflictError("user is already in deck")
+            raise ConflictError("User is already in this deck.")
         self._deck_repo.add_user(deck, user_to_add, user_role)
         return deck
 
@@ -62,19 +62,19 @@ class DeckService:
         if not user:
             raise ValidationError("user not found")
         if user not in deck.users.all() and user != request_user:
-            raise ConflictError("user isn't in deck")
+            raise ConflictError("User is not in this deck.")
         self._deck_repo.remove_user(deck, user)
 
     def join_deck(self, deck, user):
         if not deck.is_public:
-            raise PermissionDeniedError("You have not permission")
+            raise PermissionDeniedError("You don't have permission to do this.")
         if self._deck_repo.user_in_deck(deck, user):
-            raise ConflictError("user is already in deck")
+            raise ConflictError("You are already in this deck.")
         self._deck_repo.add_user(deck, user, FULL_ROLE_CLASS.VIEW_ONLY)
 
     def leave_deck(self, deck, user):
         if not self._deck_repo.user_in_deck(deck, user):
-            raise ConflictError("user is not in deck")
+            raise ConflictError("You are not in this deck.")
         self._deck_repo.leave_deck(deck, user)
 
     def clone_deck(self, old_deck, user):

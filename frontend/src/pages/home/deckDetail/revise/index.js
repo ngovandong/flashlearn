@@ -46,7 +46,7 @@ function Revise() {
 
   useEffect(() => {
     if (data && data.reviseCount === 0) {
-      toast.info("Has nothing to revise");
+      toast.info("Nothing to revise yet");
       navigate(`/deck/${deckID}`);
     }
   }, [data, deckID, navigate]);
@@ -195,7 +195,7 @@ function Revise() {
             }`}
             onClick={handleNextQuestionClick}
           >
-            {currentState.index === length - 1 ? "Finish" : "Next Question"}
+            {currentState.index === length - 1 ? "Finish" : "Next question"}
           </button>
         </div>
       </div>

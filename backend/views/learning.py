@@ -82,7 +82,7 @@ class LearningViewSet(FlexibleViewSet):
     def get_learning_terms(self, request, *args, **kwargs):
         deck_id = request.query_params.get("deck_id")
         if deck_id is None:
-            raise Http404("deck_id parameter is required")
+            raise Http404("Please select a deck.")
         deck_terms = term_service.get_learning_terms_for_deck(deck_id, request.user)
         queryset = self.filter_queryset(deck_terms)
 
@@ -111,7 +111,7 @@ class LearningViewSet(FlexibleViewSet):
 
         deck_id = request.query_params.get("deck_id")
         if deck_id is None:
-            raise Http404("deck_id parameter is required")
+            raise Http404("Please select a deck.")
         term_id = request.query_params.get("term_id") or None
         page_size = settings.REST_FRAMEWORK.get("PAGE_SIZE", 10)
         return Response(learning_service.get_latest_learned_term_info(request.user, deck_id, page_size, term_id))
@@ -125,7 +125,7 @@ class LearningViewSet(FlexibleViewSet):
     def get_revise_terms(self, request, *args, **kwargs):
         deck_id = request.query_params.get("deck_id", None)
         if deck_id is None:
-            raise Http404("deck_id parameter is required")
+            raise Http404("Please select a deck.")
         data = term_service.get_revise_terms(request.user, deck_id)
         serializer = self.get_serializer(data)
         return Response(serializer.data)
