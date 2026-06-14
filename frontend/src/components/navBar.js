@@ -25,6 +25,7 @@ const links = [
   { link: "", name: "Home" },
   // { link: "folder", name: "Folder" },
   { link: "deck", name: "Deck" },
+  { link: "number-test", name: "Number Listening" },
 ];
 
 function ResponsiveAppBar()

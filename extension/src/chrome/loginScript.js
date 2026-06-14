@@ -28,6 +28,19 @@ function injectPageBridge() {
 
 injectPageBridge();
 
+// Expose a DOM marker so the Flashlearn web app can detect that the extension
+// is installed (and which version) without an async resource probe.
+function markExtensionInstalled() {
+  try {
+    const root = document.documentElement;
+    if (!root) return;
+    const version = chrome.runtime.getManifest().version;
+    root.setAttribute("data-flashlearn-extension", version);
+  } catch (e) {}
+}
+
+markExtensionInstalled();
+
 window.addEventListener("message", function (event) {
   if (
     event.source !== window ||

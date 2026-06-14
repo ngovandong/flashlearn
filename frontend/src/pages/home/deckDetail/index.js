@@ -14,7 +14,6 @@ import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import CollectionsBookmarkIcon from "@mui/icons-material/CollectionsBookmark";
 import TimerIcon from "@mui/icons-material/Timer";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
-import HearingIcon from "@mui/icons-material/Hearing";
 import CircularProgressWithLabel from "@components/progress";
 import FooterBTNs from "./footerButtons";
 
@@ -114,12 +113,6 @@ function DeckDetail()
               text="Quick Revise"
               isDisabled={!deck.my_permission}
               icon={TimerIcon}
-            />
-            <MenuButton
-              link="number-test"
-              text="Number Test"
-              isDisabled={!deck.my_permission}
-              icon={HearingIcon}
             />
             <MenuButton
               link="competition"

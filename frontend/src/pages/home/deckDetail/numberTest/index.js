@@ -14,14 +14,40 @@ import BackspaceIcon from "@mui/icons-material/Backspace";
 
 import { numberToEnglishWords } from "@utils/numberToWords";
 
+const DIGIT_WORDS = [
+  "zero",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+];
+
+// Sequence values (phone/tax/ID) are stored as strings to preserve leading zeros.
+const isSequenceValue = (value) => typeof value === "string";
+
+const spellNumber = (value) => {
+  if (isSequenceValue(value)) {
+    return value
+      .split("")
+      .map((d) => DIGIT_WORDS[parseInt(d, 10)] || d)
+      .join(" ");
+  }
+  return numberToEnglishWords(value);
+};
+
 function NumberTest() {
   const { deckID } = useParams();
   const navigate = useNavigate();
 
   // Settings state
-  const [mode, setMode] = useState("teens-tens"); // digits, teens-tens, hundreds, thousands, millions, custom
-  const [customMin, setCustomMin] = useState(1);
-  const [customMax, setCustomMax] = useState(100);
+  const [mode, setMode] = useState("custom"); // digits, teens-tens, hundreds, thousands, millions, sequence, custom
+  const [customMin, setCustomMin] = useState(10);
+  const [customMax, setCustomMax] = useState(10000000);
   const [roundSize, setRoundSize] = useState(10);
   const [speed, setSpeed] = useState(1.0);
   const [pitch, setPitch] = useState(1.0);
@@ -125,6 +151,20 @@ function NumberTest() {
         min = 1000000;
         max = 9999999;
         break;
+      case "sequence": {
+        // Phone / tax / ID numbers: read digit-by-digit, may keep leading zeros.
+        const formats = [
+          { len: 10, lead: "0" }, // phone number
+          { len: 10, lead: "" },  // tax number
+          { len: 12, lead: "0" }, // ID / citizen number
+        ];
+        const fmt = formats[Math.floor(Math.random() * formats.length)];
+        let digits = fmt.lead;
+        while (digits.length < fmt.len) {
+          digits += Math.floor(Math.random() * 10);
+        }
+        return digits;
+      }
       case "custom":
         min = parseInt(customMin) || 0;
         max = parseInt(customMax) || 100;
@@ -147,7 +187,11 @@ function NumberTest() {
 
     if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(String(currentNum));
+      // Read sequences (phone/tax/ID) digit-by-digit, otherwise as a whole number.
+      const spokenText = isSequenceValue(currentNum)
+        ? String(currentNum).split("").join(", ")
+        : String(currentNum);
+      const utterance = new SpeechSynthesisUtterance(spokenText);
       utterance.rate = speed;
       utterance.pitch = pitch;
 
@@ -385,6 +429,14 @@ function NumberTest() {
                     <span>1M – 9.9M</span>
                   </button>
                   <button
+                    className={`mode-option ${mode === "sequence" ? "active" : ""}`}
+                    onClick={() => setMode("sequence")}
+                    title="Listen to phone, tax, or ID numbers read digit by digit"
+                  >
+                    <h4>Phone / Tax / ID</h4>
+                    <span>Digit by digit</span>
+                  </button>
+                  <button
                     className={`mode-option ${mode === "custom" ? "active" : ""}`}
                     onClick={() => setMode("custom")}
                   >
@@ -537,7 +589,7 @@ function NumberTest() {
                 {showSpelling && (
                   <div className="spelling-reveal">
                     <div className="word-text">
-                      "{numberToEnglishWords(numbers[currentIndex])}"
+                      "{spellNumber(numbers[currentIndex])}"
                     </div>
                     {!isCorrect && (
                       <div className="correct-digits">
@@ -680,7 +732,7 @@ function NumberTest() {
                           </button>
                         </td>
                         <td><strong>{item.number}</strong></td>
-                        <td className="spell-cell">{numberToEnglishWords(item.number)}</td>
+                        <td className="spell-cell">{spellNumber(item.number)}</td>
                         <td>
                           {item.userInput === "" ? (
                             <span className="skipped-tag">Skipped</span>

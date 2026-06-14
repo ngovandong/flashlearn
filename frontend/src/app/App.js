@@ -45,6 +45,7 @@ function App() {
           <Route path="" element={<MainContainer />}>
             <Route path="" element={<Home />} />
             <Route path="deck" element={<DeckPage />} />
+            <Route path="number-test" element={<NumberTest />} />
             <Route path="folder" element={<Folder />} />
             <Route path="create-deck" element={<CreateDeck />} />
             <Route path="deck/:deckID" element={<Outlet />}>

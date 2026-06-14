@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Flashlearn Extension",
   "description": "Extension for flashlearn website",
-  "version": "1.9.8",
+  "version": "2.0.0",
   "action": {
     "default_popup": "index.html",
     "default_icon": "images/icon-32.png"

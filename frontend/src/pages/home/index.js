@@ -6,6 +6,10 @@ import DeckCard from "./deckCard";
 import PaginatedDeckSection, { fetchPublicDecksPage } from "./paginatedDeckSection";
 import { useSelector } from "react-redux";
 import { selectUser } from "@app/store/authSlice";
+import InstallExtensionReminder from "@components/installExtensionReminder";
+import { Link } from "react-router-dom";
+import HearingIcon from "@mui/icons-material/Hearing";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 
 function streakCopy({ streak, studied_today }) {
   if (streak === 0) {
@@ -53,12 +57,15 @@ function Home() {
           {error || queryError}
         </Alert>
       </Snackbar>
+      <InstallExtensionReminder />
       <div className="welcome-text">
         <h2>Hi, {user.name}</h2>
       </div>
       <section>
         <div className="section-header">
-          <h5>Achievements</h5>
+          <h5>Your progress</h5>
+        </div>
+        <div className="progress-row">
           <div className="streak-container">
             <img
               src="https://cdn-icons-png.flaticon.com/512/1869/1869397.png"
@@ -72,6 +79,24 @@ function Home() {
                 </>
               )}
             </div>
+          </div>
+          <div className="practice-reminder">
+            <div className="practice-reminder__content">
+              <div className="practice-reminder__icon">
+                <HearingIcon />
+              </div>
+              <div className="practice-reminder__text">
+                <h4>Sharpen your number listening</h4>
+                <p>
+                  Train your ear by typing the English numbers you hear — from
+                  quick digits to phone, tax, and ID numbers.
+                </p>
+              </div>
+            </div>
+            <Link to="/number-test" className="practice-reminder__cta">
+              <PlayArrowRoundedIcon />
+              <span>Start practice</span>
+            </Link>
           </div>
         </div>
       </section>
