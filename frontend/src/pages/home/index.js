@@ -1,5 +1,5 @@
 import { LocalLoadingWrapper } from "@components/loading";
-import { Alert, Snackbar } from "@mui/material";
+import { Alert, Box, Snackbar } from "@mui/material";
 import { useLatestDecks, useLearningStreak } from "@hooks/useLatestDecks";
 import React, { useState } from "react";
 import DeckCard from "./deckCard";
@@ -7,6 +7,7 @@ import PaginatedDeckSection, { fetchPublicDecksPage } from "./paginatedDeckSecti
 import { useSelector } from "react-redux";
 import { selectUser } from "@app/store/authSlice";
 import InstallExtensionReminder from "@components/installExtensionReminder";
+import ThemeSuggestion from "@components/themeSuggestion";
 import { Link } from "react-router-dom";
 import HearingIcon from "@mui/icons-material/Hearing";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
@@ -57,7 +58,23 @@ function Home() {
           {error || queryError}
         </Alert>
       </Snackbar>
-      <InstallExtensionReminder />
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: { xs: 16, sm: 24 },
+          left: { xs: 16, sm: 24 },
+          right: { xs: 16, sm: "auto" },
+          zIndex: (theme) => theme.zIndex.snackbar,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: { xs: "stretch", sm: "flex-start" },
+          gap: 1.5,
+          pointerEvents: "none",
+        }}
+      >
+        <InstallExtensionReminder />
+        <ThemeSuggestion />
+      </Box>
       <div className="welcome-text">
         <h2>Hi, {user.name}</h2>
       </div>

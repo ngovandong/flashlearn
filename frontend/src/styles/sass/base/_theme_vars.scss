@@ -1,0 +1,50 @@
+/**
+ * Runtime theme tokens as CSS custom properties.
+ *
+ * These are fallback values for first paint; `utils/themeController` overrides
+ * them on `:root` from the JS theme catalog (the single source of truth).
+ * Light + Indigo is the default theme.
+ */
+:root {
+    // Brand (Indigo)
+    --fl-primary: #4255ff;
+    --fl-primary-rgb: 66, 85, 255;
+    --fl-primary-dark: #3849db;
+    --fl-primary-hover: #7e8bff;
+    --fl-primary-soft: #5d6dff;
+    --fl-on-primary: #ffffff;
+    --fl-gradient: linear-gradient(135deg, #4255ff 0%, #6c7aff 100%);
+
+    // Harmonious analogous accents derived from Indigo (cyan + violet)
+    --fl-accent: #2ec5ea;
+    --fl-accent-rgb: 46, 197, 234;
+    --fl-accent-strong: #28adcd;
+    --fl-accent-2: #9447eb;
+    --fl-accent-2-rgb: 148, 71, 235;
+    --fl-accent-2-strong: #823ecf;
+
+    // Logo hue rotation (0 for the default Indigo palette)
+    --fl-logo-rotate: 0deg;
+
+    // Neutrals (Light)
+    --fl-bg: #f6f7fb;
+    --fl-surface: #ffffff;
+    --fl-surface-2: #f1f3f9;
+    --fl-text: #282e3e;
+    --fl-text-minor: #646f90;
+    --fl-text-muted: #939bb4;
+    --fl-border: #edeff4;
+    --fl-border-strong: #e4e7f2;
+}
+
+// Neutrals (Dark) — fallback if JS hasn't applied yet.
+[data-theme="dark"] {
+    --fl-bg: #0f1117;
+    --fl-surface: #181b22;
+    --fl-surface-2: #222632;
+    --fl-text: #e8eaf2;
+    --fl-text-minor: #a7afc4;
+    --fl-text-muted: #7b8499;
+    --fl-border: #2a2f3b;
+    --fl-border-strong: #353c4a;
+}

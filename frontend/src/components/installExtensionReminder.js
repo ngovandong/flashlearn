@@ -43,16 +43,13 @@ function InstallExtensionReminder() {
     <Slide direction="up" in={show} mountOnEnter unmountOnExit>
       <Box
         sx={{
-          position: "fixed",
-          right: { xs: 16, sm: 24 },
-          bottom: { xs: 16, sm: 24 },
-          left: { xs: 16, sm: "auto" },
-          zIndex: (theme) => theme.zIndex.snackbar,
-          width: { xs: "auto", sm: 320 },
+          position: "relative",
+          width: { xs: "100%", sm: 320 },
+          pointerEvents: "auto",
           p: 2,
           borderRadius: "0.75rem",
-          backgroundColor: "#fff",
-          border: "1px solid rgba(66, 85, 255, 0.16)",
+          backgroundColor: "var(--fl-surface)",
+          border: "1px solid rgba(var(--fl-primary-rgb), 0.16)",
           boxShadow: "0 0.75rem 2rem rgba(40, 46, 62, 0.16)",
           overflow: "hidden",
           "&::before": {
@@ -62,7 +59,7 @@ function InstallExtensionReminder() {
             left: 0,
             width: "4px",
             height: "100%",
-            background: "linear-gradient(180deg, #4255ff 0%, #658EFF 100%)",
+            background: "var(--fl-gradient)",
           },
         }}
       >
@@ -74,8 +71,8 @@ function InstallExtensionReminder() {
             position: "absolute",
             top: 6,
             right: 6,
-            color: "#939bb4",
-            "&:hover": { color: "#646f90" },
+            color: "var(--fl-text-muted)",
+            "&:hover": { color: "var(--fl-text-minor)" },
           }}
         >
           <CloseRoundedIcon fontSize="small" />
@@ -91,8 +88,8 @@ function InstallExtensionReminder() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: "linear-gradient(135deg, #4255ff 0%, #658EFF 100%)",
-              color: "#fff",
+              background: "var(--fl-gradient)",
+              color: "var(--fl-on-primary)",
             }}
           >
             <ExtensionOutlinedIcon fontSize="small" />
@@ -102,7 +99,7 @@ function InstallExtensionReminder() {
               sx={{
                 fontSize: "0.9rem",
                 fontWeight: 700,
-                color: "#282e3e",
+                color: "var(--fl-text)",
                 lineHeight: 1.3,
               }}
             >
@@ -112,7 +109,7 @@ function InstallExtensionReminder() {
               sx={{
                 mt: 0.5,
                 fontSize: "0.8rem",
-                color: "#646f90",
+                color: "var(--fl-text-minor)",
                 lineHeight: 1.4,
               }}
             >
@@ -125,7 +122,7 @@ function InstallExtensionReminder() {
           <Button
             size="small"
             onClick={handleDismiss}
-            sx={{ color: "#646f90", textTransform: "none", fontWeight: 600 }}
+            sx={{ color: "var(--fl-text-minor)", textTransform: "none", fontWeight: 600 }}
           >
             Not now
           </Button>
@@ -135,11 +132,12 @@ function InstallExtensionReminder() {
             onClick={handleInstall}
             disableElevation
             sx={{
-              backgroundColor: "#4255ff",
+              backgroundColor: "var(--fl-primary)",
+              color: "var(--fl-on-primary)",
               textTransform: "none",
               fontWeight: 600,
               borderRadius: "0.5rem",
-              "&:hover": { backgroundColor: "#423ed8" },
+              "&:hover": { backgroundColor: "var(--fl-primary-dark)" },
             }}
           >
             Install

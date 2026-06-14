@@ -154,7 +154,7 @@
 
     .term-card {
         width: 100%;
-        background-color: white;
+        background-color: $surface;
         border-radius: 0.5rem;
         margin-bottom: 20px;
 
@@ -324,7 +324,7 @@
             align-items: center;
             justify-content: center;
             column-gap: 8rem;
-            background-color: white;
+            background-color: $surface;
             border-radius: 0.5rem;
             margin-bottom: 20px;
         }

@@ -89,7 +89,7 @@
         section {
             .section-cards {
                 .set-card {
-                    width: 49%;
+                    width: calc((100% - 1.25rem) / 2);
                 }
             }
         }

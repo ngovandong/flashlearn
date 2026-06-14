@@ -4,6 +4,7 @@ import { deckService } from "@api-services/deckService";
 import { getFirstError } from "@utils/errorHandler";
 import { LocalLoadingWrapper } from "@components/loading";
 import CreateDeckTab from "../deckDetail/editDeck/createDeckTab";
+import DeckWizardSteps from "@components/deckWizardSteps";
 import { useNavigate } from "react-router-dom";
 
 function CreateDeck() {
@@ -63,6 +64,7 @@ function CreateDeck() {
         <div className="create-deck__header">
           <h2>Create a new study deck</h2>
         </div>
+        <DeckWizardSteps active={0} />
         <div className="create-deck__tab next" start={0}>
           <CreateDeckTab
             deck={deck}

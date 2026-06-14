@@ -6,6 +6,7 @@ import { getFirstError } from "@utils/errorHandler";
 import { isChangeState } from "@utils/state";
 import AddTermsTab from "./addTermsTab";
 import CreateDeckTab from "./createDeckTab";
+import DeckWizardSteps from "@components/deckWizardSteps";
 import { LocalLoadingWrapper } from "@components/loading";
 
 let oldDeck = {};
@@ -119,8 +120,9 @@ function EditDeck() {
           </Alert>
         </Snackbar>
         <div className="create-deck__header">
-          <h2>Create a new study deck</h2>
+          <h2>Edit your deck</h2>
         </div>
+        <DeckWizardSteps active={currentTab.tab} onStepClick={handleClickBack} />
         <div
           className="create-deck__tab next"
           tab={currentTab.tab}

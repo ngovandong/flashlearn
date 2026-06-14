@@ -4,7 +4,7 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f2f2f2;
+    background-color: $app-background;
   }
   
   .error-text {
@@ -15,7 +15,7 @@
   .error-text h1 {
     font-size: 8rem;
     font-weight: bold;
-    color: #4255ff;
+    color: $main-purple;
     margin-bottom: 20px;
   }
   
@@ -34,15 +34,15 @@
     display: inline-block;
     font-size: 1.5rem;
     font-weight: bold;
-    color: #fff;
-    background-color: #4255ff;
+    color: $on-primary;
+    background-color: $main-purple;
     padding: 10px 20px;
     border-radius: 5px;
     text-decoration: none;
   }
   
   .error-text a:hover {
-    background-color: #2d3daa;
+    background-color: $dark-purple;
   }
   
   .error-image img {

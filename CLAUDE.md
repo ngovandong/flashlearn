@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **Also read [`AGENTS.md`](./AGENTS.md)** — the universal, cross-tool guide that
+> lists the project rules (theme adherence, mobile responsiveness, onboarding
+> tour, knowledge graph) every agent must follow. The detailed rules live in
+> `.cursor/rules/*.mdc`.
+
 ## Project Overview
 
 FlashLearn is a flashcard study application with three components:

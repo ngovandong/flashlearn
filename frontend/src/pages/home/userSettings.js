@@ -3,7 +3,7 @@ import { Alert, Snackbar, Switch, TextField } from "@mui/material";
 import { LocalLoadingWrapper } from "@components/loading";
 import { userSettingService } from "@api-services/userSettingService";
 import { getFirstError } from "@utils/errorHandler";
-import { COLORS } from "@constants/colors";
+import AppearanceSettings from "./appearanceSettings";
 
 function UserSettings() {
   const [settings, setSettings] = useState({ daily_reminder: false, reminder_email: "" });
@@ -45,6 +45,8 @@ function UserSettings() {
         <h2>Settings</h2>
       </div>
 
+      <AppearanceSettings />
+
       <div className="settings-card">
         <h5 className="settings-section-title">Notifications</h5>
 
@@ -59,9 +61,9 @@ function UserSettings() {
               setSettings((prev) => ({ ...prev, daily_reminder: e.target.checked }))
             }
             sx={{
-              "& .MuiSwitch-switchBase.Mui-checked": { color: COLORS.PURPLE },
+              "& .MuiSwitch-switchBase.Mui-checked": { color: "var(--fl-primary)" },
               "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                backgroundColor: COLORS.PURPLE,
+                backgroundColor: "var(--fl-primary)",
               },
             }}
           />

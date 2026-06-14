@@ -29,3 +29,10 @@
     }
 
 }
+
+html,
+body {
+    background-color: var(--fl-bg);
+    color: var(--fl-text);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}

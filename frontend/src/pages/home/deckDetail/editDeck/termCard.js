@@ -97,17 +97,17 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
           <AutoFixHighIcon
             onClick={() => term.name && setAiOpen(true)}
             sx={{
-              color: term.ai_filled ? COLORS.YELLOW : COLORS.GRAY_TEXT,
+              color: term.ai_filled ? "var(--fl-accent-2)" : "var(--fl-text-muted)",
               marginRight: "0.5rem",
               cursor: "pointer",
-              "&:hover": { color: COLORS.BLUE ?? "#4255ff" },
+              "&:hover": { color: "var(--fl-accent)" },
             }}
           />
         </Tooltip>
         <DeleteOutlineIcon
           onClick={() => handleDeleteTerm(index)}
           sx={{
-            color: COLORS.GRAY_TEXT,
+            color: "var(--fl-text-muted)",
             marginRight: "0.5rem",
             "&:hover": {
               color: COLORS.ERROR_RED,
@@ -116,11 +116,11 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
         />
         <DragIndicatorIcon
           sx={{
-            color: COLORS.GRAY_TEXT,
+            color: "var(--fl-text-muted)",
             marginRight: "0.5rem",
             cursor: "move",
             "&:hover": {
-              color: COLORS.YELLOW,
+              color: "var(--fl-accent-2)",
             },
           }}
         />

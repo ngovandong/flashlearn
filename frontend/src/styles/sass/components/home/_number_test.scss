@@ -12,7 +12,7 @@
     align-items: center;
     justify-content: space-between;
     height: $nav-height;
-    background-color: white;
+    background-color: $surface;
     box-shadow: $shadow;
     padding: 0 1.5rem;
     z-index: 100;
@@ -53,7 +53,7 @@
       .deck-tag {
         font-size: 0.75rem;
         font-weight: 600;
-        background-color: rgba($main-purple, 0.1);
+        background-color: rgba(var(--fl-primary-rgb), 0.1);
         color: $main-purple;
         padding: 0.25rem 0.5rem;
         border-radius: 4px;
@@ -95,7 +95,7 @@
 
   // Card Container Styles
   .test-card {
-    background-color: white;
+    background-color: $surface;
     border-radius: 1rem;
     box-shadow: $shadow;
     padding: 2rem;
@@ -149,7 +149,7 @@
       }
 
       .mode-option {
-        background-color: white;
+        background-color: $surface;
         border: 2px solid #e2e8f0;
         border-radius: 0.75rem;
         padding: 1rem;
@@ -174,12 +174,12 @@
 
         &:hover {
           border-color: $hover-purple;
-          background-color: rgba($main-purple, 0.02);
+          background-color: rgba(var(--fl-primary-rgb), 0.02);
         }
 
         &.active {
           border-color: $main-purple;
-          background-color: rgba($main-purple, 0.05);
+          background-color: rgba(var(--fl-primary-rgb), 0.05);
           box-shadow: 0 0 0 1px $main-purple;
 
           h4 {
@@ -248,7 +248,7 @@
           padding: 0.75rem 1rem;
           border-radius: 0.5rem;
           border: 2px solid #e2e8f0;
-          background-color: white;
+          background-color: $surface;
           font-size: 0.95rem;
           font-weight: 600;
           color: $main-text-color;
@@ -333,12 +333,12 @@
       height: 3.25rem;
       border: none;
       font-size: 1.05rem;
-      box-shadow: 0 4px 12px rgba($main-purple, 0.2);
+      box-shadow: 0 4px 12px rgba(var(--fl-primary-rgb), 0.2);
       transition: all 0.2s ease;
 
       &:hover {
         transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba($main-purple, 0.3);
+        box-shadow: 0 6px 16px rgba(var(--fl-primary-rgb), 0.3);
       }
     }
   }
@@ -398,7 +398,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 20px rgba($main-purple, 0.3);
+        box-shadow: 0 4px 20px rgba(var(--fl-primary-rgb), 0.3);
         transition: all 0.2s ease;
 
         .speaker-icon {
@@ -596,11 +596,11 @@
         }
 
         &.show-btn {
-          background-color: rgba($yellow, 0.15);
-          color: darken($yellow-hover, 10%);
+          background-color: rgba(var(--fl-accent-2-rgb), 0.15);
+          color: $yellow-hover;
 
           &:hover {
-            background-color: rgba($yellow, 0.25);
+            background-color: rgba(var(--fl-accent-2-rgb), 0.25);
           }
         }
 
@@ -616,7 +616,7 @@
         &.next-btn {
           background-color: $main-purple;
           color: white;
-          box-shadow: 0 4px 12px rgba($main-purple, 0.15);
+          box-shadow: 0 4px 12px rgba(var(--fl-primary-rgb), 0.15);
           font-size: 1rem;
 
           &:hover {
@@ -905,7 +905,7 @@
         &.primary {
           background-color: $main-purple;
           color: white;
-          box-shadow: 0 4px 12px rgba($main-purple, 0.15);
+          box-shadow: 0 4px 12px rgba(var(--fl-primary-rgb), 0.15);
 
           &:hover {
             background-color: $dark-purple;

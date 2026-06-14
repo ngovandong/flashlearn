@@ -15,7 +15,7 @@
         display: flex;
         position: absolute;
         z-index: 1000;
-        background-color: white;
+        background-color: $surface;
         box-shadow: 0 0.25rem 1rem 0 #2e385614;
         height: 64px;
         top: 0;
@@ -124,7 +124,7 @@
                         transform-style: preserve-3d;
                         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); // Deeper shadow
                         border-radius: 1.5rem;
-                        background-color: white;
+                        background-color: $surface;
                     }
 
                     // Flip rotation
@@ -140,7 +140,7 @@
                         -webkit-backface-visibility: hidden;
                         backface-visibility: hidden;
                         border-radius: 1.5rem;
-                        background-color: white;
+                        background-color: $surface;
                         display: flex;
                         flex-direction: column;
                         align-items: center;
@@ -215,7 +215,7 @@
                         color: #2e3856;
 
                         .term-pronunciation {
-                            color: #4255ff;
+                            color: $main-purple;
                             font-size: 1.1rem;
                             margin-bottom: 0.5rem;
                         }
@@ -233,7 +233,7 @@
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    background: white;
+                    background: $surface;
                     padding: 0.5rem 1rem;
                     border-radius: 4rem; // Pill shape
                     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
@@ -287,7 +287,7 @@
                 }
 
                 .definition-card {
-                    background: white;
+                    background: $surface;
                     padding: 1.25rem 1.75rem;
                     border-radius: 1.5rem;
                     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
@@ -318,8 +318,8 @@
                         }
 
                         .word-type-badge {
-                            background: #eef1ff;
-                            color: #4255ff;
+                            background: rgba(var(--fl-primary-rgb), 0.12);
+                            color: $main-purple;
                             font-weight: 600;
                             font-size: 0.85rem;
                             padding: 0.2rem 0.7rem;
@@ -394,7 +394,7 @@
                 }
 
                 .info-card {
-                    background: white;
+                    background: $surface;
                     padding: 1rem 1.25rem;
                     border-radius: 1rem;
                     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
@@ -430,7 +430,7 @@
                             }
 
                             b {
-                                color: #4255ff;
+                                color: $main-purple;
                             }
 
                             .example-delete {
@@ -468,16 +468,16 @@
 
                             &:focus {
                                 outline: none;
-                                border-color: #4255ff;
+                                border-color: $main-purple;
                             }
                         }
 
                         button {
-                            color: #4255ff;
-                            background-color: #eef1ff;
+                            color: $main-purple;
+                            background-color: rgba(var(--fl-primary-rgb), 0.12);
 
                             &:hover {
-                                background-color: #e0e5ff;
+                                background-color: rgba(var(--fl-primary-rgb), 0.2);
                             }
                         }
                     }
@@ -700,7 +700,7 @@
 
 // Next Question Button (for Revise page)
 .next-button {
-    background-color: #4255ff;
+    background-color: $main-purple;
     border: none;
     border-radius: 5px;
     color: #fff;
@@ -755,7 +755,7 @@
     }
 
 
-    background-color: white;
+    background-color: $surface;
     border-radius: 0.5rem;
     box-shadow: 0 0.25rem 1rem 0 #2e385614;
 

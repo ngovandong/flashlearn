@@ -8,22 +8,26 @@ import queryClient from "./app/queryClient";
 import App from "./app/App";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import "./styles/sass/index.scss";
-import { ThemeProvider } from "@emotion/react";
-import theme from "./utils/theme";
+import { AppThemeProvider } from "./app/themeContext";
+import { applyTheme, readStoredTheme } from "./utils/themeController";
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
+// Apply the cached theme before first paint to avoid a flash of default colors.
+const storedTheme = readStoredTheme();
+applyTheme(storedTheme.mode, storedTheme.palette);
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <ThemeProvider theme={theme}>
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
+  <Provider store={store}>
+    <QueryClientProvider client={queryClient}>
+      <AppThemeProvider>
         <GoogleOAuthProvider clientId={clientId}>
           <App />
         </GoogleOAuthProvider>
-      </QueryClientProvider>
-    </Provider>
-  </ThemeProvider>
+      </AppThemeProvider>
+    </QueryClientProvider>
+  </Provider>
 );
 
 // If you want to start measuring performance in your app, pass a function
