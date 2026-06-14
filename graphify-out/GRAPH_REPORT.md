@@ -1,22 +1,20 @@
 # Graph Report - flashlearn  (2026-06-14)
 
 ## Corpus Check
-- 393 files · ~96,801 words
+- 393 files · ~96,955 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1684 nodes · 2084 edges · 315 communities (217 shown, 98 thin omitted)
-- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 142 edges (avg confidence: 0.52)
+- 1563 nodes · 1696 edges · 336 communities (231 shown, 105 thin omitted)
+- Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 203 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `762271ae`
+- Built from commit: `7396928f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Community 0|Community 0]]
-- [[_COMMUNITY_Community 1|Community 1]]
 - [[_COMMUNITY_Community 2|Community 2]]
 - [[_COMMUNITY_Community 3|Community 3]]
 - [[_COMMUNITY_Community 4|Community 4]]
@@ -58,7 +56,6 @@
 - [[_COMMUNITY_Community 40|Community 40]]
 - [[_COMMUNITY_Community 41|Community 41]]
 - [[_COMMUNITY_Community 42|Community 42]]
-- [[_COMMUNITY_Community 44|Community 44]]
 - [[_COMMUNITY_Community 45|Community 45]]
 - [[_COMMUNITY_Community 46|Community 46]]
 - [[_COMMUNITY_Community 47|Community 47]]
@@ -78,7 +75,6 @@
 - [[_COMMUNITY_Community 64|Community 64]]
 - [[_COMMUNITY_Community 65|Community 65]]
 - [[_COMMUNITY_Community 66|Community 66]]
-- [[_COMMUNITY_Community 67|Community 67]]
 - [[_COMMUNITY_Community 68|Community 68]]
 - [[_COMMUNITY_Community 69|Community 69]]
 - [[_COMMUNITY_Community 70|Community 70]]
@@ -91,7 +87,6 @@
 - [[_COMMUNITY_Community 77|Community 77]]
 - [[_COMMUNITY_Community 78|Community 78]]
 - [[_COMMUNITY_Community 79|Community 79]]
-- [[_COMMUNITY_Community 82|Community 82]]
 - [[_COMMUNITY_Community 85|Community 85]]
 - [[_COMMUNITY_Community 86|Community 86]]
 - [[_COMMUNITY_Community 88|Community 88]]
@@ -100,18 +95,13 @@
 - [[_COMMUNITY_Community 96|Community 96]]
 - [[_COMMUNITY_Community 97|Community 97]]
 - [[_COMMUNITY_Community 98|Community 98]]
-- [[_COMMUNITY_Community 99|Community 99]]
 - [[_COMMUNITY_Community 101|Community 101]]
 - [[_COMMUNITY_Community 103|Community 103]]
 - [[_COMMUNITY_Community 104|Community 104]]
 - [[_COMMUNITY_Community 105|Community 105]]
-- [[_COMMUNITY_Community 106|Community 106]]
 - [[_COMMUNITY_Community 108|Community 108]]
 - [[_COMMUNITY_Community 109|Community 109]]
 - [[_COMMUNITY_Community 111|Community 111]]
-- [[_COMMUNITY_Community 146|Community 146]]
-- [[_COMMUNITY_Community 148|Community 148]]
-- [[_COMMUNITY_Community 151|Community 151]]
 - [[_COMMUNITY_Community 159|Community 159]]
 - [[_COMMUNITY_Community 160|Community 160]]
 - [[_COMMUNITY_Community 161|Community 161]]
@@ -153,16 +143,13 @@
 - [[_COMMUNITY_Community 198|Community 198]]
 - [[_COMMUNITY_Community 200|Community 200]]
 - [[_COMMUNITY_Community 203|Community 203]]
-- [[_COMMUNITY_Community 225|Community 225]]
-- [[_COMMUNITY_Community 230|Community 230]]
 - [[_COMMUNITY_Community 258|Community 258]]
 - [[_COMMUNITY_Community 259|Community 259]]
 - [[_COMMUNITY_Community 266|Community 266]]
 - [[_COMMUNITY_Community 267|Community 267]]
 - [[_COMMUNITY_Community 268|Community 268]]
 - [[_COMMUNITY_Community 269|Community 269]]
-- [[_COMMUNITY_Community 275|Community 275]]
-- [[_COMMUNITY_Community 298|Community 298]]
+- [[_COMMUNITY_Community 273|Community 273]]
 - [[_COMMUNITY_Community 299|Community 299]]
 - [[_COMMUNITY_Community 300|Community 300]]
 - [[_COMMUNITY_Community 301|Community 301]]
@@ -175,21 +162,43 @@
 - [[_COMMUNITY_Community 308|Community 308]]
 - [[_COMMUNITY_Community 309|Community 309]]
 - [[_COMMUNITY_Community 310|Community 310]]
+- [[_COMMUNITY_Community 311|Community 311]]
 - [[_COMMUNITY_Community 312|Community 312]]
 - [[_COMMUNITY_Community 313|Community 313]]
 - [[_COMMUNITY_Community 314|Community 314]]
+- [[_COMMUNITY_Community 315|Community 315]]
+- [[_COMMUNITY_Community 316|Community 316]]
+- [[_COMMUNITY_Community 317|Community 317]]
+- [[_COMMUNITY_Community 318|Community 318]]
+- [[_COMMUNITY_Community 319|Community 319]]
+- [[_COMMUNITY_Community 320|Community 320]]
+- [[_COMMUNITY_Community 321|Community 321]]
+- [[_COMMUNITY_Community 322|Community 322]]
+- [[_COMMUNITY_Community 323|Community 323]]
+- [[_COMMUNITY_Community 324|Community 324]]
+- [[_COMMUNITY_Community 325|Community 325]]
+- [[_COMMUNITY_Community 326|Community 326]]
+- [[_COMMUNITY_Community 327|Community 327]]
+- [[_COMMUNITY_Community 328|Community 328]]
+- [[_COMMUNITY_Community 329|Community 329]]
+- [[_COMMUNITY_Community 330|Community 330]]
+- [[_COMMUNITY_Community 331|Community 331]]
+- [[_COMMUNITY_Community 332|Community 332]]
+- [[_COMMUNITY_Community 333|Community 333]]
+- [[_COMMUNITY_Community 334|Community 334]]
+- [[_COMMUNITY_Community 335|Community 335]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `TermService` - 25 edges
-2. `DeckService` - 23 edges
-3. `AiProviderError` - 20 edges
-4. `TermRepository` - 20 edges
-5. `DeckRepository` - 19 edges
-6. `LearningService` - 16 edges
-7. `DeckViewSet` - 15 edges
-8. `DeckAccessPolicy` - 15 edges
-9. `RetryingHttpProvider` - 14 edges
-10. `TermViewSet` - 14 edges
+1. `TermService` - 30 edges
+2. `DeckService` - 25 edges
+3. `DeckRepository` - 21 edges
+4. `UserRepository` - 18 edges
+5. `LearningService` - 18 edges
+6. `DeckAccessPolicy` - 17 edges
+7. `AiProviderError` - 16 edges
+8. `FakeTermRepository` - 15 edges
+9. `ValidationError` - 15 edges
+10. `DeckViewSet` - 15 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `SQLAlchemyTableMixin` --uses--> `Meta`  [INFERRED]
@@ -198,43 +207,27 @@
   backend/shared/infrastructure/sqlalchemy/tables.py → base/models/custom_model.py
 - `SQLAlchemyTableMixin` --uses--> `Return the first_name plus the last_name, with a space in between.`  [INFERRED]
   backend/shared/infrastructure/sqlalchemy/tables.py → base/models/custom_model.py
-- `CustomTokenAuthentication` --uses--> `UserRepository`  [INFERRED]
-  core/authentication.py → backend/user/infrastructure/repository.py
-- `LearningService` --uses--> `LearningRepository`  [INFERRED]
-  backend/learning/application/services.py → backend/learning/infrastructure/repository.py
+- `SQLAlchemyTableMixin` --uses--> `CustomAbstractUser`  [INFERRED]
+  backend/shared/infrastructure/sqlalchemy/tables.py → base/models/custom_model.py
+- `SQLAlchemyTableMixin` --uses--> `DateTimeModel`  [INFERRED]
+  backend/shared/infrastructure/sqlalchemy/tables.py → base/models/custom_model.py
 
 ## Import Cycles
-- 1-file cycle: `backend/cron/__init__.py -> backend/cron/__init__.py`
-- 1-file cycle: `rust_backend/src/application/deck_service.rs -> rust_backend/src/application/deck_service.rs`
-- 1-file cycle: `rust_backend/src/application/term_service.rs -> rust_backend/src/application/term_service.rs`
-- 1-file cycle: `rust_backend/src/interfaces/http/routes/terms.rs -> rust_backend/src/interfaces/http/routes/terms.rs`
-- 1-file cycle: `rust_backend/src/infrastructure/persistence/rows.rs -> rust_backend/src/infrastructure/persistence/rows.rs`
-- 1-file cycle: `rust_backend/src/infrastructure/elasticsearch.rs -> rust_backend/src/infrastructure/elasticsearch.rs`
-- 1-file cycle: `rust_backend/src/infrastructure/persistence/terms.rs -> rust_backend/src/infrastructure/persistence/terms.rs`
-- 1-file cycle: `rust_backend/src/interfaces/http/routes/learnings.rs -> rust_backend/src/interfaces/http/routes/learnings.rs`
-- 1-file cycle: `rust_backend/src/interfaces/ws/quick_revise.rs -> rust_backend/src/interfaces/ws/quick_revise.rs`
+- None detected.
 
-## Communities (315 total, 98 thin omitted)
-
-### Community 0 - "Community 0"
-Cohesion: 0.10
-Nodes (16): can_edit(), can_view(), DeckAccessPolicy, get_user_role(), is_member(), Deck access rules — domain policy, independent of Django ORM., TermAccessPolicy, EditableDeck (+8 more)
-
-### Community 1 - "Community 1"
-Cohesion: 0.17
-Nodes (10): add_user_to_deck(), adjust_priority(), LearningRepository, record_correct(), record_incorrect(), record_quick_revise_answer(), RoleRepository, save() (+2 more)
-
-### Community 2 - "Community 2"
-Cohesion: 0.05
-Nodes (34): CustomAbstractUser, Deck, DeckDetailSerializer, DeckSerializer, default_background_path(), Meta, MyDeckSerializer, FolderSerializer (+26 more)
+## Communities (336 total, 105 thin omitted)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.33
-Nodes (7): Exception, ConflictError, DomainError, NotFoundError, PermissionDeniedError, Base class for domain/application errors., ValidationError
+Cohesion: 0.26
+Nodes (10): DeckDetailSerializer, DeckSerializer, Meta, MyDeckSerializer, FolderSerializer, Meta, ProgressSerializer, AddUserSerializer (+2 more)
+
+### Community 4 - "Community 4"
+Cohesion: 0.15
+Nodes (14): AiProviderError, _loads_object(), Shared HTTP/retry plumbing for AI providers.  Concrete providers (Gemini, DeepSe, Sleep before a retry, honoring a server-specified delay when present., Raised when an AI provider call fails or returns unusable output., Base class providing throttling + retry/backoff around a POST request., POST ``payload`` and return the decoded JSON body, retrying transient errors., Pace consecutive requests to stay under a per-minute quota. (+6 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.07
-Nodes (24): ABC, benchmark_strategies(), BingImageSearchStrategy, BSCrawler, _fetch_batch(), _fetch_from_providers(), get_preview_images(), GetImagesUrlView (+16 more)
+Cohesion: 0.06
+Nodes (22): benchmark_strategies(), BingImageSearchStrategy, BSCrawler, _fetch_batch(), _fetch_from_providers(), get_preview_images(), GetImagesUrlView, GoogleImageSearchStrategy (+14 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.08
@@ -245,24 +238,24 @@ Cohesion: 0.09
 Nodes (14): cache_factory(), _CacheNamespace, CacheService, _DeckTermsCache, delete(), get(), _LearningProgressCache, Backward-compatible cache re-exports. (+6 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.07
-Nodes (11): Command, BaseCommand, Command, Command, Command, Command, Command, Command (+3 more)
+Cohesion: 0.21
+Nodes (9): DeckAccessPolicy, Deck access rules — domain policy, independent of Django ORM., TermAccessPolicy, EditableDeck, EditableLearningProgress, EditableTerm, IsOwnerOfRolePermission, IsOwnerPermission (+1 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.15
-Nodes (3): Backward-compatible re-exports., AuthService, Backward-compatible re-exports.
+Cohesion: 0.06
+Nodes (12): Command, BaseCommand, Command, Command, Command, Command, Command, Command (+4 more)
 
-### Community 10 - "Community 10"
+### Community 11 - "Community 11"
 Cohesion: 0.11
 Nodes (14): ActiveQ, ChangePasswordBody, get_profile(), google_exchange_code(), google_login(), google_user_info(), GoogleCb, login() (+6 more)
 
-### Community 11 - "Community 11"
-Cohesion: 0.07
-Nodes (27): AiProviderError, Shared HTTP/retry plumbing for AI providers.  Concrete providers (Gemini, DeepSe, Sleep before a retry, honoring a server-specified delay when present., Recommended retry delay (seconds) from a Retry-After header, if any., Raised when an AI provider call fails or returns unusable output., Base class providing throttling + retry/backoff around a POST request., POST ``payload`` and return the decoded JSON body, retrying transient errors., Pace consecutive requests to stay under a per-minute quota. (+19 more)
+### Community 12 - "Community 12"
+Cohesion: 0.11
+Nodes (13): add_to_default_deck(), AddDefault, AddTerms, create_term(), CreateTerm, DeckIdQ, delete_term(), get_term() (+5 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.27
-Nodes (5): AsyncWebsocketConsumer, get_revise_terms(), get_user_and_deck(), QuickReviseConsumer, save_learning_progress()
+Cohesion: 0.16
+Nodes (9): AsyncWebsocketConsumer, get_revise_terms(), get_user_and_deck(), QuickReviseConsumer, save_learning_progress(), calculate_base_time(), calculate_leftover(), calculate_time_limit() (+1 more)
 
 ### Community 14 - "Community 14"
 Cohesion: 0.15
@@ -273,20 +266,20 @@ Cohesion: 0.12
 Nodes (6): APITestCase, DeckUserManagementTest, Regression tests guarding the DDD refactor against behavior changes.  These cove, add_user_to_deck / remove_user_from_deck end-to-end.      Guards both the unknow, RoleInviteErrorPathTest, TermErrorPathTest
 
 ### Community 16 - "Community 16"
-Cohesion: 0.15
-Nodes (7): AiTextPort, CachePort, ImageStoragePort, OAuthPort, Provider-agnostic text/JSON generation port.      Implementations talk to a conc, Any, Protocol
+Cohesion: 0.13
+Nodes (6): AiTextPort, CachePort, ImageStoragePort, OAuthPort, Provider-agnostic text/JSON generation port.      Implementations talk to a conc, Protocol
 
 ### Community 17 - "Community 17"
-Cohesion: 0.04
-Nodes (10): CursorPagination, DeckViewSet, TermSearchQuery, PageNumberPagination, DeckPageNumberPagination, DeckSearchQuery, SearchViewSet, LatestlCursorPagination (+2 more)
+Cohesion: 0.18
+Nodes (12): _apply_to_name(), _chunks(), _as_str(), _as_str_list(), _normalize(), Application service that turns a bare term into Oxford-dictionary-style data.  I, Return generated term fields. Raises on provider/validation failure., Enrich several term names in a single AI request.          Returns a mapping of (+4 more)
 
 ### Community 20 - "Community 20"
 Cohesion: 0.16
 Nodes (4): SQLAlchemyDeckQueryTest, SQLAlchemyLearningQueryTest, SQLAlchemyTablePropertyTest, TransactionTestCase
 
 ### Community 22 - "Community 22"
-Cohesion: 0.20
-Nodes (37): add_terms(), add_to_default_deck(), AddDefault, AddTerms, create_term(), CreateTerm, DeckIdQ, delete_term() (+29 more)
+Cohesion: 0.15
+Nodes (3): CreateLp, DeckIdP, PriorityBody
 
 ### Community 23 - "Community 23"
 Cohesion: 0.17
@@ -311,10 +304,6 @@ Nodes (4): MailService, send_template_mail(), SendMailThread, Thread
 ### Community 29 - "Community 29"
 Cohesion: 0.33
 Nodes (6): appendHeader(), createRefreshHandler(), createRequest(), getCurrentToken(), processQueue(), refreshToken()
-
-### Community 30 - "Community 30"
-Cohesion: 0.07
-Nodes (26): AddButton, AddInput, AddRow, AddToDeckButton, AiButton, AiSection, Chip, ChipRow (+18 more)
 
 ### Community 31 - "Community 31"
 Cohesion: 0.22
@@ -345,16 +334,12 @@ Cohesion: 0.38
 Nodes (3): legacy_api_base(), migrate_context_ready(), rust_api_base()
 
 ### Community 40 - "Community 40"
-Cohesion: 0.27
-Nodes (27): correct(), create_learning(), CreateLp, DeckIdP, get_latest_learned_term(), get_learning_terms(), get_revise_terms(), incorrect() (+19 more)
+Cohesion: 0.29
+Nodes (6): DeckRow, FolderRow, TermRow, UserDeckRoleRow, UserLearningProgressRow, UserRow
 
 ### Community 42 - "Community 42"
-Cohesion: 0.15
-Nodes (25): get_revise_terms_data(), OnlyName, ProgressTerm, revise_terms_to_json(), ReviseTermsPayload, DeckRow, MysqlUuid, NaiveDate (+17 more)
-
-### Community 44 - "Community 44"
-Cohesion: 0.16
-Nodes (22): Instant, IntoResponse, OnlyName, ProgressTerm, AppState, Arc, Option, Query (+14 more)
+Cohesion: 0.48
+Nodes (6): GameState, handle_answer(), handle_socket(), quick_revise_ws(), send_next(), WsParams
 
 ### Community 46 - "Community 46"
 Cohesion: 0.33
@@ -372,9 +357,9 @@ Nodes (3): print_inspect_snapshot(), SqlCleanup, table_counts()
 Cohesion: 0.53
 Nodes (4): normalize_response(), strip_recursive(), strips_root_and_array_item_ids(), strips_timestamps_on_object()
 
-### Community 51 - "Community 51"
-Cohesion: 0.13
-Nodes (3): TermRepository, fetch_latest_learned_term_info(), fetch_revise_terms()
+### Community 50 - "Community 50"
+Cohesion: 0.33
+Nodes (3): OnlyName, ProgressTerm, ReviseTermsPayload
 
 ### Community 53 - "Community 53"
 Cohesion: 0.40
@@ -388,17 +373,13 @@ Nodes (3): authenticate(), AuthUser, user_to_json_value()
 Cohesion: 0.60
 Nodes (3): build_cors(), create_router(), serve()
 
-### Community 67 - "Community 67"
-Cohesion: 0.23
-Nodes (9): _as_str(), _as_str_list(), Application service that turns a bare term into Oxford-dictionary-style data.  I, Return generated term fields. Raises on provider/validation failure., Enrich several term names in a single AI request.          Returns a mapping of, TermEnrichmentService, Any, Service layer entry point — prefer composition singletons for new code. (+1 more)
-
 ### Community 68 - "Community 68"
-Cohesion: 0.12
-Nodes (4): LearningContextApi, Public API for user-related operations from other contexts., TermContextApi, UserContextApi
+Cohesion: 0.83
+Nodes (3): escapeRegExp(), highlightMainWord(), sanitizeExampleHtml()
 
 ### Community 69 - "Community 69"
-Cohesion: 0.14
-Nodes (6): google_login(), init(), Serialize user at the view boundary; AuthService returns tokens only., URL-safe token params for OAuth redirect (user encoded separately)., token_redirect_params(), token_response()
+Cohesion: 0.83
+Nodes (3): generateFillQuestions(), generateQuestions(), generateQuizQuestions()
 
 ### Community 70 - "Community 70"
 Cohesion: 0.67
@@ -412,89 +393,117 @@ Nodes (3): _build_url(), get_connection(), get_engine()
 Cohesion: 0.83
 Nodes (3): clear_db_env(), database_url_from_env_builds_from_db_vars(), database_url_from_env_uses_database_url_when_set()
 
-### Community 82 - "Community 82"
-Cohesion: 0.20
-Nodes (7): Command, Meta, _apply_to_name(), _chunks(), fill_terms_with_ai(), Write enriched fields to every term that shares this name.      By default only, Backfill Oxford-style data for terms that have not been AI-filled yet.      Term
+### Community 273 - "Community 273"
+Cohesion: 0.16
+Nodes (6): _coerce_bool(), _coerce_list(), _extract_ai_fields(), _meaning_of(), TermService, Backward-compatible re-exports.
 
-### Community 99 - "Community 99"
+### Community 300 - "Community 300"
+Cohesion: 0.13
+Nodes (4): Any, Clone preset starter decks for a new user.          ``deck_specs`` is an iterabl, UserRepository, UserRepository
+
+### Community 301 - "Community 301"
 Cohesion: 0.14
-Nodes (6): DateTimeUUIDModel, Folder, Term, Meta, UserSetting, UserSettingSerializer
+Nodes (6): google_login(), init(), Serialize user at the view boundary; AuthService returns tokens only., URL-safe token params for OAuth redirect (user encoded separately)., token_redirect_params(), token_response()
 
-### Community 101 - "Community 101"
+### Community 302 - "Community 302"
 Cohesion: 0.16
 Nodes (5): FlexibleViewSet, FolderViewSet, RoleViewSet, UserViewSet, FlexibleViewSet
 
-### Community 106 - "Community 106"
-Cohesion: 0.20
-Nodes (9): Client, ElasticsearchClient, Option, Result, String, Uuid, Value, Self (+1 more)
-
-### Community 182 - "Community 182"
-Cohesion: 0.50
-Nodes (11): MySqlPool, count_terms_in_deck(), delete_term(), find_term(), insert_term(), update_term(), Into, Option (+3 more)
-
-### Community 187 - "Community 187"
-Cohesion: 0.18
-Nodes (3): AI_LIST_FIELDS, AI_STRING_FIELDS, TermService
-
-### Community 230 - "Community 230"
-Cohesion: 0.27
-Nodes (4): _EmptyRoles, FakeDeck, FakeUser, TermServiceUnitTest
-
-### Community 258 - "Community 258"
-Cohesion: 0.20
-Nodes (4): AddTermsTab(), emptyTerm, initTerms, isChangeState()
-
-### Community 275 - "Community 275"
-Cohesion: 0.36
-Nodes (6): _coerce_bool(), _coerce_list(), _extract_ai_fields(), _meaning_of(), Pull AI-generated/override fields out of a request payload, coercing types., Any
-
-### Community 299 - "Community 299"
-Cohesion: 0.22
-Nodes (8): AddTermsToDeckSerializer, LearningTermSerializer, Meta, OnlyNameTermSerializer, ProgressTermSerializer, ReviseTermSerializer, TermNestInDeckSerializer, TermSerializer
-
-### Community 300 - "Community 300"
-Cohesion: 0.29
-Nodes (4): DeckRef, ReviseTermRow, Any, TermRepository
-
-### Community 301 - "Community 301"
-Cohesion: 0.62
-Nodes (6): clone_deck(), leave_deck(), AppState, Into, Result, Uuid
-
 ### Community 303 - "Community 303"
-Cohesion: 0.40
-Nodes (3): CustomTokenAuthentication, JWTAuthentication, UserRepository
+Cohesion: 0.22
+Nodes (8): CustomAbstractUser, Meta, UserLearningProgress, Meta, UserDeckRole, Term, User, UUIDModel
+
+### Community 304 - "Community 304"
+Cohesion: 0.21
+Nodes (4): DeckAccessPolicyTest, _Role, _Roles, _User
 
 ### Community 305 - "Community 305"
+Cohesion: 0.23
+Nodes (4): _EmptyRoles, FakeDeck, FakeUser, TermServiceUnitTest
+
+### Community 308 - "Community 308"
+Cohesion: 0.18
+Nodes (5): build(), DeckSearchQuery, TermSearchQuery, SearchViewSet, TermViewSet
+
+### Community 311 - "Community 311"
+Cohesion: 0.20
+Nodes (5): DateTimeUUIDModel, Folder, Meta, UserSetting, UserSettingSerializer
+
+### Community 312 - "Community 312"
+Cohesion: 0.36
+Nodes (8): Exception, ConflictError, DomainError, NotFoundError, PermissionDeniedError, Base class for domain/application errors., ValidationError, Pull AI-generated/override fields out of a request payload, coercing types.
+
+### Community 313 - "Community 313"
+Cohesion: 0.20
+Nodes (3): DeckViewSet, PageNumberPagination, DeckPageNumberPagination
+
+### Community 315 - "Community 315"
+Cohesion: 0.22
+Nodes (7): AddTermsToDeckSerializer, LearningTermSerializer, Meta, OnlyNameTermSerializer, ProgressTermSerializer, ReviseTermSerializer, TermNestInDeckSerializer
+
+### Community 316 - "Community 316"
+Cohesion: 0.22
+Nodes (5): ChangePasswordSerializer, GoogleCallbackSerializer, GoogleUserSerializer, Meta, SetPasswordSerializer
+
+### Community 317 - "Community 317"
+Cohesion: 0.22
+Nodes (7): AddUserToDeckSerializer, InviteSerializer, Input serializer for the add_user_to_deck action.      Kept separate from AddUse, Ensure that the role is valid., RemoveUserSerializer, UpdateRoleSerializer, UserDeckRoleSerializer
+
+### Community 318 - "Community 318"
+Cohesion: 0.28
+Nodes (4): GeminiProvider, _parse(), Google Gemini implementation of :class:`AiTextPort`.  Uses the Generative Langua, _resolve_verify()
+
+### Community 319 - "Community 319"
+Cohesion: 0.28
+Nodes (5): OpenRouterProvider, _parse(), OpenRouter implementation of :class:`AiTextPort`.  OpenRouter exposes an OpenAI-, _resolve_model(), RetryingHttpProvider
+
+### Community 321 - "Community 321"
+Cohesion: 0.25
+Nodes (3): Service layer entry point — prefer composition singletons for new code., FolderRepository, FolderService
+
+### Community 323 - "Community 323"
+Cohesion: 0.25
+Nodes (4): Composition root — wire concrete infrastructure into application services., TermContextApi, LearningRepository, TermRepository
+
+### Community 326 - "Community 326"
+Cohesion: 0.29
+Nodes (3): FailoverAiProvider, Failover across multiple AI providers.  Tries each provider in order; if one fai, Build a provider from an explicit ``spec`` (no env-driven fallbacks).      ``spe
+
+### Community 327 - "Community 327"
 Cohesion: 0.50
-Nodes (3): Collect jobs from all domain modules and register them with the scheduler., register_jobs(), Scheduler
+Nodes (3): ABC, generate_q_expression(), SearchViewSet
 
-### Community 306 - "Community 306"
-Cohesion: 0.90
-Nodes (3): generateFillQuestions(), generateQuestions(), generateQuizQuestions()
+### Community 328 - "Community 328"
+Cohesion: 0.70
+Nodes (4): can_edit(), can_view(), get_user_role(), is_member()
 
-### Community 307 - "Community 307"
-Cohesion: 0.83
-Nodes (3): escapeRegExp(), highlightMainWord(), sanitizeExampleHtml()
+### Community 329 - "Community 329"
+Cohesion: 0.60
+Nodes (4): CreateLearningProgressSerializer, LearningStreakSerializer, UserLearningProgressSerializer, TermSerializer
+
+### Community 331 - "Community 331"
+Cohesion: 0.70
+Nodes (4): _build(), build_named_provider(), get_ai_provider(), _provider_chain()
 
 ## Knowledge Gaps
-- **147 isolated node(s):** `Scheduler`, `Index`, `Django`, `Migration`, `Migration` (+142 more)
+- **107 isolated node(s):** `SKIP_REDIS`, `Migration`, `Migration`, `Migration`, `Migration` (+102 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **98 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **105 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DeckAccessPolicy` connect `Community 0` to `Community 2`, `Community 13`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
-- **Why does `ValidationError` connect `Community 3` to `Community 101`, `Community 69`, `Community 9`, `Community 12`, `Community 304`, `Community 308`, `Community 151`?**
-  _High betweenness centrality (0.042) - this node is a cross-community bridge._
-- **Why does `TermViewSet` connect `Community 17` to `Community 101`?**
-  _High betweenness centrality (0.038) - this node is a cross-community bridge._
-- **Are the 7 inferred relationships involving `TermService` (e.g. with `ReviseTermRow` and `TermRepository`) actually correct?**
-  _`TermService` has 7 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 4 inferred relationships involving `DeckService` (e.g. with `Backward-compatible re-exports.` and `ConflictError`) actually correct?**
-  _`DeckService` has 4 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 5 inferred relationships involving `AiProviderError` (e.g. with `FailoverAiProvider` and `GeminiProvider`) actually correct?**
-  _`AiProviderError` has 5 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 3 inferred relationships involving `TermRepository` (e.g. with `TermService` and `Any`) actually correct?**
-  _`TermRepository` has 3 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `DeckAccessPolicy` connect `Community 8` to `Community 322`, `Community 3`, `Community 328`, `Community 13`, `Community 304`, `Community 273`, `Community 312`?**
+  _High betweenness centrality (0.039) - this node is a cross-community bridge._
+- **Why does `TermService` connect `Community 273` to `Community 321`, `Community 323`, `Community 8`, `Community 330`, `Community 305`, `Community 310`, `Community 312`?**
+  _High betweenness centrality (0.033) - this node is a cross-community bridge._
+- **Why does `Service layer entry point — prefer composition singletons for new code.` connect `Community 321` to `Community 2`, `Community 4`, `Community 325`, `Community 326`, `Community 331`, `Community 17`, `Community 18`, `Community 273`, `Community 28`, `Community 318`, `Community 319`?**
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+- **Are the 15 inferred relationships involving `TermService` (e.g. with `DeckAccessPolicy` and `Composition root — wire concrete infrastructure into application services.`) actually correct?**
+  _`TermService` has 15 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 6 inferred relationships involving `DeckService` (e.g. with `Composition root — wire concrete infrastructure into application services.` and `Backward-compatible re-exports.`) actually correct?**
+  _`DeckService` has 6 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 5 inferred relationships involving `UserRepository` (e.g. with `Any` and `AuthService`) actually correct?**
+  _`UserRepository` has 5 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 5 inferred relationships involving `LearningService` (e.g. with `Composition root — wire concrete infrastructure into application services.` and `NotFoundError`) actually correct?**
+  _`LearningService` has 5 INFERRED edges - model-reasoned connections that need verification._

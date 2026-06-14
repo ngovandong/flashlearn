@@ -1,7 +1,11 @@
+import logging
+
 from django.db import transaction
 
 from backend.constants import DEFAULT_USER_SETTINGS
 from backend.models import Deck, User, UserSetting
+
+logger = logging.getLogger(__name__)
 
 
 class UserRepository:
@@ -61,6 +65,26 @@ class UserRepository:
         user.default_deck = deck
         user.save(update_fields=["default_deck"])
         return deck
+
+    @staticmethod
+    def clone_starter_decks(user, deck_specs):
+        """Clone preset starter decks for a new user.
+
+        ``deck_specs`` is an iterable of ``(source_deck_id, name_template)``; the
+        template may use ``{name}`` for the user's display name. Missing source
+        decks are skipped so user provisioning never fails because of them.
+        """
+        from backend.deck.infrastructure.repository import DeckRepository
+
+        display_name = (user.name or user.email.split("@")[0]).strip()
+        cloned = []
+        for source_id, name_template in deck_specs:
+            source = Deck.objects.filter(pk=source_id).first()
+            if not source:
+                logger.warning("Starter deck %s not found; skipping clone for %s", source_id, user.email)
+                continue
+            cloned.append(DeckRepository.clone_deck_as(source, user, name_template.format(name=display_name)))
+        return cloned
 
     @staticmethod
     def get_settings(user):

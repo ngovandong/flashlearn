@@ -10,6 +10,13 @@ from backend.utils.dispatch import dispatch
 
 DEFAULT_DECK_NAME_TEMPLATE = "{name}'s Default deck"
 
+# Preset decks cloned into every new user's account on provisioning.
+# (source_deck_id, name_template) — template may use {name} for the display name.
+STARTER_DECKS = (
+    ("cc98f412-884d-4565-ac56-fef00e8492de", "{name}'s Travel English: Airports & Flights"),
+    ("98cf5450-4b6d-4d64-a5d6-ccf6b1c26ab9", "Tech English: Computer Basics"),
+)
+
 
 class UserService:
     def __init__(self, user_repo: type[UserRepository] | UserRepository = UserRepository, cache: Any = default_cache):
@@ -33,9 +40,14 @@ class UserService:
     def create_default_deck_for_user(self, user):
         return self._user_repo.create_default_deck(user, DEFAULT_DECK_NAME_TEMPLATE)
 
+    @transaction.atomic
+    def clone_starter_decks_for_user(self, user):
+        return self._user_repo.clone_starter_decks(user, STARTER_DECKS)
+
     def provision_new_user(self, user):
         self.seed_settings_for_user(user)
         self.create_default_deck_for_user(user)
+        self.clone_starter_decks_for_user(user)
 
     def active_user(self, user_id):
         user = self._user_repo.get_by_id(user_id)

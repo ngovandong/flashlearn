@@ -93,10 +93,15 @@ class DeckRepository:
 
     @staticmethod
     def clone_deck(old_deck, user):
+        new_deck_name = "Copy of " + old_deck.owner.name + " - " + old_deck.name
+        return DeckRepository.clone_deck_as(old_deck, user, new_deck_name)
+
+    @staticmethod
+    def clone_deck_as(old_deck, user, name):
+        """Clone ``old_deck`` (including all term fields) to ``user`` under ``name``."""
         with transaction.atomic():
-            new_deck_name = "Copy of " + old_deck.owner.name + " - " + old_deck.name
             new_deck = Deck.objects.create(
-                name=new_deck_name,
+                name=name,
                 description=old_deck.description,
                 is_public=False,
                 background=old_deck.background,
