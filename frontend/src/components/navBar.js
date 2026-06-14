@@ -38,6 +38,7 @@ const links = [
   // { link: "folder", name: "Folder" },
   { link: "deck", name: "Deck", tour: "decks" },
   { link: "number-test", name: "Number Listening", tour: "number-test" },
+  { link: "speaking-coach", name: "Speaking Coach", tour: "speaking-coach" },
 ];
 
 function ResponsiveAppBar()
@@ -81,7 +82,7 @@ function ResponsiveAppBar()
       position="sticky"
       color="white"
       elevation={0}
-      sx={{ borderBottom: ".0625rem solid #edeff4", top: 0, zIndex: 1100 }}
+      sx={{ borderBottom: ".0625rem solid var(--fl-border)", top: 0, zIndex: 1100 }}
     >
       <Container maxWidth="xxl">
         <Toolbar disableGutters>
@@ -94,11 +95,12 @@ function ResponsiveAppBar()
           <Box
             sx={{
               flexGrow: 1,
+              minWidth: 0,
               alignSelf: "stretch",
-              display: { md: "flex" },
+              display: "flex",
             }}
           >
-            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+            <Box sx={{ flexGrow: 1, display: { xs: "flex", lg: "none" } }}>
               <IconButton
                 size="large"
                 aria-label="account of current user"
@@ -124,7 +126,7 @@ function ResponsiveAppBar()
                 open={Boolean(anchorElNav)}
                 onClose={handleCloseNavMenu}
                 sx={{
-                  display: { xs: "block", md: "none" },
+                  display: { xs: "block", lg: "none" },
                 }}
               >
                 {links.map((link) => (
@@ -143,7 +145,8 @@ function ResponsiveAppBar()
               sx={{
                 flexGrow: 1,
                 alignSelf: "stretch",
-                display: { md: "flex", xs: "none" },
+                flexWrap: "nowrap",
+                display: { xs: "none", lg: "flex" },
               }}
             >
               {links.map((link) => (
@@ -160,11 +163,15 @@ function ResponsiveAppBar()
               ))}
             </Box>
           </Box>
-          <Box sx={{ flexGrow: 0, marginRight: "1.25rem" }}>
+          <Box
+            sx={{ flexGrow: 0, flexShrink: 0, mr: { xs: "0.5rem", sm: "1.25rem" } }}
+          >
             <IconButton
               aria-label="add"
               data-tour="create-deck"
               sx={{
+                width: 44,
+                height: 44,
                 background: "var(--fl-primary)",
                 "&:hover": { background: "var(--fl-primary-dark)" },
               }}
@@ -218,8 +225,16 @@ function ResponsiveAppBar()
               </MenuItem>
             </Menu>
           </Box>
-          <SearchDeckInput />
-          <Box sx={{ flexGrow: 0 }}>
+          <Box
+            sx={{
+              flexShrink: 1,
+              minWidth: 0,
+              display: { xs: "none", sm: "block" },
+            }}
+          >
+            <SearchDeckInput />
+          </Box>
+          <Box sx={{ flexGrow: 0, flexShrink: 0 }}>
             <Tooltip title="Account">
               <IconButton
                 onClick={handleOpenUserMenu}

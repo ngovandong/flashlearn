@@ -18,6 +18,34 @@
     box-shadow: $shadow-sm;
 }
 
+/**
+ * Centered page container with a max-width and fluid gutters.
+ *
+ * One primitive every top-level page uses so content stays readable on
+ * ultra-wide monitors, centers on tablets, and gets comfortable (but smaller)
+ * padding on phones — no per-page magic numbers required.
+ */
+@mixin page_shell($max: 75rem) {
+    width: 100%;
+    max-width: $max;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 4vw, 2.5rem);
+    padding-block: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+/**
+ * Responsive auto-reflowing card grid.
+ *
+ * Cards wrap automatically at every viewport — from 1 column on a phone up to
+ * as many as fit — without breakpoint overrides. `min(100%, $min)` guarantees a
+ * single card never overflows a narrow screen.
+ */
+@mixin card_grid($min: 17rem, $gap: 1.25rem) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, $min), 1fr));
+    gap: $gap;
+}
+
 /** Static surface card — consistent background, border, radius and shadow. */
 @mixin card {
     background-color: $surface;

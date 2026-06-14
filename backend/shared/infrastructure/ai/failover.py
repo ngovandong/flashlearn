@@ -29,7 +29,7 @@ class FailoverAiProvider:
     def is_configured(self) -> bool:
         return any(getattr(p, "is_configured", True) for p in self._providers)
 
-    def generate_json(self, system, user, schema=None):
+    def generate_json(self, system, user, schema=None, audio=None):
         configured = [p for p in self._providers if getattr(p, "is_configured", True)]
         if not configured:
             raise AiProviderError("No AI provider is configured")
@@ -47,7 +47,7 @@ class FailoverAiProvider:
         last_error: AiProviderError | None = None
         for provider in ready:
             try:
-                result = provider.generate_json(system, user, schema)
+                result = provider.generate_json(system, user, schema, audio)
                 self._unavailable_until.pop(id(provider), None)
                 return result
             except AiProviderError as exc:

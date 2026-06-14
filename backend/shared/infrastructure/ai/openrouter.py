@@ -69,9 +69,17 @@ class OpenRouterProvider(RetryingHttpProvider):
     def is_configured(self) -> bool:
         return bool(self._api_key)
 
-    def generate_json(self, system: str, user: str, schema: dict[str, Any] | None = None) -> dict[str, Any]:
+    def generate_json(
+        self,
+        system: str,
+        user: str,
+        schema: dict[str, Any] | None = None,
+        audio: dict[str, str] | None = None,
+    ) -> dict[str, Any]:
         if not self.is_configured:
             raise AiProviderError("OPENROUTER_API_KEY is not configured")
+        if audio:
+            raise AiProviderError("OpenRouter provider does not support audio input")
 
         # Describe the JSON shape inline (free models may ignore response schemas);
         # the word "json" must appear for json_object mode.

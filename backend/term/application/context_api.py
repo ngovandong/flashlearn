@@ -8,5 +8,5 @@ class TermContextApi:
     def get_by_id(self, term_id):
         return self._term_repo.get_by_id(term_id)
 
-    def get_latest_learned_term_info(self, user, deck_id, page_size=10):
-        return self._term_repo.get_latest_learned_term_info(user, deck_id, page_size)
+    def get_latest_learned_term_info(self, user, deck_id, page_size=10, term_id=None):
+        return self._term_repo.get_latest_learned_term_info(user, deck_id, page_size, term_id)

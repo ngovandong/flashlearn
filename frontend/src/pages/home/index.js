@@ -10,7 +10,28 @@ import InstallExtensionReminder from "@components/installExtensionReminder";
 import ThemeSuggestion from "@components/themeSuggestion";
 import { Link } from "react-router-dom";
 import HearingIcon from "@mui/icons-material/Hearing";
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
+import { getActivePracticeBanner } from "@utils/practiceBanner";
+
+const PRACTICE_BANNERS = {
+  speaking: {
+    icon: <RecordVoiceOverIcon />,
+    title: "Practice speaking with your AI coach",
+    description:
+      "Generate real-life conversations, role-play out loud, and get instant feedback on your pronunciation.",
+    to: "/speaking-coach",
+    cta: "Start speaking",
+  },
+  number: {
+    icon: <HearingIcon />,
+    title: "Sharpen your number listening",
+    description:
+      "Train your ear by typing the English numbers you hear — from quick digits to phone, tax, and ID numbers.",
+    to: "/number-test",
+    cta: "Start practice",
+  },
+};
 
 function streakCopy({ streak, studied_today }) {
   if (streak === 0) {
@@ -41,6 +62,8 @@ function Home() {
   const queryError = decksError?.message;
 
   const streakText = learningStreak ? streakCopy(learningStreak) : null;
+
+  const banner = PRACTICE_BANNERS[getActivePracticeBanner()];
 
   return user ? (
     <div className="home-page">
@@ -99,20 +122,15 @@ function Home() {
           </div>
           <div className="practice-reminder">
             <div className="practice-reminder__content">
-              <div className="practice-reminder__icon">
-                <HearingIcon />
-              </div>
+              <div className="practice-reminder__icon">{banner.icon}</div>
               <div className="practice-reminder__text">
-                <h4>Sharpen your number listening</h4>
-                <p>
-                  Train your ear by typing the English numbers you hear — from
-                  quick digits to phone, tax, and ID numbers.
-                </p>
+                <h4>{banner.title}</h4>
+                <p>{banner.description}</p>
               </div>
             </div>
-            <Link to="/number-test" className="practice-reminder__cta">
+            <Link to={banner.to} className="practice-reminder__cta">
               <PlayArrowRoundedIcon />
-              <span>Start practice</span>
+              <span>{banner.cta}</span>
             </Link>
           </div>
         </div>

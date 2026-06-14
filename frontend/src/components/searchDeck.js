@@ -14,10 +14,11 @@ const Search = styled("div")(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   backgroundColor: COLORS.APP_BACKGROUND,
   marginLeft: 0,
-  marginRight: "2rem",
+  marginRight: "1rem",
   width: "100%",
   [theme.breakpoints.up("sm")]: {
     marginLeft: theme.spacing(1),
+    marginRight: "1.5rem",
     width: "auto",
   },
 }));

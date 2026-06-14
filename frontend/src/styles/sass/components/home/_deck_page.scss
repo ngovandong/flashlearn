@@ -1,7 +1,5 @@
 .deck-page {
-    max-width: 60rem;
-    padding: 2.5rem;
-    margin: auto;
+    @include page_shell(60rem);
     animation: fade-in 0.5s;
 
     .deck-header {

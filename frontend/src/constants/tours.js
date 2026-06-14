@@ -43,6 +43,12 @@ export const TOURS = [
         body: "Train your ear by typing the English numbers you hear — from quick digits to phone, tax, and ID numbers.",
       },
       {
+        id: "home.speaking-coach",
+        selector: '[data-tour="speaking-coach"]',
+        title: "Speaking Coach",
+        body: "Practise real conversations out loud — the AI generates dialogues, reads them aloud, and scores your pronunciation.",
+      },
+      {
         id: "home.assistant",
         selector: '[data-tour="assistant"]',
         title: "Meet Dragon, your buddy",
@@ -102,7 +108,7 @@ export const TOURS = [
   {
     id: "deck-learn",
     label: "Learn",
-    match: (p) => /^\/deck\/[^/]+\/learn$/.test(p),
+    match: (p) => /^\/deck\/[^/]+\/learn(\/[^/]+)?$/.test(p),
     steps: [
       {
         id: "learn.flip",
@@ -209,6 +215,55 @@ export const TOURS = [
         selector: ".start-test-btn",
         title: "Start practising",
         body: "Hit Start Practice — Dragon will read a number aloud and you type what you hear. Good luck!",
+      },
+    ],
+  },
+  {
+    id: "speaking-coach",
+    label: "Speaking Coach",
+    match: (p) => p.endsWith("/speaking-coach") || p === "/speaking-coach",
+    steps: [
+      {
+        id: "sc.setup",
+        selector: '[data-tour="sc-setup"]',
+        title: "Set up your practice",
+        body: "Pick an AI topic or paste your own text, then choose the accent, level, tone, and length of the dialogue.",
+      },
+      {
+        id: "sc.vocab-pick",
+        selector: '[data-tour="sc-vocab-pick"]',
+        title: "Practice your own words",
+        body: "Turn this on to generate a natural conversation built around the vocabulary you've saved — great for revising in context. We pick the topic and title for you.",
+      },
+      {
+        id: "sc.voice",
+        selector: '[data-tour="sc-voice"]',
+        title: "Choose your tutor voice",
+        body: "Pick a natural AI reference voice. Dragon reads every line aloud in this voice when you tap Listen or play the conversation.",
+      },
+      {
+        id: "sc.generate",
+        selector: '[data-tour="sc-generate"]',
+        title: "Generate a conversation",
+        body: "Dragon builds a realistic two-person dialogue you can listen to, read along with, and practise out loud.",
+      },
+      {
+        id: "sc.actions",
+        selector: '[data-tour="sc-actions"]',
+        title: "Listen & role-play",
+        body: "Play the whole dialogue, or start Live Role Play to record your lines and get a pronunciation score.",
+      },
+      {
+        id: "sc.vocab",
+        selector: '[data-tour="sc-vocab"]',
+        title: "Learn & save vocabulary",
+        body: "Select any word or phrase in a line for its meaning, IPA and a speaking tip — then save it as a term or highlight it to revisit. Words you've already saved appear underlined; click them to study.",
+      },
+      {
+        id: "sc.tabs",
+        selector: '[data-tour="sc-tabs"]',
+        title: "Review your history",
+        body: "Switch to History anytime to revisit past conversations and pronunciation scores. Star favourites to pin them to the top, or select several to delete in one go.",
       },
     ],
   },

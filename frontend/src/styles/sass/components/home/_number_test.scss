@@ -33,7 +33,7 @@
       transition: all 0.2s ease;
 
       &:hover {
-        background-color: #f0f2f5;
+        background-color: $surface-2;
         color: $main-text-color;
       }
     }
@@ -76,7 +76,7 @@
         transition: all 0.2s ease;
 
         &:hover {
-          background-color: #f0f2f5;
+          background-color: $surface-2;
           color: $main-purple;
         }
       }
@@ -88,6 +88,8 @@
     flex-grow: 1;
     overflow-y: auto;
     padding: 2rem 1rem;
+    // Leave room so the last controls can scroll clear of the floating assistant.
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -150,7 +152,7 @@
 
       .mode-option {
         background-color: $surface;
-        border: 2px solid #e2e8f0;
+        border: 2px solid $border-color;
         border-radius: 0.75rem;
         padding: 1rem;
         text-align: left;
@@ -210,7 +212,7 @@
         input {
           padding: 0.6rem 0.8rem;
           border-radius: 0.5rem;
-          border: 2px solid #e2e8f0;
+          border: 2px solid $border-color;
           font-size: 0.95rem;
           font-weight: 600;
           color: $main-text-color;
@@ -247,7 +249,7 @@
         select {
           padding: 0.75rem 1rem;
           border-radius: 0.5rem;
-          border: 2px solid #e2e8f0;
+          border: 2px solid $border-color;
           background-color: $surface;
           font-size: 0.95rem;
           font-weight: 600;
@@ -302,7 +304,7 @@
           width: 100%;
           height: 6px;
           border-radius: 3px;
-          background: #e2e8f0;
+          background: $border-color;
           outline: none;
 
           &::-webkit-slider-thumb {
@@ -366,7 +368,7 @@
       .progress-track {
         width: 100%;
         height: 6px;
-        background-color: #e2e8f0;
+        background-color: $border-color;
         border-radius: 3px;
         overflow: hidden;
 
@@ -531,7 +533,7 @@
     .input-display-area {
       width: 100%;
       border-radius: 0.75rem;
-      border: 2px solid #e2e8f0;
+      border: 2px solid $border-color;
       margin-bottom: 1.5rem;
       overflow: hidden;
       transition: all 0.2s ease;
@@ -558,7 +560,7 @@
         outline: none;
 
         &::placeholder {
-          color: #cbd5e1;
+          color: $gray-text-color;
           font-size: 1.4rem;
           font-weight: 500;
         }
@@ -586,11 +588,11 @@
         transition: all 0.15s ease;
 
         &.clear-btn {
-          background-color: #f1f5f9;
+          background-color: $surface-2;
           color: $minor-text-color;
 
           &:hover {
-            background-color: #e2e8f0;
+            background-color: $border-color;
             color: $main-text-color;
           }
         }
@@ -638,8 +640,8 @@
 
       .key-btn {
         height: 3.25rem;
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background-color: $surface-2;
+        border: 1px solid $border-color;
         border-radius: 0.5rem;
         font-size: 1.25rem;
         font-weight: 700;
@@ -651,23 +653,23 @@
         transition: all 0.1s ease;
 
         &:hover {
-          background-color: #f1f5f9;
-          border-color: #cbd5e1;
+          background-color: $surface-2;
+          border-color: $gray-text-color;
         }
 
         &:active {
           transform: scale(0.95);
-          background-color: #e2e8f0;
+          background-color: $border-color;
         }
 
         &.action-key {
-          background-color: #f1f5f9;
+          background-color: $surface-2;
           font-weight: 600;
           font-size: 1rem;
           color: $minor-text-color;
 
           &:hover {
-            background-color: #e2e8f0;
+            background-color: $border-color;
           }
         }
       }
@@ -682,8 +684,8 @@
       display: flex;
       align-items: center;
       gap: 3rem;
-      background-color: #f8fafc;
-      border: 1px solid #e2e8f0;
+      background-color: $surface-2;
+      border: 1px solid $border-color;
       border-radius: 1rem;
       padding: 2rem;
       margin-bottom: 2.5rem;
@@ -707,7 +709,7 @@
 
         .circle-bg {
           fill: none;
-          stroke: #e2e8f0;
+          stroke: $border-color;
           stroke-width: 3.8;
         }
 
@@ -747,7 +749,7 @@
           display: flex;
           justify-content: space-between;
           font-size: 0.95rem;
-          border-bottom: 1px solid #e2e8f0;
+          border-bottom: 1px solid $border-color;
           padding-bottom: 0.5rem;
 
           .stat-label {
@@ -783,7 +785,7 @@
       .table-responsive {
         width: 100%;
         overflow-x: auto;
-        border: 1px solid #e2e8f0;
+        border: 1px solid $border-color;
         border-radius: 0.75rem;
       }
 
@@ -795,12 +797,12 @@
 
         th, td {
           padding: 1rem;
-          border-bottom: 1px solid #e2e8f0;
+          border-bottom: 1px solid $border-color;
           vertical-align: middle;
         }
 
         th {
-          background-color: #f8fafc;
+          background-color: $surface-2;
           font-weight: 700;
           color: $minor-text-color;
         }
@@ -818,7 +820,7 @@
         }
 
         .replay-audio-btn {
-          background-color: #f1f5f9;
+          background-color: $surface-2;
           border: none;
           color: $minor-text-color;
           padding: 0.4rem;
@@ -844,7 +846,7 @@
         }
 
         .skipped-tag {
-          color: #94a3b8;
+          color: $gray-text-color;
           font-style: italic;
         }
 
@@ -914,11 +916,11 @@
         }
 
         &.secondary {
-          background-color: #f1f5f9;
+          background-color: $surface-2;
           color: $minor-text-color;
 
           &:hover {
-            background-color: #e2e8f0;
+            background-color: $border-color;
             color: $main-text-color;
           }
         }
@@ -930,13 +932,13 @@
 // CSS ANIMATIONS
 @keyframes pulseShadow {
   0% {
-    box-shadow: 0 0 0 0 rgba(66, 85, 255, 0.5);
+    box-shadow: 0 0 0 0 rgba(var(--fl-primary-rgb), 0.5);
   }
   70% {
-    box-shadow: 0 0 0 15px rgba(66, 85, 255, 0);
+    box-shadow: 0 0 0 15px rgba(var(--fl-primary-rgb), 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(66, 85, 255, 0);
+    box-shadow: 0 0 0 0 rgba(var(--fl-primary-rgb), 0);
   }
 }
 

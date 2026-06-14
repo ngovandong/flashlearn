@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useState } from "react";
 import Answer from "./answer";
 import QuestionHeader from "./questionHeader";
+import AnswerFeedback from "./answerFeedback";
 
 const Quiz = ({
   question,
@@ -55,13 +56,11 @@ const Quiz = ({
       </div>
       {isAnswered && (
         <div className="feedback">
-          {isCorrect ? (
-            <div className="correct-feedback">Correct!</div>
-          ) : (
-            <div className="incorrect-feedback">
-              Incorrect. The correct answer is {question.answer}.
-            </div>
-          )}
+          <AnswerFeedback
+            status={isCorrect ? "correct" : "incorrect"}
+            userAnswer={selectedAnswer}
+            correctAnswer={correctAnswer}
+          />
         </div>
       )}
     </div>

@@ -3,6 +3,7 @@ from .deck import DeckViewSet
 from .folder import FolderViewSet
 from .learning import LearningViewSet
 from .role import RoleViewSet
+from .speaking import SpeakingViewSet
 from .term import TermViewSet
 from .translate import TranslateView
 from .user import UserViewSet

@@ -13,6 +13,10 @@ from .base import AiProviderError, RetryingHttpProvider
 
 _DEFAULT_BASE = "https://generativelanguage.googleapis.com/v1beta"
 _DEFAULT_MODEL = "gemini-3.1-flash-lite"
+# Text-to-speech model (override with GEMINI_TTS_MODEL). Gemini only exposes
+# TTS via *-preview models over the REST generateContent API; the non-preview
+# native-audio models use bidiGenerateContent (live streaming) instead.
+_DEFAULT_TTS_MODEL = "gemini-3.1-flash-tts-preview"
 _DEFAULT_TIMEOUT = 90
 _DEFAULT_MAX_RETRIES = 5
 # Cap for a single backoff sleep. Free-tier 429s can ask for ~60s waits, so this
@@ -44,6 +48,7 @@ class GeminiProvider(RetryingHttpProvider):
         )
         self._api_key = api_key if api_key is not None else os.getenv("GEMINI_API_KEY", "")
         self._model = model or os.getenv("GEMINI_MODEL", _DEFAULT_MODEL)
+        self._tts_model = os.getenv("GEMINI_TTS_MODEL", _DEFAULT_TTS_MODEL)
         self._api_base = (api_base or os.getenv("GEMINI_API_BASE", _DEFAULT_BASE)).rstrip("/")
 
     @staticmethod
@@ -62,7 +67,13 @@ class GeminiProvider(RetryingHttpProvider):
     def is_configured(self) -> bool:
         return bool(self._api_key)
 
-    def generate_json(self, system: str, user: str, schema: dict[str, Any] | None = None) -> dict[str, Any]:
+    def generate_json(
+        self,
+        system: str,
+        user: str,
+        schema: dict[str, Any] | None = None,
+        audio: dict[str, str] | None = None,
+    ) -> dict[str, Any]:
         if not self.is_configured:
             raise AiProviderError("GEMINI_API_KEY is not configured")
 
@@ -71,8 +82,13 @@ class GeminiProvider(RetryingHttpProvider):
         if schema:
             generation_config["responseSchema"] = schema
 
+        parts: list[dict[str, Any]] = [{"text": user}]
+        if audio:
+            # Gemini accepts inline audio as a base64 blob alongside the prompt.
+            parts.append({"inlineData": {"mimeType": audio["mime_type"], "data": audio["data"]}})
+
         payload: dict[str, Any] = {
-            "contents": [{"role": "user", "parts": [{"text": user}]}],
+            "contents": [{"role": "user", "parts": parts}],
             "generationConfig": generation_config,
         }
         if system:
@@ -80,6 +96,38 @@ class GeminiProvider(RetryingHttpProvider):
 
         body = self._request_json(url, params={"key": self._api_key}, payload=payload)
         return self._parse(body)
+
+    def generate_speech(self, text: str, voice: str = "Kore") -> dict[str, str]:
+        """Synthesize ``text`` to speech with a Gemini prebuilt voice.
+
+        Returns ``{"audio": base64, "mime_type": str}`` where ``audio`` is raw
+        16-bit PCM (mono, typically 24 kHz) that the client decodes with the Web
+        Audio API. Uses the official (non-preview) TTS model by default.
+        """
+        if not self.is_configured:
+            raise AiProviderError("GEMINI_API_KEY is not configured")
+
+        url = f"{self._api_base}/models/{self._tts_model}:generateContent"
+        payload: dict[str, Any] = {
+            "contents": [{"parts": [{"text": text}]}],
+            "generationConfig": {
+                "responseModalities": ["AUDIO"],
+                "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": voice}}},
+            },
+        }
+        body = self._request_json(url, params={"key": self._api_key}, payload=payload)
+        return self._parse_audio(body)
+
+    @staticmethod
+    def _parse_audio(body: dict[str, Any]) -> dict[str, str]:
+        try:
+            inline = body["candidates"][0]["content"]["parts"][0]["inlineData"]
+            data = inline["data"]
+        except (KeyError, IndexError, TypeError) as exc:
+            raise AiProviderError(f"Unexpected Gemini TTS response shape: {exc}") from exc
+        if not data:
+            raise AiProviderError("Gemini TTS returned empty audio")
+        return {"audio": data, "mime_type": inline.get("mimeType", "audio/L16;rate=24000")}
 
     @staticmethod
     def _retry_delay(response: "requests.Response") -> float | None:

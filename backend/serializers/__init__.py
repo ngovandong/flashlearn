@@ -14,6 +14,7 @@ from .role import (
     UpdateRoleSerializer,
     UserDeckRoleSerializer,
 )
+from .speaking import SpeakingAnalysisSerializer, SpeakingConversationSerializer
 from .term import (
     AddTermsToDeckSerializer,
     LearningTermSerializer,

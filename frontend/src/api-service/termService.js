@@ -1,4 +1,5 @@
 import BaseService from "./baseService";
+import { AI_REQUEST_TIMEOUT } from "./httpRequest";
 
 // Fields that the AI populates; arrays are JSON-encoded inside FormData.
 const AI_STRING_FIELDS = ["word_type", "pronunciation", "definition"];
@@ -68,9 +69,33 @@ class TermService extends BaseService {
     return this.request.put(this.action("update_terms"), formData);
   }
 
-  // Generate Oxford-style fields without persisting them.
+  // Generate Oxford-style fields without persisting them. Hits an external AI
+  // provider, so allow a longer timeout to ride out the backend rate-limit queue.
   aiEnrich(name, meaning = "") {
-    return this.request.post(this.action("ai_enrich"), { name, meaning });
+    return this.request.post(
+      this.action("ai_enrich"),
+      { name, meaning },
+      { timeout: AI_REQUEST_TIMEOUT }
+    );
+  }
+
+  // Save a single term (with optional AI fields) into the user's default deck.
+  // Sent as JSON so list fields (synonyms, examples, ...) are passed through as-is.
+  addToDefaultDeck(term) {
+    const payload = {
+      name: term.name,
+      meaning: term.meaning ?? "",
+      word_type: term.word_type ?? "",
+      pronunciation: term.pronunciation ?? "",
+      definition: term.definition ?? "",
+      synonyms: term.synonyms ?? [],
+      antonyms: term.antonyms ?? [],
+      examples: term.examples ?? [],
+      word_forms: term.word_forms ?? [],
+      word_family: term.word_family ?? [],
+      ai_filled: term.ai_filled ?? true,
+    };
+    return this.request.post(this.action("add_to_default_deck"), payload);
   }
 }
 

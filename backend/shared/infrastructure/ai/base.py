@@ -14,10 +14,17 @@ from typing import Any
 
 import requests
 
+from .rate_limit import GlobalAiGate
+
 logger = logging.getLogger(__name__)
 
-# Transient statuses worth retrying (rate limit, overload, gateway errors).
-_RETRY_STATUSES = {429, 500, 502, 503, 504}
+# Transient statuses worth retrying in-process (overload, gateway errors).
+# 429 (rate limit) is deliberately excluded: retrying would hold the global
+# gate lock through the server's (often ~60s) Retry-After delay, starving every
+# other request. Instead we fail fast so the failover layer can switch to
+# another provider and put this one on cooldown.
+_RETRY_STATUSES = {500, 502, 503, 504}
+_RATE_LIMIT_STATUS = 429
 
 
 class AiProviderError(RuntimeError):
@@ -44,6 +51,9 @@ class RetryingHttpProvider:
         self._min_interval = min_interval
         self._verify = verify
         self._last_request_at = 0.0
+        # Cross-process serializer + RPM limiter keyed by provider label, so the
+        # web workers, RQ worker and cron backfill all share one Gemini budget.
+        self._gate = GlobalAiGate(self.label)
 
     def _request_json(
         self, url: str, *, payload: dict, params: dict | None = None, headers: dict | None = None
@@ -51,16 +61,20 @@ class RetryingHttpProvider:
         """POST ``payload`` and return the decoded JSON body, retrying transient errors."""
         last_error: AiProviderError | None = None
         for attempt in range(self._max_retries + 1):
-            self._throttle()
             try:
-                response = requests.post(
-                    url,
-                    params=params,
-                    headers=headers,
-                    json=payload,
-                    timeout=self._timeout,
-                    verify=self._verify,
-                )
+                # Gate each attempt: only one provider request runs at a time
+                # across all processes, and never more than the per-minute quota.
+                # A retry re-enters the gate since it is another billable request.
+                with self._gate.slot():
+                    self._throttle()
+                    response = requests.post(
+                        url,
+                        params=params,
+                        headers=headers,
+                        json=payload,
+                        timeout=self._timeout,
+                        verify=self._verify,
+                    )
             except requests.RequestException as exc:
                 # Network errors / timeouts are usually transient — retry.
                 last_error = AiProviderError(f"{self.label} request failed: {exc}")
@@ -71,6 +85,17 @@ class RetryingHttpProvider:
 
             if response.status_code == 200:
                 return response.json()
+
+            if response.status_code == _RATE_LIMIT_STATUS:
+                # Don't retry rate limits in-process — give way to other
+                # requests and let the failover layer pick another provider.
+                server_delay = self._retry_delay(response)
+                logger.warning(
+                    "%s returned 429 (rate limited); not retrying%s",
+                    self.label,
+                    f", server suggested {round(server_delay, 1)}s" if server_delay is not None else "",
+                )
+                raise AiProviderError(f"{self.label} rate limited (429)")
 
             if response.status_code in _RETRY_STATUSES and attempt < self._max_retries:
                 server_delay = self._retry_delay(response)

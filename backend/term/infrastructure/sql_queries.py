@@ -65,7 +65,7 @@ def fetch_revise_terms(user_id, deck_id, limit: int = 5) -> list[SimpleNamespace
     ]
 
 
-def fetch_latest_learned_term_info(user_id, deck_id, page_size: int = 10) -> dict:
+def fetch_latest_learned_term_info(user_id, deck_id, page_size: int = 10, term_id=None) -> dict:
     user_id = normalize_uuid(user_id)
     deck_id = normalize_uuid(deck_id)
     term = Term.sa_table
@@ -74,19 +74,28 @@ def fetch_latest_learned_term_info(user_id, deck_id, page_size: int = 10) -> dic
     term_index = (func.row_number().over(order_by=(term.c.created_at.desc(), term.c.name)) - 1).label("term_index")
     ordered_terms = select(term.c.id, term_index).where(term.c.deck_id == deck_id).cte("ordered_terms")
 
-    last_learned = (
-        select(term.c.id)
-        .select_from(term.join(progress, term.c.id == progress.c.term_id))
-        .where(and_(term.c.deck_id == deck_id, progress.c.user_id == user_id))
-        .order_by(progress.c.last_learned_at.desc())
-        .limit(1)
-        .cte("last_learned")
-    )
+    if term_id:
+        # Deep-link target: open the deck at a specific term instead of the
+        # user's last-learned position.
+        target_id = normalize_uuid(term_id)
+        stmt = select(
+            ordered_terms.c.id.label("latest_id"),
+            ordered_terms.c.term_index.label("last_learned_index"),
+        ).where(ordered_terms.c.id == target_id)
+    else:
+        last_learned = (
+            select(term.c.id)
+            .select_from(term.join(progress, term.c.id == progress.c.term_id))
+            .where(and_(term.c.deck_id == deck_id, progress.c.user_id == user_id))
+            .order_by(progress.c.last_learned_at.desc())
+            .limit(1)
+            .cte("last_learned")
+        )
 
-    stmt = select(
-        last_learned.c.id.label("latest_id"),
-        ordered_terms.c.term_index.label("last_learned_index"),
-    ).select_from(last_learned.join(ordered_terms, last_learned.c.id == ordered_terms.c.id))
+        stmt = select(
+            last_learned.c.id.label("latest_id"),
+            ordered_terms.c.term_index.label("last_learned_index"),
+        ).select_from(last_learned.join(ordered_terms, last_learned.c.id == ordered_terms.c.id))
 
     with get_connection() as conn:
         row = conn.execute(stmt).mappings().first()

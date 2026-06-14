@@ -96,7 +96,13 @@ class LearningViewSet(FlexibleViewSet):
 
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter("deck_id", openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Get by deck")
+            openapi.Parameter("deck_id", openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Get by deck"),
+            openapi.Parameter(
+                "term_id",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="Open the deck at this specific term instead of the last-learned one",
+            ),
         ]
     )
     @action(detail=False, methods=["GET"])
@@ -106,8 +112,9 @@ class LearningViewSet(FlexibleViewSet):
         deck_id = request.query_params.get("deck_id")
         if deck_id is None:
             raise Http404("deck_id parameter is required")
+        term_id = request.query_params.get("term_id") or None
         page_size = settings.REST_FRAMEWORK.get("PAGE_SIZE", 10)
-        return Response(learning_service.get_latest_learned_term_info(request.user, deck_id, page_size))
+        return Response(learning_service.get_latest_learned_term_info(request.user, deck_id, page_size, term_id))
 
     @swagger_auto_schema(
         manual_parameters=[

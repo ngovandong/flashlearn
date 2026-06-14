@@ -1,7 +1,6 @@
 .create-deck {
-    padding: 0rem 4rem;
-    max-width: 81.25rem;
-    margin: auto;
+    @include page_shell(81.25rem);
+    padding-block: 0;
 
 
     .create-deck__header {
@@ -228,7 +227,7 @@
 
 
                 .upload-btn {
-                    border: 0.125rem dashed #d9dde8;
+                    border: 0.125rem dashed $border-color;
                     border-radius: .25rem;
                     display: flex;
                     flex-direction: column;

@@ -12,10 +12,12 @@ from backend.shared.composition import (
     deck_service,
     learning_context,
     learning_service,
+    speaking_coach_service,
     term_enrichment_service,
     term_service,
     user_service,
 )
+from backend.speaking.application.services import SpeakingCoachService
 from backend.term.application.ai_enrichment import TermEnrichmentService
 from backend.term.application.services import TermService
 from backend.user.application.services import AuthService, UserService
@@ -27,6 +29,7 @@ __all__ = [
     "LearningService",
     "MailService",
     "RoleService",
+    "SpeakingCoachService",
     "TermEnrichmentService",
     "TermService",
     "UserService",
@@ -35,6 +38,7 @@ __all__ = [
     "learning_context",
     "learning_service",
     "learning_progress_cache",
+    "speaking_coach_service",
     "term_enrichment_service",
     "term_service",
     "url_to_base64",

@@ -9,7 +9,7 @@ from backend.shared.interfaces.viewsets import FlexibleViewSet, SearchViewSet
 from backend.term.infrastructure.search import TermSearchQuery
 
 from ..documents import TermDocument
-from ..models import Term
+from ..models import AiResponseCache, Term
 from ..permissions import EditableTerm
 from ..serializers import AddTermsToDeckSerializer, TermNestInDeckSerializer, TermSerializer
 from ..services import deck_service, term_enrichment_service, term_service
@@ -129,7 +129,13 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         if not name:
             return Response({"errors": "name is required"}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            data = term_enrichment_service.enrich(name, meaning)
+            # Cache by name+meaning so re-enriching the same term (e.g. re-opening
+            # a noted word in the Speaking Coach) is served without a new AI call.
+            data = AiResponseCache.remember(
+                "enrich",
+                [name.lower(), (meaning or "").strip()],
+                lambda: term_enrichment_service.enrich(name, meaning),
+            )
         except AiProviderError as exc:
             return Response({"errors": str(exc)}, status=status.HTTP_502_BAD_GATEWAY)
         return Response(data)

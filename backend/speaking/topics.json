@@ -1,0 +1,1002 @@
+[
+  {
+    "text": "Saying hello and goodbye",
+    "level": "A1",
+    "category": "Greetings & Introductions"
+  },
+  {
+    "text": "Introducing yourself to someone new",
+    "level": "A1",
+    "category": "Greetings & Introductions"
+  },
+  {
+    "text": "Introducing a friend to your family",
+    "level": "A2",
+    "category": "Greetings & Introductions"
+  },
+  {
+    "text": "Meeting a new classmate",
+    "level": "A2",
+    "category": "Greetings & Introductions"
+  },
+  {
+    "text": "Making small talk at a party",
+    "level": "B1",
+    "category": "Greetings & Introductions"
+  },
+  {
+    "text": "Introducing yourself at a job interview",
+    "level": "B1",
+    "category": "Greetings & Introductions"
+  },
+  {
+    "text": "Networking at a work event",
+    "level": "B2",
+    "category": "Greetings & Introductions"
+  },
+  {
+    "text": "Breaking the ice with new colleagues",
+    "level": "B2",
+    "category": "Greetings & Introductions"
+  },
+  {
+    "text": "Building rapport in professional settings",
+    "level": "C1",
+    "category": "Greetings & Introductions"
+  },
+  {
+    "text": "The art of memorable first impressions",
+    "level": "C2",
+    "category": "Greetings & Introductions"
+  },
+  {
+    "text": "Talking about your family",
+    "level": "A1",
+    "category": "Family & Friends"
+  },
+  {
+    "text": "Describing your best friend",
+    "level": "A1",
+    "category": "Family & Friends"
+  },
+  {
+    "text": "Talking about your weekend with family",
+    "level": "A2",
+    "category": "Family & Friends"
+  },
+  {
+    "text": "Planning a visit to a friend",
+    "level": "A2",
+    "category": "Family & Friends"
+  },
+  {
+    "text": "Describing a family tradition",
+    "level": "B1",
+    "category": "Family & Friends"
+  },
+  {
+    "text": "Catching up with an old friend",
+    "level": "B1",
+    "category": "Family & Friends"
+  },
+  {
+    "text": "Balancing time between work and family",
+    "level": "B2",
+    "category": "Family & Friends"
+  },
+  {
+    "text": "Resolving a disagreement with a friend",
+    "level": "B2",
+    "category": "Family & Friends"
+  },
+  {
+    "text": "How friendships change over time",
+    "level": "C1",
+    "category": "Family & Friends"
+  },
+  {
+    "text": "The role of family in shaping identity",
+    "level": "C2",
+    "category": "Family & Friends"
+  },
+  {
+    "text": "Ordering food at a cafe",
+    "level": "A1",
+    "category": "Food & Dining"
+  },
+  {
+    "text": "Talking about your favorite food",
+    "level": "A1",
+    "category": "Food & Dining"
+  },
+  {
+    "text": "Ordering a meal at a restaurant",
+    "level": "A2",
+    "category": "Food & Dining"
+  },
+  {
+    "text": "Cooking a simple dish",
+    "level": "A2",
+    "category": "Food & Dining"
+  },
+  {
+    "text": "Asking for restaurant recommendations",
+    "level": "B1",
+    "category": "Food & Dining"
+  },
+  {
+    "text": "Talking about healthy eating",
+    "level": "B1",
+    "category": "Food & Dining"
+  },
+  {
+    "text": "Fast food versus home cooking",
+    "level": "B2",
+    "category": "Food & Dining"
+  },
+  {
+    "text": "Discussing food from different cultures",
+    "level": "B2",
+    "category": "Food & Dining"
+  },
+  {
+    "text": "The rise of plant-based diets",
+    "level": "C1",
+    "category": "Food & Dining"
+  },
+  {
+    "text": "Food, identity, and cultural heritage",
+    "level": "C2",
+    "category": "Food & Dining"
+  },
+  {
+    "text": "Asking the price of something",
+    "level": "A1",
+    "category": "Shopping"
+  },
+  {
+    "text": "Buying clothes at a shop",
+    "level": "A1",
+    "category": "Shopping"
+  },
+  {
+    "text": "Returning an item to a store",
+    "level": "A2",
+    "category": "Shopping"
+  },
+  {
+    "text": "Shopping for groceries",
+    "level": "A2",
+    "category": "Shopping"
+  },
+  {
+    "text": "Comparing prices before buying",
+    "level": "B1",
+    "category": "Shopping"
+  },
+  {
+    "text": "Talking about online shopping",
+    "level": "B1",
+    "category": "Shopping"
+  },
+  {
+    "text": "The pros and cons of online shopping",
+    "level": "B2",
+    "category": "Shopping"
+  },
+  {
+    "text": "Dealing with a faulty product",
+    "level": "B2",
+    "category": "Shopping"
+  },
+  {
+    "text": "How advertising influences buying",
+    "level": "C1",
+    "category": "Shopping"
+  },
+  {
+    "text": "Consumerism and the culture of more",
+    "level": "C2",
+    "category": "Shopping"
+  },
+  {
+    "text": "Buying a bus ticket",
+    "level": "A1",
+    "category": "Travel & Transport"
+  },
+  {
+    "text": "Asking for directions",
+    "level": "A1",
+    "category": "Travel & Transport"
+  },
+  {
+    "text": "Checking in at the airport",
+    "level": "A2",
+    "category": "Travel & Transport"
+  },
+  {
+    "text": "Taking a taxi to the hotel",
+    "level": "A2",
+    "category": "Travel & Transport"
+  },
+  {
+    "text": "Planning a weekend trip",
+    "level": "B1",
+    "category": "Travel & Transport"
+  },
+  {
+    "text": "Asking for travel advice",
+    "level": "B1",
+    "category": "Travel & Transport"
+  },
+  {
+    "text": "Travelling on a tight budget",
+    "level": "B2",
+    "category": "Travel & Transport"
+  },
+  {
+    "text": "Dealing with a delayed flight",
+    "level": "B2",
+    "category": "Travel & Transport"
+  },
+  {
+    "text": "The impact of tourism on local communities",
+    "level": "C1",
+    "category": "Travel & Transport"
+  },
+  {
+    "text": "Travel as a path to self-discovery",
+    "level": "C2",
+    "category": "Travel & Transport"
+  },
+  {
+    "text": "Your morning routine",
+    "level": "A1",
+    "category": "Home & Daily Routine"
+  },
+  {
+    "text": "Rooms in your house",
+    "level": "A1",
+    "category": "Home & Daily Routine"
+  },
+  {
+    "text": "Describing your daily schedule",
+    "level": "A2",
+    "category": "Home & Daily Routine"
+  },
+  {
+    "text": "Doing the household chores",
+    "level": "A2",
+    "category": "Home & Daily Routine"
+  },
+  {
+    "text": "Describing your ideal home",
+    "level": "B1",
+    "category": "Home & Daily Routine"
+  },
+  {
+    "text": "Sharing an apartment with roommates",
+    "level": "B1",
+    "category": "Home & Daily Routine"
+  },
+  {
+    "text": "Renting versus buying a home",
+    "level": "B2",
+    "category": "Home & Daily Routine"
+  },
+  {
+    "text": "Working from home effectively",
+    "level": "B2",
+    "category": "Home & Daily Routine"
+  },
+  {
+    "text": "How city living shapes daily life",
+    "level": "C1",
+    "category": "Home & Daily Routine"
+  },
+  {
+    "text": "The meaning of home in a mobile world",
+    "level": "C2",
+    "category": "Home & Daily Routine"
+  },
+  {
+    "text": "At the doctor",
+    "level": "A1",
+    "category": "Health & Fitness"
+  },
+  {
+    "text": "Talking about how you feel",
+    "level": "A1",
+    "category": "Health & Fitness"
+  },
+  {
+    "text": "Buying medicine at the pharmacy",
+    "level": "A2",
+    "category": "Health & Fitness"
+  },
+  {
+    "text": "Talking about your exercise routine",
+    "level": "A2",
+    "category": "Health & Fitness"
+  },
+  {
+    "text": "Building healthy daily habits",
+    "level": "B1",
+    "category": "Health & Fitness"
+  },
+  {
+    "text": "Talking about stress and relaxation",
+    "level": "B1",
+    "category": "Health & Fitness"
+  },
+  {
+    "text": "The importance of regular exercise",
+    "level": "B2",
+    "category": "Health & Fitness"
+  },
+  {
+    "text": "Managing a busy, healthy lifestyle",
+    "level": "B2",
+    "category": "Health & Fitness"
+  },
+  {
+    "text": "Mental health awareness today",
+    "level": "C1",
+    "category": "Health & Fitness"
+  },
+  {
+    "text": "Wellbeing in a fast-paced society",
+    "level": "C2",
+    "category": "Health & Fitness"
+  },
+  {
+    "text": "Jobs people do",
+    "level": "A1",
+    "category": "Work & Career"
+  },
+  {
+    "text": "Talking about your job",
+    "level": "A1",
+    "category": "Work & Career"
+  },
+  {
+    "text": "Talking about your work schedule",
+    "level": "A2",
+    "category": "Work & Career"
+  },
+  {
+    "text": "A typical day at work",
+    "level": "A2",
+    "category": "Work & Career"
+  },
+  {
+    "text": "Preparing for a job interview",
+    "level": "B1",
+    "category": "Work & Career"
+  },
+  {
+    "text": "Talking about your career goals",
+    "level": "B1",
+    "category": "Work & Career"
+  },
+  {
+    "text": "Negotiating a salary raise",
+    "level": "B2",
+    "category": "Work & Career"
+  },
+  {
+    "text": "Discussing work-life balance",
+    "level": "B2",
+    "category": "Work & Career"
+  },
+  {
+    "text": "The future of remote work",
+    "level": "C1",
+    "category": "Work & Career"
+  },
+  {
+    "text": "Finding meaning in your career",
+    "level": "C2",
+    "category": "Work & Career"
+  },
+  {
+    "text": "My school day",
+    "level": "A1",
+    "category": "Education & Learning"
+  },
+  {
+    "text": "Subjects you study",
+    "level": "A1",
+    "category": "Education & Learning"
+  },
+  {
+    "text": "Talking about your favorite teacher",
+    "level": "A2",
+    "category": "Education & Learning"
+  },
+  {
+    "text": "Studying for an exam",
+    "level": "A2",
+    "category": "Education & Learning"
+  },
+  {
+    "text": "Talking about learning a language",
+    "level": "B1",
+    "category": "Education & Learning"
+  },
+  {
+    "text": "Choosing a course to study",
+    "level": "B1",
+    "category": "Education & Learning"
+  },
+  {
+    "text": "The benefits of online learning",
+    "level": "B2",
+    "category": "Education & Learning"
+  },
+  {
+    "text": "Lifelong learning and new skills",
+    "level": "B2",
+    "category": "Education & Learning"
+  },
+  {
+    "text": "The changing value of a degree",
+    "level": "C1",
+    "category": "Education & Learning"
+  },
+  {
+    "text": "Education and equality of opportunity",
+    "level": "C2",
+    "category": "Education & Learning"
+  },
+  {
+    "text": "Using your phone every day",
+    "level": "A1",
+    "category": "Technology & Internet"
+  },
+  {
+    "text": "Your favorite app",
+    "level": "A1",
+    "category": "Technology & Internet"
+  },
+  {
+    "text": "Setting up a new device",
+    "level": "A2",
+    "category": "Technology & Internet"
+  },
+  {
+    "text": "Talking about social media",
+    "level": "A2",
+    "category": "Technology & Internet"
+  },
+  {
+    "text": "How apps make life easier",
+    "level": "B1",
+    "category": "Technology & Internet"
+  },
+  {
+    "text": "Talking about your screen time",
+    "level": "B1",
+    "category": "Technology & Internet"
+  },
+  {
+    "text": "The impact of smartphones on daily life",
+    "level": "B2",
+    "category": "Technology & Internet"
+  },
+  {
+    "text": "Staying safe online",
+    "level": "B2",
+    "category": "Technology & Internet"
+  },
+  {
+    "text": "Privacy in the age of data",
+    "level": "C1",
+    "category": "Technology & Internet"
+  },
+  {
+    "text": "The ethics of artificial intelligence",
+    "level": "C2",
+    "category": "Technology & Internet"
+  },
+  {
+    "text": "Counting money",
+    "level": "A1",
+    "category": "Money & Finance"
+  },
+  {
+    "text": "Paying at the shop",
+    "level": "A1",
+    "category": "Money & Finance"
+  },
+  {
+    "text": "Saving up for something special",
+    "level": "A2",
+    "category": "Money & Finance"
+  },
+  {
+    "text": "Opening a bank account",
+    "level": "A2",
+    "category": "Money & Finance"
+  },
+  {
+    "text": "Talking about saving money",
+    "level": "B1",
+    "category": "Money & Finance"
+  },
+  {
+    "text": "Making a monthly budget",
+    "level": "B1",
+    "category": "Money & Finance"
+  },
+  {
+    "text": "Saving for the future",
+    "level": "B2",
+    "category": "Money & Finance"
+  },
+  {
+    "text": "The rising cost of living",
+    "level": "B2",
+    "category": "Money & Finance"
+  },
+  {
+    "text": "Smart investing for beginners",
+    "level": "C1",
+    "category": "Money & Finance"
+  },
+  {
+    "text": "Money, happiness, and values",
+    "level": "C2",
+    "category": "Money & Finance"
+  },
+  {
+    "text": "Listening to music",
+    "level": "A1",
+    "category": "Entertainment & Media"
+  },
+  {
+    "text": "Watching your favorite show",
+    "level": "A1",
+    "category": "Entertainment & Media"
+  },
+  {
+    "text": "Talking about a movie you saw",
+    "level": "A2",
+    "category": "Entertainment & Media"
+  },
+  {
+    "text": "Going to a concert",
+    "level": "A2",
+    "category": "Entertainment & Media"
+  },
+  {
+    "text": "Discussing a TV series",
+    "level": "B1",
+    "category": "Entertainment & Media"
+  },
+  {
+    "text": "Recommending a film to a friend",
+    "level": "B1",
+    "category": "Entertainment & Media"
+  },
+  {
+    "text": "How the way we watch TV has changed",
+    "level": "B2",
+    "category": "Entertainment & Media"
+  },
+  {
+    "text": "Talking about your favorite podcast",
+    "level": "B2",
+    "category": "Entertainment & Media"
+  },
+  {
+    "text": "The economics of streaming services",
+    "level": "C1",
+    "category": "Entertainment & Media"
+  },
+  {
+    "text": "Media, attention, and modern life",
+    "level": "C2",
+    "category": "Entertainment & Media"
+  },
+  {
+    "text": "Your favorite hobby",
+    "level": "A1",
+    "category": "Hobbies & Free Time"
+  },
+  {
+    "text": "Playing in the park",
+    "level": "A1",
+    "category": "Hobbies & Free Time"
+  },
+  {
+    "text": "Talking about your weekend hobbies",
+    "level": "A2",
+    "category": "Hobbies & Free Time"
+  },
+  {
+    "text": "Starting a new hobby",
+    "level": "A2",
+    "category": "Hobbies & Free Time"
+  },
+  {
+    "text": "How you spend your free time",
+    "level": "B1",
+    "category": "Hobbies & Free Time"
+  },
+  {
+    "text": "A hobby you want to try",
+    "level": "B1",
+    "category": "Hobbies & Free Time"
+  },
+  {
+    "text": "Turning a hobby into a side job",
+    "level": "B2",
+    "category": "Hobbies & Free Time"
+  },
+  {
+    "text": "Finding time for hobbies",
+    "level": "B2",
+    "category": "Hobbies & Free Time"
+  },
+  {
+    "text": "Creativity and personal growth",
+    "level": "C1",
+    "category": "Hobbies & Free Time"
+  },
+  {
+    "text": "Leisure and the meaning of free time",
+    "level": "C2",
+    "category": "Hobbies & Free Time"
+  },
+  {
+    "text": "Talking about the weather",
+    "level": "A1",
+    "category": "Weather & Seasons"
+  },
+  {
+    "text": "Your favorite season",
+    "level": "A1",
+    "category": "Weather & Seasons"
+  },
+  {
+    "text": "The weather forecast for the week",
+    "level": "A2",
+    "category": "Weather & Seasons"
+  },
+  {
+    "text": "Clothes for different seasons",
+    "level": "A2",
+    "category": "Weather & Seasons"
+  },
+  {
+    "text": "How weather affects your mood",
+    "level": "B1",
+    "category": "Weather & Seasons"
+  },
+  {
+    "text": "Planning around the weather",
+    "level": "B1",
+    "category": "Weather & Seasons"
+  },
+  {
+    "text": "Adapting to extreme weather",
+    "level": "B2",
+    "category": "Weather & Seasons"
+  },
+  {
+    "text": "Seasons and local traditions",
+    "level": "B2",
+    "category": "Weather & Seasons"
+  },
+  {
+    "text": "Changing weather patterns",
+    "level": "C1",
+    "category": "Weather & Seasons"
+  },
+  {
+    "text": "Climate, culture, and adaptation",
+    "level": "C2",
+    "category": "Weather & Seasons"
+  },
+  {
+    "text": "Reading a simple map",
+    "level": "A1",
+    "category": "City & Directions"
+  },
+  {
+    "text": "Places in your town",
+    "level": "A1",
+    "category": "City & Directions"
+  },
+  {
+    "text": "Finding your way in a new city",
+    "level": "A2",
+    "category": "City & Directions"
+  },
+  {
+    "text": "At the train station",
+    "level": "A2",
+    "category": "City & Directions"
+  },
+  {
+    "text": "Describing your hometown",
+    "level": "B1",
+    "category": "City & Directions"
+  },
+  {
+    "text": "Getting around by public transport",
+    "level": "B1",
+    "category": "City & Directions"
+  },
+  {
+    "text": "Public versus private transport",
+    "level": "B2",
+    "category": "City & Directions"
+  },
+  {
+    "text": "Living in a big city",
+    "level": "B2",
+    "category": "City & Directions"
+  },
+  {
+    "text": "Designing more livable cities",
+    "level": "C1",
+    "category": "City & Directions"
+  },
+  {
+    "text": "Urbanization and the future of cities",
+    "level": "C2",
+    "category": "City & Directions"
+  },
+  {
+    "text": "Animals you like",
+    "level": "A1",
+    "category": "Nature & Environment"
+  },
+  {
+    "text": "A walk in nature",
+    "level": "A1",
+    "category": "Nature & Environment"
+  },
+  {
+    "text": "Recycling at home",
+    "level": "A2",
+    "category": "Nature & Environment"
+  },
+  {
+    "text": "A day at the beach",
+    "level": "A2",
+    "category": "Nature & Environment"
+  },
+  {
+    "text": "Reducing plastic in daily life",
+    "level": "B1",
+    "category": "Nature & Environment"
+  },
+  {
+    "text": "Talking about your garden",
+    "level": "B1",
+    "category": "Nature & Environment"
+  },
+  {
+    "text": "Eco-friendly habits at home",
+    "level": "B2",
+    "category": "Nature & Environment"
+  },
+  {
+    "text": "Protecting local wildlife",
+    "level": "B2",
+    "category": "Nature & Environment"
+  },
+  {
+    "text": "Renewable energy solutions",
+    "level": "C1",
+    "category": "Nature & Environment"
+  },
+  {
+    "text": "Sustainability and economic growth",
+    "level": "C2",
+    "category": "Nature & Environment"
+  },
+  {
+    "text": "Your favorite holiday",
+    "level": "A1",
+    "category": "Culture & Festivals"
+  },
+  {
+    "text": "A birthday celebration",
+    "level": "A1",
+    "category": "Culture & Festivals"
+  },
+  {
+    "text": "A festival in your country",
+    "level": "A2",
+    "category": "Culture & Festivals"
+  },
+  {
+    "text": "Celebrating the new year",
+    "level": "A2",
+    "category": "Culture & Festivals"
+  },
+  {
+    "text": "Describing a local tradition",
+    "level": "B1",
+    "category": "Culture & Festivals"
+  },
+  {
+    "text": "A wedding you attended",
+    "level": "B1",
+    "category": "Culture & Festivals"
+  },
+  {
+    "text": "How festivals bring people together",
+    "level": "B2",
+    "category": "Culture & Festivals"
+  },
+  {
+    "text": "Cultural differences in celebrations",
+    "level": "B2",
+    "category": "Culture & Festivals"
+  },
+  {
+    "text": "The commercialization of holidays",
+    "level": "C1",
+    "category": "Culture & Festivals"
+  },
+  {
+    "text": "Tradition and change in modern culture",
+    "level": "C2",
+    "category": "Culture & Festivals"
+  },
+  {
+    "text": "Sports you like",
+    "level": "A1",
+    "category": "Sports"
+  },
+  {
+    "text": "Playing football with friends",
+    "level": "A1",
+    "category": "Sports"
+  },
+  {
+    "text": "Talking about a game you watched",
+    "level": "A2",
+    "category": "Sports"
+  },
+  {
+    "text": "Joining a local team",
+    "level": "A2",
+    "category": "Sports"
+  },
+  {
+    "text": "The benefits of playing sports",
+    "level": "B1",
+    "category": "Sports"
+  },
+  {
+    "text": "Following your favorite team",
+    "level": "B1",
+    "category": "Sports"
+  },
+  {
+    "text": "The pressure on professional athletes",
+    "level": "B2",
+    "category": "Sports"
+  },
+  {
+    "text": "Sports and teamwork",
+    "level": "B2",
+    "category": "Sports"
+  },
+  {
+    "text": "The business behind big sports",
+    "level": "C1",
+    "category": "Sports"
+  },
+  {
+    "text": "Sport, identity, and national pride",
+    "level": "C2",
+    "category": "Sports"
+  },
+  {
+    "text": "Meeting a new friend",
+    "level": "A1",
+    "category": "Relationships & Emotions"
+  },
+  {
+    "text": "Talking about how you feel today",
+    "level": "A1",
+    "category": "Relationships & Emotions"
+  },
+  {
+    "text": "Helping a friend in need",
+    "level": "A2",
+    "category": "Relationships & Emotions"
+  },
+  {
+    "text": "Saying thank you and sorry",
+    "level": "A2",
+    "category": "Relationships & Emotions"
+  },
+  {
+    "text": "Dealing with a disagreement",
+    "level": "B1",
+    "category": "Relationships & Emotions"
+  },
+  {
+    "text": "Keeping in touch with friends",
+    "level": "B1",
+    "category": "Relationships & Emotions"
+  },
+  {
+    "text": "Building trust in relationships",
+    "level": "B2",
+    "category": "Relationships & Emotions"
+  },
+  {
+    "text": "Handling difficult conversations",
+    "level": "B2",
+    "category": "Relationships & Emotions"
+  },
+  {
+    "text": "Empathy in everyday life",
+    "level": "C1",
+    "category": "Relationships & Emotions"
+  },
+  {
+    "text": "Connection in a digital age",
+    "level": "C2",
+    "category": "Relationships & Emotions"
+  },
+  {
+    "text": "What you want to be",
+    "level": "A1",
+    "category": "Future & Goals"
+  },
+  {
+    "text": "Your plans for tomorrow",
+    "level": "A1",
+    "category": "Future & Goals"
+  },
+  {
+    "text": "Making weekend plans",
+    "level": "A2",
+    "category": "Future & Goals"
+  },
+  {
+    "text": "A goal for this year",
+    "level": "A2",
+    "category": "Future & Goals"
+  },
+  {
+    "text": "Talking about your future goals",
+    "level": "B1",
+    "category": "Future & Goals"
+  },
+  {
+    "text": "Planning a big change",
+    "level": "B1",
+    "category": "Future & Goals"
+  },
+  {
+    "text": "Setting goals and staying motivated",
+    "level": "B2",
+    "category": "Future & Goals"
+  },
+  {
+    "text": "A goal you achieved",
+    "level": "B2",
+    "category": "Future & Goals"
+  },
+  {
+    "text": "Planning for an uncertain future",
+    "level": "C1",
+    "category": "Future & Goals"
+  },
+  {
+    "text": "Ambition, purpose, and a life well lived",
+    "level": "C2",
+    "category": "Future & Goals"
+  }
+]

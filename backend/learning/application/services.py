@@ -104,7 +104,7 @@ class LearningService:
         self._learning_cache.delete_combine(progress.term.deck_id, user.id)
         self.record_study_activity(user)
 
-    def get_latest_learned_term_info(self, user, deck_id, page_size=10):
+    def get_latest_learned_term_info(self, user, deck_id, page_size=10, term_id=None):
         if self._term_context is None:
             raise RuntimeError("term_context is not configured")
-        return self._term_context.get_latest_learned_term_info(user, deck_id, page_size)
+        return self._term_context.get_latest_learned_term_info(user, deck_id, page_size, term_id)

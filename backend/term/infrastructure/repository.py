@@ -24,8 +24,8 @@ class TermRepository:
         return fetch_revise_terms(user.id, deck_id)
 
     @staticmethod
-    def get_latest_learned_term_info(user, deck_id, page_size=10):
-        return fetch_latest_learned_term_info(user.id, deck_id, page_size)
+    def get_latest_learned_term_info(user, deck_id, page_size=10, term_id=None):
+        return fetch_latest_learned_term_info(user.id, deck_id, page_size, term_id)
 
     @staticmethod
     def get_random_terms(deck_id):

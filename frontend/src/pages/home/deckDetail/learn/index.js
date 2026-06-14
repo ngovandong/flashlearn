@@ -55,7 +55,9 @@ function LearnPage()
     google = "https://www.google.com/search?q=" + definitionPhrase;
   }
   const navigate = useNavigate();
-  const { deckID } = useParams();
+  // When termId is present (deep-link, e.g. from the Speaking Coach) the deck
+  // opens at that specific term instead of the user's last-learned position.
+  const { deckID, termId } = useParams();
 
   const handleTouchStart = (event) =>
   {
@@ -161,7 +163,7 @@ function LearnPage()
   const fetchWords = async () =>
   {
     try {
-      const res1 = await learningService.getLatestLearnedTerm(deckID);
+      const res1 = await learningService.getLatestLearnedTerm(deckID, termId);
       if (!res1.error) {
         setCurrentState({
           index: res1.data.last_learned_index % LEARNING_TERM_PAGE_SIZE,
@@ -305,7 +307,7 @@ function LearnPage()
   {
     fetchWords();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [termId]);
 
   useEffect(() =>
   {

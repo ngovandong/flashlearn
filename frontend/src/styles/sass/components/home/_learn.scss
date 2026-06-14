@@ -95,14 +95,14 @@
                 .progress-bar-container {
                     width: 100%;
                     height: 6px;
-                    background-color: #e0e0e0;
+                    background-color: $border-color;
                     border-radius: 3px;
                     margin-bottom: -1rem; // Pull closer to card
                     overflow: hidden;
 
                     .progress-bar-fill {
                         height: 100%;
-                        background-color: #333; // Dark progress bar as per reference
+                        background-color: $main-text-color; // Dark progress bar as per reference
                         transition: width 0.3s ease;
                     }
                 }
@@ -185,13 +185,13 @@
                         h1 {
                             font-size: 3rem;
                             font-weight: 700;
-                            color: #2e3856;
+                            color: $main-text-color;
                             margin-bottom: 0.5rem;
                             letter-spacing: -0.5px;
                         }
 
                         p {
-                            color: #939bb4;
+                            color: $gray-text-color;
                             font-size: 0.95rem;
                             margin-top: 1.5rem;
                             font-weight: 500;
@@ -212,7 +212,7 @@
 
                     .flip-card-back {
                         transform: rotateY(180deg);
-                        color: #2e3856;
+                        color: $main-text-color;
 
                         .term-pronunciation {
                             color: $main-purple;
@@ -246,18 +246,18 @@
 
                         // Icons styling
                         button {
-                            color: #666;
+                            color: $minor-text-color;
 
                             &:hover {
-                                color: #333;
-                                background-color: #f0f0f0;
+                                color: $main-text-color;
+                                background-color: $surface-2;
                             }
                         }
 
                         // Links styling
                         a {
                             text-decoration: none;
-                            color: #1cb0f6; // Bright blue
+                            color: $blue;
                             font-weight: 600;
                             font-size: 0.9rem;
                             margin: 0 0.5rem;
@@ -295,7 +295,7 @@
                     h3 {
                         margin: 0 0 0.75rem 0;
                         font-size: 1.2rem;
-                        color: #2e3856;
+                        color: $main-text-color;
                         font-weight: 700;
                     }
 
@@ -331,7 +331,7 @@
                             display: inline-flex;
                             align-items: center;
                             gap: 0.2rem;
-                            color: #666;
+                            color: $minor-text-color;
                             font-size: 1rem;
                         }
                     }
@@ -340,17 +340,17 @@
                         p {
                             font-size: 1.1rem;
                             line-height: 1.6;
-                            color: #444;
+                            color: $main-text-color;
                             margin-bottom: 0.5rem;
                         }
 
                         .definition-meta {
-                            border-top: 1px solid #efefef;
+                            border-top: 1px solid $border-subtle;
                             padding-top: 1.5rem;
 
                             p {
                                 font-size: 1rem;
-                                color: #666;
+                                color: $minor-text-color;
                                 margin-bottom: 0.5rem;
                                 font-weight: 500;
                             }
@@ -359,7 +359,7 @@
 
                     .site-btn a {
                         text-decoration: none;
-                        color: #3ccfcf;
+                        color: $blue;
                         font-weight: 600;
                         font-size: 0.9rem;
 
@@ -382,14 +382,14 @@
 
                 // Slim, unobtrusive scrollbar
                 scrollbar-width: thin;
-                scrollbar-color: #d6dbff transparent;
+                scrollbar-color: rgba(var(--fl-primary-rgb), 0.35) transparent;
 
                 &::-webkit-scrollbar {
                     width: 6px;
                 }
 
                 &::-webkit-scrollbar-thumb {
-                    background: #d6dbff;
+                    background: rgba(var(--fl-primary-rgb), 0.35);
                     border-radius: 3px;
                 }
 
@@ -402,7 +402,7 @@
                     h3 {
                         margin: 0 0 0.65rem 0;
                         font-size: 1.05rem;
-                        color: #2e3856;
+                        color: $main-text-color;
                         font-weight: 600;
                     }
 
@@ -419,7 +419,7 @@
                         li {
                             margin-bottom: 0.6rem;
                             line-height: 1.55;
-                            color: #4a5568;
+                            color: $minor-text-color;
                             font-size: 1rem;
                             display: flex;
                             align-items: flex-start;
@@ -435,7 +435,7 @@
 
                             .example-delete {
                                 flex-shrink: 0;
-                                color: #cbd5e1;
+                                color: $gray-text-color;
                                 padding: 2px;
 
                                 &:hover {
@@ -455,15 +455,15 @@
                         .add-item-input {
                             flex: 1;
                             min-width: 0;
-                            border: 1px solid #e2e8f0;
+                            border: 1px solid $border-color;
                             border-radius: 0.6rem;
                             padding: 0.45rem 0.7rem;
                             font-size: 0.9rem;
-                            color: #2e3856;
+                            color: $main-text-color;
                             transition: border-color 0.2s ease;
 
                             &::placeholder {
-                                color: #aab2c5;
+                                color: $gray-text-color;
                             }
 
                             &:focus {
@@ -483,15 +483,15 @@
                     }
 
                     .sentence-box {
-                        background-color: #f7f7f9;
+                        background-color: $surface-2;
                         padding: 1.2rem;
                         border-radius: 0.8rem;
                         margin-bottom: 1rem;
-                        border-left: 4px solid #3ccfcf;
+                        border-left: 4px solid $blue;
 
                         p {
                             font-style: italic;
-                            color: #4a5568;
+                            color: $minor-text-color;
                             line-height: 1.6;
                             font-size: 1.05rem;
                         }
@@ -504,7 +504,7 @@
                             gap: 0.5rem;
                             background: none;
                             border: none;
-                            color: #666;
+                            color: $minor-text-color;
                             font-size: 0.95rem;
                             cursor: pointer;
                             padding: 0.5rem;
@@ -512,8 +512,8 @@
                             transition: background-color 0.2s;
 
                             &:hover {
-                                background-color: #f7f7f9;
-                                color: #333;
+                                background-color: $surface-2;
+                                color: $main-text-color;
                             }
 
                             svg {
@@ -528,15 +528,15 @@
                         gap: 0.8rem;
 
                         .synonym-chip {
-                            background-color: #f0f0f0;
+                            background-color: $surface-2;
                             padding: 0.5rem 1rem;
                             border-radius: 2rem;
                             font-size: 0.9rem;
-                            color: #4a5568;
+                            color: $minor-text-color;
                             font-weight: 500;
 
                             &:hover {
-                                background-color: #e2e8f0;
+                                background-color: $border-color;
                             }
                         }
                     }
@@ -545,9 +545,9 @@
                         display: flex;
                         justify-content: space-between;
                         padding: 0.4rem 0;
-                        border-bottom: 1px solid #f0f0f0;
+                        border-bottom: 1px solid $border-subtle;
                         font-size: 0.95rem;
-                        color: #718096;
+                        color: $minor-text-color;
 
                         &:last-child {
                             border-bottom: none;
@@ -555,7 +555,7 @@
 
                         .stat-value {
                             font-weight: 700;
-                            color: #2d3748;
+                            color: $main-text-color;
                         }
                     }
                 }
@@ -703,18 +703,19 @@
     background-color: $main-purple;
     border: none;
     border-radius: 5px;
-    color: #fff;
+    color: $on-primary;
     cursor: pointer;
     font-size: 16px;
     font-weight: 700;
     margin: 20px auto;
     padding: 10px 20px;
     transition: all 0.3s ease;
-    width: 20rem;
+    width: 100%;
+    max-width: 20rem;
     display: block;
 
     &:hover {
-        background-color: #0f27ff;
+        background-color: $dark-purple;
     }
 }
 
@@ -816,8 +817,8 @@
         }
 
         .speech-button {
-            background-color: #ccc;
-            color: #fff;
+            background-color: $surface-2;
+            color: $main-text-color;
             padding: 5px 10px;
             border-radius: 5px;
             cursor: pointer;
@@ -833,7 +834,7 @@
         margin-bottom: 20px;
 
         .answer {
-            background-color: #f4f4f4;
+            background-color: $surface-2;
             border: 2px solid $minor-text-color;
             border-radius: 10px;
             padding: 10px;
@@ -899,7 +900,7 @@
                     box-sizing: border-box;
                     width: 100%;
                     padding: 10px;
-                    border: 2px solid #dcdcdc;
+                    border: 2px solid $border-color;
                     border-radius: 5px;
                     font-size: 16px;
                     font-weight: bold;
@@ -945,11 +946,77 @@
         .correct-feedback {
             color: $light-blue;
             font-weight: bold;
+
+            .accepted-note {
+                color: $minor-text-color;
+                font-weight: 500;
+                font-size: 0.9rem;
+            }
         }
 
         .incorrect-feedback {
-            color: $error-red;
-            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+
+            .feedback-line {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: baseline;
+                gap: 0.5rem;
+            }
+
+            .feedback-label {
+                flex-shrink: 0;
+                min-width: 7.5rem;
+                color: $minor-text-color;
+                font-size: 0.8rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.03em;
+            }
+
+            .answer-diff {
+                font-weight: 700;
+                font-size: 1.05rem;
+                line-height: 1.5;
+                white-space: pre-wrap;
+                word-break: break-word;
+                color: $main-text-color;
+
+                &.diff-blank {
+                    color: $gray-text-color;
+                    font-weight: 500;
+                    font-style: italic;
+                }
+            }
+
+            // Characters that matched.
+            .diff-ok {
+                color: $main-text-color;
+            }
+
+            // Extra / wrong characters the user typed.
+            .diff-wrong {
+                color: $error-red;
+                text-decoration: line-through;
+                background-color: rgba($error-red, 0.15);
+                border-radius: 2px;
+            }
+
+            // Characters the user missed from the correct answer.
+            .diff-missing {
+                color: $light-blue;
+                background-color: rgba($light-blue, 0.18);
+                border-radius: 2px;
+                text-decoration: underline;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .incorrect-feedback .feedback-label {
+                min-width: 100%;
+            }
         }
     }
 

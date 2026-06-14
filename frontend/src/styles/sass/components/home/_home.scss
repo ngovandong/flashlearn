@@ -1,6 +1,6 @@
 .home-page {
+    @include page_shell(75rem);
     height: 100%;
-    padding: 40px;
 
     .welcome-text {
         display: flex;
@@ -187,11 +187,7 @@
         }
 
         .section-cards {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-            row-gap: 1.25rem;
-            column-gap: 1.25rem;
+            @include card_grid(17rem);
             margin-bottom: 2.5rem;
 
             &--loading {
@@ -200,9 +196,7 @@
 
             .set-card {
                 @include card_interactive;
-                min-width: 300px;
                 padding: 1.25rem 1.25rem 1rem;
-                width: calc((100% - 2.5rem) / 3);
                 height: 10rem;
                 display: flex;
                 flex-direction: column;

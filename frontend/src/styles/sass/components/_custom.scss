@@ -5,15 +5,25 @@
 }
 
 .nav-item {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
     text-decoration: none;
     color: $minor-text-color;
     font-weight: 600;
     margin: 0 $normal-font-size;
-    height: 100%;
-    line-height: $nav-height;
+    height: $nav-height;
+    line-height: 1.2;
     position: relative;
     transition: color 0.18s $ease;
+}
+
+// Tighten link spacing on narrower desktops so the row never overflows.
+@media (max-width: 1100px) {
+    .nav-item {
+        margin: 0 0.5rem;
+        font-size: $normal-font-size;
+    }
 }
 
 .nav-item:hover {
@@ -52,10 +62,18 @@
 .flash-learn-icon {
     width: 140px;
     height: 50px;
+    flex-shrink: 0;
     object-fit: cover;
     // Shift the brand mark toward the active palette's primary hue.
     filter: hue-rotate(var(--fl-logo-rotate, 0deg));
     transition: filter 0.25s ease;
+}
+
+@media (max-width: 480px) {
+    .flash-learn-icon {
+        width: 110px;
+        height: 40px;
+    }
 }
 
 .custom-input {
@@ -64,7 +82,9 @@
     input {
         width: 100%;
         border: none;
-        border-bottom: 3px solid #303545;
+        border-bottom: 3px solid $border-color;
+        background-color: transparent;
+        color: $main-text-color;
         font-size: 1rem;
         height: 2.5rem;
         margin-bottom: 0.2rem;
@@ -78,7 +98,9 @@
     textarea {
         width: 100%;
         border: none;
-        border-bottom: 3px solid #303545;
+        border-bottom: 3px solid $border-color;
+        background-color: transparent;
+        color: $main-text-color;
         font-size: 1rem;
         height: 2.5rem;
         margin-bottom: 0.2rem;
@@ -154,7 +176,7 @@
 }
 
 .permissiondenied-message {
-    color: #666;
+    color: $gray-text-color;
     font-size: 2rem;
     text-align: center;
     margin: 2rem 0;
