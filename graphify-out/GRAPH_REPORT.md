@@ -1,16 +1,16 @@
 # Graph Report - flashlearn  (2026-06-14)
 
 ## Corpus Check
-- 393 files · ~96,955 words
+- 393 files · ~97,003 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1563 nodes · 1696 edges · 336 communities (231 shown, 105 thin omitted)
+- 1610 nodes · 1742 edges · 336 communities (229 shown, 107 thin omitted)
 - Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 203 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `7396928f`
+- Built from commit: `d8afafe5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -87,6 +87,7 @@
 - [[_COMMUNITY_Community 77|Community 77]]
 - [[_COMMUNITY_Community 78|Community 78]]
 - [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 82|Community 82]]
 - [[_COMMUNITY_Community 85|Community 85]]
 - [[_COMMUNITY_Community 86|Community 86]]
 - [[_COMMUNITY_Community 88|Community 88]]
@@ -102,6 +103,7 @@
 - [[_COMMUNITY_Community 108|Community 108]]
 - [[_COMMUNITY_Community 109|Community 109]]
 - [[_COMMUNITY_Community 111|Community 111]]
+- [[_COMMUNITY_Community 116|Community 116]]
 - [[_COMMUNITY_Community 159|Community 159]]
 - [[_COMMUNITY_Community 160|Community 160]]
 - [[_COMMUNITY_Community 161|Community 161]]
@@ -215,7 +217,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (336 total, 105 thin omitted)
+## Communities (336 total, 107 thin omitted)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.26
@@ -238,8 +240,8 @@ Cohesion: 0.09
 Nodes (14): cache_factory(), _CacheNamespace, CacheService, _DeckTermsCache, delete(), get(), _LearningProgressCache, Backward-compatible cache re-exports. (+6 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.21
-Nodes (9): DeckAccessPolicy, Deck access rules — domain policy, independent of Django ORM., TermAccessPolicy, EditableDeck, EditableLearningProgress, EditableTerm, IsOwnerOfRolePermission, IsOwnerPermission (+1 more)
+Cohesion: 0.10
+Nodes (16): can_edit(), can_view(), DeckAccessPolicy, get_user_role(), is_member(), Deck access rules — domain policy, independent of Django ORM., TermAccessPolicy, EditableDeck (+8 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.06
@@ -393,6 +395,14 @@ Nodes (3): _build_url(), get_connection(), get_engine()
 Cohesion: 0.83
 Nodes (3): clear_db_env(), database_url_from_env_builds_from_db_vars(), database_url_from_env_uses_database_url_when_set()
 
+### Community 82 - "Community 82"
+Cohesion: 0.07
+Nodes (26): AddButton, AddInput, AddRow, AddToDeckButton, AiButton, AiSection, Chip, ChipRow (+18 more)
+
+### Community 116 - "Community 116"
+Cohesion: 0.11
+Nodes (18): action, default_icon, default_popup, background, service_worker, content_scripts, description, host_permissions (+10 more)
+
 ### Community 273 - "Community 273"
 Cohesion: 0.16
 Nodes (6): _coerce_bool(), _coerce_list(), _extract_ai_fields(), _meaning_of(), TermService, Backward-compatible re-exports.
@@ -414,16 +424,12 @@ Cohesion: 0.22
 Nodes (8): CustomAbstractUser, Meta, UserLearningProgress, Meta, UserDeckRole, Term, User, UUIDModel
 
 ### Community 304 - "Community 304"
-Cohesion: 0.21
-Nodes (4): DeckAccessPolicyTest, _Role, _Roles, _User
+Cohesion: 0.33
+Nodes (4): build(), DeckSearchQuery, TermSearchQuery, Generate Oxford-style fields for a term without persisting them.
 
 ### Community 305 - "Community 305"
 Cohesion: 0.23
 Nodes (4): _EmptyRoles, FakeDeck, FakeUser, TermServiceUnitTest
-
-### Community 308 - "Community 308"
-Cohesion: 0.18
-Nodes (5): build(), DeckSearchQuery, TermSearchQuery, SearchViewSet, TermViewSet
 
 ### Community 311 - "Community 311"
 Cohesion: 0.20
@@ -473,10 +479,6 @@ Nodes (3): FailoverAiProvider, Failover across multiple AI providers.  Tries eac
 Cohesion: 0.50
 Nodes (3): ABC, generate_q_expression(), SearchViewSet
 
-### Community 328 - "Community 328"
-Cohesion: 0.70
-Nodes (4): can_edit(), can_view(), get_user_role(), is_member()
-
 ### Community 329 - "Community 329"
 Cohesion: 0.60
 Nodes (4): CreateLearningProgressSerializer, LearningStreakSerializer, UserLearningProgressSerializer, TermSerializer
@@ -486,19 +488,19 @@ Cohesion: 0.70
 Nodes (4): _build(), build_named_provider(), get_ai_provider(), _provider_chain()
 
 ## Knowledge Gaps
-- **107 isolated node(s):** `SKIP_REDIS`, `Migration`, `Migration`, `Migration`, `Migration` (+102 more)
+- **149 isolated node(s):** `manifest_version`, `name`, `description`, `version`, `default_popup` (+144 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **105 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **107 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DeckAccessPolicy` connect `Community 8` to `Community 322`, `Community 3`, `Community 328`, `Community 13`, `Community 304`, `Community 273`, `Community 312`?**
-  _High betweenness centrality (0.039) - this node is a cross-community bridge._
+- **Why does `DeckAccessPolicy` connect `Community 8` to `Community 322`, `Community 3`, `Community 13`, `Community 273`, `Community 312`?**
+  _High betweenness centrality (0.032) - this node is a cross-community bridge._
 - **Why does `TermService` connect `Community 273` to `Community 321`, `Community 323`, `Community 8`, `Community 330`, `Community 305`, `Community 310`, `Community 312`?**
-  _High betweenness centrality (0.033) - this node is a cross-community bridge._
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
 - **Why does `Service layer entry point — prefer composition singletons for new code.` connect `Community 321` to `Community 2`, `Community 4`, `Community 325`, `Community 326`, `Community 331`, `Community 17`, `Community 18`, `Community 273`, `Community 28`, `Community 318`, `Community 319`?**
-  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
 - **Are the 15 inferred relationships involving `TermService` (e.g. with `DeckAccessPolicy` and `Composition root — wire concrete infrastructure into application services.`) actually correct?**
   _`TermService` has 15 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 6 inferred relationships involving `DeckService` (e.g. with `Composition root — wire concrete infrastructure into application services.` and `Backward-compatible re-exports.`) actually correct?**

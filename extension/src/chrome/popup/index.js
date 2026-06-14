@@ -424,6 +424,12 @@ const SetupDeckHint = styled.p`
   line-height: 1.4;
 `;
 
+// Renders only <b>…</b> segments as bold; any other markup stays plain text (safe from XSS).
+const renderHighlighted = (text) =>
+  String(text ?? "")
+    .split(/<b>(.*?)<\/b>/gi)
+    .map((part, i) => (i % 2 === 1 ? <strong key={i}>{part}</strong> : part));
+
 export default function TranslationPopup({
   term,
   request,
@@ -712,7 +718,7 @@ export default function TranslationPopup({
             <ExampleList>
               {(aiFields.examples || []).map((ex, i) => (
                 <li key={`ex-${i}`}>
-                  <span>{ex}</span>
+                  <span>{renderHighlighted(ex)}</span>
                   <button
                     type="button"
                     onClick={() => removeAiListItem("examples", i)}
