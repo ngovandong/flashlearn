@@ -49,12 +49,11 @@ class TermRepository:
         return Term.objects.bulk_create(terms)
 
     @staticmethod
-    def update_term(term_id, name, description, image):
+    def update_term(term_id, **fields):
         term = Term.objects.filter(id=term_id).first()
         if term:
-            term.name = name
-            term.description = description
-            term.image = image
+            for key, value in fields.items():
+                setattr(term, key, value)
             term.save()
         return term
 

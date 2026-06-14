@@ -6,9 +6,11 @@ from backend.learning.application.context_api import LearningContextApi
 from backend.learning.application.services import LearningService
 from backend.learning.infrastructure.cache import learning_progress_cache
 from backend.learning.infrastructure.repository import LearningRepository
+from backend.shared.infrastructure.ai import default_ai_provider
 from backend.shared.infrastructure.cache import default_cache
 from backend.shared.infrastructure.cloudinary import default_image_storage
 from backend.shared.infrastructure.google_oauth import default_oauth_client
+from backend.term.application.ai_enrichment import TermEnrichmentService
 from backend.term.application.context_api import TermContextApi
 from backend.term.application.services import TermService
 from backend.term.infrastructure.repository import TermRepository
@@ -39,3 +41,4 @@ term_service = TermService(
 )
 user_service = UserService(user_repo=UserRepository, cache=default_cache)
 auth_service = AuthService(oauth=default_oauth_client)
+term_enrichment_service = TermEnrichmentService(ai=default_ai_provider)

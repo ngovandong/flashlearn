@@ -79,4 +79,32 @@
             @include purple_btn;
         }
     }
+
+    @media (max-width: 600px) {
+        padding: 0 1rem;
+
+        .settings-header {
+            height: auto;
+            padding: 1.25rem 0;
+        }
+
+        .settings-card {
+            padding: 1.25rem;
+        }
+
+        .settings-row {
+            gap: 1rem;
+
+            .settings-row__label small {
+                line-height: 1.35;
+            }
+        }
+
+        .settings-footer {
+            .main-btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    }
 }

@@ -105,7 +105,21 @@ class DeckRepository:
             )
             old_terms = old_deck.terms.all()
             new_terms = [
-                Term(name=term.name, description=term.description, image=term.image, deck=new_deck)
+                Term(
+                    name=term.name,
+                    meaning=term.meaning,
+                    image=term.image,
+                    word_type=term.word_type,
+                    pronunciation=term.pronunciation,
+                    definition=term.definition,
+                    synonyms=term.synonyms,
+                    antonyms=term.antonyms,
+                    examples=term.examples,
+                    word_forms=term.word_forms,
+                    word_family=term.word_family,
+                    ai_filled=term.ai_filled,
+                    deck=new_deck,
+                )
                 for term in old_terms
             ]
             Term.objects.bulk_create(new_terms)

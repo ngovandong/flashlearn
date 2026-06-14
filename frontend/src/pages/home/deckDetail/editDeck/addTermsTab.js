@@ -10,8 +10,17 @@ import { filterChangedTerms, isChangeState } from "@utils/state";
 
 const emptyTerm = {
   name: "",
-  description: "",
+  meaning: "",
   image: "",
+  word_type: "",
+  pronunciation: "",
+  definition: "",
+  synonyms: [],
+  antonyms: [],
+  examples: [],
+  word_forms: [],
+  word_family: [],
+  ai_filled: false,
   error: null,
   open: false,
 };

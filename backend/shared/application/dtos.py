@@ -12,7 +12,7 @@ class DeckRef:
 class ReviseTermRow:
     id: str
     name: str
-    description: str
+    meaning: str
     image: str
     learning_progress_id: str | None = None
 
@@ -23,7 +23,7 @@ class ReviseTermRow:
         return cls(
             id=str(row["id"]),
             name=row["name"],
-            description=row.get("description", ""),
+            meaning=row.get("meaning", ""),
             image=row.get("image", ""),
             learning_progress_id=str(row["learning_progress_id"]) if row.get("learning_progress_id") else None,
         )
@@ -32,7 +32,7 @@ class ReviseTermRow:
         return {
             "id": self.id,
             "name": self.name,
-            "description": self.description,
+            "meaning": self.meaning,
             "image": self.image,
             "learning_progress_id": self.learning_progress_id,
         }

@@ -176,4 +176,23 @@
             width: 100%;
         }
     }
+
+    @media (max-width: 480px) {
+        .form {
+            height: auto;
+            min-height: 70vh;
+            margin-top: 0;
+            padding: 2rem 1.25rem;
+            box-sizing: border-box;
+
+            form {
+                width: 100%;
+                max-width: 320px;
+
+                h1 {
+                    font-size: 2.25rem;
+                }
+            }
+        }
+    }
 }

@@ -1,18 +1,25 @@
 .learn-wrapper {
-    position: absolute;
-    top: -64px;
-    height: calc(100vh + 64px);
+    // Full-screen study overlay that sits above the global navbar.
+    // (Using fixed + inset avoids the old `top: -64px` hack that left a
+    // light strip of app background peeking above the header.)
+    position: fixed;
+    inset: 0;
     width: 100%;
+    height: 100vh;
+    height: 100dvh; // better fit on mobile browsers with dynamic toolbars
+    background-color: $app-background;
+    z-index: 1100;
+    overflow: hidden;
 
     .learn-header {
         display: flex;
-        position: fixed;
+        position: absolute;
         z-index: 1000;
         background-color: white;
         box-shadow: 0 0.25rem 1rem 0 #2e385614;
-        transition: all 1s ease;
         height: 64px;
         top: 0;
+        left: 0;
         width: 100%;
 
         .left-header,
@@ -50,28 +57,40 @@
     }
 
     .learn-body {
-        margin-top: 128px;
-        height: 100vh;
+        margin-top: 64px; // clear the fixed header only
+        height: calc(100vh - 64px);
+        height: calc(100dvh - 64px);
         width: 100%;
-        overflow-y: auto;
+        overflow: hidden; // keep everything on one screen, no page scroll
+
+        // On stacked (tablet/mobile) layouts scroll inside the overlay
+        @media (max-width: 960px) {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
 
         .learn-container {
             max-width: 1200px;
+            height: 100%;
             margin: 0 auto;
-            padding: 2rem; // Consistent padding all around
+            padding: 1.25rem 2rem; // tighter vertical rhythm
+            box-sizing: border-box;
 
             &.learn-page-grid {
                 display: grid;
                 grid-template-columns: 1.5fr 1fr;
-                gap: 2rem;
-                align-items: start;
+                gap: 1.5rem;
+                align-items: stretch; // columns share the full height
+                height: 100%;
+                min-height: 0;
             }
 
             // --- Left Column ---
             .learn-left-col {
                 display: flex;
                 flex-direction: column;
-                gap: 2rem;
+                gap: 1rem;
+                min-height: 0; // allow the flip card to shrink to fit
 
                 .progress-bar-container {
                     width: 100%;
@@ -91,7 +110,9 @@
                 .flip-card {
                     perspective: 1000px;
                     width: 100%;
-                    height: 480px; // Taller card
+                    flex: 1 1 auto; // grow/shrink to fill remaining height
+                    min-height: 240px;
+                    max-height: 440px;
                     cursor: pointer;
                     background-color: transparent;
 
@@ -124,9 +145,9 @@
                         flex-direction: column;
                         align-items: center;
                         justify-content: center;
-                        padding: 3rem;
+                        padding: 2rem;
                         text-align: center;
-                        min-height: 20rem;
+                        min-height: 0;
 
                         .star-btn {
                             position: absolute;
@@ -192,6 +213,12 @@
                     .flip-card-back {
                         transform: rotateY(180deg);
                         color: #2e3856;
+
+                        .term-pronunciation {
+                            color: #4255ff;
+                            font-size: 1.1rem;
+                            margin-bottom: 0.5rem;
+                        }
 
                         h1 {
                             font-size: 1.8rem;
@@ -261,23 +288,60 @@
 
                 .definition-card {
                     background: white;
-                    padding: 2.5rem;
+                    padding: 1.25rem 1.75rem;
                     border-radius: 1.5rem;
                     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 
                     h3 {
-                        margin: 0 0 1.5rem 0;
+                        margin: 0 0 0.75rem 0;
                         font-size: 1.2rem;
                         color: #2e3856;
                         font-weight: 700;
                     }
 
+                    .definition-header {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        flex-wrap: wrap;
+                        gap: 0.5rem;
+
+                        h3 {
+                            margin: 0 0 0.5rem 0;
+                        }
+
+                        .word-meta {
+                            display: flex;
+                            align-items: center;
+                            gap: 0.75rem;
+                            margin-bottom: 0.5rem;
+                        }
+
+                        .word-type-badge {
+                            background: #eef1ff;
+                            color: #4255ff;
+                            font-weight: 600;
+                            font-size: 0.85rem;
+                            padding: 0.2rem 0.7rem;
+                            border-radius: 1rem;
+                            text-transform: capitalize;
+                        }
+
+                        .pronunciation-text {
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 0.2rem;
+                            color: #666;
+                            font-size: 1rem;
+                        }
+                    }
+
                     .definition-content {
                         p {
-                            font-size: 1.2rem;
-                            line-height: 1.7;
+                            font-size: 1.1rem;
+                            line-height: 1.6;
                             color: #444;
-                            margin-bottom: 2rem;
+                            margin-bottom: 0.5rem;
                         }
 
                         .definition-meta {
@@ -311,19 +375,111 @@
             .learn-right-col {
                 display: flex;
                 flex-direction: column;
-                gap: 1.5rem;
+                gap: 1rem;
+                min-height: 0;
+                overflow-y: auto; // keep extra detail in-column instead of scrolling the page
+                padding-right: 0.35rem;
+
+                // Slim, unobtrusive scrollbar
+                scrollbar-width: thin;
+                scrollbar-color: #d6dbff transparent;
+
+                &::-webkit-scrollbar {
+                    width: 6px;
+                }
+
+                &::-webkit-scrollbar-thumb {
+                    background: #d6dbff;
+                    border-radius: 3px;
+                }
 
                 .info-card {
                     background: white;
-                    padding: 1.5rem;
+                    padding: 1rem 1.25rem;
                     border-radius: 1rem;
                     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 
                     h3 {
-                        margin: 0 0 1rem 0;
-                        font-size: 1.1rem;
+                        margin: 0 0 0.65rem 0;
+                        font-size: 1.05rem;
                         color: #2e3856;
                         font-weight: 600;
+                    }
+
+                    .chip-group {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 0.5rem;
+                    }
+
+                    .example-list {
+                        margin: 0;
+                        padding-left: 1.1rem;
+
+                        li {
+                            margin-bottom: 0.6rem;
+                            line-height: 1.55;
+                            color: #4a5568;
+                            font-size: 1rem;
+                            display: flex;
+                            align-items: flex-start;
+                            gap: 0.4rem;
+
+                            span {
+                                flex: 1;
+                            }
+
+                            b {
+                                color: #4255ff;
+                            }
+
+                            .example-delete {
+                                flex-shrink: 0;
+                                color: #cbd5e1;
+                                padding: 2px;
+
+                                &:hover {
+                                    color: $error-red;
+                                }
+                            }
+                        }
+                    }
+
+                    // Inline "add synonym / antonym / example" control
+                    .add-item-row {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.4rem;
+                        margin-top: 0.75rem;
+
+                        .add-item-input {
+                            flex: 1;
+                            min-width: 0;
+                            border: 1px solid #e2e8f0;
+                            border-radius: 0.6rem;
+                            padding: 0.45rem 0.7rem;
+                            font-size: 0.9rem;
+                            color: #2e3856;
+                            transition: border-color 0.2s ease;
+
+                            &::placeholder {
+                                color: #aab2c5;
+                            }
+
+                            &:focus {
+                                outline: none;
+                                border-color: #4255ff;
+                            }
+                        }
+
+                        button {
+                            color: #4255ff;
+                            background-color: #eef1ff;
+
+                            &:hover {
+                                background-color: #e0e5ff;
+                            }
+                        }
                     }
 
                     .sentence-box {
@@ -388,7 +544,7 @@
                     .stat-row {
                         display: flex;
                         justify-content: space-between;
-                        padding: 0.8rem 0;
+                        padding: 0.4rem 0;
                         border-bottom: 1px solid #f0f0f0;
                         font-size: 0.95rem;
                         color: #718096;
@@ -407,8 +563,12 @@
 
             // --- Responsive ---
             @media (max-width: 960px) {
+                height: auto;
+
                 &.learn-page-grid {
                     grid-template-columns: 1fr;
+                    height: auto;
+                    align-items: start;
                 }
 
                 gap: 1.5rem;
@@ -416,7 +576,9 @@
 
                 .learn-left-col {
                     .flip-card {
+                        flex: none;
                         height: 400px;
+                        max-height: none;
 
                         .flip-card-front h1 {
                             font-size: 2.5rem;
@@ -426,6 +588,11 @@
                     .learn-navigate .navigate-btns {
                         flex-wrap: wrap;
                     }
+                }
+
+                .learn-right-col {
+                    overflow: visible;
+                    min-height: auto;
                 }
             }
 

@@ -233,7 +233,7 @@ async fn get_learning_terms(
         .ok_or_else(|| AppError::BadRequest("deck_id required".into()))?;
     let did = Uuid::parse_str(deck_id).map_err(|_| AppError::BadRequest("bad deck_id".into()))?;
     let rows: Vec<crate::infrastructure::persistence::rows::TermRow> = sqlx::query_as(
-        r#"SELECT t.id, t.created_at, t.updated_at, t.name, t.description, t.image, t.deck_id
+        r#"SELECT t.id, t.created_at, t.updated_at, t.name, t.meaning, t.image, t.deck_id
            FROM backend_term t
            INNER JOIN backend_userlearningprogress l ON l.term_id = t.id
            WHERE t.deck_id = ? AND l.user_id = ? AND l.is_skip = 0 AND l.score < 5"#,
@@ -249,7 +249,7 @@ async fn get_learning_terms(
             json!({
                 "id": t.id.to_string(),
                 "name": t.name,
-                "description": t.description,
+                "meaning": t.meaning,
                 "image": t.image,
                 "deck": t.deck_id.to_string(),
             })

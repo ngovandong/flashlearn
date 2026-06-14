@@ -6,14 +6,14 @@ describe("generateQuestion", () => {
     {
       id: "1",
       name: "apple",
-      description: "A fruit",
+      meaning: "A fruit",
       image: "",
       learning_progress_id: "lp1",
     },
     {
       id: "2",
       name: "banana",
-      description: "Yellow fruit",
+      meaning: "Yellow fruit",
       image: "",
       learning_progress_id: "lp2",
     },
@@ -21,9 +21,9 @@ describe("generateQuestion", () => {
 
   const allTerms = [
     ...reviseTerms,
-    { id: "3", name: "car", description: "Vehicle", image: "" },
-    { id: "4", name: "dog", description: "Animal", image: "" },
-    { id: "5", name: "egg", description: "Food", image: "" },
+    { id: "3", name: "car", meaning: "Vehicle", image: "" },
+    { id: "4", name: "dog", meaning: "Animal", image: "" },
+    { id: "5", name: "egg", meaning: "Food", image: "" },
   ];
 
   test("generateQuizQuestions builds options with the correct answer", () => {

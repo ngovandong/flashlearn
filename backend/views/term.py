@@ -12,7 +12,8 @@ from ..documents import TermDocument
 from ..models import Term
 from ..permissions import EditableTerm
 from ..serializers import AddTermsToDeckSerializer, TermNestInDeckSerializer, TermSerializer
-from ..services import deck_service, term_service
+from ..services import deck_service, term_enrichment_service, term_service
+from ..shared.infrastructure.ai import AiProviderError
 
 
 class LatestlCursorPagination(CursorPagination):
@@ -109,3 +110,26 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         parsed_data = term_service.parse_multipart_terms(request.data)
         term_service.bulk_update_terms(parsed_data)
         return Response({"message": "Terms updated successfully"})
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["name"],
+            properties={
+                "name": openapi.Schema(type=openapi.TYPE_STRING),
+                "meaning": openapi.Schema(type=openapi.TYPE_STRING),
+            },
+        )
+    )
+    @action(detail=False, methods=["POST"])
+    def ai_enrich(self, request, *args, **kwargs):
+        """Generate Oxford-style fields for a term without persisting them."""
+        name = (request.data.get("name") or "").strip()
+        meaning = request.data.get("meaning") or ""
+        if not name:
+            return Response({"errors": "name is required"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            data = term_enrichment_service.enrich(name, meaning)
+        except AiProviderError as exc:
+            return Response({"errors": str(exc)}, status=status.HTTP_502_BAD_GATEWAY)
+        return Response(data)

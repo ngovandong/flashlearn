@@ -33,7 +33,7 @@ class QuickReviseGame:
         random.shuffle(options)
         return {
             "progressId": current_term.get("learning_progress_id"),
-            "question": current_term["description"],
+            "question": current_term["meaning"],
             "answer": current_term["name"],
             "image": current_term.get("image"),
             "options": options,

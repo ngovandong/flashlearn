@@ -13,12 +13,12 @@ class QuickReviseGameTest(SimpleTestCase):
         self.assertTrue(QuickReviseGame.is_correct("  Hello ", "hello"))
 
     def test_build_question_includes_answer_in_options(self):
-        current = {"id": "1", "name": "cat", "description": "A pet", "image": ""}
+        current = {"id": "1", "name": "cat", "meaning": "A pet", "image": ""}
         all_terms = [
             current,
-            {"id": "2", "name": "dog", "description": "Bark", "image": ""},
-            {"id": "3", "name": "fish", "description": "Swim", "image": ""},
-            {"id": "4", "name": "bird", "description": "Fly", "image": ""},
+            {"id": "2", "name": "dog", "meaning": "Bark", "image": ""},
+            {"id": "3", "name": "fish", "meaning": "Swim", "image": ""},
+            {"id": "4", "name": "bird", "meaning": "Fly", "image": ""},
         ]
         question = QuickReviseGame.build_question(current, all_terms)
         self.assertIn("cat", question["options"])

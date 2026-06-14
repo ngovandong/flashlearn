@@ -25,3 +25,13 @@ class OAuthPort(Protocol):
     def get_access_token(self, code: str, redirect_uri: str) -> str: ...
 
     def get_user_info(self, access_token: str) -> dict[str, Any]: ...
+
+
+class AiTextPort(Protocol):
+    """Provider-agnostic text/JSON generation port.
+
+    Implementations talk to a concrete LLM provider (Gemini, OpenAI, ...) and
+    must return a parsed JSON object that conforms to ``schema`` when given.
+    """
+
+    def generate_json(self, system: str, user: str, schema: dict[str, Any] | None = None) -> dict[str, Any]: ...

@@ -22,6 +22,30 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Corporate TLS interception (e.g. Zscaler) presents certs signed by a private
+# root CA that certifi does not trust, breaking all outbound HTTPS. Set
+# EXTRA_CA_CERTS to that root CA's PEM file and we merge it with certifi so
+# `requests` trusts it. Works both on and off the VPN.
+_EXTRA_CA_CERTS = os.getenv("EXTRA_CA_CERTS")
+if _EXTRA_CA_CERTS and os.path.exists(_EXTRA_CA_CERTS):
+    import tempfile
+
+    import certifi
+
+    _combined_ca_bundle = os.path.join(tempfile.gettempdir(), "flashlearn_ca_bundle.pem")
+    try:
+        with open(certifi.where(), "rb") as _f:
+            _ca_data = _f.read()
+        with open(_EXTRA_CA_CERTS, "rb") as _f:
+            _extra_ca = _f.read()
+        with open(_combined_ca_bundle, "wb") as _f:
+            _f.write(_ca_data + b"\n" + _extra_ca)
+        # requests/urllib honor these env vars automatically.
+        os.environ["REQUESTS_CA_BUNDLE"] = _combined_ca_bundle
+        os.environ["SSL_CERT_FILE"] = _combined_ca_bundle
+    except OSError:
+        pass
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -228,6 +252,11 @@ BASE_FRONTEND_URL = os.getenv("BASE_FRONTEND_URL")
 BASE_BACKEND_URL = os.getenv("BASE_BACKEND_URL")
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv("GOOGLE_OAUTH2_CLIENT_ID")
 GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH2_CLIENT_SECRET")
+# AI provider (provider-agnostic; AI_PROVIDER selects the concrete client)
+AI_PROVIDER = os.getenv("AI_PROVIDER", "gemini")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
+GEMINI_API_BASE = os.getenv("GEMINI_API_BASE", "https://generativelanguage.googleapis.com/v1beta")
 # mail
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "core.email_backend.EmailBackend")
 EMAIL_HOST = "smtp.gmail.com"

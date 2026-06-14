@@ -31,7 +31,7 @@ def fetch_revise_terms(user_id, deck_id, limit: int = 5) -> list[SimpleNamespace
         select(
             term.c.id,
             term.c.name,
-            term.c.description,
+            term.c.meaning,
             term.c.image,
             progress.c.id.label("learning_progress_id"),
             progress.c.total_revisions,
@@ -56,7 +56,7 @@ def fetch_revise_terms(user_id, deck_id, limit: int = 5) -> list[SimpleNamespace
         SimpleNamespace(
             id=as_uuid(row["id"]),
             name=row["name"],
-            description=row["description"],
+            meaning=row["meaning"],
             image=row["image"],
             learning_progress_id=as_uuid(row["learning_progress_id"]),
             total_revisions=row["total_revisions"],

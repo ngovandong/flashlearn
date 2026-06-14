@@ -94,7 +94,7 @@ impl ElasticsearchClient {
             should.push(json!({
                 "multi_match": {
                     "query": q,
-                    "fields": ["name", "description", "deck.name"]
+                    "fields": ["name", "meaning", "deck.name"]
                 }
             }));
         }

@@ -21,7 +21,7 @@ export function generateQuizQuestions(reviseTerms, allTerms) {
       type: QUESTION_TYPES.QUIZ,
       id: term.id,
       image: term.image,
-      question: term.description,
+      question: term.meaning,
       options,
       answer: term.name,
       progressId: term.learning_progress_id,
@@ -36,7 +36,7 @@ export function generateFillQuestions(terms) {
     type: QUESTION_TYPES.FILL,
     id: term.id,
     image: term.image,
-    question: term.description,
+    question: term.meaning,
     answer: term.name,
     progressId: term.learning_progress_id,
   }));

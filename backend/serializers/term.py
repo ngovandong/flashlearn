@@ -2,13 +2,25 @@ from rest_framework import serializers
 
 from ..models import Term
 
+AI_FIELDS = (
+    "word_type",
+    "pronunciation",
+    "definition",
+    "synonyms",
+    "antonyms",
+    "examples",
+    "word_forms",
+    "word_family",
+    "ai_filled",
+)
+
 
 class TermSerializer(serializers.ModelSerializer):
     total_revisions = serializers.IntegerField(read_only=True, default=0)
 
     class Meta:
         model = Term
-        fields = ("id", "name", "description", "image", "deck", "total_revisions")
+        fields = ("id", "name", "meaning", "image", "deck", "total_revisions", *AI_FIELDS)
 
 
 class TermNestInDeckSerializer(serializers.ModelSerializer):
@@ -16,7 +28,7 @@ class TermNestInDeckSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Term
-        fields = ("id", "name", "description", "image")
+        fields = ("id", "name", "meaning", "image", *AI_FIELDS)
 
 
 class OnlyNameTermSerializer(serializers.ModelSerializer):
@@ -32,7 +44,7 @@ class ProgressTermSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Term
-        fields = ("id", "name", "description", "image", "learning_progress_id", "total_revisions")
+        fields = ("id", "name", "meaning", "image", "learning_progress_id", "total_revisions")
 
 
 class ReviseTermSerializer(serializers.Serializer):

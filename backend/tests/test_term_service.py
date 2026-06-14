@@ -19,12 +19,12 @@ class FakeTermRepository:
 
     def get_random_terms(self, deck_id):
         return [
-            SimpleNamespace(id="t1", name="alpha", description="desc", image="", learning_progress_id=None),
+            SimpleNamespace(id="t1", name="alpha", meaning="desc", image="", learning_progress_id=None),
         ]
 
     def get_revise_terms(self, user, deck_id):
         return [
-            SimpleNamespace(id="t1", name="alpha", description="desc", image="", learning_progress_id="lp1"),
+            SimpleNamespace(id="t1", name="alpha", meaning="desc", image="", learning_progress_id="lp1"),
         ]
 
     def get_deck_name(self, deck_id):
@@ -41,7 +41,7 @@ class FakeTermRepository:
     def bulk_create(self, deck_id, terms_data):
         self.bulk_created.extend(terms_data)
 
-    def update_term(self, term_id, name, description, image):
+    def update_term(self, term_id, **fields):
         return None
 
 
@@ -95,5 +95,5 @@ class TermServiceUnitTest(SimpleTestCase):
 
     def test_add_terms_delegates_to_repository(self):
         deck = FakeDeck()
-        self.service.add_terms(deck, deck.owner, [{"name": "one", "description": "", "image": ""}])
+        self.service.add_terms(deck, deck.owner, [{"name": "one", "meaning": "", "image": ""}])
         self.assertEqual(len(self.repo.bulk_created), 1)

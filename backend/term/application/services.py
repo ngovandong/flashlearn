@@ -1,3 +1,4 @@
+import json
 import re
 from typing import Any
 
@@ -8,6 +9,45 @@ from backend.shared.application.dtos import ReviseTermRow
 from backend.shared.application.exceptions import ConflictError, NotFoundError, PermissionDeniedError, ValidationError
 from backend.shared.infrastructure.cloudinary import default_image_storage
 from backend.term.infrastructure.repository import TermRepository
+
+_AI_STR_FIELDS = ("word_type", "pronunciation", "definition")
+_AI_LIST_FIELDS = ("synonyms", "antonyms", "examples", "word_forms", "word_family")
+
+
+def _coerce_list(value: Any) -> list:
+    if isinstance(value, list):
+        return value
+    if isinstance(value, str) and value.strip():
+        try:
+            parsed = json.loads(value)
+        except (ValueError, TypeError):
+            return []
+        return parsed if isinstance(parsed, list) else []
+    return []
+
+
+def _coerce_bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in ("true", "1", "yes")
+
+
+def _extract_ai_fields(data: dict) -> dict:
+    """Pull AI-generated/override fields out of a request payload, coercing types."""
+    fields: dict[str, Any] = {}
+    for key in _AI_STR_FIELDS:
+        if data.get(key) is not None:
+            fields[key] = data[key]
+    for key in _AI_LIST_FIELDS:
+        if key in data:
+            fields[key] = _coerce_list(data[key])
+    if "ai_filled" in data:
+        fields["ai_filled"] = _coerce_bool(data["ai_filled"])
+    return fields
+
+
+def _meaning_of(data: dict) -> str:
+    return data.get("meaning", data.get("description", "")) or ""
 
 
 class TermService:
@@ -64,8 +104,9 @@ class TermService:
         return self._term_repo.create(
             deck_id,
             name=name,
-            description=data.get("description", ""),
+            meaning=_meaning_of(data),
             image=normalized_image or "",
+            **_extract_ai_fields(data),
         )
 
     def add_to_default_deck(self, user, data, image_storage=None):
@@ -84,9 +125,18 @@ class TermService:
             raise NotFoundError("deck not found")
         if not DeckAccessPolicy.can_edit(deck, user):
             raise PermissionDeniedError("user has no permission.")
+        normalized = []
         for term in terms_data:
             self._validate_name(term.get("name"))
-        self._term_repo.bulk_create(deck.id, terms_data)
+            normalized.append(
+                {
+                    "name": term["name"],
+                    "meaning": _meaning_of(term),
+                    "image": term.get("image", ""),
+                    **_extract_ai_fields(term),
+                }
+            )
+        self._term_repo.bulk_create(deck.id, normalized)
 
     def bulk_update_terms(self, terms_data):
         for item in terms_data:
@@ -95,10 +145,14 @@ class TermService:
             self._validate_name(item.get("name"))
             self._term_repo.update_term(
                 item["id"],
-                item["name"],
-                item.get("description", ""),
-                item.get("image", ""),
+                name=item["name"],
+                meaning=_meaning_of(item),
+                image=item.get("image", ""),
+                **_extract_ai_fields(item),
             )
+
+    # term[i][<property>] keys passed straight through (coerced later by _extract_ai_fields)
+    _PASSTHROUGH_PROPERTIES = ("id", "name", "meaning", "description", *_AI_STR_FIELDS, *_AI_LIST_FIELDS, "ai_filled")
 
     def parse_multipart_terms(self, formdata, image_storage=None):
         storage = image_storage or self._image_storage
@@ -108,14 +162,10 @@ class TermService:
             term_property = key.split("[")[2].split("]")[0]
             if len(parsed_data) < term_index + 1:
                 parsed_data.append({})
-            if term_property == "id":
-                parsed_data[term_index]["id"] = value
-            elif term_property == "name":
-                parsed_data[term_index]["name"] = value
-            elif term_property == "description":
-                parsed_data[term_index]["description"] = value
-            elif term_property == "image":
+            if term_property == "image":
                 parsed_data[term_index]["image"] = self.upload_image_if_needed(value, storage)
+            elif term_property in self._PASSTHROUGH_PROPERTIES:
+                parsed_data[term_index][term_property] = value
         return parsed_data
 
     def parse_add_terms_payload(self, data, image_storage=None):
@@ -127,12 +177,10 @@ class TermService:
                 term_property = key.split("[")[2].split("]")[0]
                 if len(parsed_dict["terms"]) < term_index + 1:
                     parsed_dict["terms"].append({})
-                if term_property == "name":
-                    parsed_dict["terms"][term_index]["name"] = value
-                elif term_property == "description":
-                    parsed_dict["terms"][term_index]["description"] = value
-                elif term_property == "image":
+                if term_property == "image":
                     parsed_dict["terms"][term_index]["image"] = self.upload_image_if_needed(value, storage)
+                elif term_property in self._PASSTHROUGH_PROPERTIES:
+                    parsed_dict["terms"][term_index][term_property] = value
         return parsed_dict
 
     def get_revise_terms(self, user, deck_id):

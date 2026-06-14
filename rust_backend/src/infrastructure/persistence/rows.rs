@@ -40,7 +40,7 @@ pub struct TermRow {
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub name: String,
-    pub description: String,
+    pub meaning: String,
     pub image: Option<String>,
     pub deck_id: MysqlUuid,
 }
