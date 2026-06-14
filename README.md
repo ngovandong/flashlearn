@@ -1,12 +1,149 @@
-# FlashLearn
+<div align="center">
 
-FlashLearn is a web application built with Django (Backend) and React (Frontend).
+# 🐉 FlashLearn
 
-## Tech Stack
+#### *Learn faster. Speak better. Remember forever.*
 
-- **Backend**: Django, Django Rest Framework (DRF), MySQL, Redis, Elasticsearch
-- **Frontend**: React, Material UI, Redux Toolkit
-- **Infrastructure**: Docker (implied by Dockerfile)
+A flashcard study platform with **AI term enrichment**, an **AI Speaking Coach**,
+real-time **multiplayer revision**, a **Chrome extension**, and a dual
+**Django + Rust** backend sharing one database.
+
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![Django](https://img.shields.io/badge/Django-4.2-092E20?logo=django&logoColor=white)
+![Rust](https://img.shields.io/badge/Rust-2021-000000?logo=rust&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
+![MUI](https://img.shields.io/badge/MUI-7-007FFF?logo=mui&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-6-DC382D?logo=redis&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini_AI-multimodal-8E75B2?logo=googlegemini&logoColor=white)
+
+</div>
+
+> [!IMPORTANT]
+> 📐 **New here? Read [`ARCHITECTURE.md`](./ARCHITECTURE.md)** — a fully
+> illustrated, diagram-driven tour of the system: bounded contexts, the data
+> model, the AI engine (failover + rate gate), the Speaking Coach flow, the
+> realtime game, and deployment. The notes below cover **build, run, worker,
+> Docker, and testing**.
+
+## What's inside
+
+| Area | Highlights |
+|------|-----------|
+| 🧠 **Study** | Decks & flashcards, Learn / Revise / Quiz / Fill / Number Test modes |
+| ✨ **AI** | Term enrichment (word → Oxford-style entry), image crawler, translation |
+| 🗣️ **Speaking Coach** | AI dialogue + TTS + per-word pronunciation scoring (Gemini multimodal) |
+| 🎮 **Realtime** | Multiplayer Quick-Revise game over WebSockets (Django Channels) |
+| 👥 **Social** | Public deck cloning, OWNER/EDIT/VIEW roles, invites |
+| 🧩 **Extension** | Select text on any page → translate → save to your default deck |
+
+## 🧰 Tech stack
+
+<table>
+<tr><th>Layer</th><th>Technology</th><th>Role in FlashLearn</th></tr>
+
+<tr><td rowspan="6"><b>🐍 Django backend</b><br/><sub>primary API</sub></td>
+<td>Python 3.11 · Django 4.2</td><td>Core web framework, ORM, migrations (owns the schema)</td></tr>
+<tr><td>Django REST Framework 3.15</td><td>ViewSets, serializers, the REST API surface</td></tr>
+<tr><td>Django Channels 4 + Daphne</td><td>ASGI server & WebSockets for the multiplayer game</td></tr>
+<tr><td>SQLAlchemy 2 (read side)</td><td>Hand‑tuned read queries alongside the Django ORM</td></tr>
+<tr><td>django‑rq + rq‑scheduler</td><td>Background jobs & cron (emails, cache cleanup, backups)</td></tr>
+<tr><td>drf‑yasg</td><td>Swagger / ReDoc API docs (DEBUG only)</td></tr>
+
+<tr><td rowspan="4"><b>🦀 Rust backend</b><br/><sub>opt‑in replacement</sub></td>
+<td>Rust 2021 · Axum 0.7</td><td>High‑performance partial re‑implementation of the API</td></tr>
+<tr><td>SQLx 0.8 · Tokio 1</td><td>Async MySQL access over the same schema</td></tr>
+<tr><td>JWT · pbkdf2</td><td>Token validation & Django‑compatible password checks</td></tr>
+<tr><td>DDD layering</td><td>domain / application / infrastructure / interfaces</td></tr>
+
+<tr><td rowspan="6"><b>⚛️ React frontend</b></td>
+<td>React 18</td><td>SPA UI</td></tr>
+<tr><td>Material UI 7 + Emotion</td><td>Component library & styling</td></tr>
+<tr><td>Redux Toolkit 2 + React‑Redux</td><td>Global state</td></tr>
+<tr><td>TanStack Query 5</td><td>Server‑state caching & fetching</td></tr>
+<tr><td>React Router 7</td><td>Routing</td></tr>
+<tr><td>Sass + CSS custom properties</td><td>Runtime theming (light/dark + palettes)</td></tr>
+
+<tr><td rowspan="4"><b>🗄️ Data & infra</b></td>
+<td>MySQL 8</td><td>System of record (shared by both backends)</td></tr>
+<tr><td>Redis 6</td><td>Cache, RQ queue, Channels layer, AI rate‑gate</td></tr>
+<tr><td>Elasticsearch 8</td><td>Full‑text deck & term search</td></tr>
+<tr><td>Cloudinary</td><td>Image storage / optimization</td></tr>
+
+<tr><td rowspan="4"><b>🤖 AI & external</b></td>
+<td>Google Gemini</td><td>Multimodal: term enrichment, dialogue, TTS, pronunciation</td></tr>
+<tr><td>OpenRouter</td><td>Text/JSON fallback provider</td></tr>
+<tr><td>Google OAuth</td><td>Social login</td></tr>
+<tr><td>Playwright (Chromium)</td><td>Headless fallback for the Google image crawler</td></tr>
+
+<tr><td><b>🧩 Extension</b></td>
+<td>React + Chrome MV3</td><td>Select‑text‑to‑save on any web page</td></tr>
+
+<tr><td><b>🚢 Delivery</b></td>
+<td>Docker Compose · Podman · Nginx</td><td>Local, dev hot‑reload, and self‑service deployment</td></tr>
+</table>
+
+## 🗺️ System architecture (bird's‑eye view)
+
+```mermaid
+flowchart TB
+    subgraph clients["👥 Clients"]
+        Web["⚛️ React SPA<br/>(port 3000)"]
+        Ext["🧩 Chrome Extension"]
+    end
+
+    Nginx{{"🔀 Nginx<br/>reverse proxy"}}
+
+    subgraph backends["⚙️ Backends — one port (8005), not run together"]
+        Django["🐍 Django + DRF<br/>+ Channels/Daphne"]
+        Rust["🦀 Rust + Axum<br/>(opt-in)"]
+    end
+
+    Worker["⏰ RQ Worker + Scheduler<br/>(jobs & cron)"]
+
+    subgraph data["🗄️ Shared data layer"]
+        MySQL[("MySQL 8<br/>system of record")]
+        Redis[("Redis<br/>cache · queue · channels · AI gate")]
+        ES[("Elasticsearch<br/>search")]
+    end
+
+    subgraph ext["🌐 External services"]
+        Gemini["🤖 Gemini"]
+        OpenRouter["🤖 OpenRouter"]
+        Cloud["🖼️ Cloudinary"]
+        OAuth["🔐 Google OAuth"]
+    end
+
+    Web --> Nginx
+    Ext --> Nginx
+    Nginx --> Django
+    Nginx -. swap .-> Rust
+
+    Django <--> MySQL
+    Django <--> Redis
+    Django <--> ES
+    Rust <--> MySQL
+    Rust <--> Redis
+    Rust <--> ES
+
+    Django --> Gemini & OpenRouter & Cloud & OAuth
+    Worker <--> Redis
+    Worker <--> MySQL
+    Worker --> Gemini
+
+    classDef store fill:#0b3d4d,stroke:#06b6d4,color:#fff
+    classDef svc fill:#3b2a5a,stroke:#a78bfa,color:#fff
+    class MySQL,Redis,ES store
+    class Gemini,OpenRouter,Cloud,OAuth svc
+```
+
+> [!NOTE]
+> **Both backends speak the same database and the same port 8005.** They are
+> *never* run simultaneously — the Rust backend is an opt‑in, in‑progress
+> performance re‑implementation. **Django owns all migrations**; Rust only
+> reads/writes the schema Django defines.
+
+> See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full set of diagrams (data model, AI engine, Speaking Coach, realtime game) and [`CLAUDE.md`](./CLAUDE.md) for the architecture reference.
 
 ## Setup
 
@@ -242,3 +379,18 @@ Run backend tests:
 ```bash
 python manage.py test backend.tests
 ```
+
+### Image crawler testing
+
+The image search API lives at `POST /api/images/` (`backend/services/crawler.py`). Google uses Playwright when HTTP scraping is blocked — install the browser once:
+
+```bash
+uv run playwright install chromium
+```
+
+| Command | Purpose |
+|---------|---------|
+| `uv run python manage.py test backend.tests.test_crawler.GoogleImageParserTest -v 2` | Unit test (offline) |
+| `CRAWLER_INTEGRATION=1 uv run python manage.py test backend.tests.test_crawler.CrawlerStrategyBenchmarkTest -v 2` | Live benchmark all 4 providers |
+
+Use `CRAWLER_BENCHMARK_QUERY` and `CRAWLER_BENCHMARK_COUNT` to change the search term and result count. Set `CRAWLER_GOOGLE_SKIP_PLAYWRIGHT=1` to disable Google on low-memory servers.

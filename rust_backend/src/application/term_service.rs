@@ -18,7 +18,7 @@ pub struct OnlyName {
 pub struct ProgressTerm {
     pub id: Uuid,
     pub name: String,
-    pub description: String,
+    pub meaning: String,
     pub image: Option<String>,
     pub learning_progress_id: Uuid,
 }
@@ -54,7 +54,7 @@ pub async fn get_revise_terms_data(
     .await?;
 
     let revise_rows: Vec<(MysqlUuid, String, String, Option<String>, MysqlUuid)> = sqlx::query_as(
-        r#"SELECT t.id, t.name, t.description, t.image, l.id
+        r#"SELECT t.id, t.name, t.meaning, t.image, l.id
            FROM backend_term t
            INNER JOIN backend_userlearningprogress l ON t.id = l.term_id
            WHERE t.deck_id = ? AND l.user_id = ? AND l.is_skip = 0
@@ -76,10 +76,10 @@ pub async fn get_revise_terms_data(
 
     let revise_terms: Vec<ProgressTerm> = revise_rows
         .into_iter()
-        .map(|(id, name, description, image, lp_id)| ProgressTerm {
+        .map(|(id, name, meaning, image, lp_id)| ProgressTerm {
             id: id.into(),
             name,
-            description,
+            meaning,
             image,
             learning_progress_id: lp_id.into(),
         })

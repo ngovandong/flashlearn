@@ -54,9 +54,19 @@ function Login() {
 
     const access = searchParams.get("access");
     const refresh = searchParams.get("refresh");
+    const userParam = searchParams.get("user");
     if (access && refresh) {
-      sendTokenToExtension({ access, refresh });
-      dispatch(setToken({ access, refresh }));
+      let user = null;
+      if (userParam) {
+        try {
+          user = JSON.parse(atob(userParam));
+        } catch {
+          // ignore malformed user payload
+        }
+      }
+      const tokenPayload = user ? { access, refresh, user } : { access, refresh };
+      sendTokenToExtension(tokenPayload);
+      dispatch(setToken(tokenPayload));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -94,7 +104,7 @@ function Login() {
             type="email"
             onChange={(e) => setEmail(e.target.value)}
             name="email"
-            placeholder="Enter your email address..."
+            placeholder="Enter your email address…"
             value={email}
             required
             tabIndex={1}
@@ -113,7 +123,7 @@ function Login() {
             type="password"
             onChange={(e) => setPassword(e.target.value)}
             name="password"
-            placeholder="Enter your password..."
+            placeholder="Enter your password…"
             value={password}
             required
             onKeyDown={handleKeyDown}

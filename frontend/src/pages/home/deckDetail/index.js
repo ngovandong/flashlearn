@@ -17,11 +17,11 @@ import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import CircularProgressWithLabel from "@components/progress";
 import FooterBTNs from "./footerButtons";
 
-function MenuButton({ icon, text, link, isDisabled })
+function MenuButton({ icon, text, link, isDisabled, tour })
 {
   const IconName = icon;
   return (
-    <div className={`menu-btn${isDisabled ? " lock" : ""}`}>
+    <div className={`menu-btn${isDisabled ? " lock" : ""}`} data-tour={tour}>
       <Link to={link} className="menu-link">
         <IconName color={isDisabled ? "grey" : "purple"} />
         <span>{text}</span>
@@ -99,18 +99,21 @@ function DeckDetail()
             <MenuButton
               link="learn"
               text="Learn"
+              tour="deck-learn"
               isDisabled={!deck.my_permission}
               icon={LocalLibraryIcon}
             />
             <MenuButton
               link="revise"
               text="Revise"
+              tour="deck-revise"
               isDisabled={!deck.my_permission}
               icon={CollectionsBookmarkIcon}
             />
             <MenuButton
               link="quick-revise"
               text="Quick Revise"
+              tour="deck-quick-revise"
               isDisabled={!deck.my_permission}
               icon={TimerIcon}
             />

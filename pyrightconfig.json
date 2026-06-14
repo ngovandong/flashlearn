@@ -1,0 +1,19 @@
+{
+  "include": ["backend", "core", "base"],
+  "exclude": [
+    "**/migrations",
+    "**/tests",
+    "**/__pycache__",
+    ".venv"
+  ],
+  "venvPath": ".",
+  "venv": ".venv",
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "basic",
+  "reportMissingImports": true,
+  "reportMissingModuleSource": false,
+  "reportIncompatibleMethodOverride": false,
+  "reportIncompatibleVariableOverride": false,
+  "reportAttributeAccessIssue": "warning",
+  "reportGeneralTypeIssues": "warning"
+}

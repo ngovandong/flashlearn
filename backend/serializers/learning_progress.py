@@ -28,3 +28,8 @@ class ProgressSerializer(serializers.Serializer):
     completed = serializers.IntegerField()
     left = serializers.IntegerField()
     learned_today = serializers.IntegerField()
+
+
+class LearningStreakSerializer(serializers.Serializer):
+    streak = serializers.IntegerField()
+    studied_today = serializers.BooleanField()

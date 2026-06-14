@@ -18,6 +18,12 @@ pub struct ProgressBreakdown {
     pub learned_today: i64,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LearningStreak {
+    pub streak: i64,
+    pub studied_today: bool,
+}
+
 fn utc_naive_to_local_date(ndt: NaiveDateTime, tz: Tz) -> chrono::NaiveDate {
     Utc.from_utc_datetime(&ndt).with_timezone(&tz).date_naive()
 }
@@ -84,6 +90,33 @@ pub async fn get_learning_progress(
     }
 
     Ok((deck_term, progress))
+}
+
+pub async fn record_study_activity(state: &AppState, user_id: impl Into<Uuid>) -> Result<()> {
+    let user_id = user_id.into();
+    crate::infrastructure::persistence::users::record_study_activity(
+        &state.db.pool,
+        user_id,
+        state.settings.app_timezone,
+    )
+    .await
+}
+
+pub fn get_learning_streak(state: &AppState, user: &crate::infrastructure::persistence::rows::UserRow) -> LearningStreak {
+    let tz = state.settings.app_timezone;
+    let today = Utc::now().with_timezone(&tz).date_naive();
+    let yesterday = today.pred_opt().unwrap_or(today);
+    let last = user.last_study_date;
+    let studied_today = last == Some(today);
+    let streak = if last == Some(today) || last == Some(yesterday) {
+        i64::from(user.learning_streak_count)
+    } else {
+        0
+    };
+    LearningStreak {
+        streak,
+        studied_today,
+    }
 }
 
 pub async fn clear_learning_progress(

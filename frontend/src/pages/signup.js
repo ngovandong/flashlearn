@@ -23,7 +23,7 @@ function SignUp() {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      setError("Password not match!");
+      setError("Passwords don't match.");
     } else {
       let url = "";
       if (avatar) {
@@ -54,7 +54,7 @@ function SignUp() {
           setError(errorMessage);
         }
       } catch (error) {
-        setError("Something Wrong!");
+        setError("Something went wrong. Please try again.");
       } finally {
         dispatch(setLoading(false));
       }
@@ -81,7 +81,7 @@ function SignUp() {
             type="text"
             onChange={(e) => setFirstName(e.target.value)}
             name="first_name"
-            placeholder="Enter your first name..."
+            placeholder="Enter your first name…"
             value={firstName}
             required
           />
@@ -92,7 +92,7 @@ function SignUp() {
             type="text"
             onChange={(e) => setLastName(e.target.value)}
             name="last_name"
-            placeholder="Enter your last name..."
+            placeholder="Enter your last name…"
             value={lastName}
             required
           />
@@ -103,7 +103,7 @@ function SignUp() {
             type="email"
             onChange={(e) => setEmail(e.target.value)}
             name="email"
-            placeholder="Enter your email address..."
+            placeholder="Enter your email address…"
             value={email}
             required
           />
@@ -112,7 +112,7 @@ function SignUp() {
           <label>Avatar</label>
           <label htmlFor="custom-file-upload" className="filupp">
             <span className="filupp-file-name">
-              {avatar ? avatar.name : "Browse Files"}
+              {avatar ? avatar.name : "Browse files"}
             </span>
             <input
               type="file"
@@ -128,7 +128,7 @@ function SignUp() {
             type="password"
             onChange={(e) => setPassword(e.target.value)}
             name="password"
-            placeholder="Enter your password..."
+            placeholder="Enter your password…"
             value={password}
             required
           />
@@ -139,7 +139,7 @@ function SignUp() {
             type="password"
             onChange={(e) => setConfirmPassword(e.target.value)}
             name="confirm_password"
-            placeholder="Confirm your password..."
+            placeholder="Confirm your password…"
             value={confirmPassword}
             required
           />
@@ -150,7 +150,7 @@ function SignUp() {
           <div className="bottom-text">
             <p>Already have an account?</p>
             <Link className="link" to="/login">
-              Log In
+              Log in
             </Link>
           </div>
         </form>

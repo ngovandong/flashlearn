@@ -9,9 +9,9 @@ class LearningService extends BaseService {
       params: { deck_id, page },
     });
   };
-  getLatestLearnedTerm = (deck_id) => {
+  getLatestLearnedTerm = (deck_id, term_id) => {
     return this.request.get(this.action("get_latest_learned_term"), {
-      params: { deck_id },
+      params: { deck_id, ...(term_id ? { term_id } : {}) },
     });
   };
   getReviseTerms = (deck_id) => {

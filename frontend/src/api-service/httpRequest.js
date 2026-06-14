@@ -26,7 +26,7 @@ let failedQueue = [];
 
 const refreshToken = async (error) => {
   if (error.code === "ERR_NETWORK") {
-    return { error: "Server Error" };
+    return { error: "Network error. Please check your connection." };
   }
   const token = getCurrentToken();
   if (error.response?.status === 401 && token) {
@@ -72,6 +72,15 @@ function processQueue(error, token = null) {
 }
 
 axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
+
+// Endpoints that hit an external AI provider can now queue behind the backend's
+// global rate-limit gate (AI_GATE_MAX_WAIT, ~120s) on top of the provider call
+// itself (GEMINI_TIMEOUT, ~90s), so they need a much longer client timeout than
+// a normal request. Pass `{ timeout: AI_REQUEST_TIMEOUT }` on AI calls so they
+// tolerate the wait but still fail cleanly instead of hanging forever.
+export const AI_REQUEST_TIMEOUT = Number(
+  process.env.REACT_APP_AI_REQUEST_TIMEOUT || 240000
+);
 
 const request = axios.create();
 

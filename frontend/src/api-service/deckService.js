@@ -8,17 +8,17 @@ class DeckService extends BaseService {
   getMyDecks = () => {
     return this.request.get(this.action("my_decks"));
   };
-  getPublicDecks = () => {
-    return this.request.get(this.action("public_decks"));
+  getPublicDecks = (page = 1) => {
+    return this.request.get(this.action("public_decks"), { params: { page } });
   };
-  getMyOwnDecks = () => {
-    return this.request.get(this.action("my_own_decks"));
+  getMyOwnDecks = (page = 1) => {
+    return this.request.get(this.action("my_own_decks"), { params: { page } });
   };
   getLatestDeck = () => {
     return this.request.get(this.action("latest_decks"));
   };
-  getOthersDeck = () => {
-    return this.request.get(this.action("others_deck"));
+  getOthersDeck = (page = 1) => {
+    return this.request.get(this.action("others_deck"), { params: { page } });
   };
   getInviteUrl = (id, role) => {
     return this.request.post(this.detailAction(id, "get_invite_url"), { role });

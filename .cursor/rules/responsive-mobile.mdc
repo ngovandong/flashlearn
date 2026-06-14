@@ -1,0 +1,55 @@
+---
+description: All new/updated frontend UI must stay responsive and not break the mobile layout
+globs: frontend/src/**
+alwaysApply: false
+---
+
+# Mobile responsiveness is required for all UI
+
+Flashlearn renders at `width=device-width` (`frontend/public/index.html`), so
+every screen is used on phones. Whenever you ADD or UPDATE UI, it MUST adapt
+down to small viewports without horizontal scroll, overflow, clipped content, or
+overlapping elements. Mentally verify at ~375px wide before finishing.
+
+## Where responsive rules live
+
+- **Global, cross-page overrides** → `frontend/src/styles/sass/base/_media_queries.scss`.
+- **Component-local overrides** → a nested `@media` block inside that
+  component's own SCSS partial (this is the common pattern in
+  `components/home/*.scss`).
+- Use the project's existing breakpoints — don't invent new ones:
+  `480px` (small phone), `600px` (phone, primary mobile bp), `725px` / `850px` /
+  `900px` / `960px` (tablet). Author desktop-first with `max-width`.
+
+## Rules
+
+- **No fixed pixel widths that exceed a phone.** Prefer `%`, `max-width`,
+  `flex`, `minmax()`, or `min(…, 100%)`. Any element with a wide fixed `width`
+  needs a `max-width: 600px` override collapsing it to `width: 100%`.
+- **Reflow rows on mobile.** Horizontal `display: flex` rows of cards/inputs/
+  buttons must `flex-wrap: wrap` or switch to `flex-direction: column` at the
+  phone breakpoint, with full-width children.
+- **Tap targets ≥ 44px.** Buttons/links/icons must stay comfortably tappable;
+  don't shrink them below ~44px tall on mobile.
+- **Don't hardcode large min-widths or fixed heights** on containers; let
+  content drive height (`height: auto`) on small screens — see how `.term-card`
+  is handled in `_media_queries.scss`.
+- **MUI**: use responsive props instead of static values, e.g.
+  `sx={{ flexDirection: { xs: "column", sm: "row" }, width: { xs: "100%", sm: 320 } }}`.
+  Avoid `<Grid item md={4}>` without an `xs` value.
+- Combine with the theme rule — responsive overrides must still use theme tokens.
+
+## Example
+
+```scss
+// ❌ BAD — fixed width, never collapses, overflows a phone
+.info-input-card { width: 480px; display: flex; }
+
+// ✅ GOOD — fluid, then stack at the phone breakpoint
+.info-input-card { width: 480px; max-width: 100%; display: flex; }
+
+@media (max-width: 600px) {
+    .create-deck__info { flex-direction: column; }
+    .info-input-card { width: 100% !important; }
+}
+```

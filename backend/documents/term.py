@@ -22,4 +22,4 @@ class TermDocument(Document):
 
     class Django:
         model = Term
-        fields = ["id", "name", "description", "image"]
+        fields = ["id", "name", "meaning", "image"]

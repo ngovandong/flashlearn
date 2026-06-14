@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { setError, setToken } from "@app/store/authSlice";
 import authService from "@api-services/authService";
 import { getFirstError } from "@utils/errorHandler";
+import { toast } from "react-toastify";
 import { sendTokenToExtension } from "@utils/extensionLogin";
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -28,7 +29,9 @@ function CustomPopupGoogleLoginBT() {
     await authService
       .initUser(id_token)
       .then(handleUserInit)
-      .catch(() => {});
+      .catch((err) => {
+        toast.error(getFirstError(err) || "Google login failed.");
+      });
   };
   const openGoogleLoginPage = () => {
     const googleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -50,13 +53,13 @@ function CustomPopupGoogleLoginBT() {
   useGoogleOneTapLogin({
     onSuccess: onPopupSuccess,
     onError: () => {
-      dispatch(setError("Login Failed!"));
+      dispatch(setError("Google login failed."));
     },
   });
   return (
     <button onClick={openGoogleLoginPage} className="loginBT">
       <img src="icons/google.svg" alt="google login" className="icon"></img>
-      <span className="buttonText">Login with Google</span>
+      <span className="buttonText">Continue with Google</span>
     </button>
   );
 }

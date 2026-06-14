@@ -11,7 +11,8 @@ services:
   backend:
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
+      target: backend
     container_name: flashlearn_backend
     restart: unless-stopped
     env_file:
@@ -28,10 +29,10 @@ services:
   worker:
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
+      target: worker
     container_name: flashlearn_worker
     restart: unless-stopped
-    command: uv run python manage.py start_worker
     env_file:
       - .env.docker
     networks:

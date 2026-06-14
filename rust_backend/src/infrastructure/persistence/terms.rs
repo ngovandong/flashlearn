@@ -7,7 +7,7 @@ use uuid::Uuid;
 pub async fn find_term(pool: &MySqlPool, id: impl Into<Uuid>) -> Result<Option<TermRow>> {
     let id = id.into();
     sqlx::query_as::<_, TermRow>(
-        "SELECT id, created_at, updated_at, name, description, image, deck_id FROM backend_term WHERE id = ?",
+        "SELECT id, created_at, updated_at, name, meaning, image, deck_id FROM backend_term WHERE id = ?",
     )
     .bind(to_mysql_char(id))
     .fetch_optional(pool)
@@ -28,19 +28,19 @@ pub async fn insert_term(
     pool: &MySqlPool,
     id: impl Into<Uuid>,
     name: &str,
-    description: &str,
+    meaning: &str,
     image: Option<&str>,
     deck_id: impl Into<Uuid>,
 ) -> Result<()> {
     let id = id.into();
     let deck_id = deck_id.into();
     sqlx::query(
-        "INSERT INTO backend_term (id, created_at, updated_at, name, description, image, deck_id) \
+        "INSERT INTO backend_term (id, created_at, updated_at, name, meaning, image, deck_id) \
          VALUES (?, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6), ?, ?, ?, ?)",
     )
     .bind(to_mysql_char(id))
     .bind(name)
-    .bind(description)
+    .bind(meaning)
     .bind(image)
     .bind(to_mysql_char(deck_id))
     .execute(pool)
@@ -52,15 +52,15 @@ pub async fn update_term(
     pool: &MySqlPool,
     id: impl Into<Uuid>,
     name: &str,
-    description: &str,
+    meaning: &str,
     image: Option<&str>,
 ) -> Result<()> {
     let id = id.into();
     sqlx::query(
-        "UPDATE backend_term SET name = ?, description = ?, image = ?, updated_at = CURRENT_TIMESTAMP(6) WHERE id = ?",
+        "UPDATE backend_term SET name = ?, meaning = ?, image = ?, updated_at = CURRENT_TIMESTAMP(6) WHERE id = ?",
     )
     .bind(name)
-    .bind(description)
+    .bind(meaning)
     .bind(image)
     .bind(to_mysql_char(id))
     .execute(pool)

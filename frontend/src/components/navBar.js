@@ -16,15 +16,29 @@ import { COLORS } from "@constants/colors";
 import { logout, selectUser } from "@app/store/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
-import { ListItemIcon, ListItemText } from "@mui/material";
+import { Divider, ListItemIcon, ListItemText } from "@mui/material";
 import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
 import AutoAwesomeMotionOutlinedIcon from "@mui/icons-material/AutoAwesomeMotionOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import SearchDeckInput from "./searchDeck";
+
+const userMenuItemSx = {
+  borderRadius: "0.55rem",
+  px: 1.25,
+  py: 0.85,
+  color: "var(--fl-text)",
+  "& .MuiListItemIcon-root": { minWidth: 34, color: "var(--fl-text-minor)" },
+  "&:hover": { backgroundColor: "rgba(var(--fl-primary-rgb), 0.08)" },
+  "&:hover .MuiListItemIcon-root": { color: "var(--fl-primary)" },
+};
 
 const links = [
   { link: "", name: "Home" },
   // { link: "folder", name: "Folder" },
-  { link: "deck", name: "Deck" },
+  { link: "deck", name: "Deck", tour: "decks" },
+  { link: "number-test", name: "Number Listening", tour: "number-test" },
+  { link: "speaking-coach", name: "Speaking Coach", tour: "speaking-coach" },
 ];
 
 function ResponsiveAppBar()
@@ -65,26 +79,28 @@ function ResponsiveAppBar()
 
   return user ? (
     <AppBar
-      position="static"
+      position="sticky"
       color="white"
-      sx={{ borderBottom: ".0625rem solid #edeff4" }}
+      elevation={0}
+      sx={{ borderBottom: ".0625rem solid var(--fl-border)", top: 0, zIndex: 1100 }}
     >
       <Container maxWidth="xxl">
         <Toolbar disableGutters>
           <img
             src="/icons/flashlearn.svg"
-            alt="flash learn logo"
+            alt="FlashLearn logo"
             className="flash-learn-icon"
           />
 
           <Box
             sx={{
               flexGrow: 1,
+              minWidth: 0,
               alignSelf: "stretch",
-              display: { md: "flex" },
+              display: "flex",
             }}
           >
-            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+            <Box sx={{ flexGrow: 1, display: { xs: "flex", lg: "none" } }}>
               <IconButton
                 size="large"
                 aria-label="account of current user"
@@ -110,7 +126,7 @@ function ResponsiveAppBar()
                 open={Boolean(anchorElNav)}
                 onClose={handleCloseNavMenu}
                 sx={{
-                  display: { xs: "block", md: "none" },
+                  display: { xs: "block", lg: "none" },
                 }}
               >
                 {links.map((link) => (
@@ -129,12 +145,14 @@ function ResponsiveAppBar()
               sx={{
                 flexGrow: 1,
                 alignSelf: "stretch",
-                display: { md: "flex", xs: "none" },
+                flexWrap: "nowrap",
+                display: { xs: "none", lg: "flex" },
               }}
             >
               {links.map((link) => (
                 <NavLink
                   key={link.link}
+                  data-tour={link.tour}
                   className={({ isActive }) =>
                     isActive ? "nav-item nav-item--active" : "nav-item"
                   }
@@ -145,12 +163,17 @@ function ResponsiveAppBar()
               ))}
             </Box>
           </Box>
-          <Box sx={{ flexGrow: 0, marginRight: "1.25rem" }}>
+          <Box
+            sx={{ flexGrow: 0, flexShrink: 0, mr: { xs: "0.5rem", sm: "1.25rem" } }}
+          >
             <IconButton
               aria-label="add"
+              data-tour="create-deck"
               sx={{
-                background: COLORS.PURPLE,
-                "&:hover": { background: COLORS.DARK_PURPLE },
+                width: 44,
+                height: 44,
+                background: "var(--fl-primary)",
+                "&:hover": { background: "var(--fl-primary-dark)" },
               }}
               color="white"
               id="basic-button"
@@ -202,19 +225,35 @@ function ResponsiveAppBar()
               </MenuItem>
             </Menu>
           </Box>
-          <SearchDeckInput />
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="my avartar" src={user.image_url} />
+          <Box
+            sx={{
+              flexShrink: 1,
+              minWidth: 0,
+              display: { xs: "none", sm: "block" },
+            }}
+          >
+            <SearchDeckInput />
+          </Box>
+          <Box sx={{ flexGrow: 0, flexShrink: 0 }}>
+            <Tooltip title="Account">
+              <IconButton
+                onClick={handleOpenUserMenu}
+                data-tour="account"
+                sx={{
+                  p: 0.25,
+                  border: "2px solid transparent",
+                  transition: "border-color 0.18s ease",
+                  "&:hover": { borderColor: "var(--fl-primary-hover)" },
+                }}
+              >
+                <Avatar alt={user.name} src={user.image_url} />
               </IconButton>
             </Tooltip>
             <Menu
-              sx={{ mt: "45px" }}
               id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{
-                vertical: "top",
+                vertical: "bottom",
                 horizontal: "right",
               }}
               keepMounted
@@ -224,27 +263,123 @@ function ResponsiveAppBar()
               }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
+              slotProps={{
+                paper: {
+                  elevation: 0,
+                  sx: {
+                    mt: 1.25,
+                    minWidth: 252,
+                    borderRadius: "0.9rem",
+                    overflow: "hidden",
+                    border: "1px solid var(--fl-border)",
+                    backgroundColor: "var(--fl-surface)",
+                    boxShadow: "0 12px 32px rgba(40, 46, 62, 0.16)",
+                    "& .MuiList-root": { padding: "0.5rem" },
+                  },
+                },
+              }}
             >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.25,
+                  px: 1.25,
+                  py: 1,
+                }}
+              >
+                <Avatar
+                  alt={user.name}
+                  src={user.image_url}
+                  sx={{ width: 44, height: 44 }}
+                />
+                <Box sx={{ minWidth: 0 }}>
+                  <Box
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: "0.9rem",
+                      color: "var(--fl-text)",
+                      lineHeight: 1.25,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {user.name}
+                  </Box>
+                  <Box
+                    sx={{
+                      fontSize: "0.78rem",
+                      color: "var(--fl-text-minor)",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {user.email}
+                  </Box>
+                </Box>
+              </Box>
+
+              <Divider sx={{ borderColor: "var(--fl-border)", my: 0.5 }} />
+
               <MenuItem
-                onClick={() =>
-                {
+                onClick={() => {
                   navigate("deck");
                   handleCloseUserMenu();
                 }}
+                sx={userMenuItemSx}
               >
-                <Typography textAlign="center">My decks</Typography>
+                <ListItemIcon>
+                  <AutoAwesomeMotionOutlinedIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText
+                  primaryTypographyProps={{ fontSize: "0.875rem", fontWeight: 600 }}
+                >
+                  My decks
+                </ListItemText>
               </MenuItem>
               <MenuItem
-                onClick={() =>
-                {
+                onClick={() => {
                   navigate("settings");
                   handleCloseUserMenu();
                 }}
+                sx={userMenuItemSx}
               >
-                <Typography textAlign="center">Settings</Typography>
+                <ListItemIcon>
+                  <SettingsOutlinedIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText
+                  primaryTypographyProps={{ fontSize: "0.875rem", fontWeight: 600 }}
+                >
+                  Settings
+                </ListItemText>
               </MenuItem>
-              <MenuItem onClick={() => dispatch(logout())}>
-                <Typography textAlign="center">Logout</Typography>
+
+              <Divider sx={{ borderColor: "var(--fl-border)", my: 0.5 }} />
+
+              <MenuItem
+                onClick={() => {
+                  handleCloseUserMenu();
+                  dispatch(logout());
+                }}
+                sx={{
+                  borderRadius: "0.55rem",
+                  px: 1.25,
+                  py: 0.85,
+                  color: "#ef5350",
+                  "& .MuiListItemIcon-root": { minWidth: 34, color: "#ef5350" },
+                  "&:hover": { backgroundColor: "rgba(239, 83, 80, 0.1)" },
+                }}
+              >
+                <ListItemIcon>
+                  <LogoutOutlinedIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText
+                  primaryTypographyProps={{ fontSize: "0.875rem", fontWeight: 600 }}
+                >
+                  Log out
+                </ListItemText>
               </MenuItem>
             </Menu>
           </Box>

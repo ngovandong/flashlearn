@@ -10,16 +10,17 @@ const containerStyle = {
 const pageStyle = {
   maxWidth: '800px',
   padding: '20px',
-  backgroundColor: '#f9f9f9', // Light background color
+  backgroundColor: 'var(--fl-surface)',
+  color: 'var(--fl-text)',
   borderRadius: '8px',
   boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)', // Box shadow for a card-like effect
 };
 
 const headingStyle = {
-  color: '#4255ff',
+  color: 'var(--fl-primary)',
 };
 
-const accentColor = '#4255ff'; // Use the main color for accents
+const accentColor = 'var(--fl-primary)'; // Follows the active palette's primary
 
 const accentTextStyle = {
   color: accentColor,

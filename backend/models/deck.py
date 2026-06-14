@@ -7,7 +7,7 @@ from django.db import models
 
 from base.models import DateTimeUUIDModel
 
-from ..constants import FULL_ROLE_CLASS
+from ..deck.domain.access import DeckAccessPolicy
 from .user import User
 
 
@@ -25,61 +25,27 @@ class Deck(DateTimeUUIDModel):
         ordering = ("created_at",)
 
     def get_user_permission(self, user):
-        from ..services.cache import cache
-
-        key = f"deck_user_perm_{user.id}_{self.id}"
-        perm = cache.get(key)
-        if perm is not None:
-            return perm
-        if user == self.cache_owner or user.is_superuser:
-            perm = FULL_ROLE_CLASS.OWNER
-        else:
-            for r in self.user_roles.all():
-                if r.user == user:
-                    perm = r.role
-                    break
-        if perm is not None:
-            # cache.set(key, perm)
-            pass
-        return perm
+        return DeckAccessPolicy.get_user_role(self, user)
 
     def user_can_edit_deck(self, user):
-        if user.is_superuser:
-            return True
-        user_role = self.get_user_permission(user)
-        if user_role is None:
-            return False
-        return user_role in [FULL_ROLE_CLASS.EDIT, FULL_ROLE_CLASS.OWNER]
+        return DeckAccessPolicy.can_edit(self, user)
 
     def user_is_in_deck(self, user):
-        return self.get_user_permission(user) is not None
+        return DeckAccessPolicy.is_member(self, user)
 
     def user_can_view_deck(self, user):
-        return self.is_public or self.get_user_permission(user) or user.is_superuser
+        return DeckAccessPolicy.can_view(self, user)
 
-    def set_default_image(self):
+    @staticmethod
+    def default_background_path():
         random_number = random.randint(1, 5)
         random_background = f"background_{random_number}"
         url, _ = cloudinary_url(random_background)
         parsed_url = urlparse(url)
         path = parsed_url.path.lstrip("/")
-        path = parsed_url.path.lstrip("/")[path.index("/", 1) + 1 :]
-        self.background = path
+        return path[path.index("/", 1) + 1 :]
 
     def save(self, *args, **kwargs):
         if not self.background:
-            self.set_default_image()
+            self.background = self.default_background_path()
         super().save(*args, **kwargs)
-
-    @property
-    def cache_owner(self):
-        if not hasattr(self, "_cached_owner"):
-            from ..services.cache import cache
-
-            key = f"user_{self.owner_id}"
-            user = cache.get(key)
-            if user is None:
-                user = self.owner
-                cache.set(key, user)
-            self._cached_owner = user
-        return self._cached_owner

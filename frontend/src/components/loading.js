@@ -2,7 +2,7 @@ import { COLORS } from "@constants/colors";
 import { Backdrop } from "@mui/material";
 import { HashLoader } from "react-spinners";
 
-function GlobalLoadingWrapper({ open }) {
+function GlobalLoadingWrapper({ open = true }) {
   return (
     <Backdrop
       sx={{
@@ -18,11 +18,7 @@ function GlobalLoadingWrapper({ open }) {
   );
 }
 
-GlobalLoadingWrapper.defaultProps = {
-  open: true,
-};
-
-function LocalLoadingWrapper({ open }) {
+function LocalLoadingWrapper({ open = true }) {
   return (
     <Backdrop
       sx={{
@@ -37,9 +33,5 @@ function LocalLoadingWrapper({ open }) {
     </Backdrop>
   );
 }
-
-LocalLoadingWrapper.defaultProps = {
-  open: true,
-};
 
 export { LocalLoadingWrapper, GlobalLoadingWrapper };

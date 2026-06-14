@@ -57,10 +57,11 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
   if (message.action === "fetch_images") {
     const crawlerURL = process.env.REACT_APP_CRAWLER_URL;
+    const count = message.count ?? 10;
     fetch(`${crawlerURL}images/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query: message.query }),
+      body: JSON.stringify({ query: message.query, count }),
     })
       .then((res) => res.json())
       .then((data) => sendResponse({ urls: data.urls || [] }))

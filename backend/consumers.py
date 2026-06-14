@@ -1,18 +1,19 @@
 import asyncio
 import json
 import logging
-import random
 from urllib.parse import parse_qs
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
-from django.utils import timezone
-from rest_framework_simplejwt.tokens import AccessToken, TokenError
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import AccessToken
 
-from backend.models import Deck, UserLearningProgress
+from backend.deck.domain.access import DeckAccessPolicy
+from backend.learning.application.quick_revise_game import QuickReviseGame
+from backend.models import Deck
 from backend.serializers import ReviseTermSerializer
-from backend.services import TermService, learning_progress_cache
+from backend.services import learning_progress_cache, learning_service, term_service
 
 logger = logging.getLogger(__name__)
 
@@ -35,12 +36,11 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        self.scope["user"] = user  # Keep this for consistency with other methods expecting self.scope['user']
-        self.user = user  # Also store in self.user for convenience
+        self.scope["user"] = user
+        self.user = user
         self.deck_id = deck_id
         await self.accept()
 
-        # Initialize game state
         self.game_state = {
             "score": 0,
             "current_index": 0,
@@ -50,7 +50,6 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
             "question_start_time": 0,
             "leftover_time": 0,
         }
-        # Lock to prevent concurrent start_game() calls
         self.game_lock = asyncio.Lock()
 
     @database_sync_to_async
@@ -60,26 +59,20 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
             user_id = access_token["user_id"]
             user = User.objects.get(id=user_id)
             deck = Deck.objects.get(id=deck_id)
-            if deck.user_can_view_deck(user):
+            if DeckAccessPolicy.can_view(deck, user):
                 return user, deck
+            return None, None
         except (TokenError, User.DoesNotExist):
             return None, None
 
     @database_sync_to_async
     def save_learning_progress(self, term_id):
-        learning_progress, _ = UserLearningProgress.objects.get_or_create(user=self.user, term_id=term_id)
-        learning_progress.score += 1
-        learning_progress.last_revised_at = timezone.now()
-        learning_progress.save()
+        learning_service.record_quick_revise_answer(self.user, term_id)
 
     @database_sync_to_async
     def get_revise_terms(self):
-        data = TermService.get_revise_terms(self.user, self.deck_id)
+        data = term_service.get_revise_terms(self.user, self.deck_id)
         serializer = ReviseTermSerializer(data)
-        # We need to serialize it to get the data dict
-        # ReviseTermSerializer is a serializer, so we should access .data
-        # data is a dict {'deck_name':..., 'all_terms':..., 'revise_terms':...}
-        # The serializer expects this structure.
         return serializer.to_representation(data)
 
     async def receive(self, text_data):
@@ -94,16 +87,16 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
 
         except json.JSONDecodeError:
             logger.warning(f"Invalid JSON received: {text_data}")
-            pass
         except Exception as e:
             logger.error(f"Error in receive handler: {e}", exc_info=True)
             try:
-                await self.send(text_data=json.dumps({"type": "error", "message": "Server error"}))
+                await self.send(
+                    text_data=json.dumps({"type": "error", "message": "Something went wrong. Please try again."})
+                )
             except Exception:
-                pass  # Connection might be closed
+                pass
 
     async def start_game(self):
-        # Use lock to prevent concurrent start_game() calls
         async with self.game_lock:
             try:
                 self.revise_terms = []
@@ -112,7 +105,6 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
                 await self.send_next_question(is_first=True)
             except Exception as e:
                 logger.error(f"Error starting game: {e}", exc_info=True)
-                # Cleanup on error
                 self._cleanup_game_memory()
                 try:
                     await self.send(text_data=json.dumps({"type": "error", "message": "Failed to start game"}))
@@ -121,60 +113,20 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
 
     async def send_next_question(self, is_first=False):
         try:
-            # Infinite Mode: No queue limit check. Game ends only on timeout/wrong answer.
             index = self.game_state["current_index"]
 
-            # In infinite mode, we pick a random term from all_terms
             if not self.revise_terms:
                 data = await self.get_revise_terms()
                 self.revise_terms = data.get("revise_terms", [])
                 self.all_terms = data.get("all_terms", [])
                 if not self.revise_terms:
-                    # Should not happen given previous fallback, but safety first
                     await self.close()
                     return
 
-            # Pop first term in revise_terms
             current_term = self.revise_terms.pop(0)
+            question_payload = QuickReviseGame.build_question(current_term, self.all_terms)
+            time_limit = QuickReviseGame.calculate_time_limit(index, self.game_state.get("leftover_time", 0))
 
-            # Filter out the current term from all_terms
-            distractors = [t for t in self.all_terms if t["id"] != current_term["id"]]
-
-            # Pick 3 random distractors
-            if len(distractors) < 3:
-                # If not enough terms, just duplicate or handle gracefully
-                selected_distractors = distractors
-            else:
-                random.shuffle(distractors)
-                selected_distractors = distractors[:3]
-
-            questions_options = [current_term["name"]] + [d["name"] for d in selected_distractors]
-            random.shuffle(questions_options)
-
-            question_payload = {
-                "progressId": current_term.get("learning_progress_id"),
-                "question": current_term["description"],
-                "answer": current_term["name"],
-                "image": current_term.get("image"),
-                "options": questions_options,
-                "type": "quiz",
-            }
-
-            # Time Calculation
-            # Rule: 10s first, then 8s, 6s... + leftover
-            # Since index grows indefinitely, we clamp the minimum base time.
-            # 10 - (0*2) = 10
-            # 10 - (1*2) = 8
-            # ...
-            # 10 - (4*2) = 2
-            # 10 - (5*2) = 0 -> clamped to 2.
-            base_time = max(2, 10 - (index * 2))
-            leftover = self.game_state.get("leftover_time", 0)
-            time_limit = base_time + leftover
-
-            # Save the current_term to queue/history if needed, or just update game_state for handle_answer
-            # We need to know the 'correct answer' for handle_answer.
-            # Strategy: Store current_term in game_state explicitly.
             self.game_state["current_question_term"] = current_term
 
             await self.send(
@@ -184,15 +136,12 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
                         "question": question_payload,
                         "time_limit": time_limit,
                         "index": index + 1,
-                        # "total": ... - No total in infinite mode
                     }
                 )
             )
 
-            # Record start time for calculating leftover later
             self.game_state["question_start_time"] = asyncio.get_event_loop().time()
 
-            # Start timer (cancel previous if exists)
             if self.game_state["timer_task"]:
                 try:
                     self.game_state["timer_task"].cancel()
@@ -211,53 +160,39 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
     async def game_timer(self, duration):
         try:
             await asyncio.sleep(duration)
-            # Timeout - check if connection is still open
             try:
                 await self.send(text_data=json.dumps({"type": "game_over", "reason": "timeout"}))
             except Exception as e:
                 logger.debug(f"Could not send timeout message (connection closed?): {e}")
-            # Do not close connection to allow replay
-            # await self.close()
         except asyncio.CancelledError:
-            pass  # Timer was cancelled, normal operation
+            pass
         except Exception as e:
             logger.error(f"Unexpected error in game_timer: {e}", exc_info=True)
 
     async def handle_answer(self, user_answer):
         try:
-            # Cancel timer immediately
             if self.game_state["timer_task"]:
                 try:
                     self.game_state["timer_task"].cancel()
                 except Exception as e:
                     logger.warning(f"Error cancelling timer in handle_answer: {e}")
 
-            # Calculate leftover time
             now = asyncio.get_event_loop().time()
             start_time = self.game_state.get("question_start_time", now)
             elapsed = now - start_time
-
             index = self.game_state["current_index"]
-            base_time = max(2, 10 - (index * 2))
-            start_leftover = self.game_state.get("leftover_time", 0)
-            if start_leftover:
-                start_leftover = start_leftover / 2
-            current_limit = base_time + start_leftover
+            self.game_state["leftover_time"] = QuickReviseGame.calculate_leftover(
+                elapsed, index, self.game_state.get("leftover_time", 0)
+            )
 
-            actual_leftover = max(0, current_limit - elapsed)
-            self.game_state["leftover_time"] = actual_leftover
-
-            # Get term from state (set in send_next_question)
             current_term = self.game_state.get("current_question_term")
-
             if not current_term:
-                # Should not happen, but robust handling
                 await self.close()
                 return
 
             correct_answer = current_term["name"]
 
-            if user_answer.strip().lower() == correct_answer.lower():
+            if QuickReviseGame.is_correct(user_answer, correct_answer):
                 await self.save_learning_progress(current_term["id"])
                 self.game_state["score"] += 1
                 await self.send(text_data=json.dumps({"type": "result", "correct": True}))
@@ -275,8 +210,6 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
                         }
                     )
                 )
-                # Do not close connection to allow replay
-                # await self.close()
         except Exception as e:
             logger.error(f"Error handling answer: {e}", exc_info=True)
             self._cleanup_game_memory()
@@ -286,8 +219,6 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
                 pass
 
     async def disconnect(self, code):
-        """Cleanup when connection closes - MUST NOT fail"""
-        # Cancel timer with proper error handling
         try:
             if hasattr(self, "game_state") and self.game_state.get("timer_task"):
                 timer_task = self.game_state.get("timer_task")
@@ -296,13 +227,11 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             logger.error(f"Error cancelling timer in disconnect: {e}")
 
-        # Clear game memory
         try:
             self._cleanup_game_memory()
         except Exception as e:
             logger.error(f"Error cleaning up game memory in disconnect: {e}")
 
-        # Clear cache - CRITICAL, must succeed
         try:
             if hasattr(self, "user") and hasattr(self, "deck_id") and self.user and self.deck_id:
                 learning_progress_cache.delete_combine(self.deck_id, self.user.id)
@@ -314,7 +243,6 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
         )
 
     def _cleanup_game_memory(self):
-        """Clear large data structures to prevent memory leaks"""
         try:
             if hasattr(self, "revise_terms"):
                 self.revise_terms = []

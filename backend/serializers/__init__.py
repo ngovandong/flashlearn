@@ -1,13 +1,20 @@
 from .deck import DeckDetailSerializer, DeckSerializer, MyDeckSerializer
 from .folder import FolderSerializer
-from .learning_progress import CreateLearningProgressSerializer, ProgressSerializer, UserLearningProgressSerializer
+from .learning_progress import (
+    CreateLearningProgressSerializer,
+    LearningStreakSerializer,
+    ProgressSerializer,
+    UserLearningProgressSerializer,
+)
 from .role import (
     AddUserSerializer,
+    AddUserToDeckSerializer,
     InviteSerializer,
     RemoveUserSerializer,
     UpdateRoleSerializer,
     UserDeckRoleSerializer,
 )
+from .speaking import SpeakingAnalysisSerializer, SpeakingConversationSerializer
 from .term import (
     AddTermsToDeckSerializer,
     LearningTermSerializer,

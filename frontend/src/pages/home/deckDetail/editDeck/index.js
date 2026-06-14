@@ -6,6 +6,7 @@ import { getFirstError } from "@utils/errorHandler";
 import { isChangeState } from "@utils/state";
 import AddTermsTab from "./addTermsTab";
 import CreateDeckTab from "./createDeckTab";
+import DeckWizardSteps from "@components/deckWizardSteps";
 import { LocalLoadingWrapper } from "@components/loading";
 
 let oldDeck = {};
@@ -51,12 +52,12 @@ function EditDeck() {
             setError(responseError);
           }
         } catch (error) {
-          setError("Something Wrong!");
+          setError("Something went wrong. Please try again.");
         } finally {
           setIsLoading(false);
         }
       } else {
-        setError("Please fill all fields!");
+        setError("Please fill in all fields.");
       }
     } else {
       setCurrentTab({ tab: 1, start: 0 });
@@ -88,7 +89,7 @@ function EditDeck() {
         setError(responseError);
       }
     } catch (error) {
-      setError("Something Wrong!");
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -119,8 +120,9 @@ function EditDeck() {
           </Alert>
         </Snackbar>
         <div className="create-deck__header">
-          <h2>Create a new study deck</h2>
+          <h2>Edit your deck</h2>
         </div>
+        <DeckWizardSteps active={currentTab.tab} onStepClick={handleClickBack} />
         <div
           className="create-deck__tab next"
           tab={currentTab.tab}

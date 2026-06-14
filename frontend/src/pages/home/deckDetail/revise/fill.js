@@ -1,11 +1,14 @@
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import QuestionHeader from "./questionHeader";
+import AnswerFeedback from "./answerFeedback";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import { COLORS } from "@constants/colors";
+import { checkAnswer } from "@utils/answerCheck";
 const initialState = {
   isCorrect: false,
   isAnswered: false,
+  status: null,
   answer: "",
 };
 const Fill = ({
@@ -18,14 +21,14 @@ const Fill = ({
 }) => {
   const [currentState, setCurrentState] = useState(initialState);
   const handleAnswer = () => {
-    const isCorrect =
-      currentState.answer.toLowerCase() === question.answer.toLowerCase();
+    const result = checkAnswer(currentState.answer, question.answer);
     setCurrentState((pre) => ({
       ...pre,
-      isCorrect: isCorrect,
+      isCorrect: result.isCorrect,
+      status: result.status,
       isAnswered: true,
     }));
-    if (isCorrect) {
+    if (result.isCorrect) {
       handleCorrect();
     } else {
       handleIncorrect();
@@ -40,7 +43,12 @@ const Fill = ({
   };
 
   const handleShowAnswer = () => {
-    setCurrentState((pre) => ({ ...pre, isAnswered: true }));
+    setCurrentState((pre) => ({
+      ...pre,
+      isAnswered: true,
+      isCorrect: false,
+      status: "incorrect",
+    }));
     showNext();
   };
 
@@ -136,13 +144,11 @@ const Fill = ({
       </div>
       {currentState.isAnswered && (
         <div className="feedback">
-          {currentState.isCorrect ? (
-            <div className="correct-feedback">Correct!</div>
-          ) : (
-            <div className="incorrect-feedback">
-              Incorrect. The correct answer is {question.answer}.
-            </div>
-          )}
+          <AnswerFeedback
+            status={currentState.status}
+            userAnswer={currentState.answer}
+            correctAnswer={question.answer}
+          />
         </div>
       )}
     </div>

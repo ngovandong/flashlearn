@@ -17,10 +17,21 @@ export function isChangeState(obj1, obj2) {
 }
 
 function isTermEqual(obj1, obj2) {
+  const sameList = (a, b) =>
+    JSON.stringify(a || []) === JSON.stringify(b || []);
   return (
     obj1.name === obj2.name &&
-    obj1.description === obj2.description &&
-    obj1.image === obj2.image
+    obj1.meaning === obj2.meaning &&
+    obj1.image === obj2.image &&
+    (obj1.word_type || "") === (obj2.word_type || "") &&
+    (obj1.pronunciation || "") === (obj2.pronunciation || "") &&
+    (obj1.definition || "") === (obj2.definition || "") &&
+    sameList(obj1.synonyms, obj2.synonyms) &&
+    sameList(obj1.antonyms, obj2.antonyms) &&
+    sameList(obj1.examples, obj2.examples) &&
+    sameList(obj1.word_forms, obj2.word_forms) &&
+    sameList(obj1.word_family, obj2.word_family) &&
+    Boolean(obj1.ai_filled) === Boolean(obj2.ai_filled)
   );
 }
 

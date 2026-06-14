@@ -14,10 +14,11 @@ const Search = styled("div")(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   backgroundColor: COLORS.APP_BACKGROUND,
   marginLeft: 0,
-  marginRight: "2rem",
+  marginRight: "1rem",
   width: "100%",
   [theme.breakpoints.up("sm")]: {
     marginLeft: theme.spacing(1),
+    marginRight: "1.5rem",
     width: "auto",
   },
 }));
@@ -119,7 +120,7 @@ function ItemList({ items, loading, setIsFocus }) {
             <ItemText primary={item.name} />
           </Item>
         ))}
-      {!loading && items.length === 0 && <div>0 matching results</div>}
+      {!loading && items.length === 0 && <div>No matching decks</div>}
     </ItemContainer>
   );
 }
@@ -139,7 +140,7 @@ function SearchDeckInput() {
         toast.error(errorMessage);
       }
     } catch (error) {
-      toast.error("Search failed");
+      toast.error("Search failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -178,7 +179,7 @@ function SearchDeckInput() {
           <SearchIcon />
         </SearchIconWrapper>
         <StyledInputBase
-          placeholder="Search public deck"
+          placeholder="Search public decks"
           onChange={handleSearchChange}
           value={searchValue}
           onFocus={() => setIsFocus(true)}

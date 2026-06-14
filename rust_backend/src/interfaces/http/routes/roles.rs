@@ -59,7 +59,6 @@ async fn update_role(
         "id": role.id.to_string(),
         "email": email.0,
         "role": role.role,
-        "streaks": role.streaks,
     })))
 }
 

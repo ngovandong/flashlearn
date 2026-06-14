@@ -1,7 +1,7 @@
 
 services:
   backend:
-    command: uv run python manage.py runserver 0.0.0.0:8005
+    command: python manage.py runserver 0.0.0.0:8005
     volumes:
       - .:/app
     environment:
@@ -10,8 +10,10 @@ services:
       - ALLOWED_HOSTS=*
 
   worker:
-    build: .
-    command: uv run python manage.py start_worker
+    build:
+      context: .
+      target: worker
+    command: python manage.py start_worker
     volumes:
       - .:/app
     environment:

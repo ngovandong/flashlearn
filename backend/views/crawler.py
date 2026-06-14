@@ -9,7 +9,7 @@ class GetImagesUrlView(views.APIView):
         query = request.data.get("query")
         count = request.data.get("count", 10)
         if not query:
-            return Response({"error": "Missing query parameter"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Please enter a search term."}, status=status.HTTP_400_BAD_REQUEST)
 
         urls = BSCrawler.get_preview_images(query, count)
 

@@ -1,0 +1,50 @@
+---
+description: All new/updated frontend UI must adhere to the runtime theme system
+globs: frontend/src/**
+alwaysApply: false
+---
+
+# Theme adherence is required for all UI
+
+Flashlearn is fully themeable at runtime: a "mode" (light/dark/system) and a
+"palette" (brand + accent colors) are materialized into CSS custom properties on
+`:root` by `frontend/src/utils/themeController.js`. The catalog in
+`frontend/src/constants/themes.js` is the single source of truth.
+
+Whenever you ADD or UPDATE any UI, it MUST use these theme tokens so it adapts to
+light/dark and every palette. Verify your change looks correct in both light and
+dark mode.
+
+## Use the tokens — never hardcode brand/neutral colors
+
+- **In SCSS** (`frontend/src/styles/sass/**`): use the Sass aliases from
+  `base/_variables.scss`, e.g. `$main-purple`, `$blue`, `$yellow`, `$surface`,
+  `$surface-2`, `$app-background`, `$main-text-color`, `$minor-text-color`,
+  `$gray-text-color`, `$border-subtle`, `$border-color`, `$brand-gradient`, and
+  the shadow/radius/space scales. Prefer the `@mixin`s (`card`,
+  `card_interactive`, `purple_btn`, `blue_btn`, `yellow_btn`).
+- **In JS/MUI `sx` or inline styles**: reference the CSS variables directly, e.g.
+  `color: "var(--fl-text)"`, `backgroundColor: "var(--fl-surface)"`,
+  `borderColor: "var(--fl-border)"`, `background: "var(--fl-gradient)"`. For
+  translucency use the `-rgb` triplets:
+  `rgba(var(--fl-primary-rgb), 0.12)`.
+
+### Token cheat-sheet (CSS var ↔ SCSS alias)
+
+- Brand: `--fl-primary` / `$main-purple`, `--fl-primary-dark` / `$dark-purple`,
+  `--fl-primary-hover` / `$hover-purple`, `--fl-on-primary` / `$on-primary`,
+  `--fl-gradient` / `$brand-gradient`
+- Accents: `--fl-accent` / `$blue`, `--fl-accent-2` / `$yellow` (+ `-strong`)
+- Neutrals: `--fl-bg` / `$app-background`, `--fl-surface` / `$surface`,
+  `--fl-surface-2` / `$surface-2`, `--fl-text` / `$main-text-color`,
+  `--fl-text-minor` / `$minor-text-color`, `--fl-text-muted` /
+  `$gray-text-color`, `--fl-border` / `$border-subtle`, `--fl-border-strong` /
+  `$border-color`
+
+## Don'ts
+
+- Don't hardcode hex/`rgb()` for brand, accent, surface, text, or border colors
+  (e.g. `#fff`, `#282e3e`, `#4255ff`). Use a token instead.
+- Don't assume a white background or dark text — both flip in dark mode.
+- Only static *semantic* colors may stay hardcoded: success green, error red
+  (`$error-red`), and similar status colors that must not change with the theme.

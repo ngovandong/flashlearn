@@ -1,3 +1,6 @@
+import base64
+import json
+from typing import Any
 from urllib.parse import urlencode
 
 from django.conf import settings
@@ -9,23 +12,42 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
-from base.views import FlexibleViewSet
+from backend.shared.application.exceptions import ValidationError as DomainValidationError
+from backend.shared.interfaces.viewsets import FlexibleViewSet
 
-from ..models import User, UserSetting
+from ..models import User
 from ..serializers import (
     ActiveAccountSerializer,
     ChangePasswordSerializer,
     CustomTokenObtainPairSerializer,
     GoogleCallbackSerializer,
     GoogleUserSerializer,
+    LearningStreakSerializer,
     SetPasswordSerializer,
     UserSerializer,
 )
-from ..services import AuthService, UserService
+from ..services import auth_service, learning_service, user_service
 from ..tasks import setup_new_user
 from ..utils.dispatch import dispatch
 
 login_url = f"{settings.BASE_FRONTEND_URL}/login"
+
+
+def token_response(user) -> dict[str, Any]:
+    """Serialize user at the view boundary; AuthService returns tokens only."""
+    token: dict[str, Any] = auth_service.get_token(user)
+    token["user"] = UserSerializer(user).data
+    return token
+
+
+def token_redirect_params(user):
+    """URL-safe token params for OAuth redirect (user encoded separately)."""
+    token = auth_service.get_token(user)
+    user_data = UserSerializer(user).data
+    return {
+        **token,
+        "user": base64.urlsafe_b64encode(json.dumps(user_data).encode()).decode(),
+    }
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
@@ -45,6 +67,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
     permission_map = {
         "change_password": [permissions.IsAuthenticated],
         "get_profile": [permissions.IsAuthenticated],
+        "learning_streak": [permissions.IsAuthenticated],
+        "record_study": [permissions.IsAuthenticated],
         "my_settings": [permissions.IsAuthenticated],
     }
 
@@ -53,17 +77,21 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
+    @action(detail=False, methods=["GET"])
+    def learning_streak(self, request, *args, **kwargs):
+        data = learning_service.get_learning_streak(request.user)
+        return Response(LearningStreakSerializer(data).data)
+
+    @action(detail=False, methods=["POST"])
+    def record_study(self, request, *args, **kwargs):
+        learning_service.record_study_activity(request.user)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=False, methods=["GET", "PATCH"])
     def my_settings(self, request, *args, **kwargs):
         if request.method == "GET":
-            qs = UserSetting.objects.filter(user=request.user)
-            return Response({s.key: s.value for s in qs})
-
-        # PATCH: update or create each key sent in the request body
-        for key, value in request.data.items():
-            UserSetting.objects.update_or_create(user=request.user, key=key, defaults={"value": value})
-        qs = UserSetting.objects.filter(user=request.user)
-        return Response({s.key: s.value for s in qs})
+            return Response(user_service.get_settings(request.user))
+        return Response(user_service.update_settings(request.user, request.data))
 
     @action(detail=False, methods=["POST"])
     def login(self, request, *args, **kwargs):
@@ -81,7 +109,6 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
             raise InvalidToken(e.args[0]) from e
-
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["POST"])
@@ -93,9 +120,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
         domain = settings.BASE_BACKEND_URL
         api_url = reverse("user-active-account")
         active_account_url = f"{domain}{api_url}"
-
-        token = AuthService.get_verify_email_token(user)
-
+        token = auth_service.get_verify_email_token(user)
         params = urlencode({"token": token})
         link = f"{active_account_url}?{params}"
 
@@ -107,12 +132,14 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
         user = self.get_object()
         serializer = ChangePasswordSerializer(data=request.data)
         if serializer.is_valid():
-            # Check old password
-            if not user.check_password(serializer.data.get("old_password")):
+            try:
+                user_service.change_password(
+                    user,
+                    serializer.validated_data.get("old_password"),
+                    serializer.validated_data.get("new_password"),
+                )
+            except DomainValidationError:
                 return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
-            # Set new password
-            user.set_password(serializer.data.get("new_password"))
-            user.save()
             return Response({"status": "password changed"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -136,7 +163,6 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
             import json
 
             try:
-                # Add padding if needed for base64 decoding
                 padded_state = state + "=" * (-len(state) % 4)
                 decoded_state = json.loads(base64.b64decode(padded_state).decode("utf-8"))
                 redirect_uri = decoded_state.get("r")
@@ -148,58 +174,37 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
             api_uri = reverse("user-google-login")
             redirect_uri = f"{domain}{api_uri}"
 
-        access_token = AuthService.google_get_access_token(code=code, redirect_uri=redirect_uri)
-
-        user_data = AuthService.google_get_user_info(access_token=access_token)
-
-        profile_data = {
-            "email": user_data["email"],
-            "first_name": user_data.get("given_name", ""),
-            "last_name": user_data.get("family_name", ""),
-            "name": user_data.get("name", ""),
-            "image_url": user_data.get("picture", ""),
-        }
-
-        # We use get-or-create logic here for the sake of the example.
-        # We don't have a sign-up flow.
-        user, _ = UserService.user_get_or_create_validated_email_user(**profile_data)
+        access_token = auth_service.google_get_access_token(code=code, redirect_uri=redirect_uri)
+        user_data = auth_service.google_get_user_info(access_token=access_token)
+        profile_data = auth_service.google_profile_from_user_data(user_data)
+        user, _ = user_service.user_get_or_create_validated_email_user(**profile_data)
 
         if not user.is_google_account:
-            params = urlencode({"error": "It looks like you already have an account with that email"})
+            params = urlencode(
+                {"error": "You already have an account with that email. Please log in with your password."}
+            )
             return redirect(f"{login_url}?{params}")
 
-        token = AuthService.get_token(user)
-
-        params = urlencode(token)
+        params = urlencode(token_redirect_params(user))
         return redirect(f"{login_url}?{params}")
 
     @action(detail=False, methods=["GET"])
     def init(self, request, *args, **kwargs):
         id_token = request.headers.get("Authorization")
-
         if not id_token:
-            return Response({"error": "token is require"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Token is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        user_data = AuthService.google_validate_id_token(id_token)
-
-        profile_data = {
-            "email": user_data["email"],
-            "first_name": user_data.get("given_name", ""),
-            "last_name": user_data.get("family_name", ""),
-            "name": user_data.get("name", ""),
-            "image_url": user_data.get("picture", ""),
-        }
-
-        user, _ = UserService.user_get_or_create_validated_email_user(**profile_data)
+        user_data = auth_service.google_validate_id_token(id_token)
+        profile_data = auth_service.google_profile_from_user_data(user_data)
+        user, _ = user_service.user_get_or_create_validated_email_user(**profile_data)
 
         if not user.is_google_account:
             return Response(
-                {"error": "It looks like you already have an account with that email"},
+                {"error": "You already have an account with that email. Please log in with your password."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        token = AuthService.get_token(user)
-        return Response(token)
+        return Response(token_response(user))
 
     @action(detail=False, methods=["GET"])
     def active_account(self, request, *args, **kwargs):
@@ -212,7 +217,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
             raise InvalidToken(e.args[0]) from e
 
         user_id = serializer.user_id
-        UserService.active_user(user_id)
+        user_service.active_user(user_id)
 
         params = urlencode(serializer.validated_data)
         return redirect(f"{login_url}?{params}")

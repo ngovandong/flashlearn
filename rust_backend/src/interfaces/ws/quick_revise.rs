@@ -175,7 +175,7 @@ async fn send_next(socket: &mut WebSocket, game: &mut GameState) -> Result<(), (
     game.question_start = Some(std::time::Instant::now());
     let payload = json!({
         "progressId": current.learning_progress_id.to_string(),
-        "question": current.description,
+        "question": current.meaning,
         "answer": current.name,
         "image": current.image,
         "options": opts,

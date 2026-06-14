@@ -47,7 +47,7 @@ async fn list_terms(
         .ok_or_else(|| AppError::BadRequest("deck_id required".into()))?;
     let did = Uuid::parse_str(deck_id).map_err(|_| AppError::BadRequest("bad deck_id".into()))?;
     let rows: Vec<crate::infrastructure::persistence::rows::TermRow> = sqlx::query_as(
-        "SELECT id, created_at, updated_at, name, description, image, deck_id FROM backend_term WHERE deck_id = ? ORDER BY created_at DESC",
+        "SELECT id, created_at, updated_at, name, meaning, image, deck_id FROM backend_term WHERE deck_id = ? ORDER BY created_at DESC",
     )
     .bind(crate::util::db_uuid::to_mysql_char(did))
     .fetch_all(&state.db.pool)
@@ -61,7 +61,7 @@ fn term_nest_json(t: &crate::infrastructure::persistence::rows::TermRow) -> serd
     json!({
         "id": t.id.to_string(),
         "name": t.name,
-        "description": t.description,
+        "meaning": t.meaning,
         "image": t.image,
     })
 }
@@ -97,7 +97,7 @@ async fn search_terms(
 #[derive(Deserialize)]
 struct CreateTerm {
     name: String,
-    description: Option<String>,
+    meaning: Option<String>,
     deck: String,
     image: Option<String>,
 }
@@ -119,12 +119,12 @@ async fn create_term(
         return Err(AppError::BadRequest("user has no permission.".into()));
     }
     let id = Uuid::new_v4();
-    let desc = body.description.unwrap_or_default();
+    let meaning = body.meaning.unwrap_or_default();
     terms::insert_term(
         &state.db.pool,
         id,
         &body.name,
-        &desc,
+        &meaning,
         body.image.as_deref(),
         deck_id,
     )
@@ -174,7 +174,7 @@ fn term_full_json(
     json!({
         "id": t.id.to_string(),
         "name": t.name,
-        "description": t.description,
+        "meaning": t.meaning,
         "image": t.image,
         "deck": deck_id.to_string(),
     })
@@ -195,7 +195,7 @@ async fn get_term(
 #[derive(Deserialize)]
 struct UpdateTerm {
     name: Option<String>,
-    description: Option<String>,
+    meaning: Option<String>,
     image: Option<String>,
 }
 
@@ -220,13 +220,13 @@ async fn update_term(
         return Err(AppError::Forbidden);
     }
     let name = body.name.as_deref().unwrap_or(&t.name);
-    let desc = body.description.as_deref().unwrap_or(&t.description);
+    let meaning = body.meaning.as_deref().unwrap_or(&t.meaning);
     let img = body.image.as_ref().or(t.image.as_ref());
     terms::update_term(
         &state.db.pool,
         id,
         name,
-        desc,
+        meaning,
         img.map(|s| s.as_str()),
     )
     .await
@@ -276,7 +276,7 @@ async fn delete_term(
 #[derive(Deserialize)]
 struct AddDefault {
     name: String,
-    description: Option<String>,
+    meaning: Option<String>,
 }
 
 async fn add_to_default_deck(
@@ -298,12 +298,12 @@ async fn add_to_default_deck(
         return Err(AppError::BadRequest("term is already existed".into()));
     }
     let id = Uuid::new_v4();
-    let desc = body.description.take().unwrap_or_default();
+    let meaning = body.meaning.take().unwrap_or_default();
     terms::insert_term(
         &state.db.pool,
         id,
         &body.name,
-        &desc,
+        &meaning,
         None,
         dd,
     )

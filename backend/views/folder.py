@@ -1,10 +1,11 @@
 from rest_framework import permissions, viewsets
 
-from base.views import FlexibleViewSet
+from backend.shared.interfaces.viewsets import FlexibleViewSet
 
 from ..models import Folder
 from ..permissions import IsOwnerPermission
 from ..serializers import FolderSerializer
+from ..services import FolderService
 
 
 class FolderViewSet(viewsets.ModelViewSet, FlexibleViewSet):
@@ -17,7 +18,7 @@ class FolderViewSet(viewsets.ModelViewSet, FlexibleViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         if self.action == "list":
-            return queryset.filter(owner=self.request.user)
+            return FolderService.list_for_owner(self.request.user)
         return queryset
 
     def perform_create(self, serializer):

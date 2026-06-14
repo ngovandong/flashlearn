@@ -1,7 +1,9 @@
-import { IconButton } from "@mui/material";
+import { Button, Chip, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CircleButton from "@components/circleButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -9,6 +11,7 @@ import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import { useCallback, useEffect, useRef, useState } from "react";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { learningService } from "@api-services/learningService";
+import { termService } from "@api-services/termService";
 import { useNavigate, useParams } from "react-router-dom";
 import { getFirstError } from "@utils/errorHandler";
 import { toast } from "react-toastify";
@@ -16,12 +19,19 @@ import { LocalLoadingWrapper } from "@components/loading";
 import { speak } from "@api-services/voiceService";
 import { deckService } from "@api-services/deckService";
 import { LEARNING_TERM_PAGE_SIZE } from "@constants/pageSize";
+import { highlightMainWord } from "@utils/exampleText";
 
 function LearnPage()
 {
   const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [terms, setTerms] = useState();
+  const [aiLoading, setAiLoading] = useState(false);
+  const [newSynonym, setNewSynonym] = useState("");
+  const [newAntonym, setNewAntonym] = useState("");
+  const [newExample, setNewExample] = useState("");
+  const [newWordForm, setNewWordForm] = useState("");
+  const [newWordFamily, setNewWordFamily] = useState("");
   const touchStartRef = useRef(null);
 
   const [currentState, setCurrentState] = useState({
@@ -34,22 +44,6 @@ function LearnPage()
   let currentTerm = null;
   let youglish = null;
   let google = null;
-  const MOCK_DATA = {
-    sentence:
-      '"The keynote speaker was incredibly eloquent, captivating the entire audience with her powerful words and clear delivery."',
-    synonyms: [
-      "Articulate",
-      "Fluent",
-      "Expressive",
-      "Persuasive",
-      "Silver-tongued",
-      "Well-spoken",
-    ],
-    partOfSpeech: "Adjective",
-    pronunciation: "/ˈeləkwənt/",
-    definition:
-      "Having or showing the ability to use language clearly and effectively; expressing oneself readily, clearly, and effectively.",
-  };
 
   if (terms && terms.length > 0) {
     currentTerm = terms[currentState.index];
@@ -61,7 +55,9 @@ function LearnPage()
     google = "https://www.google.com/search?q=" + definitionPhrase;
   }
   const navigate = useNavigate();
-  const { deckID } = useParams();
+  // When termId is present (deep-link, e.g. from the Speaking Coach) the deck
+  // opens at that specific term instead of the user's last-learned position.
+  const { deckID, termId } = useParams();
 
   const handleTouchStart = (event) =>
   {
@@ -167,7 +163,7 @@ function LearnPage()
   const fetchWords = async () =>
   {
     try {
-      const res1 = await learningService.getLatestLearnedTerm(deckID);
+      const res1 = await learningService.getLatestLearnedTerm(deckID, termId);
       if (!res1.error) {
         setCurrentState({
           index: res1.data.last_learned_index % LEARNING_TERM_PAGE_SIZE,
@@ -225,11 +221,93 @@ function LearnPage()
     learningService.create({ term_id: currentTerm.id });
   };
 
+  // Optimistically update the current card in local state, then persist the
+  // full term to the backend.
+  const persistTerm = async (updated) =>
+  {
+    setTerms((pre) =>
+      pre.map((t, i) => (i === currentState.index ? updated : t))
+    );
+    try {
+      await termService.updateTerms([
+        {
+          id: updated.id,
+          name: updated.name,
+          meaning: updated.meaning ?? "",
+          image: typeof updated.image === "string" ? updated.image : "",
+          word_type: updated.word_type,
+          pronunciation: updated.pronunciation,
+          definition: updated.definition,
+          synonyms: updated.synonyms,
+          antonyms: updated.antonyms,
+          examples: updated.examples,
+          word_forms: updated.word_forms,
+          word_family: updated.word_family,
+          ai_filled: true,
+        },
+      ]);
+    } catch (error) {
+      toast.error("Failed to save changes");
+    }
+  };
+
+  const addListItem = (field, rawValue, reset) =>
+  {
+    const value = (rawValue || "").trim();
+    if (!value || !currentTerm) return;
+    persistTerm({
+      ...currentTerm,
+      [field]: [...(currentTerm[field] || []), value],
+    });
+    reset("");
+  };
+
+  const removeListItem = (field, idx) =>
+  {
+    if (!currentTerm) return;
+    persistTerm({
+      ...currentTerm,
+      [field]: (currentTerm[field] || []).filter((_, i) => i !== idx),
+    });
+  };
+
+  const handleFillWithAi = async () =>
+  {
+    if (!currentTerm || aiLoading) return;
+    setAiLoading(true);
+    try {
+      const res = await termService.aiEnrich(
+        currentTerm.name,
+        currentTerm.meaning || ""
+      );
+      if (res.error) {
+        toast.error(getFirstError(res.error));
+      } else {
+        const d = res.data || {};
+        await persistTerm({
+          ...currentTerm,
+          word_type: d.word_type || "",
+          pronunciation: d.pronunciation || "",
+          definition: d.definition || "",
+          synonyms: d.synonyms || [],
+          antonyms: d.antonyms || [],
+          examples: d.examples || [],
+          word_forms: d.word_forms || [],
+          word_family: d.word_family || [],
+        });
+      }
+    } catch (error) {
+      toast.error("AI request failed. Please try again.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   useEffect(() =>
   {
     fetchWords();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [termId]);
 
   useEffect(() =>
   {
@@ -332,7 +410,7 @@ function LearnPage()
                 }}
               ></div>
             </div>
-            <div style={{ textAlign: "center", marginBottom: "1rem", color: "#666", fontSize: "0.9rem" }}>
+            <div style={{ textAlign: "center", marginBottom: "0.25rem", color: "#666", fontSize: "0.85rem" }}>
               Card {currentState.absolute_index + 1} of {deck.number_of_term}
             </div>
 
@@ -361,7 +439,10 @@ function LearnPage()
                   </div>
                 </div>
                 <div className="flip-card-back">
-                  <h1>{currentTerm.description}</h1>
+                  {currentTerm.pronunciation && (
+                    <span className="term-pronunciation">{currentTerm.pronunciation}</span>
+                  )}
+                  <h1>{currentTerm.meaning}</h1>
                   {currentTerm.image && (
                     <div className="meaning-img">
                       <img src={currentTerm.image} alt="meaning" />
@@ -409,69 +490,239 @@ function LearnPage()
                 )}
                 {google && (
                   <a href={google} target="_blank" rel="noreferrer">
-                    Search on google
+                    Search on Google
                   </a>
                 )}
               </div>
             </div>
 
             <div className="definition-card">
-              <h3>Definition</h3>
-              <div className="definition-content">
-                <p>{MOCK_DATA.definition}</p>
-                <div className="definition-meta">
-                  <p>Part of Speech: {MOCK_DATA.partOfSpeech}</p>
-                  <p>Pronunciation: {MOCK_DATA.pronunciation}</p>
+              <div className="definition-header">
+                <h3>Definition</h3>
+                <div className="word-meta">
+                  {currentTerm?.word_type && (
+                    <span className="word-type-badge">{currentTerm.word_type}</span>
+                  )}
+                  {currentTerm?.pronunciation && (
+                    <span className="pronunciation-text">
+                      {currentTerm.pronunciation}
+                      <IconButton size="small" onClick={speakTerm}>
+                        <VolumeUpIcon fontSize="small" />
+                      </IconButton>
+                    </span>
+                  )}
                 </div>
               </div>
+              <div className="definition-content">
+                <p>{currentTerm?.definition || currentTerm?.meaning || "No definition available for this term."}</p>
+              </div>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<AutoFixHighIcon />}
+                onClick={handleFillWithAi}
+                disabled={aiLoading}
+                sx={{ marginTop: "0.75rem" }}
+              >
+                {aiLoading
+                  ? "Generating…"
+                  : currentTerm?.ai_filled
+                  ? "Regenerate with AI"
+                  : "Fill with AI"}
+              </Button>
             </div>
           </div>
 
           {/* --- Right Column --- */}
           <div className="learn-right-col">
-            {/* Sentence Example */}
-            <div className="info-card">
-              <h3>Sentence Example</h3>
-              <div className="sentence-box">
-                <p>{MOCK_DATA.sentence}</p>
-              </div>
-              <div className="audio-actions">
-                <button className="audio-btn" onClick={speakTerm}>
-                  <VolumeUpIcon /> Listen to pronunciation
-                </button>
-              </div>
-            </div>
-
-            {/* Synonyms */}
-            <div className="info-card">
-              <h3>Synonyms</h3>
-              <div className="synonyms-list">
-                {MOCK_DATA.synonyms.map((s, i) => (
-                  <span key={i} className="synonym-chip">
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-
             {/* Study Progress */}
             <div className="info-card">
-              <h3>Study Progress</h3>
+              <h3>Study progress</h3>
               <div className="studystats">
                 <div className="stat-row">
-                  <span>Words Learned</span>
+                  <span>Total revisions</span>
                   <span className="stat-value">
-                    {currentState.absolute_index}/{deck.number_of_term}
+                    {currentTerm.total_revisions ?? 0}
                   </span>
                 </div>
-                <div className="stat-row">
-                  <span>Study Streak</span>
-                  <span className="stat-value">5 days</span>
-                </div>
-                <div className="stat-row">
-                  <span>Time Studied</span>
-                  <span className="stat-value">23 min</span>
-                </div>
+              </div>
+            </div>
+
+            <div className="info-card">
+              <h3>Synonyms</h3>
+              <div className="chip-group">
+                {(currentTerm?.synonyms || []).map((s, i) => (
+                  <Chip
+                    key={`syn-${i}`}
+                    label={s}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                    onDelete={() => removeListItem("synonyms", i)}
+                  />
+                ))}
+              </div>
+              <div className="add-item-row">
+                <input
+                  className="add-item-input"
+                  value={newSynonym}
+                  onChange={(e) => setNewSynonym(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" &&
+                    addListItem("synonyms", newSynonym, setNewSynonym)
+                  }
+                  placeholder="Add a synonym"
+                />
+                <IconButton
+                  size="small"
+                  onClick={() => addListItem("synonyms", newSynonym, setNewSynonym)}
+                >
+                  <AddIcon fontSize="small" />
+                </IconButton>
+              </div>
+            </div>
+
+            <div className="info-card">
+              <h3>Antonyms</h3>
+              <div className="chip-group">
+                {(currentTerm?.antonyms || []).map((a, i) => (
+                  <Chip
+                    key={`ant-${i}`}
+                    label={a}
+                    size="small"
+                    variant="outlined"
+                    onDelete={() => removeListItem("antonyms", i)}
+                  />
+                ))}
+              </div>
+              <div className="add-item-row">
+                <input
+                  className="add-item-input"
+                  value={newAntonym}
+                  onChange={(e) => setNewAntonym(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" &&
+                    addListItem("antonyms", newAntonym, setNewAntonym)
+                  }
+                  placeholder="Add an antonym"
+                />
+                <IconButton
+                  size="small"
+                  onClick={() => addListItem("antonyms", newAntonym, setNewAntonym)}
+                >
+                  <AddIcon fontSize="small" />
+                </IconButton>
+              </div>
+            </div>
+
+            <div className="info-card">
+              <h3>Word forms</h3>
+              <div className="chip-group">
+                {(currentTerm?.word_forms || []).map((w, i) => (
+                  <Chip
+                    key={`wf-${i}`}
+                    label={w}
+                    size="small"
+                    color="secondary"
+                    variant="outlined"
+                    onDelete={() => removeListItem("word_forms", i)}
+                  />
+                ))}
+              </div>
+              <div className="add-item-row">
+                <input
+                  className="add-item-input"
+                  value={newWordForm}
+                  onChange={(e) => setNewWordForm(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" &&
+                    addListItem("word_forms", newWordForm, setNewWordForm)
+                  }
+                  placeholder="e.g. past tense: ran"
+                />
+                <IconButton
+                  size="small"
+                  onClick={() =>
+                    addListItem("word_forms", newWordForm, setNewWordForm)
+                  }
+                >
+                  <AddIcon fontSize="small" />
+                </IconButton>
+              </div>
+            </div>
+
+            <div className="info-card">
+              <h3>Word family</h3>
+              <div className="chip-group">
+                {(currentTerm?.word_family || []).map((w, i) => (
+                  <Chip
+                    key={`wfam-${i}`}
+                    label={w}
+                    size="small"
+                    variant="outlined"
+                    onDelete={() => removeListItem("word_family", i)}
+                  />
+                ))}
+              </div>
+              <div className="add-item-row">
+                <input
+                  className="add-item-input"
+                  value={newWordFamily}
+                  onChange={(e) => setNewWordFamily(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" &&
+                    addListItem("word_family", newWordFamily, setNewWordFamily)
+                  }
+                  placeholder="e.g. noun: specification"
+                />
+                <IconButton
+                  size="small"
+                  onClick={() =>
+                    addListItem("word_family", newWordFamily, setNewWordFamily)
+                  }
+                >
+                  <AddIcon fontSize="small" />
+                </IconButton>
+              </div>
+            </div>
+
+            <div className="info-card">
+              <h3>Examples</h3>
+              <ul className="example-list">
+                {(currentTerm?.examples || []).map((ex, i) => (
+                  <li key={`ex-${i}`}>
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: highlightMainWord(ex, currentTerm.name),
+                      }}
+                    />
+                    <IconButton
+                      size="small"
+                      className="example-delete"
+                      onClick={() => removeListItem("examples", i)}
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  </li>
+                ))}
+              </ul>
+              <div className="add-item-row">
+                <input
+                  className="add-item-input"
+                  value={newExample}
+                  onChange={(e) => setNewExample(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" &&
+                    addListItem("examples", newExample, setNewExample)
+                  }
+                  placeholder="Add an example sentence"
+                />
+                <IconButton
+                  size="small"
+                  onClick={() => addListItem("examples", newExample, setNewExample)}
+                >
+                  <AddIcon fontSize="small" />
+                </IconButton>
               </div>
             </div>
           </div>

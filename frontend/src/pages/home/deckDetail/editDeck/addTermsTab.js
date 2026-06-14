@@ -1,7 +1,7 @@
 import { Alert, Button, Snackbar } from "@mui/material";
 import TermCard from "./termCard";
 import AddIcon from "@mui/icons-material/Add";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { termService } from "@api-services/termService";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { LocalLoadingWrapper } from "@components/loading";
@@ -10,25 +10,33 @@ import { filterChangedTerms, isChangeState } from "@utils/state";
 
 const emptyTerm = {
   name: "",
-  description: "",
+  meaning: "",
   image: "",
+  word_type: "",
+  pronunciation: "",
+  definition: "",
+  synonyms: [],
+  antonyms: [],
+  examples: [],
+  word_forms: [],
+  word_family: [],
+  ai_filled: false,
   error: null,
   open: false,
 };
 
 const initTerms = [emptyTerm, emptyTerm, emptyTerm, emptyTerm];
-let oldTerms = initTerms;
-
-let isLoadMore = false;
 
 function AddTermsTab({ handleClickBack }) {
+  const oldTermsRef = useRef(initTerms);
+  const isLoadMoreRef = useRef(false);
   const [terms, setTerms] = useState(initTerms);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
   const [isSuccess, setIsSuccess] = useState(false);
   const { deckID } = useParams();
   const isUpdate = terms.some((t) => t.id);
-  const isSateChanged = isChangeState(oldTerms, terms);
+  const isSateChanged = isChangeState(oldTermsRef.current, terms);
   const [fetchState, setFetchState] = useState({
     cursor: null,
     next: "",
@@ -64,10 +72,10 @@ function AddTermsTab({ handleClickBack }) {
           if (res.status === 204) {
             setTerms((pre) => pre.filter((t) => t.id !== term.id));
           } else {
-            setError("Delete Fail!");
+            setError("Couldn't delete the term. Please try again.");
           }
         } catch (error) {
-          setError("Something Wrong!");
+          setError("Something went wrong. Please try again.");
         } finally {
           setIsLoading(false);
         }
@@ -76,7 +84,7 @@ function AddTermsTab({ handleClickBack }) {
         setTerms(newTerms);
       }
     } else {
-      setError("Decks must have more than 4 terms");
+      setError("A deck needs at least 4 terms.");
     }
   };
   const handleAddTerm = () => {
@@ -119,7 +127,7 @@ function AddTermsTab({ handleClickBack }) {
         (index) =>
           (newterms[
             index
-          ].error = `Term '${newterms[index].name}' is already used`)
+          ].error = `Term '${newterms[index].name}' is already in this deck`)
       );
     }
 
@@ -133,7 +141,7 @@ function AddTermsTab({ handleClickBack }) {
   const handleClickSave = async () => {
     let ischangedState = false;
     if (terms.length < 4) {
-      setError("You must add at least four terms!");
+      setError("A deck needs at least 4 terms.");
     } else {
       const [success, result] = validate();
       if (success === true) {
@@ -148,7 +156,7 @@ function AddTermsTab({ handleClickBack }) {
                 setError(res.error);
               }
             }
-            const updatedTerms = filterChangedTerms(oldTerms, result);
+            const updatedTerms = filterChangedTerms(oldTermsRef.current, result);
             if (updatedTerms.length > 0) {
               const res = await termService.updateTerms(updatedTerms);
               ischangedState = true;
@@ -164,7 +172,7 @@ function AddTermsTab({ handleClickBack }) {
             }
           }
         } catch (error) {
-          setError("Something wrong!");
+          setError("Something went wrong. Please try again.");
         } finally {
           setFetchState({
             cursor: null,
@@ -202,7 +210,7 @@ function AddTermsTab({ handleClickBack }) {
           const fetchedTerms = isUpdate
             ? [...(refresh ? [] : terms), ...convertTerms(res.data.results)]
             : convertTerms(res.data.results);
-          oldTerms = fetchedTerms;
+          oldTermsRef.current = fetchedTerms;
           setTerms(fetchedTerms);
         }
       } else {
@@ -210,10 +218,10 @@ function AddTermsTab({ handleClickBack }) {
         setError(errorMessage);
       }
     } catch (error) {
-      setError("Something wrong!");
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
-      isLoadMore = false;
+      isLoadMoreRef.current = false;
     }
   };
 
@@ -229,8 +237,8 @@ function AddTermsTab({ handleClickBack }) {
     const isAtBottom =
       window.innerHeight + window.scrollY >= document.body.offsetHeight - 50;
     // Update the state based on whether the user is at the end of the page
-    if (!isLoadMore && isAtBottom && fetchState.next) {
-      isLoadMore = true;
+    if (!isLoadMoreRef.current && isAtBottom && fetchState.next) {
+      isLoadMoreRef.current = true;
       fetchTerms();
     }
   };
@@ -268,7 +276,7 @@ function AddTermsTab({ handleClickBack }) {
         onClose={() => setError(null)}
       >
         <Alert onClose={() => setIsSuccess(false)} severity="success">
-          Update terms success
+          Terms updated
         </Alert>
       </Snackbar>
       {isLoading && <LocalLoadingWrapper />}
@@ -309,7 +317,7 @@ function AddTermsTab({ handleClickBack }) {
             startIcon={<AddIcon />}
             onClick={handleAddTerm}
           >
-            <span className="button-text">Add Term</span>
+            <span className="button-text">Add term</span>
           </Button>
         </div>
         {terms.map((t, i) => (

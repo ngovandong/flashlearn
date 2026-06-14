@@ -10,7 +10,7 @@
 
 export function getFirstError(data) {
   if (typeof data === "string") {
-    return "Server Error";
+    return "Something went wrong. Please try again.";
   }
   const firstKeyError = Object.keys(data)[0];
   const firstErrors = data[firstKeyError];

@@ -12,6 +12,14 @@ class UserSettingService extends BaseService {
   updateSettings = (data) => {
     return this.request.patch(this.action("my_settings"), data);
   };
+
+  getLearningStreak = () => {
+    return this.request.get(this.action("learning_streak"));
+  };
+
+  recordStudyActivity = () => {
+    return this.request.post(this.action("record_study"));
+  };
 }
 
 export const userSettingService = new UserSettingService();

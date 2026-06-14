@@ -1,2 +1,3 @@
-from .custom_viewset import FlexibleViewSet
-from .search_viewset import SearchViewSet
+from backend.shared.interfaces.viewsets import FlexibleViewSet, SearchViewSet
+
+__all__ = ["FlexibleViewSet", "SearchViewSet"]

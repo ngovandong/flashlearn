@@ -45,7 +45,7 @@ pub async fn clone_deck(
     )
     .await?;
     let term_rows: Vec<TermRow> = sqlx::query_as(
-        "SELECT id, created_at, updated_at, name, description, image, deck_id FROM backend_term WHERE deck_id = ?",
+        "SELECT id, created_at, updated_at, name, meaning, image, deck_id FROM backend_term WHERE deck_id = ?",
     )
     .bind(crate::util::db_uuid::to_mysql_char(old_deck_id))
     .fetch_all(&state.db.pool)
@@ -55,7 +55,7 @@ pub async fn clone_deck(
             &state.db.pool,
             Uuid::new_v4(),
             &t.name,
-            &t.description,
+            &t.meaning,
             t.image.as_deref(),
             new_id,
         )

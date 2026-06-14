@@ -1,5 +1,7 @@
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import { Tooltip } from "@mui/material";
 import { COLORS } from "@constants/colors";
 import { CustomInput } from "@components/customInput";
 import PhotoIcon from "@mui/icons-material/Photo";
@@ -7,9 +9,15 @@ import UploadButton from "@components/uploadButton";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { useEffect, useState } from "react";
 import { getImagesURL, translateEnToVI } from "@api-services/crawlerService";
+import AiFillDialog from "@components/aiFillDialog";
 function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+
+  const handleApplyAi = (fields) => {
+    handleTermChange(index, { ...term, ...fields });
+  };
   const handleOnEnter = async (url) => {
     handleTermChange(index, {
       ...term,
@@ -54,7 +62,7 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
         handleTermChange(index, {
           ...{
             ...term,
-            description: res.data,
+            meaning: res.data,
           },
         });
       } catch (error) {}
@@ -85,10 +93,21 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
           )}
         </div>
 
+        <Tooltip title={term.ai_filled ? "AI data filled" : "Fill with AI"}>
+          <AutoFixHighIcon
+            onClick={() => term.name && setAiOpen(true)}
+            sx={{
+              color: term.ai_filled ? "var(--fl-accent-2)" : "var(--fl-text-muted)",
+              marginRight: "0.5rem",
+              cursor: "pointer",
+              "&:hover": { color: "var(--fl-accent)" },
+            }}
+          />
+        </Tooltip>
         <DeleteOutlineIcon
           onClick={() => handleDeleteTerm(index)}
           sx={{
-            color: COLORS.GRAY_TEXT,
+            color: "var(--fl-text-muted)",
             marginRight: "0.5rem",
             "&:hover": {
               color: COLORS.ERROR_RED,
@@ -97,11 +116,11 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
         />
         <DragIndicatorIcon
           sx={{
-            color: COLORS.GRAY_TEXT,
+            color: "var(--fl-text-muted)",
             marginRight: "0.5rem",
             cursor: "move",
             "&:hover": {
-              color: COLORS.YELLOW,
+              color: "var(--fl-accent-2)",
             },
           }}
         />
@@ -120,12 +139,12 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
         </div>
         <div className="desc">
           <CustomInput
-            value={term.description}
+            value={term.meaning}
             setValue={(value) =>
-              handleTermChange(index, { ...term, description: value })
+              handleTermChange(index, { ...term, meaning: value })
             }
-            placeholder="Enter desc"
-            helpText="DESCRIPTION"
+            placeholder="Enter meaning"
+            helpText="MEANING"
           />
         </div>
         <div className="img">
@@ -171,7 +190,7 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
             <img
               className="loading-image"
               src="/imgs/loading.png"
-              alt="Loading..."
+              alt="Loading…"
             />
           )}
           {!isLoading &&
@@ -194,6 +213,14 @@ function TermCard({ index, term, handleTermChange, handleDeleteTerm }) {
           />
         </div>
       </div>
+      <AiFillDialog
+        open={aiOpen}
+        name={term.name}
+        meaning={term.meaning}
+        initial={term}
+        onClose={() => setAiOpen(false)}
+        onApply={handleApplyAi}
+      />
     </div>
   );
 }

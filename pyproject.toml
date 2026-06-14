@@ -9,7 +9,6 @@ requires-python = ">=3.11"
 dependencies = [
     "django>=4.2.0,<5.0.0",
     "djangorestframework>=3.15.0,<4.0.0",
-    "django-debug-toolbar>=4.2.0,<5.0.0",
     "djangorestframework-simplejwt>=5.3.0,<6.0.0",
     "django-cors-headers>=4.3.0,<5.0.0",
     "python-dotenv>=1.0.0,<2.0.0",
@@ -33,6 +32,8 @@ dependencies = [
     "google-auth-oauthlib>=1.1.0,<2.0.0",
     "google-auth-httplib2>=0.2.0,<1.0.0",
     "google-api-python-client>=2.100.0,<3.0.0",
+    "curl-cffi>=0.15.0",
+    "sqlalchemy>=2.0.0,<3.0.0",
 ]
 
 [tool.uv]
@@ -47,8 +48,16 @@ dev = [
 [dependency-groups]
 dev = [
     "debugpy>=1.8.20",
+    "django-debug-toolbar>=4.2.0,<5.0.0",
     "ruff>=0.9.0",
     "pre-commit>=4.0.0",
+    "django-stubs>=6.0.5",
+    "djangorestframework-stubs>=3.17.0",
+    "types-requests>=2.33.0.20260518",
+    "pyright>=1.1.410",
+]
+crawler = [
+    "playwright>=1.60.0",
 ]
 
 [tool.ruff]
@@ -71,6 +80,20 @@ ignore = [
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+[tool.pyright]
+# Mirrors pyrightconfig.json — run: uv run pyright
+include = ["backend", "core", "base"]
+exclude = ["**/migrations", "**/tests", "**/__pycache__", ".venv"]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.11"
+typeCheckingMode = "basic"
+reportMissingModuleSource = false
+reportIncompatibleMethodOverride = false
+reportIncompatibleVariableOverride = false
+reportAttributeAccessIssue = "warning"
+reportGeneralTypeIssues = "warning"
 
 [tool.bandit]
 exclude_dirs = ["backend/migrations", "backend/tests"]

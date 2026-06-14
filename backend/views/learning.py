@@ -1,6 +1,4 @@
-from django.conf import settings
 from django.http import Http404
-from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -8,9 +6,9 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from base.views import FlexibleViewSet
+from backend.shared.interfaces.viewsets import FlexibleViewSet
 
-from ..models import Term, UserLearningProgress
+from ..models import UserLearningProgress
 from ..permissions import EditableLearningProgress
 from ..serializers import (
     CreateLearningProgressSerializer,
@@ -18,14 +16,14 @@ from ..serializers import (
     TermSerializer,
     UserLearningProgressSerializer,
 )
-from ..services import TermService, learning_progress_cache
+from ..services import learning_service, term_service
 
 
 class LearningViewSet(FlexibleViewSet):
     serializer_class = UserLearningProgressSerializer
     queryset = UserLearningProgress.objects.all()
 
-    permission_classes = IsAuthenticated
+    permission_classes = [IsAuthenticated]
 
     editable_learning_progress = (IsAuthenticated, EditableLearningProgress)
 
@@ -44,18 +42,10 @@ class LearningViewSet(FlexibleViewSet):
     def perform_create(self, serializer):
         term_id = serializer.validated_data.get("term_id")
         user_id = serializer.validated_data.get("user_id")
-        instance = self.get_queryset().filter(user=self.request.user, term_id=term_id).first()
-        term = Term.objects.get(id=term_id)
-        deck_id = term.deck_id
-        if instance is None:
-            serializer.save()
-        else:
-            instance.last_learned_at = timezone.now()
-            instance.save()
-        learning_progress_cache.delete_combine(deck_id, user_id)
+        learning_service.create_or_touch_progress(self.request.user, term_id, user_id)
 
     def create(self, request, *args, **kwargs):
-        data = request.data
+        data = dict(request.data)
         data["user_id"] = request.user.id
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -64,41 +54,23 @@ class LearningViewSet(FlexibleViewSet):
 
     @action(detail=True, methods=["PUT"])
     def correct(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.score += 2
-        instance.last_revised_at = timezone.now()
-        instance.save()
-        learning_progress_cache.delete_combine(instance.term.deck_id, request.user.id)
-
+        learning_service.record_correct(self.get_object(), request.user)
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["PUT"])
     def incorrect(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.score -= 3
-        instance.last_revised_at = timezone.now()
-        instance.save()
-        learning_progress_cache.delete_combine(instance.term.deck_id, request.user.id)
-
+        learning_service.record_incorrect(self.get_object(), request.user)
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["PUT"])
     def remember(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.is_skip = not instance.is_skip
-        instance.save()
-
+        learning_service.toggle_remember(self.get_object())
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["PUT"])
     def priority(self, request, *args, **kwargs):
-        data = request.data
-        adjust_point = int(data.get("adjust_point", 0))
-        if adjust_point:
-            instance = self.get_object()
-            instance.score += adjust_point
-            instance.save()
-
+        adjust_point = int(request.data.get("adjust_point", 0))
+        learning_service.adjust_priority(self.get_object(), adjust_point)
         return Response(status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
@@ -106,15 +78,12 @@ class LearningViewSet(FlexibleViewSet):
             openapi.Parameter("deck_id", openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Filter by deck")
         ]
     )
-    @action(
-        detail=False,
-        methods=["GET"],
-    )
+    @action(detail=False, methods=["GET"])
     def get_learning_terms(self, request, *args, **kwargs):
         deck_id = request.query_params.get("deck_id")
         if deck_id is None:
-            raise Http404("deck_id parameter is required")
-        deck_terms = Term.objects.get_terms_for_deck(deck_id=deck_id).all()
+            raise Http404("Please select a deck.")
+        deck_terms = term_service.get_learning_terms_for_deck(deck_id, request.user)
         queryset = self.filter_queryset(deck_terms)
 
         page = self.paginate_queryset(queryset)
@@ -127,52 +96,36 @@ class LearningViewSet(FlexibleViewSet):
 
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter("deck_id", openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Get by deck")
+            openapi.Parameter("deck_id", openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Get by deck"),
+            openapi.Parameter(
+                "term_id",
+                openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="Open the deck at this specific term instead of the last-learned one",
+            ),
         ]
     )
-    @action(
-        detail=False,
-        methods=["GET"],
-    )
+    @action(detail=False, methods=["GET"])
     def get_latest_learned_term(self, request, *args, **kwargs):
+        from django.conf import settings
+
         deck_id = request.query_params.get("deck_id")
         if deck_id is None:
-            raise Http404("deck_id parameter is required")
-        deck_terms = Term.objects.get_terms_for_deck(deck_id=deck_id).all()
-        last_learned_term = Term.objects.get_last_learned_term(request.user, deck_id)
-        if last_learned_term:
-            last_learned_index = last_learned_term.id
-            for index, t in enumerate(deck_terms):
-                if t.id == last_learned_term.id:
-                    last_learned_index = index
-            default_page = last_learned_index // settings.REST_FRAMEWORK.get("PAGE_SIZE", 10) + 1
-            res_dict = {
-                "default_page": default_page,
-                "latest_id": last_learned_term.id,
-                "last_learned_index": last_learned_index,
-            }
-            return Response(res_dict)
-        else:
-            res_dict = {
-                "default_page": 1,
-                "latest_id": "",
-                "last_learned_index": 0,
-            }
-            return Response(res_dict)
+            raise Http404("Please select a deck.")
+        term_id = request.query_params.get("term_id") or None
+        page_size = settings.REST_FRAMEWORK.get("PAGE_SIZE", 10)
+        return Response(learning_service.get_latest_learned_term_info(request.user, deck_id, page_size, term_id))
 
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter("deck_id", openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Filter by deck")
         ]
     )
-    @action(
-        detail=False,
-        methods=["GET"],
-    )
+    @action(detail=False, methods=["GET"])
     def get_revise_terms(self, request, *args, **kwargs):
         deck_id = request.query_params.get("deck_id", None)
         if deck_id is None:
-            raise Http404("deck_id parameter is required")
-        data = TermService.get_revise_terms(request.user, deck_id)
+            raise Http404("Please select a deck.")
+        data = term_service.get_revise_terms(request.user, deck_id)
         serializer = self.get_serializer(data)
         return Response(serializer.data)

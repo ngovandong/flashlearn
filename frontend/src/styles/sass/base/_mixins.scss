@@ -14,21 +14,78 @@
 }
 
 @mixin app_radius {
-    border-radius: 0.25rem;
-    box-shadow: $shadow;
+    border-radius: $radius-md;
+    box-shadow: $shadow-sm;
+}
+
+/**
+ * Centered page container with a max-width and fluid gutters.
+ *
+ * One primitive every top-level page uses so content stays readable on
+ * ultra-wide monitors, centers on tablets, and gets comfortable (but smaller)
+ * padding on phones — no per-page magic numbers required.
+ */
+@mixin page_shell($max: 75rem) {
+    width: 100%;
+    max-width: $max;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 4vw, 2.5rem);
+    padding-block: clamp(1.25rem, 3vw, 2.5rem);
+}
+
+/**
+ * Responsive auto-reflowing card grid.
+ *
+ * Cards wrap automatically at every viewport — from 1 column on a phone up to
+ * as many as fit — without breakpoint overrides. `min(100%, $min)` guarantees a
+ * single card never overflows a narrow screen.
+ */
+@mixin card_grid($min: 17rem, $gap: 1.25rem) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, $min), 1fr));
+    gap: $gap;
+}
+
+/** Static surface card — consistent background, border, radius and shadow. */
+@mixin card {
+    background-color: $surface;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-md;
+    box-shadow: $shadow-sm;
+}
+
+/** Clickable card that lifts on hover instead of shifting layout. */
+@mixin card_interactive {
+    @include card;
+    cursor: pointer;
+    transition: transform 0.18s $ease, box-shadow 0.18s $ease, border-color 0.18s $ease;
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: $shadow-lg;
+        border-color: $hover-purple;
+    }
 }
 
 @mixin purple_btn {
     background-color: $main-purple;
     color: white;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 1.25rem;
     font-weight: 600;
-    border-radius: .5rem;
+    border: none;
+    border-radius: $radius-sm;
     font-size: 0.875rem;
     cursor: pointer;
+    transition: background-color 0.18s $ease, box-shadow 0.18s $ease, transform 0.18s $ease;
 
     &:hover {
         background-color: $dark-purple;
+        box-shadow: $shadow-purple;
+        transform: translateY(-1px);
+    }
+
+    &:active {
+        transform: translateY(0);
     }
 }
 
@@ -38,6 +95,7 @@
 
     &:hover {
         background-color: $yellow-hover;
+        box-shadow: $shadow-md;
     }
 }
 
@@ -47,14 +105,17 @@
 
     &:hover {
         background-color: $blue-hover;
+        box-shadow: $shadow-md;
     }
 }
 
+/** Legacy hover accent — now a clean lift to avoid layout shift. */
 @mixin border_bottom_purple {
-    border-bottom: 0.3125rem solid #fff;
+    transition: transform 0.18s $ease, box-shadow 0.18s $ease, border-color 0.18s $ease;
 
     &:hover {
-        border-bottom: 0.3125rem solid $hover-purple;
-        transition: all .12s cubic-bezier(.47, 0, .745, .715);
+        transform: translateY(-3px);
+        box-shadow: $shadow-lg;
+        border-color: $hover-purple;
     }
 }

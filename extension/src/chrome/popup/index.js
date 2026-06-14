@@ -98,7 +98,7 @@ const TermSpeaker = styled.button`
   padding: 6px;
   transition: all 0.2s;
   flex-shrink: 0;
-  
+
   & > img {
     height: 16px;
     width: 16px;
@@ -190,9 +190,11 @@ const ResourceLink = styled.a`
 const ImageGallery = styled.div`
   margin-top: 14px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   margin-bottom: 12px;
+  max-height: 360px;
+  overflow-y: auto;
 `;
 
 const ImageThumbnail = styled.img`
@@ -205,10 +207,10 @@ const ImageThumbnail = styled.img`
   border: 2px solid transparent;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
   transition: all 0.2s;
-  
+
   border-color: ${(props) => (props.selected ? primaryColor : "transparent")};
   box-shadow: ${(props) => (props.selected ? "0 4px 12px rgba(66, 85, 255, 0.15)" : "0 2px 4px rgba(0,0,0,0.04)")};
-  
+
   &:hover {
     border-color: ${primaryColor};
     transform: scale(1.02);
@@ -228,7 +230,7 @@ const AddToDeckButton = styled.button`
   margin-top: 12px;
   box-shadow: 0 4px 12px rgba(66, 85, 255, 0.15);
   transition: all 0.2s;
-  
+
   &:hover {
     background-color: ${primaryHoverColor};
     box-shadow: 0 6px 16px rgba(66, 85, 255, 0.25);
@@ -245,6 +247,156 @@ const LoadingIcon = styled.img`
     100% {
       transform: rotate(360deg);
     }
+  }
+`;
+
+const AiButton = styled.button`
+  background-color: #ffffff;
+  color: ${primaryColor};
+  border: 1px solid ${primaryColor};
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem !important;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 8px;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #eef1ff;
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+`;
+
+const AiSection = styled.div`
+  margin-bottom: 12px;
+
+  & label {
+    display: block;
+    font-size: 0.7rem !important;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 8px 0 2px;
+  }
+
+  & input,
+  & textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 0.8rem !important;
+    color: #1e293b;
+    resize: vertical;
+  }
+`;
+
+const ChipRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+`;
+
+const Chip = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: ${(props) => (props.muted ? "#f1f5f9" : "#eef1ff")};
+  color: ${(props) => (props.muted ? "#475569" : primaryColor)};
+  border: 1px solid ${(props) => (props.muted ? "#e2e8f0" : "#d6dbff")};
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 0.75rem !important;
+  font-weight: 600;
+
+  & > button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.6;
+    font-size: 0.85rem !important;
+    line-height: 1;
+    padding: 0;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+`;
+
+const ExampleList = styled.ul`
+  margin: 4px 0 0 !important;
+  padding-left: 16px !important;
+  list-style: disc;
+
+  & > li {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 0.8rem !important;
+    line-height: 1.45;
+    color: #334155;
+
+    & > span {
+      flex: 1;
+    }
+
+    & > button {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #cbd5e1;
+      font-size: 0.9rem !important;
+      line-height: 1;
+      padding: 0;
+
+      &:hover {
+        color: #ef4444;
+      }
+    }
+  }
+`;
+
+const AddRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+`;
+
+const AddInput = styled.input`
+  flex: 1;
+  min-width: 0;
+`;
+
+const AddButton = styled.button`
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background-color: #eef1ff;
+  color: ${primaryColor};
+  font-size: 1rem !important;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #e0e5ff;
   }
 `;
 
@@ -272,6 +424,12 @@ const SetupDeckHint = styled.p`
   line-height: 1.4;
 `;
 
+// Renders only <b>…</b> segments as bold; any other markup stays plain text (safe from XSS).
+const renderHighlighted = (text) =>
+  String(text ?? "")
+    .split(/<b>(.*?)<\/b>/gi)
+    .map((part, i) => (i % 2 === 1 ? <strong key={i}>{part}</strong> : part));
+
 export default function TranslationPopup({
   term,
   request,
@@ -289,6 +447,60 @@ export default function TranslationPopup({
   const [images, setImages] = useState([]);
   const [error, setError] = useState(null);
   const [selectedImg, setselectedImg] = useState();
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiFilled, setAiFilled] = useState(false);
+  const [aiFields, setAiFields] = useState(null);
+  const [newSynonym, setNewSynonym] = useState("");
+  const [newAntonym, setNewAntonym] = useState("");
+  const [newExample, setNewExample] = useState("");
+
+  const setAiField = (key) => (e) =>
+    setAiFields((prev) => ({ ...prev, [key]: e.target.value }));
+
+  const addAiListItem = (key, rawValue, reset) => {
+    const value = (rawValue || "").trim();
+    if (!value) return;
+    setAiFields((prev) => ({
+      ...prev,
+      [key]: [...(prev[key] || []), value],
+    }));
+    reset("");
+  };
+
+  const removeAiListItem = (key, idx) =>
+    setAiFields((prev) => ({
+      ...prev,
+      [key]: (prev[key] || []).filter((_, i) => i !== idx),
+    }));
+
+  const handleFillWithAi = async () => {
+    setAiLoading(true);
+    setError(null);
+    try {
+      const res = await request.post("terms/ai_enrich/", {
+        name: term,
+        meaning,
+      });
+      if (res.error) {
+        setError(res.error.errors || "AI request failed.");
+      } else {
+        const d = res.data || {};
+        setAiFields({
+          word_type: d.word_type || "",
+          pronunciation: d.pronunciation || "",
+          definition: d.definition || "",
+          synonyms: d.synonyms || [],
+          antonyms: d.antonyms || [],
+          examples: d.examples || [],
+        });
+        setAiFilled(true);
+      }
+    } catch (err) {
+      setError("AI request failed. Please try again.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const encodedPhrase = encodeURIComponent(term);
   const definitionPhrase = encodeURIComponent(term + " definition");
@@ -297,11 +509,21 @@ export default function TranslationPopup({
 
   const handleAddToDefaultDeck = async () => {
     try {
-      const res = await request.post("terms/add_to_default_deck/", {
+      const payload = {
         image: selectedImg,
         name: term,
-        description: meaning,
-      });
+        meaning,
+      };
+      if (aiFields) {
+        payload.word_type = aiFields.word_type;
+        payload.pronunciation = aiFields.pronunciation;
+        payload.definition = aiFields.definition;
+        payload.synonyms = aiFields.synonyms || [];
+        payload.antonyms = aiFields.antonyms || [];
+        payload.examples = aiFields.examples || [];
+        payload.ai_filled = true;
+      }
+      const res = await request.post("terms/add_to_default_deck/", payload);
       if (!res.error) onClose();
       else setError(res.error.errors);
     } catch (err) {
@@ -317,7 +539,7 @@ export default function TranslationPopup({
   const handleClick = (e) => {
     e.stopPropagation();
   };
-  
+
   const handleSpeak = () => {
     speak(term);
   };
@@ -361,7 +583,7 @@ export default function TranslationPopup({
             <img src={speakerURL} alt="speak term" />
           </TermSpeaker>
         </TermHeaderContainer>
-        
+
         <LinkGroup>
           <ResourceLink href={youglish} target="_blank" rel="noreferrer">
             YouGlish
@@ -370,7 +592,7 @@ export default function TranslationPopup({
             Google
           </ResourceLink>
         </LinkGroup>
-        
+
         <MeaningContainer>
           <p>Meaning</p>
           {!error && isLoading && (
@@ -382,6 +604,15 @@ export default function TranslationPopup({
           {error && <img src={notFoundURL} alt="notfound icon" />}
           {error && <div className="error-text">{error}</div>}
 
+          {!isLoading && hasDefaultDeck && (
+            <AiButton onClick={handleFillWithAi} disabled={aiLoading}>
+              {aiLoading
+                ? "Generating..."
+                : aiFilled
+                ? "✨ Regenerate with AI"
+                : "✨ Fill with AI"}
+            </AiButton>
+          )}
           {meaning && !isLoading && hasDefaultDeck && (
             <AddToDeckButton onClick={handleAddToDefaultDeck}>
               + Add to Default Deck
@@ -394,7 +625,131 @@ export default function TranslationPopup({
             </SetupDeckHint>
           )}
         </MeaningContainer>
-        
+
+        {aiFields && (
+          <AiSection>
+            <label>Type of word</label>
+            <input
+              value={aiFields.word_type}
+              onChange={setAiField("word_type")}
+              placeholder="Noun, Verb..."
+            />
+            <label>Pronunciation</label>
+            <input
+              value={aiFields.pronunciation}
+              onChange={setAiField("pronunciation")}
+              placeholder="/ɔɪl/"
+            />
+            <label>Definition</label>
+            <textarea
+              rows={2}
+              value={aiFields.definition}
+              onChange={setAiField("definition")}
+            />
+            <label>Synonyms</label>
+            <ChipRow>
+              {(aiFields.synonyms || []).map((s, i) => (
+                <Chip key={`syn-${i}`}>
+                  {s}
+                  <button
+                    type="button"
+                    onClick={() => removeAiListItem("synonyms", i)}
+                  >
+                    &times;
+                  </button>
+                </Chip>
+              ))}
+            </ChipRow>
+            <AddRow>
+              <AddInput
+                value={newSynonym}
+                onChange={(e) => setNewSynonym(e.target.value)}
+                onKeyDown={(e) =>
+                  e.key === "Enter" &&
+                  addAiListItem("synonyms", newSynonym, setNewSynonym)
+                }
+                placeholder="Add a synonym"
+              />
+              <AddButton
+                type="button"
+                onClick={() =>
+                  addAiListItem("synonyms", newSynonym, setNewSynonym)
+                }
+              >
+                +
+              </AddButton>
+            </AddRow>
+
+            <label>Antonyms</label>
+            <ChipRow>
+              {(aiFields.antonyms || []).map((a, i) => (
+                <Chip muted key={`ant-${i}`}>
+                  {a}
+                  <button
+                    type="button"
+                    onClick={() => removeAiListItem("antonyms", i)}
+                  >
+                    &times;
+                  </button>
+                </Chip>
+              ))}
+            </ChipRow>
+            <AddRow>
+              <AddInput
+                value={newAntonym}
+                onChange={(e) => setNewAntonym(e.target.value)}
+                onKeyDown={(e) =>
+                  e.key === "Enter" &&
+                  addAiListItem("antonyms", newAntonym, setNewAntonym)
+                }
+                placeholder="Add an antonym"
+              />
+              <AddButton
+                type="button"
+                onClick={() =>
+                  addAiListItem("antonyms", newAntonym, setNewAntonym)
+                }
+              >
+                +
+              </AddButton>
+            </AddRow>
+
+            <label>Examples</label>
+            <ExampleList>
+              {(aiFields.examples || []).map((ex, i) => (
+                <li key={`ex-${i}`}>
+                  <span>{renderHighlighted(ex)}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeAiListItem("examples", i)}
+                  >
+                    &times;
+                  </button>
+                </li>
+              ))}
+            </ExampleList>
+            <AddRow>
+              <AddInput
+                value={newExample}
+                onChange={(e) => setNewExample(e.target.value)}
+                onKeyDown={(e) =>
+                  e.key === "Enter" &&
+                  addAiListItem("examples", newExample, setNewExample)
+                }
+                placeholder="Add an example"
+              />
+              <AddButton
+                type="button"
+                onClick={() =>
+                  addAiListItem("examples", newExample, setNewExample)
+                }
+              >
+                +
+              </AddButton>
+            </AddRow>
+          </AiSection>
+        )}
+
         <ImageGallery>
           {images.map((i) => (
             <ImageThumbnail
@@ -410,4 +765,3 @@ export default function TranslationPopup({
     </PopupContainer>
   );
 }
-

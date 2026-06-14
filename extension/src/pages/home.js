@@ -36,7 +36,8 @@ function Home() {
     try {
       const res = await deckService.getMyDecks();
       if (!res.error) {
-        setDecks(res.data);
+        const data = res.data;
+        setDecks(Array.isArray(data) ? data : data?.results ?? []);
       } else {
         const responseError = getFirstError(res.error);
         setError(responseError);

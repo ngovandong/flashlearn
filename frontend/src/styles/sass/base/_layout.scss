@@ -29,3 +29,33 @@
     }
 
 }
+
+html,
+body {
+    background-color: var(--fl-bg);
+    color: var(--fl-text);
+    transition: background-color 0.2s ease, color 0.2s ease;
+    // Guard against accidental horizontal scroll from any single wide child.
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+// Media never forces a horizontal scrollbar on small screens.
+img,
+svg,
+video,
+canvas,
+iframe {
+    max-width: 100%;
+}
+
+// Long words / URLs wrap instead of pushing the layout wider than the viewport.
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    overflow-wrap: break-word;
+}

@@ -1,31 +1,36 @@
 import { IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { learningService } from "@api-services/learningService";
 import { useNavigate, useParams } from "react-router-dom";
-import { getFirstError } from "@utils/errorHandler";
 import { toast } from "react-toastify";
 import Confetti from "react-confetti";
 import { LocalLoadingWrapper } from "@components/loading";
 import Quiz from "./quiz";
-import { generateQuestions } from "./generateQuestion";
 import Fill from "./fill";
 import { QUESTION_TYPES } from "@constants/questionTypes";
 import { speak } from "@api-services/voiceService";
+import { useReviseTerms } from "@hooks/useReviseTerms";
+import { useStudySounds } from "@hooks/useStudySounds";
+import { useSwipeGesture } from "@hooks/useSwipeGesture";
 
 let timeoutId;
 
 function Revise() {
-  const [deckName, setDeckName] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [terms, setTerms] = useState();
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
+  const [isLoading, setIsLoading] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [currentState, setCurrentState] = useState({
     index: 0,
     showNext: false,
   });
+  const navigate = useNavigate();
+  const { deckID } = useParams();
+  const { data, isLoading: queryLoading, error } = useReviseTerms(deckID);
+  const sounds = useStudySounds();
+
+  const deckName = data?.deckName ?? "";
+  const terms = data?.questions;
+
   let currentQuestion = null;
   let length = 0;
   if (terms) {
@@ -33,11 +38,19 @@ function Revise() {
     length = terms.length;
   }
 
-  const correctSound = new Audio(`${process.env.PUBLIC_URL}/sound/true.mp3`);
-  const incorrectSound = new Audio(`${process.env.PUBLIC_URL}/sound/false.mp3`);
-  const finishSound = new Audio(
-    `${process.env.PUBLIC_URL}/sound/congratulation.mp3`
-  );
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (data && data.reviseCount === 0) {
+      toast.info("Nothing to revise yet");
+      navigate(`/deck/${deckID}`);
+    }
+  }, [data, deckID, navigate]);
+
   const handleNextQuestionClick = () => {
     if (currentState.index < length - 1) {
       setCurrentState((pre) => ({ index: pre.index + 1, showNext: false }));
@@ -48,36 +61,20 @@ function Revise() {
 
   const showNext = () => {
     if (currentState.index === length - 1) {
-      finishSound.play();
+      sounds.finish.play();
       setShowConfetti(true);
     }
     setCurrentState((pre) => ({ ...pre, showNext: true }));
   };
 
-  const navigate = useNavigate();
-  const { deckID } = useParams();
-
-  const playCorrectSound = () => {
-    correctSound.play();
-  };
-  const playIncorrectSound = () => {
-    incorrectSound.play();
-  };
-  const handleTouchStart = (event) => {
-    touchStartX.current = event.touches[0].clientX;
-  };
-
-  const handleTouchMove = (event) => {
-    touchEndX.current = event.touches[0].clientX;
-  };
-
-  const handleTouchEnd = () => {
-    const swipeDistance = touchEndX.current - touchStartX.current;
-
-    if (currentState.showNext && swipeDistance < -40) {
-      handleNextQuestionClick();
-    }
-  };
+  const { handleTouchStart, handleTouchEnd } = useSwipeGesture({
+    threshold: 40,
+    onSwipeLeft: () => {
+      if (currentState.showNext) {
+        handleNextQuestionClick();
+      }
+    },
+  });
 
   const speakTermWhenAnswer = () => {
     if (timeoutId) {
@@ -88,46 +85,27 @@ function Revise() {
 
   const handleCorrect = async () => {
     speakTermWhenAnswer();
-    playCorrectSound();
-    await learningService.correct(currentQuestion.progressId);
+    sounds.correct.play();
+    try {
+      await learningService.correct(currentQuestion.progressId);
+    } catch {
+      toast.error("Failed to record correct answer");
+    }
   };
+
   const handleIncorrect = async () => {
     speakTermWhenAnswer();
-    playIncorrectSound();
-    await learningService.incorrect(currentQuestion.progressId);
+    sounds.incorrect.play();
+    try {
+      await learningService.incorrect(currentQuestion.progressId);
+    } catch {
+      toast.error("Failed to record incorrect answer");
+    }
   };
 
   const speakTerm = async () => {
     speak(currentQuestion.answer);
   };
-
-  const fetchWords = async () => {
-    try {
-      const res = await learningService.getReviseTerms(deckID);
-      if (!res.error) {
-        const { revise_terms, all_terms, deck_name } = res.data;
-        if (revise_terms.length === 0) {
-          toast.info("Has nothing to revise");
-          navigate(`/deck/${deckID}`);
-        }
-        setDeckName(deck_name);
-        const questions = generateQuestions(revise_terms, all_terms);
-        setTerms(questions);
-      } else {
-        const errorMessage = getFirstError(res.error);
-        toast.error(errorMessage);
-      }
-    } catch (error) {
-      setIsLoading(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchWords();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleKeyDown = (event) => {
     if (event.key === "ArrowRight" || event.key === "Enter") {
@@ -154,7 +132,6 @@ function Revise() {
       }, timeout);
     }
 
-    // Cleanup function to clear the timeout if the component unmounts or the dependencies change
     return () => {
       if (timeoutId) {
         clearTimeout(timeoutId);
@@ -162,11 +139,12 @@ function Revise() {
     };
   }, [currentQuestion]);
 
+  const loading = queryLoading || isLoading;
+
   return terms ? (
     <div
       className="learn-wrapper"
       onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       {showConfetti && (
@@ -217,13 +195,13 @@ function Revise() {
             }`}
             onClick={handleNextQuestionClick}
           >
-            {currentState.index === length - 1 ? "Finish" : "Next Question"}
+            {currentState.index === length - 1 ? "Finish" : "Next question"}
           </button>
         </div>
       </div>
     </div>
   ) : (
-    <LocalLoadingWrapper open={isLoading} />
+    <LocalLoadingWrapper open={loading} />
   );
 }
 

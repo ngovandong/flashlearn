@@ -1,88 +1,137 @@
-import { deckService } from "@api-services/deckService";
 import { LocalLoadingWrapper } from "@components/loading";
-import { Alert, Snackbar } from "@mui/material";
-import { getFirstError } from "@utils/errorHandler";
-import React, { useEffect, useState } from "react";
+import { Alert, Box, Snackbar } from "@mui/material";
+import { useLatestDecks, useLearningStreak } from "@hooks/useLatestDecks";
+import React, { useState } from "react";
 import DeckCard from "./deckCard";
+import PaginatedDeckSection, { fetchPublicDecksPage } from "./paginatedDeckSection";
 import { useSelector } from "react-redux";
 import { selectUser } from "@app/store/authSlice";
+import InstallExtensionReminder from "@components/installExtensionReminder";
+import ThemeSuggestion from "@components/themeSuggestion";
+import { Link } from "react-router-dom";
+import HearingIcon from "@mui/icons-material/Hearing";
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
+import { getActivePracticeBanner } from "@utils/practiceBanner";
+
+const PRACTICE_BANNERS = {
+  speaking: {
+    icon: <RecordVoiceOverIcon />,
+    title: "Practice speaking with your AI coach",
+    description:
+      "Generate real-life conversations, role-play out loud, and get instant feedback on your pronunciation.",
+    to: "/speaking-coach",
+    cta: "Start speaking",
+  },
+  number: {
+    icon: <HearingIcon />,
+    title: "Sharpen your number listening",
+    description:
+      "Train your ear by typing the English numbers you hear — from quick digits to phone, tax, and ID numbers.",
+    to: "/number-test",
+    cta: "Start practice",
+  },
+};
+
+function streakCopy({ streak, studied_today }) {
+  if (streak === 0) {
+    return {
+      main: "Start your learning streak today!",
+      sub: "Study a deck to begin building your streak.",
+    };
+  }
+  const dayLabel = streak === 1 ? "1-day" : `${streak}-day`;
+  return {
+    main: `You have a ${dayLabel} streak of learning`,
+    sub: studied_today
+      ? "Keep studying hard to maintain your streak!"
+      : "Study today to keep your streak going!",
+  };
+}
+
 function Home() {
-  const [mydecks, setMydecks] = useState();
-  const [publicDecks, setPublicDecks] = useState();
   const [error, setError] = useState();
-  const [isLoading, setIsLoading] = useState(false);
   const user = useSelector(selectUser);
-  const fetchDeck = async () => {
-    setIsLoading(true);
-    try {
-      const res = await deckService.getLatestDeck();
-      if (!res.error) {
-        const decks = res.data;
-        setMydecks(decks);
-        if (decks.length < 3) {
-          fetchPublicDeck();
-        }
-      } else {
-        const responseError = getFirstError(res.error);
-        setError(responseError);
-      }
-    } catch (error) {
-      setIsLoading(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  const fetchPublicDeck = async () => {
-    setIsLoading(true);
-    try {
-      const res = await deckService.getPublicDecks();
-      if (!res.error) {
-        setPublicDecks(res.data);
-      } else {
-        const responseError = getFirstError(res.error);
-        setError(responseError);
-      }
-    } catch (error) {
-      setIsLoading(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchDeck();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const {
+    data: mydecks,
+    isLoading: decksLoading,
+    error: decksError,
+  } = useLatestDecks();
+  const { data: learningStreak } = useLearningStreak();
+
+  const queryError = decksError?.message;
+
+  const streakText = learningStreak ? streakCopy(learningStreak) : null;
+
+  const banner = PRACTICE_BANNERS[getActivePracticeBanner()];
+
   return user ? (
     <div className="home-page">
-      <LocalLoadingWrapper open={isLoading} />
+      <LocalLoadingWrapper open={decksLoading} />
       <Snackbar
         anchorOrigin={{
           vertical: "bottom",
           horizontal: "center",
         }}
-        open={error != null}
+        open={error != null || queryError != null}
         autoHideDuration={6000}
         onClose={() => setError(null)}
       >
         <Alert onClose={() => setError(null)} severity="error">
-          {error}
+          {error || queryError}
         </Alert>
       </Snackbar>
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: { xs: 16, sm: 24 },
+          left: { xs: 16, sm: 24 },
+          right: { xs: 16, sm: "auto" },
+          zIndex: (theme) => theme.zIndex.snackbar,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: { xs: "stretch", sm: "flex-start" },
+          gap: 1.5,
+          pointerEvents: "none",
+        }}
+      >
+        <InstallExtensionReminder />
+        <ThemeSuggestion />
+      </Box>
       <div className="welcome-text">
         <h2>Hi, {user.name}</h2>
       </div>
       <section>
         <div className="section-header">
-          <h5>Achievements</h5>
+          <h5>Your progress</h5>
+        </div>
+        <div className="progress-row">
           <div className="streak-container">
             <img
               src="https://cdn-icons-png.flaticon.com/512/1869/1869397.png"
               alt="streak-calendar"
             />
             <div className="streak-text">
-              <div>You have a 1-day streak of learning</div>
-              <span>Keep studying hard to maintain your streak!</span>
+              {streakText && (
+                <>
+                  <div>{streakText.main}</div>
+                  <span>{streakText.sub}</span>
+                </>
+              )}
             </div>
+          </div>
+          <div className="practice-reminder">
+            <div className="practice-reminder__content">
+              <div className="practice-reminder__icon">{banner.icon}</div>
+              <div className="practice-reminder__text">
+                <h4>{banner.title}</h4>
+                <p>{banner.description}</p>
+              </div>
+            </div>
+            <Link to={banner.to} className="practice-reminder__cta">
+              <PlayArrowRoundedIcon />
+              <span>{banner.cta}</span>
+            </Link>
           </div>
         </div>
       </section>
@@ -105,25 +154,12 @@ function Home() {
           </div>
         </section>
       )}
-      {publicDecks && (
-        <section>
-          <div className="section-header">
-            <h5>Public decks</h5>
-          </div>
-          <div className="section-cards">
-            {publicDecks.map((d) => (
-              <DeckCard
-                key={d.id}
-                id={d.id}
-                name={d.name}
-                owner={d.owner}
-                terms={d.number_of_term}
-                background={d.background}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+      <PaginatedDeckSection
+        title="Public decks"
+        queryKey={["decks", "public"]}
+        fetchPage={fetchPublicDecksPage}
+        onError={setError}
+      />
     </div>
   ) : (
     <></>

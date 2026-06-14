@@ -219,17 +219,17 @@ function QuickRevise()
                         </Box>
 
                         <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
-                            {gameOverState.reason === 'timeout' ? "Time's Up!" : "Game Over"}
+                            {gameOverState.reason === 'timeout' ? "Time's up!" : "Game over"}
                         </Typography>
 
                         <Typography variant="h6" color="text.secondary" gutterBottom>
-                            Final Score: {gameOverState.finalScore}
+                            Final score: {gameOverState.finalScore}
                         </Typography>
 
                         {gameOverState.reason === 'wrong_answer' && (
                             <Paper elevation={0} sx={{ bgcolor: '#f5f5f5', p: 2, my: 2, borderRadius: 2 }}>
                                 <Typography variant="body2" color="text.secondary" gutterBottom>
-                                    Correct Answer:
+                                    Correct answer:
                                 </Typography>
                                 <Typography variant="h6" color="success.main" sx={{ fontWeight: 'bold' }}>
                                     {gameOverState.correctAnswer}
