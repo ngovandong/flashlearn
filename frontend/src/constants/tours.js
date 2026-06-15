@@ -239,7 +239,7 @@ export const TOURS = [
         id: "sc.voice",
         selector: '[data-tour="sc-voice"]',
         title: "Choose your tutor voice",
-        body: "Pick a natural AI reference voice. Dragon reads every line aloud in this voice when you tap Listen or play the conversation.",
+        body: "Pick a natural AI reference voice — you'll hear a quick sample, or tap Demo to replay it. Dragon reads every line aloud in this voice when you tap Listen or play the conversation.",
       },
       {
         id: "sc.generate",

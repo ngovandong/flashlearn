@@ -19,28 +19,59 @@ TTS_CRON_DELAY = float(os.getenv("SPEAKING_TTS_CRON_DELAY", "1.0"))
 TTS_CRON_ABORT_AFTER_FAILURES = int(os.getenv("SPEAKING_TTS_CRON_ABORT_AFTER_FAILURES", "3"))
 
 
-def _pending_lines(voice: str, max_lines: int | None):
-    """Return up to ``max_lines`` distinct ``(text, text_hash)`` conversation lines
-    that have no cached :class:`SpeakingAudioClip` for ``voice`` yet."""
+def _pending_lines(max_lines: int | None, voice_override: str | None = None):
+    """Return up to ``max_lines`` distinct ``(voice, text, text_hash)`` conversation
+    lines that have no cached :class:`SpeakingAudioClip` yet.
+
+    Each conversation is warmed with the voice it was generated with (its
+    ``voice`` field), falling back to the default voice when unset. Passing
+    ``voice_override`` forces that voice for every line instead.
+    """
     from ..models import SpeakingAudioClip, SpeakingConversation
+    from ..speaking.application.services import DEFAULT_TTS_VOICE, TTS_VOICES, VOICE_DEMO_TEXT
 
-    existing = set(SpeakingAudioClip.objects.filter(voice=voice).values_list("text_hash", flat=True))
+    # Lazily load (and memoize) the set of already-cached hashes per voice.
+    existing_by_voice: dict[str, set[str]] = {}
 
-    pending: list[tuple[str, str]] = []
-    seen: set[str] = set()
-    for lines in SpeakingConversation.objects.values_list("lines", flat=True).iterator(chunk_size=200):
+    def existing_for(voice: str) -> set[str]:
+        if voice not in existing_by_voice:
+            existing_by_voice[voice] = set(
+                SpeakingAudioClip.objects.filter(voice=voice).values_list("text_hash", flat=True)
+            )
+        return existing_by_voice[voice]
+
+    pending: list[tuple[str, str, str]] = []
+    seen: set[tuple[str, str]] = set()
+
+    def _add(voice: str, text: str) -> bool:
+        """Queue ``(voice, text)`` if it isn't cached/queued. Returns True when the
+        ``max_lines`` budget is now exhausted."""
+        if voice not in TTS_VOICES:
+            voice = DEFAULT_TTS_VOICE
+        text = (text or "").strip()
+        if not text:
+            return False
+        text_hash = SpeakingAudioClip.hash_text(text)
+        key = (voice, text_hash)
+        if text_hash in existing_for(voice) or key in seen:
+            return False
+        seen.add(key)
+        pending.append((voice, text, text_hash))
+        return max_lines is not None and len(pending) >= max_lines
+
+    # Seed the per-voice preview sample first so the picker demo is always warm,
+    # even for voices not used by any saved conversation. Retried each tick until
+    # cached, so a transient rate-limit (429) self-heals over time.
+    for demo_voice in [voice_override] if voice_override else TTS_VOICES:
+        if _add(demo_voice, VOICE_DEMO_TEXT):
+            return pending
+
+    for conv_voice, lines in SpeakingConversation.objects.values_list("voice", "lines").iterator(chunk_size=200):
+        voice = voice_override or conv_voice
         for line in lines or []:
             if not isinstance(line, dict):
                 continue
-            text = (line.get("text") or "").strip()
-            if not text:
-                continue
-            text_hash = SpeakingAudioClip.hash_text(text)
-            if text_hash in existing or text_hash in seen:
-                continue
-            seen.add(text_hash)
-            pending.append((text, text_hash))
-            if max_lines is not None and len(pending) >= max_lines:
+            if _add(voice, line.get("text")):
                 return pending
     return pending
 
@@ -60,27 +91,27 @@ def prewarm_speaking_audio(
     lines that have no cached clip and synthesizes them **one at a time** (the
     global AI gate serializes calls; ``delay`` adds extra spacing on top).
 
-    Conversations don't store the chosen voice, so we warm the default voice
-    (override per run with ``voice`` or the ``SPEAKING_TTS_CRON_*`` env vars).
-    Idempotent: already-cached lines are skipped, so it is safe to re-run.
+    Each conversation is warmed with the voice it was generated with (the
+    conversation's ``voice`` field, falling back to the default). Pass ``voice``
+    to force a single voice for every line instead. It also seeds the per-voice
+    picker preview sample so the demo is always warm. Idempotent: already-cached
+    lines are skipped, so it is safe to re-run (a transient 429 self-heals on the
+    next tick).
     """
     from ..models import SpeakingAudioClip
     from ..services import speaking_coach_service
     from ..shared.infrastructure.ai import AiProviderError
-    from ..speaking.application.services import DEFAULT_TTS_VOICE, TTS_VOICES
 
-    voice = voice if voice in TTS_VOICES else DEFAULT_TTS_VOICE
-
-    pending = _pending_lines(voice, max_lines)
+    pending = _pending_lines(max_lines, voice_override=voice)
     if not pending:
-        return {"voice": voice, "pending": 0, "synthesized": 0, "failed": 0, "aborted": False}
+        return {"pending": 0, "synthesized": 0, "failed": 0, "aborted": False}
 
     synthesized = failed = 0
     consecutive_failures = 0
     aborted = False
-    for index, (text, text_hash) in enumerate(pending):
+    for index, (line_voice, text, text_hash) in enumerate(pending):
         try:
-            result = speaking_coach_service.synthesize_speech(text, voice)
+            result = speaking_coach_service.synthesize_speech(text, line_voice)
         except AiProviderError as exc:
             logger.warning("TTS prewarm failed for a line (%s)", exc)
             failed += 1
@@ -100,7 +131,7 @@ def prewarm_speaking_audio(
             continue
 
         SpeakingAudioClip.objects.get_or_create(
-            voice=voice,
+            voice=line_voice,
             text_hash=text_hash,
             defaults={
                 "text": text,
@@ -116,15 +147,13 @@ def prewarm_speaking_audio(
             time.sleep(delay)
 
     logger.info(
-        "Speaking TTS prewarm: voice=%s pending=%d synthesized=%d failed=%d aborted=%s",
-        voice,
+        "Speaking TTS prewarm: pending=%d synthesized=%d failed=%d aborted=%s",
         len(pending),
         synthesized,
         failed,
         aborted,
     )
     return {
-        "voice": voice,
         "pending": len(pending),
         "synthesized": synthesized,
         "failed": failed,

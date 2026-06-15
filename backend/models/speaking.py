@@ -21,6 +21,7 @@ class SpeakingConversation(DateTimeUUIDModel):
     # User-noted words/phrases re-highlighted on revisit: [{"text", "note"}, ...]
     highlights = models.JSONField(default=list, blank=True)
     starred = models.BooleanField(default=False)
+    voice = models.CharField(max_length=32, blank=True)
 
     class Meta:
         # Starred conversations float to the top, then most recent first.

@@ -26,6 +26,10 @@ ACCENT_LABELS = {
 TTS_VOICES = ["Kore", "Puck", "Charon", "Fenrir", "Zephyr"]
 DEFAULT_TTS_VOICE = "Kore"
 
+# Sample line played when previewing a voice in the picker. Must match the
+# frontend's ``VOICE_DEMO_TEXT`` so the pre-cached clips are a cache hit.
+VOICE_DEMO_TEXT = "Hi! This is how I sound. Let's practice speaking together."
+
 # Gemini structured-output schemas (uppercase OpenAPI types).
 _CONVERSATION_SCHEMA: dict[str, Any] = {
     "type": "OBJECT",

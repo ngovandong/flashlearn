@@ -80,6 +80,7 @@ class SpeakingViewSet(viewsets.ViewSet):
             accent=data.get("accent", "US") or "",
             level=data.get("level") or "",
             tone=data.get("tone") or "",
+            voice=self._clean_voice(data.get("voice")),
             lines=conversation["lines"],
         )
         return Response(SpeakingConversationSerializer(record).data, status=status.HTTP_201_CREATED)

@@ -219,6 +219,44 @@ $sc-low: $error-red;
     text-transform: none;
 }
 
+.sc-voice-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+
+    select {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+.sc-voice-demo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-sm;
+    background: rgba(var(--fl-primary-rgb), 0.08);
+    color: $main-purple;
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 0 0.85rem;
+    cursor: pointer;
+    transition: all 0.18s $ease;
+
+    &:hover {
+        border-color: $main-purple;
+        background: rgba(var(--fl-primary-rgb), 0.16);
+    }
+
+    &.is-playing {
+        border-color: $main-purple;
+        background: $main-purple;
+        color: $on-primary;
+    }
+}
+
 .sc-vocab-pick {
     display: flex;
     align-items: center;
@@ -496,6 +534,63 @@ $sc-low: $error-red;
     display: flex;
     flex-direction: column;
     gap: $space-4;
+}
+
+.sc-convo-header {
+    @include card;
+    padding: $space-3;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+
+    &__icon {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: $radius-sm;
+        background: $brand-gradient;
+        color: $on-primary;
+        flex-shrink: 0;
+    }
+
+    &__text {
+        flex: 1;
+        min-width: 0;
+
+        h3 {
+            margin: 0;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: $main-text-color;
+        }
+
+        p {
+            margin: 0.2rem 0 0;
+            font-size: 0.82rem;
+            color: $minor-text-color;
+            line-height: 1.4;
+        }
+    }
+
+    &__meta {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+
+        .sc-tag {
+            color: $main-purple;
+            background: rgba(var(--fl-primary-rgb), 0.12);
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .sc-convo-header__meta {
+        width: 100%;
+    }
 }
 
 .sc-action-bar {

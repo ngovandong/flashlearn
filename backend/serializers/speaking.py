@@ -13,6 +13,7 @@ class SpeakingConversationSerializer(serializers.ModelSerializer):
             "accent",
             "level",
             "tone",
+            "voice",
             "lines",
             "highlights",
             "starred",

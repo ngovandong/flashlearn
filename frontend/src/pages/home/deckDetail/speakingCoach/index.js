@@ -53,6 +53,9 @@ const TTS_VOICES = [
   { id: "Fenrir", label: "Fenrir — Energetic" },
   { id: "Zephyr", label: "Zephyr — Bright" },
 ];
+const DEFAULT_VOICE = "Kore";
+// Short sample played when previewing a voice from the dropdown.
+const VOICE_DEMO_TEXT = "Hi! This is how I sound. Let's practice speaking together.";
 
 function base64ToBytes(b64) {
   const bin = atob(b64);
@@ -111,7 +114,8 @@ export default function SpeakingCoach() {
   const [speed, setSpeed] = useState(1.0);
   const [userName, setUserName] = useState("Me");
   const [partnerName, setPartnerName] = useState("Coach");
-  const [selectedVoice, setSelectedVoice] = useState("Kore");
+  const [selectedVoice, setSelectedVoice] = useState(DEFAULT_VOICE);
+  const [demoVoice, setDemoVoice] = useState(null); // voice id currently previewing
 
   const [voices, setVoices] = useState([]);
   const [conversation, setConversation] = useState(null);
@@ -240,16 +244,16 @@ export default function SpeakingCoach() {
   // (voice, text) is kept so look-ahead prefetch and actual playback never fire
   // two calls — TTS stays strictly one request at a time to avoid rate limits.
   const fetchAudio = useCallback(
-    (text) => {
+    (text, voice = selectedVoice) => {
       const clean = (text || "").trim();
-      const key = `${selectedVoice}:${clean}`;
+      const key = `${voice}:${clean}`;
       const cache = audioCacheRef.current;
       if (cache.has(key)) return Promise.resolve(cache.get(key));
       const inflight = inflightRef.current;
       if (inflight.has(key)) return inflight.get(key);
 
       const promise = speakingService
-        .generateSpeech(clean, selectedVoice)
+        .generateSpeech(clean, voice)
         .then((res) => {
           if (res.error || !res.data?.audio) throw new Error("tts-failed");
           const entry = {
@@ -276,7 +280,7 @@ export default function SpeakingCoach() {
   );
 
   const speak = useCallback(
-    async (text, onEnd, onStart) => {
+    async (text, onEnd, onStart, voice) => {
       const clean = (text || "").trim();
       if (!clean) {
         onEnd?.();
@@ -286,7 +290,7 @@ export default function SpeakingCoach() {
       window.speechSynthesis?.cancel();
       let entry;
       try {
-        entry = await fetchAudio(clean);
+        entry = await fetchAudio(clean, voice);
       } catch {
         onStart?.();
         await browserSpeak(clean, onEnd);
@@ -323,6 +327,17 @@ export default function SpeakingCoach() {
     setSpeakingLineId(null);
   }, [stopCurrentSource]);
 
+  // Play a short sample of a voice so the learner can compare voices before
+  // committing. Uses an explicit voice (state updates are async) and reuses the
+  // normal cache-first synth path.
+  const previewVoice = useCallback(
+    (voice) => {
+      setDemoVoice(voice);
+      speak(VOICE_DEMO_TEXT, () => setDemoVoice(null), undefined, voice).catch(() => setDemoVoice(null));
+    },
+    [speak]
+  );
+
   // ---- Generate conversation ----
   const handleGenerate = async () => {
     setLoading(true);
@@ -339,6 +354,7 @@ export default function SpeakingCoach() {
         level,
         tone,
         turns,
+        voice: selectedVoice,
         use_vocabulary: useVocab,
       });
       if (res.error || !res.data?.lines?.length) {
@@ -867,6 +883,7 @@ export default function SpeakingCoach() {
       if (res.data?.id) {
         resetPracticeState();
         setConversation(res.data);
+        if (res.data.voice) setSelectedVoice(res.data.voice);
         setView("practice");
       } else {
         toast.error("Conversation not found.");
@@ -1061,15 +1078,33 @@ export default function SpeakingCoach() {
                 <label>
                   <RecordVoiceOverIcon fontSize="small" /> Reference tutor voice
                 </label>
-                <select value={selectedVoice} onChange={(e) => setSelectedVoice(e.target.value)}>
-                  {TTS_VOICES.map((v) => (
-                    <option key={v.id} value={v.id}>
-                      {v.label}
-                    </option>
-                  ))}
-                </select>
+                <div className="sc-voice-row">
+                  <select
+                    value={selectedVoice}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setSelectedVoice(v);
+                      previewVoice(v);
+                    }}
+                  >
+                    {TTS_VOICES.map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {v.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    className={`sc-voice-demo ${demoVoice === selectedVoice ? "is-playing" : ""}`}
+                    onClick={() => previewVoice(selectedVoice)}
+                    title="Hear a sample of this voice"
+                  >
+                    <VolumeUpIcon fontSize="small" />
+                    {demoVoice === selectedVoice ? "Playing…" : "Demo"}
+                  </button>
+                </div>
                 <span className="sc-field__hint">
-                  Natural AI voice used when you tap Listen or play a line.
+                  Natural AI voice used when you tap Listen or play a line. Pick one to hear a sample.
                 </span>
               </div>
 
@@ -1085,6 +1120,20 @@ export default function SpeakingCoach() {
 
             {conversation && (
               <section className="sc-conversation">
+                <div className="sc-convo-header">
+                  <span className="sc-convo-header__icon">
+                    <RecordVoiceOverIcon fontSize="small" />
+                  </span>
+                  <div className="sc-convo-header__text">
+                    <h3>{conversation.topic || "Conversation"}</h3>
+                    {conversation.context && <p>{conversation.context}</p>}
+                  </div>
+                  <div className="sc-convo-header__meta">
+                    {conversation.accent && <span className="sc-tag">{conversation.accent}</span>}
+                    {conversation.level && <span className="sc-tag">{conversation.level}</span>}
+                    <span className="sc-tag">{conversation.lines?.length || 0} turns</span>
+                  </div>
+                </div>
                 <div className="sc-action-bar" data-tour="sc-actions">
                   <div className="sc-action-group">
                     {fullPlayState === "playing" ? (
@@ -1333,6 +1382,7 @@ export default function SpeakingCoach() {
                           onClick={() => {
                             resetPracticeState();
                             setConversation(c);
+                            if (c.voice) setSelectedVoice(c.voice);
                             setView("practice");
                             navigate(`/speaking-coach/${c.id}`);
                           }}
