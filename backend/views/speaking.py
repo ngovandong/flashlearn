@@ -20,6 +20,8 @@ from ..speaking import topics as speaking_topics
 from ..speaking.application.services import (
     ACTIVE_TTS_VOICES,
     DEFAULT_TTS_VOICE,
+    ELEVENLABS_ACCENT_DEFAULT,
+    ELEVENLABS_VOICE_ACCENT,
     GEMINI_TTS_VOICES,
     TTS_VOICES,
 )
@@ -195,14 +197,21 @@ class SpeakingViewSet(viewsets.ViewSet):
     def voices(self, request, *args, **kwargs):
         """Tutor voices the learner can pick from.
 
-        ``voices`` are the active voices offered for new conversations;
-        ``legacy_voices`` are kept only so an old conversation that was generated
+        ``voices`` are the active voices offered for new conversations, each
+        tagged with the accent it natively speaks (``null`` for legacy Gemini
+        voices, which aren't accent-specific). ``accent_defaults`` maps an accent
+        to its default voice so the UI can switch the voice when the accent
+        changes. ``legacy_voices`` are kept only so an old conversation generated
         with one still shows (and replays) its original voice.
         """
         return Response(
             {
-                "voices": [{"id": v, "label": label} for v, label in ACTIVE_TTS_VOICES.items()],
+                "voices": [
+                    {"id": v, "label": label, "accent": ELEVENLABS_VOICE_ACCENT.get(v)}
+                    for v, label in ACTIVE_TTS_VOICES.items()
+                ],
                 "default": DEFAULT_TTS_VOICE,
+                "accent_defaults": ELEVENLABS_ACCENT_DEFAULT,
                 "legacy_voices": [{"id": v, "label": label} for v, label in GEMINI_TTS_VOICES.items()],
             }
         )

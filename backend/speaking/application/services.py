@@ -40,17 +40,36 @@ GEMINI_TTS_VOICES: dict[str, str] = {
 }
 LEGACY_DEFAULT_VOICE = "Kore"
 
-# Active ElevenLabs voices (key == ElevenLabs voice id) shown in the picker for
-# new conversations. These are stable premade-library voice ids.
-ELEVENLABS_TTS_VOICES: dict[str, str] = {
-    "EXAVITQu4vr4xnSDxMaL": "Sarah — Warm & clear",
-    "JBFqnCBsd6RMkjVDRZzb": "George — Deep & calm",
-    "TX3LPaxmHKxFdv7VOQHJ": "Liam — Energetic",
-    "XB0fDUnXU5powFXDhCwa": "Charlotte — Bright",
-    "pFZP5JQG7iQjIQuC4Bku": "Lily — Friendly",
-}
-# Voice pre-selected in the picker for new conversations.
-DEFAULT_ELEVENLABS_VOICE = "TX3LPaxmHKxFdv7VOQHJ"  # Liam — Energetic
+# Active ElevenLabs voices (stable premade-library voice ids). Each voice speaks
+# a fixed native accent, so the picker shows the voices matching the chosen
+# accent (US/UK/AU) and the default voice switches when the accent changes.
+ELEVENLABS_VOICES: list[dict[str, str]] = [
+    # American (US)
+    {"id": "TX3LPaxmHKxFdv7VOQHJ", "label": "Liam — Energetic", "accent": "US"},
+    {"id": "EXAVITQu4vr4xnSDxMaL", "label": "Sarah — Warm & clear", "accent": "US"},
+    {"id": "cgSgspJ2msm6clMCkdW9", "label": "Jessica — Expressive", "accent": "US"},
+    {"id": "cjVigY5qzO86Huf0OWal", "label": "Eric — Calm", "accent": "US"},
+    {"id": "nPczCjzI2devNBz1zQrb", "label": "Brian — Deep", "accent": "US"},
+    # British (UK)
+    {"id": "JBFqnCBsd6RMkjVDRZzb", "label": "George — Mature & calm", "accent": "UK"},
+    {"id": "pFZP5JQG7iQjIQuC4Bku", "label": "Lily — Warm", "accent": "UK"},
+    {"id": "Xb7hH8MSUJpSbSDYk0k2", "label": "Alice — Confident", "accent": "UK"},
+    {"id": "onwK4e9ZLuTAKqWW03F9", "label": "Daniel — Authoritative", "accent": "UK"},
+    # Australian (AU)
+    {"id": "IKne3meq5aSn9XLyUdCD", "label": "Charlie — Casual", "accent": "AU"},
+]
+
+# id -> label (used for cache keys / labelling) and id -> accent.
+ELEVENLABS_TTS_VOICES: dict[str, str] = {v["id"]: v["label"] for v in ELEVENLABS_VOICES}
+ELEVENLABS_VOICE_ACCENT: dict[str, str] = {v["id"]: v["accent"] for v in ELEVENLABS_VOICES}
+
+# Default voice per accent (first voice listed for that accent).
+ELEVENLABS_ACCENT_DEFAULT: dict[str, str] = {}
+for _v in ELEVENLABS_VOICES:
+    ELEVENLABS_ACCENT_DEFAULT.setdefault(_v["accent"], _v["id"])
+
+# Global default for new conversations before an accent is chosen (US / Liam).
+DEFAULT_ELEVENLABS_VOICE = ELEVENLABS_ACCENT_DEFAULT.get("US") or ELEVENLABS_VOICES[0]["id"]
 
 # Whether ElevenLabs is wired up (an API key is present). When it isn't, the app
 # falls back to the legacy Gemini voices so the feature keeps working.

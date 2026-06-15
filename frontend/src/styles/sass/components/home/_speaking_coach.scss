@@ -1492,7 +1492,14 @@ $sc-low: $error-red;
         min-width: 0;
         display: flex;
         flex-direction: column;
+        align-items: flex-start;
         gap: 0.35rem;
+
+        .sc-tag {
+            max-width: 100%;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
     }
 
     &__tools {
@@ -1506,9 +1513,12 @@ $sc-low: $error-red;
         display: flex;
         align-items: center;
         gap: 0.6rem;
+        min-width: 0;
     }
 
     &__text {
+        flex: 1;
+        min-width: 0;
         font-weight: 600;
         color: $main-text-color !important;
         white-space: nowrap;

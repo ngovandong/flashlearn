@@ -134,6 +134,8 @@ export default function SpeakingCoach() {
   // conversations, plus a label map for legacy voices used by old conversations.
   const [ttsVoices, setTtsVoices] = useState(FALLBACK_VOICES);
   const [legacyVoiceMap, setLegacyVoiceMap] = useState({});
+  // accent id -> default voice id, so switching accent switches the voice.
+  const [accentDefaults, setAccentDefaults] = useState({});
 
   const [voices, setVoices] = useState([]);
   const [conversation, setConversation] = useState(null);
@@ -178,9 +180,13 @@ export default function SpeakingCoach() {
         legacy[v.id] = v.label;
       });
       setLegacyVoiceMap(legacy);
+      setAccentDefaults(res.data.accent_defaults || {});
       // Default to the active provider's voice for new conversations only; a
       // conversation opened by URL keeps the voice it was generated with.
-      if (!routeId && res.data.default) setSelectedVoice(res.data.default);
+      if (!routeId) {
+        const initial = res.data.accent_defaults?.[accent] || res.data.default;
+        if (initial) setSelectedVoice(initial);
+      }
     });
     return () => {
       active = false;
@@ -376,6 +382,20 @@ export default function SpeakingCoach() {
       speak(VOICE_DEMO_TEXT, () => setDemoVoice(null), undefined, voice).catch(() => setDemoVoice(null));
     },
     [speak]
+  );
+
+  // Switch accent and move to that accent's default voice (each ElevenLabs voice
+  // has a fixed accent, so the voice follows the accent). Previews the new voice.
+  const selectAccent = useCallback(
+    (accentId) => {
+      setAccent(accentId);
+      const next = accentDefaults[accentId];
+      if (next && next !== selectedVoice) {
+        setSelectedVoice(next);
+        previewVoice(next);
+      }
+    },
+    [accentDefaults, selectedVoice, previewVoice]
   );
 
   // ---- Generate conversation ----
@@ -936,19 +956,23 @@ export default function SpeakingCoach() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeId]);
 
-  // Picker options: active voices for new conversations. If the loaded
-  // conversation was generated with a legacy voice (not in the active list),
-  // surface that voice as an extra option so the UI shows what it actually uses.
+  // Picker options: active voices for the selected accent (voices without an
+  // accent — e.g. legacy Gemini fallback — are always shown). If the selected
+  // voice isn't in that list (a loaded conversation's voice from another accent,
+  // or a legacy voice), surface it as an extra option so the UI reflects it.
   const voiceOptions = useMemo(() => {
-    const opts = [...ttsVoices];
+    const opts = ttsVoices.filter((v) => !v.accent || v.accent === accent);
     if (selectedVoice && !opts.some((v) => v.id === selectedVoice)) {
-      opts.unshift({
-        id: selectedVoice,
-        label: `${legacyVoiceMap[selectedVoice] || selectedVoice} (legacy)`,
-      });
+      const known = ttsVoices.find((v) => v.id === selectedVoice);
+      opts.unshift(
+        known || {
+          id: selectedVoice,
+          label: `${legacyVoiceMap[selectedVoice] || selectedVoice} (legacy)`,
+        }
+      );
     }
     return opts;
-  }, [ttsVoices, selectedVoice, legacyVoiceMap]);
+  }, [ttsVoices, selectedVoice, legacyVoiceMap, accent]);
 
   const busy = rolePlayIndex !== null || fullPlayState !== "stopped";
 
@@ -1063,7 +1087,7 @@ export default function SpeakingCoach() {
                       <button
                         key={a.id}
                         className={accent === a.id ? "active" : ""}
-                        onClick={() => setAccent(a.id)}
+                        onClick={() => selectAccent(a.id)}
                       >
                         {a.label}
                       </button>
