@@ -45,14 +45,10 @@ const TONES = [
 ];
 const FALLBACK_TOPICS = ["Ordering Coffee", "Job Interview", "Airport Check-in"];
 
-// Gemini prebuilt tutor voices (must match backend TTS_VOICES).
-const TTS_VOICES = [
-  { id: "Kore", label: "Kore — Warm & clear" },
-  { id: "Puck", label: "Puck — Upbeat" },
-  { id: "Charon", label: "Charon — Deep & calm" },
-  { id: "Fenrir", label: "Fenrir — Energetic" },
-  { id: "Zephyr", label: "Zephyr — Bright" },
-];
+// Tutor voices are loaded from the backend (ElevenLabs is the active provider;
+// Gemini voices are legacy and only shown when an old conversation used one).
+// This is just a safe fallback used before the API responds.
+const FALLBACK_VOICES = [{ id: "Kore", label: "Kore — Warm & clear" }];
 const DEFAULT_VOICE = "Kore";
 // Short sample played when previewing a voice from the dropdown.
 const VOICE_DEMO_TEXT = "Hi! This is how I sound. Let's practice speaking together.";
@@ -69,6 +65,12 @@ function sampleRateFromMime(mime) {
   return match ? parseInt(match[1], 10) : 24000;
 }
 
+// Gemini (legacy) TTS returns raw 16-bit PCM; detect it so we decode correctly.
+function isPcmMime(mime) {
+  const m = (mime || "").toLowerCase();
+  return m.includes("l16") || m.includes("pcm") || m.includes("rate=");
+}
+
 // Gemini TTS returns raw signed 16-bit little-endian PCM (mono).
 function pcm16ToAudioBuffer(bytes, ctx, sampleRate) {
   const usable = bytes.byteLength - (bytes.byteLength % 2);
@@ -77,6 +79,17 @@ function pcm16ToAudioBuffer(bytes, ctx, sampleRate) {
   const channel = buffer.getChannelData(0);
   for (let i = 0; i < int16.length; i++) channel[i] = int16[i] / 32768;
   return buffer;
+}
+
+// Decode a cached clip to an AudioBuffer. Gemini → raw PCM; ElevenLabs → MP3
+// (decoded via the Web Audio API).
+async function decodeClip(entry, ctx) {
+  const bytes = base64ToBytes(entry.audio);
+  if (isPcmMime(entry.mimeType)) {
+    return pcm16ToAudioBuffer(bytes, ctx, sampleRateFromMime(entry.mimeType));
+  }
+  // decodeAudioData detaches the buffer, so hand it a fresh copy.
+  return ctx.decodeAudioData(bytes.buffer.slice(0));
 }
 
 function errorMessage(err, fallback) {
@@ -117,6 +130,11 @@ export default function SpeakingCoach() {
   const [selectedVoice, setSelectedVoice] = useState(DEFAULT_VOICE);
   const [demoVoice, setDemoVoice] = useState(null); // voice id currently previewing
 
+  // Active tutor voices (from the backend) shown in the picker for new
+  // conversations, plus a label map for legacy voices used by old conversations.
+  const [ttsVoices, setTtsVoices] = useState(FALLBACK_VOICES);
+  const [legacyVoiceMap, setLegacyVoiceMap] = useState({});
+
   const [voices, setVoices] = useState([]);
   const [conversation, setConversation] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -147,6 +165,28 @@ export default function SpeakingCoach() {
   const speedRef = useRef(1.0);
   const inflightRef = useRef(new Map());
   const conversationRef = useRef(null);
+
+  // ---- Tutor voices (active + legacy) loaded from the backend ----
+  useEffect(() => {
+    let active = true;
+    speakingService.getVoices().then((res) => {
+      if (!active || !res.data) return;
+      const list = res.data.voices?.length ? res.data.voices : FALLBACK_VOICES;
+      setTtsVoices(list);
+      const legacy = {};
+      (res.data.legacy_voices || []).forEach((v) => {
+        legacy[v.id] = v.label;
+      });
+      setLegacyVoiceMap(legacy);
+      // Default to the active provider's voice for new conversations only; a
+      // conversation opened by URL keeps the voice it was generated with.
+      if (!routeId && res.data.default) setSelectedVoice(res.data.default);
+    });
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ---- Browser voices: only used as a fallback if Gemini TTS is unavailable ----
   useEffect(() => {
@@ -258,7 +298,7 @@ export default function SpeakingCoach() {
           if (res.error || !res.data?.audio) throw new Error("tts-failed");
           const entry = {
             audio: res.data.audio,
-            sampleRate: sampleRateFromMime(res.data.mime_type),
+            mimeType: res.data.mime_type || "audio/mpeg",
           };
           cache.set(key, entry);
           return entry;
@@ -299,7 +339,7 @@ export default function SpeakingCoach() {
       try {
         const ctx = ensureAudioContext();
         if (ctx.state === "suspended") await ctx.resume();
-        const buffer = pcm16ToAudioBuffer(base64ToBytes(entry.audio), ctx, entry.sampleRate);
+        const buffer = await decodeClip(entry, ctx);
         onStart?.();
         await new Promise((resolve) => {
           const source = ctx.createBufferSource();
@@ -896,6 +936,20 @@ export default function SpeakingCoach() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeId]);
 
+  // Picker options: active voices for new conversations. If the loaded
+  // conversation was generated with a legacy voice (not in the active list),
+  // surface that voice as an extra option so the UI shows what it actually uses.
+  const voiceOptions = useMemo(() => {
+    const opts = [...ttsVoices];
+    if (selectedVoice && !opts.some((v) => v.id === selectedVoice)) {
+      opts.unshift({
+        id: selectedVoice,
+        label: `${legacyVoiceMap[selectedVoice] || selectedVoice} (legacy)`,
+      });
+    }
+    return opts;
+  }, [ttsVoices, selectedVoice, legacyVoiceMap]);
+
   const busy = rolePlayIndex !== null || fullPlayState !== "stopped";
 
   return (
@@ -1087,7 +1141,7 @@ export default function SpeakingCoach() {
                       previewVoice(v);
                     }}
                   >
-                    {TTS_VOICES.map((v) => (
+                    {voiceOptions.map((v) => (
                       <option key={v.id} value={v.id}>
                         {v.label}
                       </option>

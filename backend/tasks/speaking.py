@@ -101,6 +101,7 @@ def prewarm_speaking_audio(
     from ..models import SpeakingAudioClip
     from ..services import speaking_coach_service
     from ..shared.infrastructure.ai import AiProviderError
+    from ..speaking.application.services import is_elevenlabs_voice
 
     pending = _pending_lines(max_lines, voice_override=voice)
     if not pending:
@@ -142,8 +143,10 @@ def prewarm_speaking_audio(
         synthesized += 1
         consecutive_failures = 0
 
-        # Space out the next call; the global gate already paces us, this is belt-and-suspenders.
-        if delay and index < len(pending) - 1:
+        # Only pace legacy Gemini lines — its TTS quota is tight, so this adds
+        # spacing on top of the global gate. ElevenLabs has no such limit, so its
+        # backlog is drained without any extra delay.
+        if delay and index < len(pending) - 1 and not is_elevenlabs_voice(line_voice):
             time.sleep(delay)
 
     logger.info(

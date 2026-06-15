@@ -19,6 +19,33 @@ function measureRect(selector) {
   return r;
 }
 
+/**
+ * Whether an element is actually rendered on screen — present in the DOM AND
+ * not hidden via display/visibility/opacity or collapsed to zero size. Steps
+ * whose target isn't visible are skipped so the tour never points at nothing.
+ */
+export function isElementVisible(el) {
+  if (!el || typeof window === "undefined") return false;
+  if (!el.getClientRects().length) return false;
+  const style = window.getComputedStyle(el);
+  if (
+    style.display === "none" ||
+    style.visibility === "hidden" ||
+    style.visibility === "collapse" ||
+    Number(style.opacity) === 0
+  ) {
+    return false;
+  }
+  const r = el.getBoundingClientRect();
+  return r.width > 0 || r.height > 0;
+}
+
+/** Whether a tour step's target currently exists and is visible on screen. */
+export function isStepVisible(step) {
+  if (!step || typeof document === "undefined") return false;
+  return isElementVisible(document.querySelector(step.selector));
+}
+
 function GuideTour({ open, onClose, onStepDone, onSkipAll, steps = [] }) {
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState(null);
@@ -40,10 +67,10 @@ function GuideTour({ open, onClose, onStepDone, onSkipAll, steps = [] }) {
     sync();
     // A second pass after smooth-scroll/layout settles.
     const t = setTimeout(sync, 360);
-    // If the target genuinely doesn't exist on this page/role, skip the step
-    // rather than showing a confusing centered tooltip.
+    // If the target doesn't exist OR isn't visible on this page/role, skip the
+    // step rather than showing a confusing centered tooltip.
     const skip = setTimeout(() => {
-      if (step && !document.querySelector(step.selector)) {
+      if (step && !isStepVisible(step)) {
         if (index >= steps.length - 1) finish();
         else setIndex((i) => i + 1);
       }

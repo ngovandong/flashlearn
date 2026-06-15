@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { useLocation } from "react-router-dom";
-import GuideTour from "./guideTour";
+import GuideTour, { isStepVisible } from "./guideTour";
 import { getTourById, getTourForPath } from "@constants/tours";
 import {
   areToursDisabled,
@@ -59,8 +59,11 @@ export function TourProvider({ children }) {
       if (areToursDisabled()) return;
       const stillLeft = remainingSteps(tour.steps);
       if (stillLeft.length === 0) return;
+      // Only show steps whose target is actually rendered on screen.
+      const visible = stillLeft.filter(isStepVisible);
+      if (visible.length === 0) return;
       autoShownRef.current.add(key);
-      setSteps(stillLeft);
+      setSteps(visible);
       setOpen(true);
     }, AUTO_SHOW_DELAY_MS);
 
@@ -77,7 +80,10 @@ export function TourProvider({ children }) {
       // Manual launches default to remaining steps, but never show an empty
       // tour — fall back to the full set so "Show me the guide" always works.
       const toShow = all || remaining.length === 0 ? tour.steps : remaining;
-      setSteps(toShow);
+      // Skip steps whose target isn't visible on screen right now.
+      const visible = toShow.filter(isStepVisible);
+      if (visible.length === 0) return;
+      setSteps(visible);
       setOpen(true);
     },
     [location.pathname, location.search]

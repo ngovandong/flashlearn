@@ -11,6 +11,7 @@ next. Add a provider by creating a sibling module and registering it in
 import os
 
 from .base import AiProviderError
+from .elevenlabs import ElevenLabsProvider
 from .failover import FailoverAiProvider
 from .gemini import GeminiProvider
 from .openrouter import OpenRouterProvider
@@ -19,6 +20,7 @@ __all__ = [
     "AiProviderError",
     "GeminiProvider",
     "OpenRouterProvider",
+    "ElevenLabsProvider",
     "FailoverAiProvider",
     "get_ai_provider",
     "build_named_provider",
@@ -28,6 +30,7 @@ __all__ = [
 _BUILDERS = {
     "gemini": GeminiProvider,
     "openrouter": OpenRouterProvider,
+    "elevenlabs": ElevenLabsProvider,
 }
 
 
