@@ -1,0 +1,79 @@
+---
+description: All new/updated Django backend code must follow the DDD / clean-architecture layering
+globs: backend/**
+alwaysApply: false
+---
+
+# Backend layering is required for all Django code
+
+The Django backend is organized as bounded contexts (`deck/`, `term/`, `user/`,
+`learning/`, `folder/`, `role/`, `speaking/`, …) following a DDD / clean-architecture
+layering. Whenever you ADD or UPDATE backend code, it MUST respect these layers.
+Do not regress to fat views that talk to the ORM directly.
+
+## The layers (per bounded context `backend/<context>/`)
+
+- **`domain/`** — pure business rules and enums (e.g. `access.py`, `Role`). No
+  Django, no ORM, no I/O. Optional for simple contexts.
+- **`application/`** — use-case **services** (e.g. `DeckService`,
+  `SpeakingService`). They orchestrate the use case and contain the business
+  rules. Dependencies (repositories, ports, other contexts' context-APIs) are
+  injected via the constructor. No DRF `request`/`Response`, no HTTP concerns.
+- **`infrastructure/`** — the **repository** (`repository.py`) and other I/O
+  adapters (`search.py`, `sql_queries.py`, `cache.py`). **This is the only place
+  Django ORM access (`Model.objects...`, `.save()`, `.delete()`) is allowed.**
+- **`application/context_api.py`** — the read API a context exposes to *other*
+  contexts. Cross-context reads should go through a context-API rather than
+  importing another context's repository directly.
+
+Shared, cross-cutting pieces live under `backend/shared/`:
+
+- **`shared/application/ports.py`** — `Protocol` interfaces for infrastructure
+  (`CachePort`, `AiTextPort`, `ImageStoragePort`, `OAuthPort`). Services depend
+  on the port, never on a concrete provider.
+- **`shared/infrastructure/`** — concrete adapters (AI providers, cache,
+  cloudinary, oauth, sqlalchemy).
+- **`shared/interfaces/`** — DRF base viewsets, pagination, exception handler.
+- **`shared/composition.py`** — the **composition root**. This is where concrete
+  repositories/ports are wired into the application services and exported as
+  singletons. `backend/services/__init__.py` re-exports those singletons.
+
+Interface layer:
+
+- **`backend/views/<context>.py`** — thin DRF viewsets. They parse/validate the
+  request, call an application-service singleton, serialize the result and map
+  exceptions to HTTP status codes. **No business logic and no ORM access here.**
+
+## Required flow
+
+```
+views/<context>.py  (parse request, serialize, map errors)
+   └─ <context>/application/services.py        (use case + rules; injected deps)
+        ├─ <context>/infrastructure/repository.py   (ORM / data access only)
+        ├─ shared/application/ports.py via shared/infrastructure/*  (AI, cache, …)
+        └─ <other context>/application/context_api.py   (cross-context reads)
+```
+
+Wire every new service in `shared/composition.py` and expose it via
+`backend/services/__init__.py`. Views import the singleton from `..services`.
+
+## Do / Don't
+
+- **Don't** call `Model.objects...`, `.save()`, `.delete()`, build querysets, or
+  hit Redis/Cloudinary/an AI SDK from a view. Move it into a repository method
+  and call it through the service.
+- **Don't** put business rules, caching decisions, validation of domain values,
+  or multi-step orchestration in a view. That belongs in the application service.
+- **Don't** construct concrete providers/repositories inside a service body. Use
+  constructor-injected dependencies wired in the composition root.
+- **Do** raise domain exceptions from `shared/application/exceptions.py`
+  (`ValidationError`, `ConflictError`, `PermissionDeniedError`) from services;
+  let infrastructure exceptions (e.g. `AiProviderError`) surface so the view maps
+  them to a status code.
+- **Do** keep serializers in `backend/serializers/` and use them only in views.
+- **Do** add a new bounded context as `backend/<context>/{domain,application,infrastructure}/`
+  mirroring `deck/` rather than dropping logic into `views/` or `models/`.
+
+When you finish a backend change, confirm: the view is thin, the ORM lives only
+in a repository, the service holds the rules, and the wiring is in the
+composition root.

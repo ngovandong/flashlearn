@@ -49,7 +49,19 @@ updating and state your decision (e.g. "no guide update needed").
   `data-tour`/selector → update the step. Register tours in `constants/tours.js`
   and mark targets with `data-tour="..."`.
 
-### 4. Knowledge graph — `.cursor/rules/graphify.mdc`
+### 4. Backend layering (Django) — `.cursor/rules/backend-architecture.mdc`
+Applies to `backend/**`. The Django backend is organized into DDD / clean-architecture
+bounded contexts (`deck/`, `term/`, `speaking/`, …). All new/updated backend code MUST
+respect the layers — never regress to fat views that hit the ORM directly.
+- **Views** (`backend/views/**`) are thin: parse the request, call an application-service
+  singleton, serialize, map errors to status codes. No business logic, no ORM.
+- **Application** (`<context>/application/services.py`) holds the use case + rules with
+  constructor-injected dependencies. **Infrastructure** (`<context>/infrastructure/repository.py`)
+  is the *only* place ORM access is allowed. **Ports** (`shared/application/ports.py`)
+  abstract external I/O; cross-context reads go through `context_api.py`.
+- Wire every service in `shared/composition.py` and expose it via `backend/services/__init__.py`.
+
+### 5. Knowledge graph — `.cursor/rules/graphify.mdc`
 Applies repo-wide. Before answering architecture/codebase questions, read
 `graphify-out/GRAPH_REPORT.md`. After modifying code files in a session, rebuild
 the graph:
