@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import { selectUser } from "@app/store/authSlice";
+import { getTourForPath } from "@constants/tours";
 import {
   Box,
   Divider,
@@ -162,6 +164,10 @@ function TypingDots() {
 function AiAssistant() {
   const user = useSelector(selectUser);
   const { startTour } = useTour();
+  const location = useLocation();
+  // The guide shown matches the page the user is currently on. Pages without a
+  // registered tour simply don't offer the button.
+  const currentTour = getTourForPath(location.pathname, location.search);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
@@ -407,13 +413,13 @@ function AiAssistant() {
               {messages.map((m) => (
                 <Box key={m.id} sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
                   <MessageBubble role={m.role}>{m.text}</MessageBubble>
-                  {m.showGuideButton && (
+                  {m.showGuideButton && currentTour && (
                     <Box sx={{ pl: 4.25 }}>
                       <Box
                         role="button"
                         onClick={() => {
                           setOpen(false);
-                          startTour("home", { all: true });
+                          startTour(currentTour.id, { all: true });
                         }}
                         sx={{
                           display: "inline-flex",

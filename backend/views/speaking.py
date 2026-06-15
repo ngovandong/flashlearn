@@ -17,7 +17,14 @@ from ..serializers import SpeakingAnalysisSerializer, SpeakingConversationSerial
 from ..services import speaking_coach_service
 from ..shared.infrastructure.ai import AiProviderError
 from ..speaking import topics as speaking_topics
-from ..speaking.application.services import DEFAULT_TTS_VOICE, TTS_VOICES
+from ..speaking.application.services import (
+    ACTIVE_TTS_VOICES,
+    DEFAULT_TTS_VOICE,
+    ELEVENLABS_ACCENT_DEFAULT,
+    ELEVENLABS_VOICE_ACCENT,
+    GEMINI_TTS_VOICES,
+    TTS_VOICES,
+)
 
 
 class SpeakingViewSet(viewsets.ViewSet):
@@ -80,6 +87,7 @@ class SpeakingViewSet(viewsets.ViewSet):
             accent=data.get("accent", "US") or "",
             level=data.get("level") or "",
             tone=data.get("tone") or "",
+            voice=self._clean_active_voice(data.get("voice")),
             lines=conversation["lines"],
         )
         return Response(SpeakingConversationSerializer(record).data, status=status.HTTP_201_CREATED)
@@ -187,14 +195,34 @@ class SpeakingViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=["GET"])
     def voices(self, request, *args, **kwargs):
-        """Available reference tutor voices the learner can pick from."""
-        return Response({"voices": TTS_VOICES, "default": DEFAULT_TTS_VOICE})
+        """Tutor voices the learner can pick from.
+
+        ``voices`` are the active voices offered for new conversations, each
+        tagged with the accent it natively speaks (``null`` for legacy Gemini
+        voices, which aren't accent-specific). ``accent_defaults`` maps an accent
+        to its default voice so the UI can switch the voice when the accent
+        changes. ``legacy_voices`` are kept only so an old conversation generated
+        with one still shows (and replays) its original voice.
+        """
+        return Response(
+            {
+                "voices": [
+                    {"id": v, "label": label, "accent": ELEVENLABS_VOICE_ACCENT.get(v)}
+                    for v, label in ACTIVE_TTS_VOICES.items()
+                ],
+                "default": DEFAULT_TTS_VOICE,
+                "accent_defaults": ELEVENLABS_ACCENT_DEFAULT,
+                "legacy_voices": [{"id": v, "label": label} for v, label in GEMINI_TTS_VOICES.items()],
+            }
+        )
 
     @action(detail=False, methods=["POST"])
     def speak(self, request, *args, **kwargs):
         """Synthesize one line (cache-first) with the selected tutor voice."""
         text = (request.data.get("text") or "").strip()
-        voice = self._clean_voice(request.data.get("voice"))
+        # Accept any recognized voice (active or legacy) so saved conversations
+        # generated with a legacy voice still replay through Gemini.
+        voice = self._clean_playable_voice(request.data.get("voice"))
         if not text:
             return Response({"errors": "Please enter some text."}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -204,7 +232,14 @@ class SpeakingViewSet(viewsets.ViewSet):
         return Response({"audio": clip.audio, "mime_type": clip.mime_type})
 
     @staticmethod
-    def _clean_voice(value):
+    def _clean_active_voice(value):
+        """Validate a voice for a NEW conversation — only active voices allowed."""
+        voice = value or DEFAULT_TTS_VOICE
+        return voice if voice in ACTIVE_TTS_VOICES else DEFAULT_TTS_VOICE
+
+    @staticmethod
+    def _clean_playable_voice(value):
+        """Validate a voice for playback — any recognized (active or legacy) voice."""
         voice = value or DEFAULT_TTS_VOICE
         return voice if voice in TTS_VOICES else DEFAULT_TTS_VOICE
 

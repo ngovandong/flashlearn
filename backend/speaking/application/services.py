@@ -10,6 +10,7 @@ text/JSON and can use any provider in the failover chain.
 """
 
 import logging
+import os
 from typing import Any
 
 from backend.shared.infrastructure.ai import AiProviderError, build_named_provider, default_ai_provider
@@ -22,9 +23,79 @@ ACCENT_LABELS = {
     "AU": "Australian English",
 }
 
-# Gemini prebuilt voices the learner can choose as the "Reference Tutor Voice".
-TTS_VOICES = ["Kore", "Puck", "Charon", "Fenrir", "Zephyr"]
-DEFAULT_TTS_VOICE = "Kore"
+# ─── Tutor voices ────────────────────────────────────────────────────────────
+# Two TTS providers coexist. ElevenLabs is the active provider for NEW
+# conversations (Gemini's TTS has a very tight rate limit). Gemini is kept as a
+# LEGACY provider so conversations generated with its prebuilt voices still play
+# with their original voice — those legacy voices are only ever shown in the UI
+# when an old conversation that used one is opened.
+
+# Legacy Gemini prebuilt voices (voice name == provider param).
+GEMINI_TTS_VOICES: dict[str, str] = {
+    "Kore": "Kore — Warm & clear",
+    "Puck": "Puck — Upbeat",
+    "Charon": "Charon — Deep & calm",
+    "Fenrir": "Fenrir — Energetic",
+    "Zephyr": "Zephyr — Bright",
+}
+LEGACY_DEFAULT_VOICE = "Kore"
+
+# Active ElevenLabs voices (stable premade-library voice ids). Each voice speaks
+# a fixed native accent, so the picker shows the voices matching the chosen
+# accent (US/UK/AU) and the default voice switches when the accent changes.
+ELEVENLABS_VOICES: list[dict[str, str]] = [
+    # American (US)
+    {"id": "TX3LPaxmHKxFdv7VOQHJ", "label": "Liam — Energetic", "accent": "US"},
+    {"id": "EXAVITQu4vr4xnSDxMaL", "label": "Sarah — Warm & clear", "accent": "US"},
+    {"id": "cgSgspJ2msm6clMCkdW9", "label": "Jessica — Expressive", "accent": "US"},
+    {"id": "cjVigY5qzO86Huf0OWal", "label": "Eric — Calm", "accent": "US"},
+    {"id": "nPczCjzI2devNBz1zQrb", "label": "Brian — Deep", "accent": "US"},
+    # British (UK)
+    {"id": "JBFqnCBsd6RMkjVDRZzb", "label": "George — Mature & calm", "accent": "UK"},
+    {"id": "pFZP5JQG7iQjIQuC4Bku", "label": "Lily — Warm", "accent": "UK"},
+    {"id": "Xb7hH8MSUJpSbSDYk0k2", "label": "Alice — Confident", "accent": "UK"},
+    {"id": "onwK4e9ZLuTAKqWW03F9", "label": "Daniel — Authoritative", "accent": "UK"},
+    # Australian (AU)
+    {"id": "IKne3meq5aSn9XLyUdCD", "label": "Charlie — Casual", "accent": "AU"},
+]
+
+# id -> label (used for cache keys / labelling) and id -> accent.
+ELEVENLABS_TTS_VOICES: dict[str, str] = {v["id"]: v["label"] for v in ELEVENLABS_VOICES}
+ELEVENLABS_VOICE_ACCENT: dict[str, str] = {v["id"]: v["accent"] for v in ELEVENLABS_VOICES}
+
+# Default voice per accent (first voice listed for that accent).
+ELEVENLABS_ACCENT_DEFAULT: dict[str, str] = {}
+for _v in ELEVENLABS_VOICES:
+    ELEVENLABS_ACCENT_DEFAULT.setdefault(_v["accent"], _v["id"])
+
+# Global default for new conversations before an accent is chosen (US / Liam).
+DEFAULT_ELEVENLABS_VOICE = ELEVENLABS_ACCENT_DEFAULT.get("US") or ELEVENLABS_VOICES[0]["id"]
+
+# Whether ElevenLabs is wired up (an API key is present). When it isn't, the app
+# falls back to the legacy Gemini voices so the feature keeps working.
+ELEVENLABS_ENABLED = bool(os.getenv("ELEVENLABS_API_KEY", "").strip())
+
+# Voices offered for NEW conversations + the default selection.
+ACTIVE_TTS_VOICES: dict[str, str] = ELEVENLABS_TTS_VOICES if ELEVENLABS_ENABLED else GEMINI_TTS_VOICES
+DEFAULT_TTS_VOICE = DEFAULT_ELEVENLABS_VOICE if ELEVENLABS_ENABLED else LEGACY_DEFAULT_VOICE
+
+# Every recognized voice (active + legacy) — used to validate/replay any voice a
+# saved conversation or cached clip might reference.
+TTS_VOICES: list[str] = list(dict.fromkeys([*ACTIVE_TTS_VOICES, *GEMINI_TTS_VOICES]))
+
+
+def voice_label(voice: str) -> str:
+    """Human-readable label for a voice id from either provider."""
+    return ELEVENLABS_TTS_VOICES.get(voice) or GEMINI_TTS_VOICES.get(voice) or voice
+
+
+def is_elevenlabs_voice(voice: str) -> bool:
+    return voice in ELEVENLABS_TTS_VOICES
+
+
+# Sample line played when previewing a voice in the picker. Must match the
+# frontend's ``VOICE_DEMO_TEXT`` so the pre-cached clips are a cache hit.
+VOICE_DEMO_TEXT = "Hi! This is how I sound. Let's practice speaking together."
 
 # Gemini structured-output schemas (uppercase OpenAPI types).
 _CONVERSATION_SCHEMA: dict[str, Any] = {
@@ -145,9 +216,12 @@ class SpeakingCoachService:
     include text-only backups.
     """
 
-    def __init__(self, ai: Any = default_ai_provider, audio_ai: Any | None = None):
+    def __init__(self, ai: Any = default_ai_provider, audio_ai: Any | None = None, tts: Any | None = None):
         self._ai = ai
         self._audio_ai = audio_ai or build_named_provider("gemini")
+        # Active TTS provider (ElevenLabs). Falls back to the legacy Gemini
+        # provider when ElevenLabs has no API key configured.
+        self._tts = tts if tts is not None else (build_named_provider("elevenlabs") if ELEVENLABS_ENABLED else None)
 
     def generate_conversation(
         self,
@@ -257,20 +331,31 @@ class SpeakingCoachService:
         return self._normalize_analysis(raw)
 
     def synthesize_speech(self, text: str, voice: str = DEFAULT_TTS_VOICE) -> dict[str, str]:
-        """Generate tutor speech for ``text`` using a Gemini prebuilt voice.
+        """Generate tutor speech for ``text``, routing to the voice's provider.
 
-        TTS is intentionally limited to the Speaking Coach (it is a billed call),
-        so it always uses the multimodal ``audio_ai`` provider rather than the
-        text failover chain. Returns ``{"audio": base64, "mime_type": str}``.
+        ElevenLabs voices use the active TTS provider; legacy Gemini voices keep
+        playing through Gemini so old conversations sound the same. TTS is
+        intentionally limited to the Speaking Coach (it is a billed call).
+        Returns ``{"audio": base64, "mime_type": str}``.
         """
         text = (text or "").strip()
         if not text:
             raise ValueError("text is required for speech synthesis")
         if voice not in TTS_VOICES:
             voice = DEFAULT_TTS_VOICE
-        if not hasattr(self._audio_ai, "generate_speech"):
-            raise AiProviderError("The configured AI provider does not support speech synthesis")
-        return self._audio_ai.generate_speech(text, voice)
+
+        if is_elevenlabs_voice(voice):
+            provider = self._tts
+            if provider is None or not hasattr(provider, "generate_speech"):
+                raise AiProviderError("ElevenLabs TTS is not configured")
+        else:
+            provider = self._audio_ai
+            if not hasattr(provider, "generate_speech"):
+                raise AiProviderError("The configured AI provider does not support speech synthesis")
+        # ``generate_speech`` is provider-specific (not on the text AiTextPort), so
+        # resolve it dynamically after the capability check above.
+        synth = provider.generate_speech
+        return synth(text, voice)
 
     def explain_phrase(self, text: str, context: str = "") -> dict[str, Any]:
         text = (text or "").strip()

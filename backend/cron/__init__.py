@@ -1,6 +1,6 @@
 from rq_scheduler import Scheduler
 
-from . import ai, backup, email, images, maintenance
+from . import ai, backup, email, images, maintenance, speaking
 
 # Add new domain modules here to include their jobs
 _MODULES = [
@@ -9,6 +9,7 @@ _MODULES = [
     email,
     images,
     maintenance,
+    speaking,
 ]
 
 

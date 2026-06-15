@@ -45,14 +45,13 @@ const TONES = [
 ];
 const FALLBACK_TOPICS = ["Ordering Coffee", "Job Interview", "Airport Check-in"];
 
-// Gemini prebuilt tutor voices (must match backend TTS_VOICES).
-const TTS_VOICES = [
-  { id: "Kore", label: "Kore — Warm & clear" },
-  { id: "Puck", label: "Puck — Upbeat" },
-  { id: "Charon", label: "Charon — Deep & calm" },
-  { id: "Fenrir", label: "Fenrir — Energetic" },
-  { id: "Zephyr", label: "Zephyr — Bright" },
-];
+// Tutor voices are loaded from the backend (ElevenLabs is the active provider;
+// Gemini voices are legacy and only shown when an old conversation used one).
+// This is just a safe fallback used before the API responds.
+const FALLBACK_VOICES = [{ id: "Kore", label: "Kore — Warm & clear" }];
+const DEFAULT_VOICE = "Kore";
+// Short sample played when previewing a voice from the dropdown.
+const VOICE_DEMO_TEXT = "Hi! This is how I sound. Let's practice speaking together.";
 
 function base64ToBytes(b64) {
   const bin = atob(b64);
@@ -66,6 +65,12 @@ function sampleRateFromMime(mime) {
   return match ? parseInt(match[1], 10) : 24000;
 }
 
+// Gemini (legacy) TTS returns raw 16-bit PCM; detect it so we decode correctly.
+function isPcmMime(mime) {
+  const m = (mime || "").toLowerCase();
+  return m.includes("l16") || m.includes("pcm") || m.includes("rate=");
+}
+
 // Gemini TTS returns raw signed 16-bit little-endian PCM (mono).
 function pcm16ToAudioBuffer(bytes, ctx, sampleRate) {
   const usable = bytes.byteLength - (bytes.byteLength % 2);
@@ -74,6 +79,17 @@ function pcm16ToAudioBuffer(bytes, ctx, sampleRate) {
   const channel = buffer.getChannelData(0);
   for (let i = 0; i < int16.length; i++) channel[i] = int16[i] / 32768;
   return buffer;
+}
+
+// Decode a cached clip to an AudioBuffer. Gemini → raw PCM; ElevenLabs → MP3
+// (decoded via the Web Audio API).
+async function decodeClip(entry, ctx) {
+  const bytes = base64ToBytes(entry.audio);
+  if (isPcmMime(entry.mimeType)) {
+    return pcm16ToAudioBuffer(bytes, ctx, sampleRateFromMime(entry.mimeType));
+  }
+  // decodeAudioData detaches the buffer, so hand it a fresh copy.
+  return ctx.decodeAudioData(bytes.buffer.slice(0));
 }
 
 function errorMessage(err, fallback) {
@@ -111,7 +127,15 @@ export default function SpeakingCoach() {
   const [speed, setSpeed] = useState(1.0);
   const [userName, setUserName] = useState("Me");
   const [partnerName, setPartnerName] = useState("Coach");
-  const [selectedVoice, setSelectedVoice] = useState("Kore");
+  const [selectedVoice, setSelectedVoice] = useState(DEFAULT_VOICE);
+  const [demoVoice, setDemoVoice] = useState(null); // voice id currently previewing
+
+  // Active tutor voices (from the backend) shown in the picker for new
+  // conversations, plus a label map for legacy voices used by old conversations.
+  const [ttsVoices, setTtsVoices] = useState(FALLBACK_VOICES);
+  const [legacyVoiceMap, setLegacyVoiceMap] = useState({});
+  // accent id -> default voice id, so switching accent switches the voice.
+  const [accentDefaults, setAccentDefaults] = useState({});
 
   const [voices, setVoices] = useState([]);
   const [conversation, setConversation] = useState(null);
@@ -143,6 +167,32 @@ export default function SpeakingCoach() {
   const speedRef = useRef(1.0);
   const inflightRef = useRef(new Map());
   const conversationRef = useRef(null);
+
+  // ---- Tutor voices (active + legacy) loaded from the backend ----
+  useEffect(() => {
+    let active = true;
+    speakingService.getVoices().then((res) => {
+      if (!active || !res.data) return;
+      const list = res.data.voices?.length ? res.data.voices : FALLBACK_VOICES;
+      setTtsVoices(list);
+      const legacy = {};
+      (res.data.legacy_voices || []).forEach((v) => {
+        legacy[v.id] = v.label;
+      });
+      setLegacyVoiceMap(legacy);
+      setAccentDefaults(res.data.accent_defaults || {});
+      // Default to the active provider's voice for new conversations only; a
+      // conversation opened by URL keeps the voice it was generated with.
+      if (!routeId) {
+        const initial = res.data.accent_defaults?.[accent] || res.data.default;
+        if (initial) setSelectedVoice(initial);
+      }
+    });
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ---- Browser voices: only used as a fallback if Gemini TTS is unavailable ----
   useEffect(() => {
@@ -240,21 +290,21 @@ export default function SpeakingCoach() {
   // (voice, text) is kept so look-ahead prefetch and actual playback never fire
   // two calls — TTS stays strictly one request at a time to avoid rate limits.
   const fetchAudio = useCallback(
-    (text) => {
+    (text, voice = selectedVoice) => {
       const clean = (text || "").trim();
-      const key = `${selectedVoice}:${clean}`;
+      const key = `${voice}:${clean}`;
       const cache = audioCacheRef.current;
       if (cache.has(key)) return Promise.resolve(cache.get(key));
       const inflight = inflightRef.current;
       if (inflight.has(key)) return inflight.get(key);
 
       const promise = speakingService
-        .generateSpeech(clean, selectedVoice)
+        .generateSpeech(clean, voice)
         .then((res) => {
           if (res.error || !res.data?.audio) throw new Error("tts-failed");
           const entry = {
             audio: res.data.audio,
-            sampleRate: sampleRateFromMime(res.data.mime_type),
+            mimeType: res.data.mime_type || "audio/mpeg",
           };
           cache.set(key, entry);
           return entry;
@@ -276,7 +326,7 @@ export default function SpeakingCoach() {
   );
 
   const speak = useCallback(
-    async (text, onEnd, onStart) => {
+    async (text, onEnd, onStart, voice) => {
       const clean = (text || "").trim();
       if (!clean) {
         onEnd?.();
@@ -286,7 +336,7 @@ export default function SpeakingCoach() {
       window.speechSynthesis?.cancel();
       let entry;
       try {
-        entry = await fetchAudio(clean);
+        entry = await fetchAudio(clean, voice);
       } catch {
         onStart?.();
         await browserSpeak(clean, onEnd);
@@ -295,7 +345,7 @@ export default function SpeakingCoach() {
       try {
         const ctx = ensureAudioContext();
         if (ctx.state === "suspended") await ctx.resume();
-        const buffer = pcm16ToAudioBuffer(base64ToBytes(entry.audio), ctx, entry.sampleRate);
+        const buffer = await decodeClip(entry, ctx);
         onStart?.();
         await new Promise((resolve) => {
           const source = ctx.createBufferSource();
@@ -323,6 +373,31 @@ export default function SpeakingCoach() {
     setSpeakingLineId(null);
   }, [stopCurrentSource]);
 
+  // Play a short sample of a voice so the learner can compare voices before
+  // committing. Uses an explicit voice (state updates are async) and reuses the
+  // normal cache-first synth path.
+  const previewVoice = useCallback(
+    (voice) => {
+      setDemoVoice(voice);
+      speak(VOICE_DEMO_TEXT, () => setDemoVoice(null), undefined, voice).catch(() => setDemoVoice(null));
+    },
+    [speak]
+  );
+
+  // Switch accent and move to that accent's default voice (each ElevenLabs voice
+  // has a fixed accent, so the voice follows the accent). Previews the new voice.
+  const selectAccent = useCallback(
+    (accentId) => {
+      setAccent(accentId);
+      const next = accentDefaults[accentId];
+      if (next && next !== selectedVoice) {
+        setSelectedVoice(next);
+        previewVoice(next);
+      }
+    },
+    [accentDefaults, selectedVoice, previewVoice]
+  );
+
   // ---- Generate conversation ----
   const handleGenerate = async () => {
     setLoading(true);
@@ -339,6 +414,7 @@ export default function SpeakingCoach() {
         level,
         tone,
         turns,
+        voice: selectedVoice,
         use_vocabulary: useVocab,
       });
       if (res.error || !res.data?.lines?.length) {
@@ -867,6 +943,7 @@ export default function SpeakingCoach() {
       if (res.data?.id) {
         resetPracticeState();
         setConversation(res.data);
+        if (res.data.voice) setSelectedVoice(res.data.voice);
         setView("practice");
       } else {
         toast.error("Conversation not found.");
@@ -878,6 +955,24 @@ export default function SpeakingCoach() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeId]);
+
+  // Picker options: active voices for the selected accent (voices without an
+  // accent — e.g. legacy Gemini fallback — are always shown). If the selected
+  // voice isn't in that list (a loaded conversation's voice from another accent,
+  // or a legacy voice), surface it as an extra option so the UI reflects it.
+  const voiceOptions = useMemo(() => {
+    const opts = ttsVoices.filter((v) => !v.accent || v.accent === accent);
+    if (selectedVoice && !opts.some((v) => v.id === selectedVoice)) {
+      const known = ttsVoices.find((v) => v.id === selectedVoice);
+      opts.unshift(
+        known || {
+          id: selectedVoice,
+          label: `${legacyVoiceMap[selectedVoice] || selectedVoice} (legacy)`,
+        }
+      );
+    }
+    return opts;
+  }, [ttsVoices, selectedVoice, legacyVoiceMap, accent]);
 
   const busy = rolePlayIndex !== null || fullPlayState !== "stopped";
 
@@ -992,7 +1087,7 @@ export default function SpeakingCoach() {
                       <button
                         key={a.id}
                         className={accent === a.id ? "active" : ""}
-                        onClick={() => setAccent(a.id)}
+                        onClick={() => selectAccent(a.id)}
                       >
                         {a.label}
                       </button>
@@ -1061,15 +1156,33 @@ export default function SpeakingCoach() {
                 <label>
                   <RecordVoiceOverIcon fontSize="small" /> Reference tutor voice
                 </label>
-                <select value={selectedVoice} onChange={(e) => setSelectedVoice(e.target.value)}>
-                  {TTS_VOICES.map((v) => (
-                    <option key={v.id} value={v.id}>
-                      {v.label}
-                    </option>
-                  ))}
-                </select>
+                <div className="sc-voice-row">
+                  <select
+                    value={selectedVoice}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setSelectedVoice(v);
+                      previewVoice(v);
+                    }}
+                  >
+                    {voiceOptions.map((v) => (
+                      <option key={v.id} value={v.id}>
+                        {v.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    className={`sc-voice-demo ${demoVoice === selectedVoice ? "is-playing" : ""}`}
+                    onClick={() => previewVoice(selectedVoice)}
+                    title="Hear a sample of this voice"
+                  >
+                    <VolumeUpIcon fontSize="small" />
+                    {demoVoice === selectedVoice ? "Playing…" : "Demo"}
+                  </button>
+                </div>
                 <span className="sc-field__hint">
-                  Natural AI voice used when you tap Listen or play a line.
+                  Natural AI voice used when you tap Listen or play a line. Pick one to hear a sample.
                 </span>
               </div>
 
@@ -1085,6 +1198,20 @@ export default function SpeakingCoach() {
 
             {conversation && (
               <section className="sc-conversation">
+                <div className="sc-convo-header">
+                  <span className="sc-convo-header__icon">
+                    <RecordVoiceOverIcon fontSize="small" />
+                  </span>
+                  <div className="sc-convo-header__text">
+                    <h3>{conversation.topic || "Conversation"}</h3>
+                    {conversation.context && <p>{conversation.context}</p>}
+                  </div>
+                  <div className="sc-convo-header__meta">
+                    {conversation.accent && <span className="sc-tag">{conversation.accent}</span>}
+                    {conversation.level && <span className="sc-tag">{conversation.level}</span>}
+                    <span className="sc-tag">{conversation.lines?.length || 0} turns</span>
+                  </div>
+                </div>
                 <div className="sc-action-bar" data-tour="sc-actions">
                   <div className="sc-action-group">
                     {fullPlayState === "playing" ? (
@@ -1333,6 +1460,7 @@ export default function SpeakingCoach() {
                           onClick={() => {
                             resetPracticeState();
                             setConversation(c);
+                            if (c.voice) setSelectedVoice(c.voice);
                             setView("practice");
                             navigate(`/speaking-coach/${c.id}`);
                           }}

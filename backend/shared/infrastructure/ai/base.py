@@ -55,10 +55,14 @@ class RetryingHttpProvider:
         # web workers, RQ worker and cron backfill all share one Gemini budget.
         self._gate = GlobalAiGate(self.label)
 
-    def _request_json(
+    def _send(
         self, url: str, *, payload: dict, params: dict | None = None, headers: dict | None = None
-    ) -> dict[str, Any]:
-        """POST ``payload`` and return the decoded JSON body, retrying transient errors."""
+    ) -> "requests.Response":
+        """POST ``payload`` and return the raw 200 response, retrying transient errors.
+
+        Centralizes the gate/throttle/backoff loop so callers can decode the body
+        however they need (JSON for text models, raw bytes for audio/TTS).
+        """
         last_error: AiProviderError | None = None
         for attempt in range(self._max_retries + 1):
             try:
@@ -84,7 +88,7 @@ class RetryingHttpProvider:
                 raise last_error from exc
 
             if response.status_code == 200:
-                return response.json()
+                return response
 
             if response.status_code == _RATE_LIMIT_STATUS:
                 # Don't retry rate limits in-process — give way to other
@@ -114,6 +118,18 @@ class RetryingHttpProvider:
             raise AiProviderError(f"{self.label} returned status {response.status_code}")
 
         raise last_error or AiProviderError(f"{self.label} request failed after retries")
+
+    def _request_json(
+        self, url: str, *, payload: dict, params: dict | None = None, headers: dict | None = None
+    ) -> dict[str, Any]:
+        """POST ``payload`` and return the decoded JSON body, retrying transient errors."""
+        return self._send(url, payload=payload, params=params, headers=headers).json()
+
+    def _request_bytes(
+        self, url: str, *, payload: dict, params: dict | None = None, headers: dict | None = None
+    ) -> bytes:
+        """POST ``payload`` and return the raw response body (e.g. audio), with retries."""
+        return self._send(url, payload=payload, params=params, headers=headers).content
 
     def _throttle(self) -> None:
         """Pace consecutive requests to stay under a per-minute quota."""
