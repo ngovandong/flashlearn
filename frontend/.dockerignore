@@ -5,6 +5,7 @@ build
 .env
 .env.*
 !.env.sample
+!.env
 *.md
 .cursor
 .vscode
