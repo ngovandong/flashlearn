@@ -43,6 +43,15 @@ function base64ToBytes(b64) {
   return bytes;
 }
 
+// A clip's raw bytes — from its Cloudinary URL when present, else inline base64.
+async function clipBytes(entry) {
+  if (entry?.audio_url) {
+    const resp = await fetch(entry.audio_url);
+    return new Uint8Array(await resp.arrayBuffer());
+  }
+  return base64ToBytes(entry.audio);
+}
+
 // A line's audio is cached per voice + text, so two characters speaking the same
 // sentence (different voices) get their own clip.
 function lineKey(line) {
@@ -376,9 +385,9 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
       .then(async (res) => {
         const ctx = ensureCtx();
         for (const item of res.data?.lines || []) {
-          if (!active || !item.audio) continue;
+          if (!active || (!item.audio && !item.audio_url)) continue;
           try {
-            const bytes = base64ToBytes(item.audio);
+            const bytes = await clipBytes(item);
             const buffer = await ctx.decodeAudioData(bytes.buffer.slice(0));
             buffersRef.current.set(lineKey(item), buffer);
           } catch {
@@ -429,10 +438,10 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
       if (!clean) return;
       try {
         const res = await speakingService.generateSpeech(clean);
-        if (res.error || !res.data?.audio) return;
+        if (res.error || (!res.data?.audio && !res.data?.audio_url)) return;
         const ctx = ensureCtx();
         await ctx.resume?.();
-        const bytes = base64ToBytes(res.data.audio);
+        const bytes = await clipBytes(res.data);
         const buffer = await ctx.decodeAudioData(bytes.buffer.slice(0));
         stopSource();
         const src = ctx.createBufferSource();

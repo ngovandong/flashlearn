@@ -32,8 +32,9 @@ class CourseService extends BaseService {
     return this.request.get(this.detail(slug));
   }
 
-  // { lines: [{ voice, text, audio: base64, mime_type }] } — one generated
-  // Azure TTS clip per distinct character line.
+  // { lines: [{ voice, text, audio_url, audio: base64, mime_type }] } — one
+  // generated Azure TTS clip per distinct character line. Prefer audio_url
+  // (hosted on Cloudinary); audio is a fallback for un-migrated clips.
   getLessonAudio(lessonId) {
     return this.request.get(`${this.action("lesson_audio")}?lesson_id=${lessonId}`);
   }

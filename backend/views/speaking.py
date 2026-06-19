@@ -87,7 +87,9 @@ class SpeakingViewSet(viewsets.ViewSet):
             clip = speaking_service.speak(text, request.data.get("voice"))
         except AiProviderError as exc:
             return Response({"errors": str(exc)}, status=status.HTTP_502_BAD_GATEWAY)
-        return Response({"audio": clip.audio, "mime_type": clip.mime_type})
+        # Prefer the Cloudinary URL; ``audio`` (base64) stays as a fallback for
+        # clips not yet migrated off inline storage.
+        return Response({"audio_url": clip.audio_url, "audio": clip.audio, "mime_type": clip.mime_type})
 
     @action(detail=False, methods=["POST"])
     def explain_phrase(self, request, *args, **kwargs):

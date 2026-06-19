@@ -6,6 +6,8 @@ The DRF viewset is a thin transport layer that only parses requests, serializes
 results and maps exceptions — all rules and data access live here.
 """
 
+import base64
+import logging
 import re
 from typing import Any
 
@@ -18,9 +20,13 @@ from backend.speaking.application.services import (
     ELEVENLABS_VOICE_ACCENT,
     GEMINI_TTS_VOICES,
     TTS_VOICES,
+    VOICE_DEMO_TEXT,
     SpeakingCoachService,
+    audio_clip_public_id,
 )
 from backend.speaking.infrastructure.repository import SpeakingRepository
+
+logger = logging.getLogger(__name__)
 
 _DEFAULT_FALLBACK_TOPICS = ["Ordering Coffee", "Job Interview", "Airport Check-in", "Making Plans", "At the Doctor"]
 
@@ -30,9 +36,13 @@ class SpeakingService:
         self,
         coach: SpeakingCoachService,
         repo: type[SpeakingRepository] | SpeakingRepository = SpeakingRepository,
+        audio_storage=None,
     ):
         self._coach = coach
         self._repo = repo
+        # When wired, synthesized audio is uploaded here and only its URL is
+        # persisted; otherwise the base64 bytes are stored inline (legacy path).
+        self._audio_storage = audio_storage
 
     # ── Conversation generation ───────────────────────────────────────────
     def generate_conversation(
@@ -170,13 +180,29 @@ class SpeakingService:
         if clip is not None:
             return clip
         result = self._coach.synthesize_speech(text, voice)
+        audio_b64 = result["audio"]
+        audio_url = self._upload_audio(voice, text_hash, audio_b64)
         return self._repo.get_or_create_clip(
             voice=voice,
             text_hash=text_hash,
             text=text,
-            audio=result["audio"],
+            # Only keep base64 inline when the upload didn't happen (no storage
+            # wired or it failed), so playback still works as a fallback.
+            audio="" if audio_url else audio_b64,
+            audio_url=audio_url,
             mime_type=result.get("mime_type", "audio/L16;rate=24000"),
         )
+
+    def _upload_audio(self, voice: str, text_hash: str, audio_b64: str) -> str:
+        """Upload base64 audio bytes to the audio store; return the URL (or "")."""
+        if self._audio_storage is None or not audio_b64:
+            return ""
+        try:
+            data = base64.b64decode(audio_b64)
+            return self._audio_storage.upload_audio(data, public_id=audio_clip_public_id(voice, text_hash))
+        except Exception:
+            logger.exception("Audio upload failed for clip (%s); keeping inline base64", voice)
+            return ""
 
     def explain_phrase(self, text: str, context: str = "") -> dict[str, Any]:
         # Same word in the same line context returns identical guidance, so
@@ -186,6 +212,103 @@ class SpeakingService:
             [text.lower(), (context or "").strip()],
             lambda: self._coach.explain_phrase(text, context),
         )
+
+    # ── Cache maintenance ─────────────────────────────────────────────────
+    def prune_orphan_audio_clips(self, *, extra_referenced_keys=None, dry_run=False) -> dict[str, Any]:
+        """Delete cached TTS clips nothing references any more.
+
+        The :class:`SpeakingAudioClip` cache is shared and never expires, so clips
+        pile up when conversations are deleted or course dialogues are re-crawled.
+        A clip is kept only when its ``(voice, text_hash)`` is still referenced by
+        a saved conversation line, the per-voice picker demo, or one of
+        ``extra_referenced_keys`` (e.g. course lesson lines, which reuse this
+        cache). Everything else is an orphan.
+
+        Pass ``dry_run=True`` to count orphans (and list each one's voice/text/size
+        via ``previews``) without deleting. Returns
+        ``{scanned, referenced, orphans, deleted, previews}``.
+        """
+        referenced = self._referenced_clip_keys(extra_referenced_keys)
+
+        scanned = 0
+        orphan_ids: list = []
+        for clip_id, voice, text_hash in self._repo.clip_identity_rows():
+            scanned += 1
+            if (voice, text_hash) not in referenced:
+                orphan_ids.append(clip_id)
+
+        previews: list = []
+        deleted = 0
+        if dry_run:
+            previews = self._repo.clip_previews_by_ids(orphan_ids)
+        else:
+            deleted = self._repo.delete_clips_by_ids(orphan_ids)
+        return {
+            "scanned": scanned,
+            "referenced": len(referenced),
+            "orphans": len(orphan_ids),
+            "deleted": deleted,
+            "previews": previews,
+        }
+
+    def migrate_audio_to_storage(self, *, max_clips=None, purge_audio=True, dry_run=False, on_progress=None) -> dict:
+        """Upload clips still holding inline base64 to the audio store, one at a time.
+
+        For each clip with no ``audio_url`` yet, the base64 bytes are decoded,
+        uploaded and the resulting URL is saved; when ``purge_audio`` is set the
+        inline base64 is then cleared to reclaim database space. Idempotent and
+        re-runnable (already-migrated clips are skipped). Returns
+        ``{pending, uploaded, failed, purged}``.
+        """
+        if self._audio_storage is None:
+            raise RuntimeError("No audio storage is configured (set CLOUDINARY_* env vars).")
+
+        if dry_run:
+            return {"pending": self._repo.count_pending_upload(), "uploaded": 0, "failed": 0, "purged": purge_audio}
+
+        ids = self._repo.pending_upload_ids(max_clips)
+        uploaded = failed = 0
+        for clip_id in ids:
+            row = self._repo.clip_audio_row(clip_id)
+            if not row or not row["audio"]:
+                continue
+            try:
+                data = base64.b64decode(row["audio"])
+                url = self._audio_storage.upload_audio(
+                    data, public_id=audio_clip_public_id(row["voice"], row["text_hash"])
+                )
+            except Exception:
+                logger.exception("Audio migration upload failed for clip %s", clip_id)
+                url = ""
+            if not url:
+                failed += 1
+                continue
+            self._repo.set_clip_url(clip_id, url, purge_audio=purge_audio)
+            uploaded += 1
+            if on_progress:
+                on_progress(uploaded, failed, len(ids))
+        return {"pending": len(ids), "uploaded": uploaded, "failed": failed, "purged": purge_audio}
+
+    def _referenced_clip_keys(self, extra_referenced_keys=None) -> set[tuple[str, str]]:
+        """Every ``(voice, text_hash)`` a live feature can still replay."""
+        keys: set[tuple[str, str]] = set(extra_referenced_keys or ())
+
+        # The picker preview sample, pre-warmed for every recognized voice.
+        demo_hash = self._repo.hash_text(VOICE_DEMO_TEXT)
+        for voice in TTS_VOICES:
+            keys.add((voice, demo_hash))
+
+        # Each saved conversation line, keyed by the voice it replays with — the
+        # same normalization the ``speak`` endpoint applies when caching.
+        for voice, lines in self._repo.conversation_clip_sources():
+            voice = self._clean_playable_voice(voice)
+            for line in lines or []:
+                if not isinstance(line, dict):
+                    continue
+                text = (line.get("text") or "").strip()
+                if text:
+                    keys.add((voice, self._repo.hash_text(text)))
+        return keys
 
     # ── History ───────────────────────────────────────────────────────────
     def history(self, user):

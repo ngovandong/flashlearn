@@ -12,11 +12,20 @@ text/JSON and can use any provider in the failover chain.
 import json
 import logging
 import os
+import re
 from typing import Any
 
 from backend.shared.infrastructure.ai import AiProviderError, build_named_provider, default_ai_provider
 
 logger = logging.getLogger(__name__)
+
+
+def audio_clip_public_id(voice: str, text_hash: str) -> str:
+    """Deterministic Cloudinary id for a cached clip, so re-uploads overwrite the
+    same asset instead of orphaning copies. Keyed on the clip's ``(voice, text_hash)``."""
+    safe_voice = re.sub(r"[^A-Za-z0-9_-]", "_", voice or "voice")
+    return f"flashlearn/speaking_audio/{safe_voice}/{text_hash}"
+
 
 ACCENT_LABELS = {
     "US": "American English",

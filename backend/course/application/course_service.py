@@ -6,6 +6,7 @@ generation of per-character dialogue audio via Azure TTS. The DRF viewset stays 
 thin transport layer.
 """
 
+import base64
 import logging
 
 from backend.course.domain.progress import (
@@ -18,6 +19,7 @@ from backend.course.domain.voices import assign_voices as assign_character_voice
 from backend.course.infrastructure.repository import CourseRepository
 from backend.shared.application.exceptions import NotFoundError, ValidationError
 from backend.shared.infrastructure.ai import AiProviderError
+from backend.speaking.application.services import audio_clip_public_id
 
 logger = logging.getLogger(__name__)
 
@@ -47,15 +49,26 @@ _GENDER_SYSTEM = (
 
 
 class CourseService:
-    def __init__(self, *, repo=CourseRepository, speaking_service=None, ai=None, tts=None, image_storage=None):
+    def __init__(
+        self,
+        *,
+        repo=CourseRepository,
+        speaking_service=None,
+        ai=None,
+        tts=None,
+        image_storage=None,
+        audio_storage=None,
+    ):
         self._repo = repo
         # The Speaking Coach service supplies pronunciation analysis for role-play.
         self._speaking = speaking_service
         # ``ai`` classifies character gender; ``tts`` (Azure) synthesizes audio.
         self._ai = ai
         self._tts = tts
-        # ``image_storage`` mirrors source character/background art to our CDN.
+        # ``image_storage`` mirrors source character/background art to our CDN;
+        # ``audio_storage`` hosts generated dialogue audio so it doesn't bloat the DB.
         self._image_storage = image_storage
+        self._audio_storage = audio_storage
 
     # ── Catalog ───────────────────────────────────────────────────────────
     def courses(self):
@@ -131,7 +144,15 @@ class CourseService:
             seen.add(key)
             clip = self._repo.get_clip(voice, self._repo.clip_hash(text))
             if clip is not None:
-                out.append({"voice": voice, "text": text, "audio": clip.audio, "mime_type": clip.mime_type})
+                out.append(
+                    {
+                        "voice": voice,
+                        "text": text,
+                        "audio_url": clip.audio_url,
+                        "audio": clip.audio,
+                        "mime_type": clip.mime_type,
+                    }
+                )
         return out
 
     # ── Live Role-play ────────────────────────────────────────────────────
@@ -298,11 +319,13 @@ class CourseService:
                     continue
                 try:
                     result = self._tts.synthesize(text, voice)
+                    audio_url = self._upload_clip_audio(voice, text_hash, result["audio"])
                     self._repo.save_clip(
                         voice=voice,
                         text_hash=text_hash,
                         text=text,
-                        audio=result["audio"],
+                        audio="" if audio_url else result["audio"],
+                        audio_url=audio_url,
                         mime_type=result["mime_type"],
                     )
                     made += 1
@@ -314,6 +337,23 @@ class CourseService:
                     if on_progress:
                         on_progress(f"FAILED {voice}: {text[:48]} — {exc}")
         return {"voices": len(voice_map), "made": made, "skipped": skipped, "failed": failed, "clips": len(seen)}
+
+    def _upload_clip_audio(self, voice, text_hash, audio_b64):
+        """Upload base64 audio bytes to the audio store; return the URL (or "")."""
+        if self._audio_storage is None or not audio_b64:
+            return ""
+        try:
+            data = base64.b64decode(audio_b64)
+            return self._audio_storage.upload_audio(data, public_id=audio_clip_public_id(voice, text_hash))
+        except Exception:
+            logger.exception("Course audio upload failed for clip (%s); keeping inline base64", voice)
+            return ""
+
+    def referenced_audio_clip_keys(self):
+        """``(voice, text_hash)`` pairs for every course dialogue line still in the
+        catalog. Used by the speaking-audio cleanup to keep clips course lessons
+        reuse from the shared SpeakingAudioClip cache."""
+        return self._repo.referenced_clip_keys()
 
     def assign_course_voices(self, course):
         """Classify every character's gender and stamp a voice onto lines/characters.

@@ -21,6 +21,10 @@ class ImageStoragePort(Protocol):
     def url_to_base64(self, url: str) -> str: ...
 
 
+class AudioStoragePort(Protocol):
+    def upload_audio(self, data: bytes, *, public_id: str | None = None) -> str: ...
+
+
 class OAuthPort(Protocol):
     def validate_id_token(self, id_token: str) -> dict[str, Any]: ...
 

@@ -1,4 +1,5 @@
 import base64
+import io
 
 import cloudinary.uploader
 
@@ -38,3 +39,24 @@ class CloudinaryImageStorage:
 
 
 default_image_storage = CloudinaryImageStorage()
+
+
+class CloudinaryAudioStorage:
+    """Stores TTS audio bytes on Cloudinary so they don't bloat the database.
+
+    Uploads with ``resource_type="raw"`` so the exact bytes (MP3 or raw 16-bit
+    PCM) are served back unchanged — the frontend fetches the URL and decodes it
+    with the Web Audio API using the clip's ``mime_type``.
+    """
+
+    def upload_audio(self, data: bytes, *, public_id: str | None = None) -> str:
+        # A deterministic public_id + overwrite keeps re-runs idempotent (a
+        # re-synthesized clip replaces its asset instead of orphaning copies).
+        options = {"resource_type": "raw", "overwrite": True}
+        if public_id:
+            options["public_id"] = public_id
+        result = cloudinary.uploader.upload(io.BytesIO(data), **options)
+        return result.get("secure_url") or result.get("url", "")
+
+
+default_audio_storage = CloudinaryAudioStorage()

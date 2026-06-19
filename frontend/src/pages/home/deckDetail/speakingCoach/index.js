@@ -87,10 +87,20 @@ function pcm16ToAudioBuffer(bytes, ctx, sampleRate) {
   return buffer;
 }
 
+// Get a clip's raw bytes — from its hosted URL (clips migrated to Cloudinary)
+// or the inline base64 fallback (clips not yet migrated).
+async function clipBytes(entry) {
+  if (entry.audioUrl) {
+    const resp = await fetch(entry.audioUrl);
+    return new Uint8Array(await resp.arrayBuffer());
+  }
+  return base64ToBytes(entry.audio);
+}
+
 // Decode a cached clip to an AudioBuffer. Gemini → raw PCM; ElevenLabs → MP3
 // (decoded via the Web Audio API).
 async function decodeClip(entry, ctx) {
-  const bytes = base64ToBytes(entry.audio);
+  const bytes = await clipBytes(entry);
   if (isPcmMime(entry.mimeType)) {
     return pcm16ToAudioBuffer(bytes, ctx, sampleRateFromMime(entry.mimeType));
   }
@@ -354,9 +364,10 @@ export default function SpeakingCoach() {
       const promise = speakingService
         .generateSpeech(clean, voice)
         .then((res) => {
-          if (res.error || !res.data?.audio) throw new Error("tts-failed");
+          if (res.error || (!res.data?.audio && !res.data?.audio_url)) throw new Error("tts-failed");
           const entry = {
             audio: res.data.audio,
+            audioUrl: res.data.audio_url,
             mimeType: res.data.mime_type || "audio/mpeg",
           };
           cache.set(key, entry);

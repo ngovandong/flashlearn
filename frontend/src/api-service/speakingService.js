@@ -37,8 +37,9 @@ class SpeakingService extends BaseService {
     return this.request.post(this.action("explain_phrase"), { text, context }, AI_CONFIG);
   }
 
-  // Returns { audio: base64, mime_type } from the voice's TTS provider
+  // Returns { audio_url, audio: base64, mime_type } from the voice's TTS provider
   // (ElevenLabs MP3 for active voices, Gemini raw 16-bit PCM for legacy voices).
+  // Prefer audio_url (hosted on Cloudinary); audio is a fallback for un-migrated clips.
   generateSpeech(text, voice) {
     return this.request.post(this.action("speak"), { text, voice }, AI_CONFIG);
   }

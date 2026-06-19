@@ -5,7 +5,7 @@ shared TTS audio-clip cache and the AI response cache lives here so the
 application service and the DRF viewset never touch the ORM directly.
 """
 
-from django.db.models.functions import Greatest
+from django.db.models.functions import Greatest, Length
 
 from backend.models import (
     AiResponseCache,
@@ -82,17 +82,81 @@ class SpeakingRepository:
         return SpeakingAudioClip.objects.filter(voice=voice, text_hash=text_hash).first()
 
     @staticmethod
-    def get_or_create_clip(*, voice, text_hash, text, audio, mime_type):
+    def get_or_create_clip(*, voice, text_hash, text, audio, mime_type, audio_url=""):
         clip, _ = SpeakingAudioClip.objects.get_or_create(
             voice=voice,
             text_hash=text_hash,
-            defaults={"text": text, "audio": audio, "mime_type": mime_type},
+            defaults={"text": text, "audio": audio, "audio_url": audio_url, "mime_type": mime_type},
         )
         return clip
 
     @staticmethod
     def hash_text(text):
         return SpeakingAudioClip.hash_text(text)
+
+    @staticmethod
+    def conversation_clip_sources():
+        """``(voice, lines)`` for every saved conversation (for orphan cleanup).
+
+        Only the lightweight fields are loaded — the heavy ``audio`` column lives
+        on the clip table, not here.
+        """
+        return SpeakingConversation.objects.values_list("voice", "lines").iterator(chunk_size=200)
+
+    @staticmethod
+    def clip_identity_rows():
+        """``(id, voice, text_hash)`` for every cached clip, without loading audio."""
+        return SpeakingAudioClip.objects.values_list("id", "voice", "text_hash").iterator(chunk_size=500)
+
+    @staticmethod
+    def clip_previews_by_ids(ids):
+        """``[{voice, text, audio_len}]`` for the given clips, without loading audio.
+
+        ``audio_len`` is the stored base64 character count — a proxy for the row's
+        on-disk size used to preview what a cleanup would free.
+        """
+        ids = list(ids)
+        if not ids:
+            return []
+        rows = (
+            SpeakingAudioClip.objects.filter(id__in=ids)
+            .annotate(audio_len=Length("audio"))
+            .values("voice", "text", "audio_len")
+        )
+        return list(rows)
+
+    @staticmethod
+    def pending_upload_ids(limit=None):
+        """Ids of clips still storing inline base64 with no hosted URL yet."""
+        qs = SpeakingAudioClip.objects.filter(audio_url="").exclude(audio="").values_list("id", flat=True)
+        return list(qs[:limit] if limit else qs)
+
+    @staticmethod
+    def count_pending_upload():
+        return SpeakingAudioClip.objects.filter(audio_url="").exclude(audio="").count()
+
+    @staticmethod
+    def clip_audio_row(clip_id):
+        """``{id, voice, text_hash, audio}`` for one clip (audio loaded on purpose)."""
+        return SpeakingAudioClip.objects.filter(id=clip_id).values("id", "voice", "text_hash", "audio").first()
+
+    @staticmethod
+    def set_clip_url(clip_id, audio_url, *, purge_audio=True):
+        """Save a clip's hosted URL, optionally clearing the inline base64 to free space."""
+        fields = {"audio_url": audio_url}
+        if purge_audio:
+            fields["audio"] = ""
+        SpeakingAudioClip.objects.filter(id=clip_id).update(**fields)
+
+    @staticmethod
+    def delete_clips_by_ids(ids, *, batch_size=500):
+        """Delete cached clips by id in batches. Returns the number deleted."""
+        ids = list(ids)
+        deleted = 0
+        for start in range(0, len(ids), batch_size):
+            count, _ = SpeakingAudioClip.objects.filter(id__in=ids[start : start + batch_size]).delete()
+            deleted += count
+        return deleted
 
     # ── AI response cache ─────────────────────────────────────────────────
     @staticmethod

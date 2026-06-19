@@ -93,13 +93,32 @@ class CourseRepository:
         return SpeakingAudioClip.objects.filter(voice=voice, text_hash=text_hash).first()
 
     @staticmethod
-    def save_clip(*, voice, text_hash, text, audio, mime_type):
+    def save_clip(*, voice, text_hash, text, audio, mime_type, audio_url=""):
         clip, _ = SpeakingAudioClip.objects.update_or_create(
             voice=voice,
             text_hash=text_hash,
-            defaults={"text": text, "audio": audio, "mime_type": mime_type},
+            defaults={"text": text, "audio": audio, "audio_url": audio_url, "mime_type": mime_type},
         )
         return clip
+
+    @staticmethod
+    def referenced_clip_keys():
+        """``(voice, text_hash)`` for every voiced line across all course lessons.
+
+        Mirrors the keying ``generate_course_audio`` uses so a shared-cache
+        cleanup keeps every clip a lesson can still play. Lines without an
+        assigned voice are skipped (they can't be replayed, so no clip exists).
+        """
+        keys: set[tuple[str, str]] = set()
+        for lines in CourseLesson.objects.values_list("lines", flat=True).iterator(chunk_size=200):
+            for line in lines or []:
+                if not isinstance(line, dict):
+                    continue
+                text = (line.get("text") or "").strip()
+                voice = (line.get("voice") or "").strip()
+                if text and voice:
+                    keys.add((voice, SpeakingAudioClip.hash_text(text)))
+        return keys
 
     @staticmethod
     def save_lesson_content(lesson):

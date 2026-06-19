@@ -16,7 +16,7 @@ from backend.shared.infrastructure.ai import (
     default_ai_provider,
 )
 from backend.shared.infrastructure.cache import default_cache
-from backend.shared.infrastructure.cloudinary import default_image_storage
+from backend.shared.infrastructure.cloudinary import default_audio_storage, default_image_storage
 from backend.shared.infrastructure.google_oauth import default_oauth_client
 from backend.speaking.application.services import SpeakingCoachService
 from backend.speaking.application.speaking_service import SpeakingService
@@ -61,7 +61,11 @@ speaking_coach_service = SpeakingCoachService(
     ai=default_ai_provider,
     pronunciation=_azure_speech if _azure_speech.is_configured else None,
 )
-speaking_service = SpeakingService(coach=speaking_coach_service, repo=SpeakingRepository)
+speaking_service = SpeakingService(
+    coach=speaking_coach_service,
+    repo=SpeakingRepository,
+    audio_storage=default_audio_storage,
+)
 # Azure TTS gives each course dialogue character a fixed neural voice matching
 # their gender; only wired when credentials are present.
 _azure_tts = AzureTextToSpeechProvider()
@@ -71,5 +75,6 @@ course_service = CourseService(
     ai=default_ai_provider,
     tts=_azure_tts if _azure_tts.is_configured else None,
     image_storage=default_image_storage,
+    audio_storage=default_audio_storage,
 )
 reminder_service = ReminderService(repo=ReminderRepository)
