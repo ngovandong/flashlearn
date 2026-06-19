@@ -113,12 +113,25 @@ def _normalize_sql_dump(sql: str) -> str:
     return sql
 
 
+# MariaDB 11.5+ changed the implicit default collation for utf8mb3/utf8mb4 to the
+# uca1400 family. A MySQL 8.0 dump emits legacy tables as `DEFAULT CHARSET=utf8mb3`
+# with no explicit COLLATE (utf8mb3_general_ci is MySQL's default, so mysqldump
+# omits it). On MariaDB those columns silently become utf8mb3_uca1400_ai_ci, while
+# FK child columns are pinned to the explicit utf8mb3_general_ci -> the FK columns
+# no longer match and CREATE TABLE fails with errno 150. Forcing MySQL 8.0's
+# implicit defaults for the session makes collations resolve exactly as they did
+# in the source dump. `/*M!...*/` is a MariaDB-only executable comment (>= 11.2,
+# version 110200); MySQL treats it as a plain comment and ignores it.
+_MARIADB_COLLATION_COMPAT = (
+    "/*M!110200 SET @@character_set_collations='utf8mb3=utf8mb3_general_ci,utf8mb4=utf8mb4_0900_ai_ci' */;\n"
+)
+
 # mysqldump disables UNIQUE/FOREIGN_KEY checks but leaves autocommit on, so every
 # INSERT commits separately and InnoDB fsyncs per statement. On slow SD/eMMC
 # storage (e.g. Armbian boards) that turns a small dump into a 20+ minute import.
 # Wrapping the whole restore in one transaction collapses the per-statement
 # fsyncs into a single flush.
-_RESTORE_PROLOGUE = "SET autocommit=0;\nSET unique_checks=0;\nSET foreign_key_checks=0;\n"
+_RESTORE_PROLOGUE = f"{_MARIADB_COLLATION_COMPAT}SET autocommit=0;\nSET unique_checks=0;\nSET foreign_key_checks=0;\n"
 _RESTORE_EPILOGUE = "\nCOMMIT;\n"
 
 
