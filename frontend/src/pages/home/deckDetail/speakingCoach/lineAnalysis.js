@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import MicIcon from "@mui/icons-material/Mic";
 import AddIcon from "@mui/icons-material/Add";
@@ -28,6 +28,7 @@ export default function LineAnalysis({
   onSaveWord,
   onSaveSentence,
   onPlayReference,
+  onPlayWord,
   savedWords = {},
 }) {
   const [selectedWord, setSelectedWord] = useState(
@@ -37,6 +38,15 @@ export default function LineAnalysis({
   );
   const [isUserPlaying, setIsUserPlaying] = useState(false);
   const userAudioRef = useRef(null);
+
+  // The component is reused across consecutive analyses, so the cached Audio
+  // element must be rebuilt whenever a new recording arrives — otherwise
+  // "My recording" replays a stale clip.
+  useEffect(() => {
+    userAudioRef.current?.pause();
+    userAudioRef.current = null;
+    setIsUserPlaying(false);
+  }, [result.userAudioUrl]);
 
   const handlePlayUserAudio = () => {
     if (!result.userAudioUrl) return;
@@ -223,12 +233,27 @@ export default function LineAnalysis({
           <div className="sc-word-detail__head">
             <div className="sc-word-detail__title">
               <span className="sc-mono sc-mono--lg">"{selectedWord.word}"</span>
+              {onPlayWord && (
+                <button
+                  type="button"
+                  className="sc-icon-btn"
+                  onClick={() => onPlayWord(selectedWord.word)}
+                  title="Hear the correct pronunciation"
+                >
+                  <VolumeUpIcon fontSize="small" />
+                </button>
+              )}
               <span className={`sc-status sc-status--${selectedWord.status}`}>
                 {selectedWord.status === "correct" && <CheckCircleIcon fontSize="inherit" />}
                 {selectedWord.status === "incorrect" && <CancelIcon fontSize="inherit" />}
                 {selectedWord.status === "missing" && <WarningAmberIcon fontSize="inherit" />}
                 {selectedWord.status}
               </span>
+              {selectedWord.accuracyScore > 0 && (
+                <span className={`sc-pct sc-pct--${scoreLevel(selectedWord.accuracyScore)}`}>
+                  {selectedWord.accuracyScore}%
+                </span>
+              )}
             </div>
             <button
               className="sc-btn sc-btn--primary sc-btn--sm"

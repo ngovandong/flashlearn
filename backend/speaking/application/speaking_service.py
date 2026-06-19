@@ -114,6 +114,8 @@ class SpeakingService:
             target_text, audio, mime_type=mime_type, full_session=(kind == SpeakingAnalysis.KIND_FULL)
         )
         conversation = self._repo.get_conversation(user, conversation_id) if conversation_id else None
+        # Only the latest analysis per (user, conversation) is kept.
+        self._repo.delete_analyses(user, conversation)
         record = self._repo.create_analysis(
             user=user,
             conversation=conversation,
@@ -131,6 +133,22 @@ class SpeakingService:
             word_analysis=result["wordAnalysis"],
         )
         return record, result
+
+    def analyze_text(
+        self,
+        *,
+        target_text: str,
+        audio: str,
+        mime_type: str = "audio/wav",
+        full_session: bool = False,
+    ) -> dict[str, Any]:
+        """Run pronunciation analysis and return the raw camelCase result only.
+
+        Unlike :meth:`analyze`, this does not persist a ``SpeakingAnalysis`` record
+        — used by other contexts (e.g. the Course role-play) that keep their own
+        result history and must not pollute the Speaking Coach's.
+        """
+        return self._coach.analyze_pronunciation(target_text, audio, mime_type=mime_type, full_session=full_session)
 
     # ── Voices & speech ───────────────────────────────────────────────────
     def voices(self) -> dict[str, Any]:

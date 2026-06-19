@@ -68,6 +68,11 @@ class SpeakingRepository:
         return SpeakingAnalysis.objects.create(**fields)
 
     @staticmethod
+    def delete_analyses(user, conversation):
+        """Drop a user's existing analyses for ``conversation`` (``None`` group included)."""
+        SpeakingAnalysis.objects.filter(user=user, conversation=conversation).delete()
+
+    @staticmethod
     def recent_analyses(user, limit=30):
         return SpeakingAnalysis.objects.filter(user=user)[:limit]
 

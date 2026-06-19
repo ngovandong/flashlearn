@@ -64,10 +64,13 @@ class SpeakingService extends BaseService {
   }
 
   // Returns { matches: [{ term_id, deck_id, name }] } — the user's own terms
-  // found in the conversation so they can be highlighted and deep-linked to
-  // /deck/:deck_id/learn/:term_id.
-  matchTerms(conversationId) {
-    return this.request.post(this.action("match_terms"), { conversation_id: conversationId });
+  // found in the given lines so they can be highlighted and deep-linked to
+  // /deck/:deck_id/learn/:term_id. Pass a conversation id string, or an object
+  // with an explicit `texts` array (used by the Course lesson transcript).
+  matchTerms(arg) {
+    const payload =
+      arg && typeof arg === "object" ? { texts: arg.texts } : { conversation_id: arg };
+    return this.request.post(this.action("match_terms"), payload);
   }
 
   // Add/update (or remove with { remove: true }) a noted word/phrase on a

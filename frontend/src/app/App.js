@@ -53,6 +53,7 @@ const NumberTest = lazyWithRetry(() =>
 const SpeakingCoach = lazyWithRetry(() =>
   import("@pages/home/deckDetail/speakingCoach")
 );
+const Course = lazyWithRetry(() => import("@pages/home/course"));
 const PrivacyPage = lazyWithRetry(() => import("@pages/privacy"));
 
 function RouteFallback() {
@@ -127,7 +128,14 @@ function App() {
             <Route path="" element={<Home />} />
             <Route path="deck" element={<DeckPage />} />
             <Route path="number-test" element={<NumberTest />} />
+            <Route path="course" element={<Course />} />
+            <Route path="course/:courseId" element={<Course />} />
+            <Route path="course/:courseId/:lessonId" element={<Course />} />
             <Route path="speaking-coach" element={<SpeakingCoach />} />
+            <Route path="speaking-coach/history" element={<SpeakingCoach />} />
+            <Route path="speaking-coach/course" element={<SpeakingCoach />} />
+            <Route path="speaking-coach/course/:courseId" element={<SpeakingCoach />} />
+            <Route path="speaking-coach/course/:courseId/:lessonId" element={<SpeakingCoach />} />
             <Route path="speaking-coach/:id" element={<SpeakingCoach />} />
             <Route path="learn/:termId" element={<SingleTermLearn />} />
             <Route path="folder" element={<Folder />} />

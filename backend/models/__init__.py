@@ -1,4 +1,10 @@
 from .ai_cache import AiResponseCache
+from .course import (
+    Course,
+    CourseLesson,
+    CourseSection,
+    UserCourseLessonProgress,
+)
 from .deck import Deck
 from .folder import Folder
 from .learning_progress import UserLearningProgress

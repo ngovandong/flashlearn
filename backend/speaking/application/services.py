@@ -9,6 +9,7 @@ multimodal-capable provider (Gemini). Conversation/topic generation is plain
 text/JSON and can use any provider in the failover chain.
 """
 
+import json
 import logging
 import os
 from typing import Any
@@ -206,6 +207,29 @@ _EXPLAIN_SYSTEM = (
     "matching the requested schema."
 )
 
+# Turns Azure's measured findings into human coaching text (no audio involved).
+_COACHING_SCHEMA: dict[str, Any] = {
+    "type": "OBJECT",
+    "properties": {
+        "overallFeedback": {"type": "STRING"},
+        "keyStruggles": {"type": "ARRAY", "items": _KEY_STRUGGLE_ITEM},
+        "wordTips": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {"word": {"type": "STRING"}, "mouthTip": {"type": "STRING"}},
+                "required": ["word", "mouthTip"],
+            },
+        },
+    },
+    "required": ["overallFeedback"],
+}
+
+_COACHING_SYSTEM = (
+    "You are an encouraging English speaking coach. Given measured pronunciation results, write "
+    "concise, actionable coaching. Always answer with a single JSON object matching the requested schema."
+)
+
 
 class SpeakingCoachService:
     """AI operations for the Speaking Coach feature.
@@ -216,12 +240,22 @@ class SpeakingCoachService:
     include text-only backups.
     """
 
-    def __init__(self, ai: Any = default_ai_provider, audio_ai: Any | None = None, tts: Any | None = None):
+    def __init__(
+        self,
+        ai: Any = default_ai_provider,
+        audio_ai: Any | None = None,
+        tts: Any | None = None,
+        pronunciation: Any | None = None,
+    ):
         self._ai = ai
         self._audio_ai = audio_ai or build_named_provider("gemini")
         # Active TTS provider (ElevenLabs). Falls back to the legacy Gemini
         # provider when ElevenLabs has no API key configured.
         self._tts = tts if tts is not None else (build_named_provider("elevenlabs") if ELEVENLABS_ENABLED else None)
+        # Optional dedicated pronunciation assessor (Azure Speech). When present
+        # it produces measured scores; otherwise we fall back to the multimodal
+        # listener (``audio_ai``) which estimates them.
+        self._pron = pronunciation
 
     def generate_conversation(
         self,
@@ -305,6 +339,23 @@ class SpeakingCoachService:
     ) -> dict[str, Any]:
         if not (audio_base64 or "").strip():
             raise ValueError("audio is required for pronunciation analysis")
+
+        # Prefer Azure's measured assessment when configured; fall back to the
+        # multimodal listener on any failure so analysis always returns something.
+        if self._pron is not None and getattr(self._pron, "is_configured", False):
+            try:
+                raw = self._pron.assess_pronunciation(audio_base64, target_text, mime_type=mime_type)
+                result = self._map_azure_analysis(raw, target_text)
+                self._enrich_with_coaching(result, full_session)
+                return result
+            except AiProviderError:
+                logger.exception("Azure pronunciation assessment failed; falling back to the AI listener")
+
+        return self._analyze_with_listener(target_text, audio_base64, mime_type, full_session)
+
+    def _analyze_with_listener(
+        self, target_text: str, audio_base64: str, mime_type: str, full_session: bool
+    ) -> dict[str, Any]:
         if full_session:
             system = (
                 "You are an English speaking coach evaluating a full multi-turn role-play session. "
@@ -329,6 +380,157 @@ class SpeakingCoachService:
             system, task, _ANALYSIS_SCHEMA, audio={"mime_type": mime_type, "data": audio_base64}
         )
         return self._normalize_analysis(raw)
+
+    # ── Azure pronunciation assessment → analysis schema ──────────────────
+    _AZURE_STATUS = {"None": "correct", "Mispronunciation": "incorrect", "Omission": "missing"}
+
+    @staticmethod
+    def _assessment(obj: dict[str, Any]) -> dict[str, Any]:
+        """Scores holder for ``obj``.
+
+        The REST short-audio API puts pronunciation scores directly on the
+        NBest/Word object, while the SDK JSON nests them under
+        ``PronunciationAssessment`` — tolerate both shapes.
+        """
+        if isinstance(obj, dict):
+            nested = obj.get("PronunciationAssessment")
+            return nested if isinstance(nested, dict) else obj
+        return {}
+
+    @classmethod
+    def _map_azure_analysis(cls, raw: dict[str, Any], reference_text: str) -> dict[str, Any]:
+        """Map Azure's detailed REST result to the frontend analysis schema."""
+        nbest = (raw.get("NBest") or [{}])[0]
+        assessment = cls._assessment(nbest)
+        words_raw = nbest.get("Words") or []
+
+        words: list[dict[str, Any]] = []
+        for item in words_raw:
+            word = _str(item.get("Word"))
+            wa = cls._assessment(item)
+            error = wa.get("ErrorType") or "None"
+            # Insertions are extra words not in the target; they don't belong on
+            # the target-sentence map.
+            if not word or error == "Insertion":
+                continue
+            phonemes = item.get("Phonemes") or []
+            syllables = item.get("Syllables") or []
+            accuracy = _int(wa.get("AccuracyScore"))
+            words.append(
+                {
+                    "word": word,
+                    "status": cls._AZURE_STATUS.get(error, "incorrect"),
+                    "accuracyScore": accuracy,
+                    "userPronunciation": "",
+                    "correctPronunciation": "",
+                    "ipaTarget": cls._join_ipa(p.get("Phoneme") for p in phonemes),
+                    "ipaSpoken": cls._join_ipa(cls._top_phoneme(p) for p in phonemes),
+                    "mouthTip": "",
+                    "syllableStress": " · ".join(_str(s.get("Syllable")) for s in syllables if _str(s.get("Syllable"))),
+                    "feedback": cls._word_feedback(error, accuracy),
+                }
+            )
+
+        return {
+            "transcription": _str(nbest.get("Display") or raw.get("DisplayText") or nbest.get("Lexical")),
+            "accuracyScore": _int(assessment.get("AccuracyScore")),
+            "fluencyScore": _int(assessment.get("FluencyScore")),
+            "completenessScore": _int(assessment.get("CompletenessScore")),
+            # Prosody (stress/intonation/rhythm) maps to the UI's "rhythm" metric;
+            # fall back to fluency when prosody wasn't returned.
+            "rhythmScore": _int(assessment.get("ProsodyScore")) or _int(assessment.get("FluencyScore")),
+            "wordsPerMinute": cls._words_per_minute(words_raw),
+            "accentAnalysis": "",
+            "overallFeedback": "",
+            "keyStruggles": [],
+            "wordAnalysis": words,
+        }
+
+    @staticmethod
+    def _join_ipa(phonemes) -> str:
+        joined = "".join(_str(p) for p in phonemes if _str(p))
+        return f"/{joined}/" if joined else ""
+
+    @classmethod
+    def _top_phoneme(cls, phoneme: dict[str, Any]) -> str:
+        """The most likely actually-spoken phoneme (top N-best), else the expected one."""
+        nbest = cls._assessment(phoneme).get("NBestPhonemes") or []
+        if nbest:
+            return _str(nbest[0].get("Phoneme")) or _str(phoneme.get("Phoneme"))
+        return _str(phoneme.get("Phoneme"))
+
+    @staticmethod
+    def _word_feedback(error: str, accuracy: int) -> str:
+        if error == "Omission":
+            return "This word wasn't detected — make sure to say it clearly."
+        if error in ("Mispronunciation", "Insertion") or accuracy < 60:
+            return f"Accuracy {accuracy}% — focus on the highlighted sounds."
+        if accuracy < 80:
+            return f"Accuracy {accuracy}% — close, refine the trickier sounds."
+        return "Clear and accurate."
+
+    @classmethod
+    def _words_per_minute(cls, words_raw: list[dict[str, Any]]) -> int:
+        spans = [
+            (item["Offset"], item["Duration"])
+            for item in words_raw
+            if isinstance(item, dict)
+            and isinstance(item.get("Offset"), int | float)
+            and isinstance(item.get("Duration"), int | float)
+            and cls._assessment(item).get("ErrorType") != "Omission"
+        ]
+        if not spans:
+            return 0
+        start = min(offset for offset, _ in spans)
+        end = max(offset + duration for offset, duration in spans)
+        seconds = (end - start) / 10_000_000  # Azure ticks are 100ns units.
+        return round(len(spans) / seconds * 60) if seconds > 0 else 0
+
+    def _enrich_with_coaching(self, result: dict[str, Any], full_session: bool) -> None:
+        """Add friendly coaching text (struggles, mouth tips, summary) in place.
+
+        Azure gives the hard numbers but no human guidance, so a single text-LLM
+        pass turns its findings into tips. Best-effort: any failure leaves the
+        measured scores intact.
+        """
+        struggles = [w for w in result["wordAnalysis"] if w["status"] != "correct"]
+        if not struggles and not full_session:
+            return
+        focus = [
+            {"word": w["word"], "ipaTarget": w["ipaTarget"], "ipaSpoken": w["ipaSpoken"], "status": w["status"]}
+            for w in struggles[:8]
+        ]
+        scope = "a full multi-turn role-play session" if full_session else "one sentence"
+        user_prompt = (
+            f'A learner practiced {scope}. Transcription: "{result["transcription"]}".\n'
+            f"Overall accuracy {result['accuracyScore']}%, fluency {result['fluencyScore']}%, "
+            f"rhythm {result['rhythmScore']}%.\n"
+            f"Mispronounced/missed words (target vs detected IPA): {json.dumps(focus)}\n"
+            "Provide: 'overallFeedback' (1-2 encouraging sentences), 'keyStruggles' (up to 3 tricky "
+            "sounds, each with a 'description' and a physical 'tip' for tongue/lip placement), and "
+            "'wordTips' (a short 'mouthTip' for each listed word)."
+        )
+        try:
+            raw = self._ai.generate_json(_COACHING_SYSTEM, user_prompt, _COACHING_SCHEMA)
+        except Exception:
+            logger.exception("Pronunciation coaching enrichment failed; returning measured scores only")
+            return
+
+        result["overallFeedback"] = _str(raw.get("overallFeedback")) or result["overallFeedback"]
+        result["keyStruggles"] = [
+            {"sound": _str(s.get("sound")), "description": _str(s.get("description")), "tip": _str(s.get("tip"))}
+            for s in (raw.get("keyStruggles") or [])
+            if isinstance(s, dict) and _str(s.get("sound"))
+        ]
+        tips = {
+            _str(t.get("word")).lower(): _str(t.get("mouthTip"))
+            for t in (raw.get("wordTips") or [])
+            if isinstance(t, dict) and _str(t.get("word"))
+        }
+        for word in result["wordAnalysis"]:
+            tip = tips.get(word["word"].lower())
+            if tip:
+                word["mouthTip"] = tip
 
     def synthesize_speech(self, text: str, voice: str = DEFAULT_TTS_VOICE) -> dict[str, str]:
         """Generate tutor speech for ``text``, routing to the voice's provider.
