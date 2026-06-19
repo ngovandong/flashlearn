@@ -1,16 +1,16 @@
-# Graph Report - flashlearn  (2026-06-15)
+# Graph Report - flashlearn  (2026-06-19)
 
 ## Corpus Check
-- 445 files · ~136,357 words
+- 446 files · ~136,364 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1890 nodes · 2089 edges · 381 communities (272 shown, 109 thin omitted)
+- 1893 nodes · 2091 edges · 377 communities (270 shown, 107 thin omitted)
 - Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 223 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `88c18b83`
+- Built from commit: `f62f41dc`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -192,10 +192,8 @@
 - [[_COMMUNITY_Community 354|Community 354]]
 - [[_COMMUNITY_Community 355|Community 355]]
 - [[_COMMUNITY_Community 356|Community 356]]
-- [[_COMMUNITY_Community 357|Community 357]]
 - [[_COMMUNITY_Community 358|Community 358]]
 - [[_COMMUNITY_Community 359|Community 359]]
-- [[_COMMUNITY_Community 360|Community 360]]
 - [[_COMMUNITY_Community 361|Community 361]]
 - [[_COMMUNITY_Community 362|Community 362]]
 - [[_COMMUNITY_Community 363|Community 363]]
@@ -210,8 +208,6 @@
 - [[_COMMUNITY_Community 373|Community 373]]
 - [[_COMMUNITY_Community 374|Community 374]]
 - [[_COMMUNITY_Community 375|Community 375]]
-- [[_COMMUNITY_Community 376|Community 376]]
-- [[_COMMUNITY_Community 377|Community 377]]
 - [[_COMMUNITY_Community 378|Community 378]]
 - [[_COMMUNITY_Community 379|Community 379]]
 
@@ -242,7 +238,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (381 total, 109 thin omitted)
+## Communities (377 total, 107 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.15
@@ -265,8 +261,8 @@ Cohesion: 0.16
 Nodes (11): _int(), is_elevenlabs_voice(), _normalize_analysis(), _normalize_conversation(), Speaking Coach application service.  All AI prompts, rules and JSON schemas for, AI operations for the Speaking Coach feature.      ``ai`` handles text/JSON gene, Generate tutor speech for ``text``, routing to the voice's provider.          El, Human-readable label for a voice id from either provider. (+3 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.06
-Nodes (22): benchmark_strategies(), BingImageSearchStrategy, BSCrawler, _fetch_batch(), _fetch_from_providers(), get_preview_images(), GetImagesUrlView, GoogleImageSearchStrategy (+14 more)
+Cohesion: 0.08
+Nodes (21): benchmark_strategies(), BingImageSearchStrategy, BSCrawler, _fetch_batch(), _fetch_from_providers(), get_preview_images(), GetImagesUrlView, GoogleImageSearchStrategy (+13 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.08
@@ -297,8 +293,8 @@ Cohesion: 0.11
 Nodes (13): add_to_default_deck(), AddDefault, AddTerms, create_term(), CreateTerm, DeckIdQ, delete_term(), get_term() (+5 more)
 
 ### Community 14 - "Community 14"
-Cohesion: 0.16
-Nodes (9): AsyncWebsocketConsumer, get_revise_terms(), get_user_and_deck(), QuickReviseConsumer, save_learning_progress(), calculate_base_time(), calculate_leftover(), calculate_time_limit() (+1 more)
+Cohesion: 0.12
+Nodes (10): AsyncWebsocketConsumer, get_revise_terms(), get_user_and_deck(), QuickReviseConsumer, save_learning_progress(), calculate_base_time(), calculate_leftover(), calculate_time_limit() (+2 more)
 
 ### Community 15 - "Community 15"
 Cohesion: 0.15
@@ -313,8 +309,8 @@ Cohesion: 0.13
 Nodes (6): AiTextPort, CachePort, ImageStoragePort, OAuthPort, Provider-agnostic text/JSON generation port.      Implementations talk to a conc, Protocol
 
 ### Community 18 - "Community 18"
-Cohesion: 0.16
-Nodes (6): _coerce_bool(), _coerce_list(), _extract_ai_fields(), _meaning_of(), TermService, Backward-compatible re-exports.
+Cohesion: 0.05
+Nodes (22): DeckRef, ReviseTermRow, Exception, ConflictError, DomainError, NotFoundError, PermissionDeniedError, Base class for domain/application errors. (+14 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.18
@@ -536,10 +532,6 @@ Nodes (9): UserLearningProgress, AddTermsToDeckSerializer, LearningTermSerialize
 Cohesion: 0.21
 Nodes (4): DeckAccessPolicyTest, _Role, _Roles, _User
 
-### Community 354 - "Community 354"
-Cohesion: 0.23
-Nodes (4): _EmptyRoles, FakeDeck, FakeUser, TermServiceUnitTest
-
 ### Community 356 - "Community 356"
 Cohesion: 0.21
 Nodes (6): GeminiProvider, _parse(), _parse_audio(), Google Gemini implementation of :class:`AiTextPort`.  Uses the Generative Langua, Synthesize ``text`` to speech with a Gemini prebuilt voice.          Returns ``{, _resolve_verify()
@@ -551,10 +543,6 @@ Nodes (9): 1. Theme adherence (frontend) — `.cursor/rules/frontend-theming.mdc
 ### Community 359 - "Community 359"
 Cohesion: 0.22
 Nodes (7): AiResponseCache, make_hash(), Meta, Persistent cache of AI provider responses keyed by ``(context, request_hash)``., remember(), DateTimeUUIDModel, Folder
-
-### Community 360 - "Community 360"
-Cohesion: 0.36
-Nodes (8): Exception, ConflictError, DomainError, NotFoundError, PermissionDeniedError, Base class for domain/application errors., ValidationError, Pull AI-generated/override fields out of a request payload, coercing types.
 
 ### Community 361 - "Community 361"
 Cohesion: 0.20
@@ -605,19 +593,19 @@ Cohesion: 0.53
 Nodes (5): _build(), build_named_provider(), get_ai_provider(), _provider_chain(), Build a provider from an explicit ``spec`` (no env-driven fallbacks).      ``spe
 
 ## Knowledge Gaps
-- **123 isolated node(s):** `Commands, architecture & setup`, `1. Theme adherence (frontend) — `.cursor/rules/frontend-theming.mdc``, `2. Mobile responsiveness (frontend) — `.cursor/rules/responsive-mobile.mdc``, `3. Onboarding tour / user guide (frontend) — `.cursor/rules/user-guide.mdc``, `4. Backend layering (Django) — `.cursor/rules/backend-architecture.mdc`` (+118 more)
+- **124 isolated node(s):** `andrej-karpathy-skills@karpathy-skills`, `Commands, architecture & setup`, `1. Theme adherence (frontend) — `.cursor/rules/frontend-theming.mdc``, `2. Mobile responsiveness (frontend) — `.cursor/rules/responsive-mobile.mdc``, `3. Onboarding tour / user guide (frontend) — `.cursor/rules/user-guide.mdc`` (+119 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **109 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **107 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DeckAccessPolicy` connect `Community 9` to `Community 1`, `Community 353`, `Community 360`, `Community 366`, `Community 14`, `Community 18`?**
-  _High betweenness centrality (0.030) - this node is a cross-community bridge._
-- **Why does `TermService` connect `Community 18` to `Community 354`, `Community 357`, `Community 360`, `Community 9`, `Community 376`, `Community 316`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
-- **Why does `ValidationError` connect `Community 360` to `Community 0`, `Community 2`, `Community 354`, `Community 357`, `Community 11`, `Community 367`, `Community 18`, `Community 312`, `Community 377`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **Why does `DeckAccessPolicy` connect `Community 9` to `Community 1`, `Community 353`, `Community 366`, `Community 14`, `Community 18`?**
+  _High betweenness centrality (0.033) - this node is a cross-community bridge._
+- **Why does `TermService` connect `Community 18` to `Community 9`, `Community 316`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
+- **Why does `ValidationError` connect `Community 18` to `Community 0`, `Community 2`, `Community 11`, `Community 367`, `Community 312`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Are the 13 inferred relationships involving `TermService` (e.g. with `DeckAccessPolicy` and `ReviseTermRow`) actually correct?**
   _`TermService` has 13 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 5 inferred relationships involving `DeckService` (e.g. with `Backward-compatible re-exports.` and `ConflictError`) actually correct?**
