@@ -66,7 +66,16 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "False") == "True"
 CORS_ALLOW_PRIVATE_NETWORK = True
 
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+# Required so the browser sends/stores the HttpOnly refresh cookie on cross-origin
+# API calls (e.g. localhost:3000 -> localhost:8005 in dev, or the ngovandong
+# subdomain split). With credentials, the matching origin must be explicit —
+# a wildcard Access-Control-Allow-Origin is rejected by browsers.
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = os.getenv(
+    "CORS_ALLOWED_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000",
+).split(",")
 
 INTERNAL_IPS = [
     "127.0.0.1",
@@ -83,6 +92,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
     "django_elasticsearch_dsl",
     "corsheaders",
     "drf_yasg",
@@ -225,7 +235,11 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
+    # Kept False on purpose: the web app and browser extension can hold the same
+    # refresh token, so blacklisting on every rotation would make one client log
+    # the other out every ~30 min. Revocation is instead done explicitly on
+    # logout via the /users/logout/ endpoint (which blacklists the refresh token).
+    "BLACKLIST_AFTER_ROTATION": False,
     "UPDATE_LAST_LOGIN": True,
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
@@ -247,6 +261,21 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 }
+
+# --- Refresh-token cookie -----------------------------------------------------
+# The refresh token is delivered to the SPA as an HttpOnly cookie (unreadable by
+# JS, so an XSS can't exfiltrate it). The short-lived access token is returned in
+# the response body and kept only in memory by the frontend. `/api/users/refresh`
+# reads this cookie; `/api/users/logout` clears it + blacklists the token.
+REFRESH_COOKIE_NAME = os.getenv("REFRESH_COOKIE_NAME", "refresh_token")
+# Scope the cookie to the API path so it's only attached to backend calls.
+REFRESH_COOKIE_PATH = "/api"
+# Lax is safe here: the frontend talks to the API same-origin (via the /api proxy
+# on Vercel) or cross-subdomain (same-site), and cross-site POSTs won't carry the
+# cookie — which doubles as CSRF protection for the refresh endpoint.
+REFRESH_COOKIE_SAMESITE = os.getenv("REFRESH_COOKIE_SAMESITE", "Lax")
+# Secure (HTTPS-only) in production; relaxed for local http dev.
+REFRESH_COOKIE_SECURE = os.getenv("REFRESH_COOKIE_SECURE", "False" if DEBUG else "True") == "True"
 # load env
 BASE_FRONTEND_URL = os.getenv("BASE_FRONTEND_URL")
 BASE_BACKEND_URL = os.getenv("BASE_BACKEND_URL")

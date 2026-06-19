@@ -20,10 +20,37 @@ const initUser = (token) => {
 };
 
 const getUser = async () => {
-  const res = await request.get("users/get_profile");
+  const res = await request.get("users/get_profile/");
   return res.data;
 };
 
-const authService = { login, getUser, signUp, initUser };
+// Refresh + logout rely on the HttpOnly refresh cookie (sent automatically with
+// withCredentials), so no token is passed in the body.
+const refresh = async () => {
+  const res = await request.post("users/refresh/");
+  return res.data; // { access }
+};
+
+const logout = () => {
+  return request.post("users/logout/");
+};
+
+// Mint a fresh {access, refresh, user} pair to hand off to the browser extension
+// when an already-logged-in user connects it (the SPA can't read its own refresh
+// cookie to relay). Requires the in-memory access token (sent by the interceptor).
+const extensionToken = async () => {
+  const res = await request.post("users/extension_token/");
+  return res.data; // { access, refresh, user }
+};
+
+const authService = {
+  login,
+  getUser,
+  signUp,
+  initUser,
+  refresh,
+  logout,
+  extensionToken,
+};
 
 export default authService;

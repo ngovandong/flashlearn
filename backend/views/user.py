@@ -33,19 +33,43 @@ from ..utils.dispatch import dispatch
 login_url = f"{settings.BASE_FRONTEND_URL}/login"
 
 
-def token_response(user) -> dict[str, Any]:
-    """Serialize user at the view boundary; AuthService returns tokens only."""
+def set_refresh_cookie(response, refresh_token: str) -> None:
+    """Store the refresh token in an HttpOnly cookie so JS (incl. XSS) can't read
+    it. The access token is the only credential the frontend holds in memory."""
+    response.set_cookie(
+        settings.REFRESH_COOKIE_NAME,
+        refresh_token,
+        max_age=int(settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()),
+        httponly=True,
+        secure=settings.REFRESH_COOKIE_SECURE,
+        samesite=settings.REFRESH_COOKIE_SAMESITE,
+        path=settings.REFRESH_COOKIE_PATH,
+    )
+
+
+def clear_refresh_cookie(response) -> None:
+    response.delete_cookie(
+        settings.REFRESH_COOKIE_NAME,
+        path=settings.REFRESH_COOKIE_PATH,
+        samesite=settings.REFRESH_COOKIE_SAMESITE,
+    )
+
+
+def session_payload(user):
+    """One token pair for a fresh session. Returns (refresh_token, body) where
+    body = {access, user} for the response and the refresh goes in the cookie."""
     token: dict[str, Any] = auth_service.get_token(user)
-    token["user"] = UserSerializer(user).data
-    return token
+    body = {"access": token["access"], "user": UserSerializer(user).data}
+    return token["refresh"], body
 
 
-def token_redirect_params(user):
-    """URL-safe token params for OAuth redirect (user encoded separately)."""
+def token_fragment_params(user):
+    """URL fragment params for the OAuth redirect — access + user only. The
+    refresh token never goes in the URL; it's set as an HttpOnly cookie."""
     token = auth_service.get_token(user)
     user_data = UserSerializer(user).data
-    return {
-        **token,
+    return token["refresh"], {
+        "access": token["access"],
         "user": base64.urlsafe_b64encode(json.dumps(user_data).encode()).decode(),
     }
 
@@ -70,7 +94,30 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
         "learning_streak": [permissions.IsAuthenticated],
         "record_study": [permissions.IsAuthenticated],
         "my_settings": [permissions.IsAuthenticated],
+        "extension_token": [permissions.IsAuthenticated],
+        # Logout acts only on the presented refresh cookie, so it must work even
+        # when the short-lived access token has already expired.
+        "logout": [permissions.AllowAny],
     }
+
+    @action(detail=False, methods=["POST"])
+    def extension_token(self, request, *args, **kwargs):
+        """Mint a fresh token pair for the browser extension.
+
+        The SPA keeps its refresh token in an HttpOnly cookie it can't read, so
+        when an already-logged-in user connects the extension there's no token to
+        relay. This authenticated endpoint returns a {access, refresh, user} pair
+        the SPA can hand off to the extension (which uses the Bearer + body-refresh
+        flow). Gated by IsAuthenticated — same trust level as logging in."""
+        token: dict[str, Any] = auth_service.get_token(request.user)
+        return Response(
+            {
+                "access": token["access"],
+                "refresh": token["refresh"],
+                "user": UserSerializer(request.user).data,
+            },
+            status=status.HTTP_200_OK,
+        )
 
     @action(detail=False, methods=["GET"])
     def get_profile(self, request, *args, **kwargs):
@@ -100,16 +147,55 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
             raise InvalidToken(e.args[0]) from e
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        data = dict(serializer.validated_data)
+        refresh = data.pop("refresh")
+        # The refresh token is also returned in the body so the SPA can relay it to
+        # the browser extension (which keeps its own Bearer + refresh flow). The SPA
+        # itself ignores the body refresh and relies on the HttpOnly cookie below.
+        response = Response(
+            {"access": data["access"], "user": data.get("user"), "refresh": refresh},
+            status=status.HTTP_200_OK,
+        )
+        set_refresh_cookie(response, refresh)
+        return response
+
+    @action(detail=False, methods=["POST"])
+    def logout(self, request, *args, **kwargs):
+        # SPA presents the refresh token via the HttpOnly cookie; the extension
+        # sends it in the body. Accept either so both can revoke their token.
+        refresh = request.data.get("refresh") or request.COOKIES.get(settings.REFRESH_COOKIE_NAME)
+        if refresh:
+            auth_service.blacklist_refresh_token(refresh)
+        response = Response(status=status.HTTP_205_RESET_CONTENT)
+        clear_refresh_cookie(response)
+        return response
 
     @action(detail=False, methods=["POST"])
     def refresh(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        # Two clients refresh here: the SPA (token in the HttpOnly cookie) and the
+        # browser extension (token in the request body). The extension can't read
+        # the cookie cross-origin, so we accept either channel.
+        body_refresh = request.data.get("refresh")
+        refresh = body_refresh or request.COOKIES.get(settings.REFRESH_COOKIE_NAME)
+        if not refresh:
+            return Response({"errors": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+        serializer = self.get_serializer(data={"refresh": refresh})
         try:
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
             raise InvalidToken(e.args[0]) from e
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        data = dict(serializer.validated_data)
+        new_refresh = data.pop("refresh", None)
+        payload = {"access": data["access"]}
+        response = Response(payload, status=status.HTTP_200_OK)
+        if new_refresh:
+            # Respond on the same channel the client used: echo the rotated refresh
+            # in the body for the extension, or reset the cookie for the SPA.
+            if body_refresh:
+                payload["refresh"] = new_refresh
+            else:
+                set_refresh_cookie(response, new_refresh)
+        return response
 
     @action(detail=False, methods=["POST"])
     def sign_up(self, request, *args, **kwargs):
@@ -185,8 +271,13 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
             )
             return redirect(f"{login_url}?{params}")
 
-        params = urlencode(token_redirect_params(user))
-        return redirect(f"{login_url}?{params}")
+        # Access token + user go in the URL fragment (#) — never the query string
+        # — so they aren't logged or leaked via Referer. The refresh token is set
+        # as an HttpOnly cookie on this redirect response instead of in the URL.
+        refresh, params = token_fragment_params(user)
+        response = redirect(f"{login_url}#{urlencode(params)}")
+        set_refresh_cookie(response, refresh)
+        return response
 
     @action(detail=False, methods=["GET"])
     def init(self, request, *args, **kwargs):
@@ -204,7 +295,13 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        return Response(token_response(user))
+        refresh, body = session_payload(user)
+        # Include refresh in the body so the SPA can relay it to the extension
+        # (see login). The SPA stores only the access token from this response.
+        body["refresh"] = refresh
+        response = Response(body)
+        set_refresh_cookie(response, refresh)
+        return response
 
     @action(detail=False, methods=["GET"])
     def active_account(self, request, *args, **kwargs):
@@ -219,5 +316,10 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet, FlexibleViewSet):
         user_id = serializer.user_id
         user_service.active_user(user_id)
 
-        params = urlencode(serializer.validated_data)
-        return redirect(f"{login_url}?{params}")
+        # Access + user in the fragment; refresh token in the HttpOnly cookie.
+        validated = serializer.validated_data
+        user_param = base64.urlsafe_b64encode(json.dumps(validated["user"]).encode()).decode()
+        params = urlencode({"access": validated["access"], "user": user_param})
+        response = redirect(f"{login_url}#{params}")
+        set_refresh_cookie(response, validated["refresh"])
+        return response

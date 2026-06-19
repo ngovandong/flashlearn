@@ -360,7 +360,7 @@ $sc-low: $error-red;
 
 .sc-grid-2 {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: $space-4;
 }
 
@@ -396,6 +396,7 @@ $sc-low: $error-red;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    min-width: 0;
     background: $surface-2;
     border: 1px solid $border-subtle;
     border-radius: $radius-sm;
@@ -407,6 +408,7 @@ $sc-low: $error-red;
         background: transparent;
         padding: 0.7rem 0;
         flex: 1;
+        min-width: 0; // allow the text field to shrink below its default size
         font-weight: 600;
         color: $main-text-color;
         outline: none;

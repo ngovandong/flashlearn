@@ -13,6 +13,19 @@ import { applyTheme, readStoredTheme } from "./utils/themeController";
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
+// One-time auth migration. Older builds persisted the {access, refresh} token in
+// localStorage. The app now keeps the refresh token in an HttpOnly cookie and
+// the access token only in memory, so any leftover localStorage token is stale
+// and unusable. Purge it (and force a clean re-login via the new cookie flow)
+// so an old logged-in user isn't left in a half-authenticated state.
+try {
+  if (localStorage.getItem("token") !== null) {
+    localStorage.removeItem("token");
+  }
+} catch {
+  // localStorage unavailable (private mode / disabled) — nothing to clean.
+}
+
 // Apply the cached theme before first paint to avoid a flash of default colors.
 const storedTheme = readStoredTheme();
 applyTheme(storedTheme.mode, storedTheme.palette);

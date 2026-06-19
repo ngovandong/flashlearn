@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { deckService } from "../api-service/deckService";
+import { request } from "../api-service/httpRequest";
 import { getFirstError } from "../util/errorHandler";
 import { useDispatch, useSelector } from "react-redux";
-import { logout, selectUser } from "../store";
+import { logout, selectToken, selectUser } from "../store";
 
 const FRONTEND_URL = process.env.REACT_APP_BASE_FRONTEND_URL;
 
@@ -20,6 +21,7 @@ const LANGUAGES = [
 function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const user = useSelector(selectUser);
+  const token = useSelector(selectToken);
   const [decks, setDecks] = useState([]);
   const [error, setError] = useState();
   const [defaultDeck, setDefaultDeck] = useState("");
@@ -27,7 +29,14 @@ function Home() {
   const [openOnStartup, setOpenOnStartup] = useState(false);
   const dispatch = useDispatch();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      if (token?.refresh) {
+        await request.post("users/logout/", { refresh: token.refresh });
+      }
+    } catch {
+      // ignore — clear the session locally regardless
+    }
     dispatch(logout());
   };
 
@@ -99,7 +108,7 @@ function Home() {
           <span className="error-close" onClick={() => setError(null)}>x</span>
         </div>
       )}
-      
+
       <div className="home-card">
         <div className="home-header">
           <div className="user-info">
@@ -193,4 +202,3 @@ function Home() {
 }
 
 export default Home;
-

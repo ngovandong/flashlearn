@@ -53,6 +53,7 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     def search(self, request, *args, **kwargs):
         deck_id = request.query_params.get("deck_id", "")
         query = request.query_params.get("query", "")
+        deck_service.assert_can_view(request.user, deck_id)
         results = self.get_search_results(query, deck_id=deck_id)
         return Response(results)
 
@@ -63,6 +64,7 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     )
     def list(self, request, *args, **kwargs):
         deck_id = request.query_params.get("deck_id", "")
+        deck_service.assert_can_view(request.user, deck_id)
         queryset = self.filter_queryset(self.get_queryset().filter(deck_id=deck_id))
         page = self.paginate_queryset(queryset)
         if page is not None:

@@ -27,7 +27,7 @@ class EditableDeck(permissions.BasePermission):
 class EditableTerm(permissions.BasePermission):
     def has_object_permission(self, request, view, obj: Term):
         if request.method in permissions.SAFE_METHODS:
-            return True
+            return DeckAccessPolicy.can_view(obj.deck, request.user)
         return TermAccessPolicy.can_edit(obj, request.user)
 
 

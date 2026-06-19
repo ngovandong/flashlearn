@@ -1,40 +1,71 @@
 import { googleLogout } from "@react-oauth/google";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authService from "@api-services/authService";
-import { decodeUser, resolveAuthUser } from "@utils/jwt";
 import { getFirstError } from "@utils/errorHandler";
 import { sendTokenToExtension } from "@utils/extensionLogin";
 
-// Fire the event on the window object
+// Auth model: the refresh token lives in an HttpOnly cookie (set by the backend,
+// unreadable by JS). The frontend only ever holds the short-lived ACCESS token,
+// in memory (Redux) — never in localStorage. On a page reload the in-memory
+// access token is gone, so we silently call /users/refresh (which sends the
+// cookie) to mint a new one; see bootstrapSession + App.
 
 export const login = createAsyncThunk("auth/login", async (user) => {
   const { email, password } = user;
   const res = await authService.login(email, password);
   if (!res.error) {
     sendTokenToExtension(res.data);
-    return res.data;
+    return res.data; // { access, user }
   } else {
     const errorMessage = getFirstError(res.error);
     throw new Error(errorMessage);
   }
 });
+
 export const getUser = createAsyncThunk("auth/getUser", async () => {
   const res = await authService.getUser();
   return res;
 });
 
-let tokenString = null;
-let localUser = null;
-try {
-  tokenString = JSON.parse(localStorage.getItem("token"));
-  localUser = resolveAuthUser(tokenString);
-} catch {}
+// Re-establish the session on app load using the HttpOnly refresh cookie. If the
+// cookie is missing/expired the call fails and we stay logged out.
+export const bootstrapSession = createAsyncThunk(
+  "auth/bootstrap",
+  async (_, { dispatch }) => {
+    try {
+      const data = await authService.refresh();
+      if (data?.access) {
+        dispatch(setToken({ access: data.access }));
+      }
+    } catch {
+      // not logged in — leave the session empty
+    }
+  }
+);
+
+// User-initiated logout: revoke the refresh cookie server-side (blacklist +
+// clear cookie), then clear local state. Best-effort — local logout happens
+// regardless of whether the network call succeeds.
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, { dispatch }) => {
+    try {
+      await authService.logout();
+    } catch {
+      // ignore — we still clear the session locally below
+    }
+    dispatch(logout());
+  }
+);
 
 const initialState = {
-  user: localUser,
-  token: tokenString,
+  user: null,
+  token: null,
   error: "",
   loading: false,
+  // false until the initial silent refresh attempt completes — the app shows a
+  // loader until then so it doesn't flash the login page before we know.
+  bootstrapped: false,
   globalError: null,
 };
 
@@ -49,14 +80,20 @@ const userSlice = createSlice({
       state.globalError = action.payload;
     },
     setToken: (state, action) => {
-      state.token = action.payload;
-      state.user = resolveAuthUser(action.payload);
-      localStorage.setItem("token", JSON.stringify(action.payload));
+      const payload = action.payload || {};
+      state.token = payload.access ? { access: payload.access } : null;
+      if ("user" in payload) {
+        state.user = payload.user;
+      }
+    },
+    // Mark the initial session check as done without hitting /refresh — used on
+    // public auth pages (login/signup) where we deliberately skip the cookie probe.
+    markBootstrapped: (state) => {
+      state.bootstrapped = true;
     },
     logout: (state) => {
       state.token = null;
       state.user = null;
-      localStorage.setItem("token", null);
       googleLogout();
     },
     setLoading: (state, action) => {
@@ -69,14 +106,19 @@ const userSlice = createSlice({
         state.loading = true;
       })
       .addCase(login.fulfilled, (state, action) => {
-        state.token = action.payload;
-        state.user = resolveAuthUser(action.payload);
-        localStorage.setItem("token", JSON.stringify(action.payload));
+        state.token = { access: action.payload.access };
+        state.user = action.payload.user;
         state.loading = false;
       })
       .addCase(login.rejected, (state, action) => {
         state.error = action.error.message;
         state.loading = false;
+      })
+      .addCase(bootstrapSession.fulfilled, (state, _) => {
+        state.bootstrapped = true;
+      })
+      .addCase(bootstrapSession.rejected, (state, _) => {
+        state.bootstrapped = true;
       })
       .addCase(getUser.pending, (state, _) => {
         state.loading = true;
@@ -96,8 +138,15 @@ export const selectUser = (state) => state.auth.user;
 export const selectToken = (state) => state.auth.token;
 export const selectError = (state) => state.auth.error;
 export const selectLoading = (state) => state.auth.loading;
+export const selectBootstrapped = (state) => state.auth.bootstrapped;
 export const selectGlobalError = (state) => state.auth.globalError;
 
-export const { logout, setToken, setError, setLoading, setGlobalError } =
-  userSlice.actions;
+export const {
+  logout,
+  setToken,
+  markBootstrapped,
+  setError,
+  setLoading,
+  setGlobalError,
+} = userSlice.actions;
 export default userSlice.reducer;

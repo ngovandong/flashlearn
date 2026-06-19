@@ -28,20 +28,22 @@ const refreshToken = async (error) => {
   if (error.code === "ERR_NETWORK") {
     return { error: "Network error. Please check your connection." };
   }
+  const originalRequest = error.config;
+  // Never try to refresh the refresh/login calls themselves — that would recurse.
+  const isAuthEndpoint = /users\/(refresh|login|logout)\/?$/.test(
+    originalRequest?.url || ""
+  );
   const token = getCurrentToken();
-  if (error.response?.status === 401 && token) {
-    const originalRequest = error.config;
-
+  if (error.response?.status === 401 && token && !isAuthEndpoint) {
     if (!isRefreshing) {
       isRefreshing = true;
       try {
-        const { data } = await axios.post("users/refresh/", {
-          refresh: token.refresh,
-        });
-        store.dispatch(setToken(data));
+        // The refresh token rides in the HttpOnly cookie; no body needed.
+        const { data } = await axios.post("users/refresh/");
+        store.dispatch(setToken({ access: data.access }));
         originalRequest.headers["Authorization"] = `Bearer ${data.access}`;
         processQueue(null, data.access);
-        return axios(error.config);
+        return axios(originalRequest);
       } catch {
         store.dispatch(logout());
         processQueue("Logout Error", null);
@@ -72,6 +74,9 @@ function processQueue(error, token = null) {
 }
 
 axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
+// Send the HttpOnly refresh cookie on auth calls (login/refresh/logout) and any
+// same-site API request. Required for the cookie-based refresh flow.
+axios.defaults.withCredentials = true;
 
 // Endpoints that hit an external AI provider can now queue behind the backend's
 // global rate-limit gate (AI_GATE_MAX_WAIT, ~120s) on top of the provider call
@@ -82,7 +87,7 @@ export const AI_REQUEST_TIMEOUT = Number(
   process.env.REACT_APP_AI_REQUEST_TIMEOUT || 240000
 );
 
-const request = axios.create();
+const request = axios.create({ withCredentials: true });
 
 request.interceptors.request.use(appendHeader);
 // request.interceptors.request.use(appendSlash);

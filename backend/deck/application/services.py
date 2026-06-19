@@ -1,6 +1,7 @@
 from typing import Any
 
 from backend.constants import FULL_ROLE_CLASS
+from backend.deck.domain.access import DeckAccessPolicy
 from backend.deck.infrastructure.repository import DeckRepository
 from backend.models import User
 from backend.shared.application.exceptions import ConflictError, PermissionDeniedError, ValidationError
@@ -40,6 +41,14 @@ class DeckService:
 
     def get_deck_by_id(self, deck_id):
         return self._deck_repo.get_by_id(deck_id)
+
+    def assert_can_view(self, user, deck_id):
+        """Guard collection-level term reads: only members (or anyone, for a
+        public deck) may list/search a deck's terms."""
+        deck = self._deck_repo.get_by_id(deck_id)
+        if deck is None or not DeckAccessPolicy.can_view(deck, user):
+            raise PermissionDeniedError("You don't have permission to view this deck.")
+        return deck
 
     def touch_on_retrieve(self, deck):
         self._deck_repo.touch_updated_at(deck)

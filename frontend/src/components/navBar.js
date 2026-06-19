@@ -13,7 +13,7 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import { COLORS } from "@constants/colors";
 
-import { logout, selectUser } from "@app/store/authSlice";
+import { logoutUser, selectUser } from "@app/store/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
 import { Divider, ListItemIcon, ListItemText } from "@mui/material";
@@ -361,7 +361,7 @@ function ResponsiveAppBar()
               <MenuItem
                 onClick={() => {
                   handleCloseUserMenu();
-                  dispatch(logout());
+                  dispatch(logoutUser());
                 }}
                 sx={{
                   borderRadius: "0.55rem",
