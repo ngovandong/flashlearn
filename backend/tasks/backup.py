@@ -113,6 +113,19 @@ def _normalize_sql_dump(sql: str) -> str:
     return sql
 
 
+# mysqldump disables UNIQUE/FOREIGN_KEY checks but leaves autocommit on, so every
+# INSERT commits separately and InnoDB fsyncs per statement. On slow SD/eMMC
+# storage (e.g. Armbian boards) that turns a small dump into a 20+ minute import.
+# Wrapping the whole restore in one transaction collapses the per-statement
+# fsyncs into a single flush.
+_RESTORE_PROLOGUE = "SET autocommit=0;\nSET unique_checks=0;\nSET foreign_key_checks=0;\n"
+_RESTORE_EPILOGUE = "\nCOMMIT;\n"
+
+
+def _wrap_restore_sql(sql: str) -> str:
+    return f"{_RESTORE_PROLOGUE}{sql}{_RESTORE_EPILOGUE}"
+
+
 def _backup_files_query():
     query = "name contains '.sql' and trashed = false"
     if DRIVE_BACKUP_FOLDER_ID:
@@ -272,7 +285,7 @@ def restore_database_from_drive(backup_file=None):
 
         result = subprocess.run(  # nosec B603
             _mysql_base_cmd(db, include_db_name=True),
-            input=sql,
+            input=_wrap_restore_sql(sql),
             stderr=subprocess.PIPE,
             text=True,
         )
