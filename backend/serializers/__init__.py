@@ -37,3 +37,4 @@ from .user import (
     UserSerializer,
 )
 from .user_setting import UserSettingSerializer
+from .writing import WritingSessionSerializer

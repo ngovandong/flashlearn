@@ -28,6 +28,9 @@ from backend.term.infrastructure.repository import TermRepository
 from backend.user.application.context_api import UserContextApi
 from backend.user.application.services import AuthService, UserService
 from backend.user.infrastructure.repository import UserRepository
+from backend.writing.application.services import WritingCoachService
+from backend.writing.application.writing_service import WritingService
+from backend.writing.infrastructure.repository import WritingRepository
 
 term_context = TermContextApi(TermRepository)
 user_context = UserContextApi(UserRepository, default_cache)
@@ -78,3 +81,7 @@ course_service = CourseService(
     audio_storage=default_audio_storage,
 )
 reminder_service = ReminderService(repo=ReminderRepository)
+# Writing Coach: chat practice + IELTS-style free-form assessment. Text-only AI,
+# so it just needs the default provider (no audio/TTS/pronunciation deps).
+writing_coach_service = WritingCoachService(ai=default_ai_provider)
+writing_service = WritingService(coach=writing_coach_service, repo=WritingRepository)

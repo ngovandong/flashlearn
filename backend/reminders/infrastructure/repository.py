@@ -17,6 +17,7 @@ from backend.models import (
     SpeakingConversation,
     UserCourseLessonProgress,
     UserLearningProgress,
+    WritingSession,
 )
 
 
@@ -26,6 +27,12 @@ class ReminderRepository:
     def latest_conversation(user):
         """The user's most recently generated conversation, or ``None``."""
         return SpeakingConversation.objects.filter(user=user).order_by("-created_at").first()
+
+    # ── Writing ───────────────────────────────────────────────────────────
+    @staticmethod
+    def latest_writing_session(user):
+        """The user's most recently created writing session, or ``None``."""
+        return WritingSession.objects.filter(user=user).order_by("-created_at").first()
 
     # ── Course ────────────────────────────────────────────────────────────
     @staticmethod

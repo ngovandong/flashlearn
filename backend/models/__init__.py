@@ -13,3 +13,4 @@ from .speaking import SpeakingAnalysis, SpeakingAudioClip, SpeakingConversation
 from .term import Term
 from .user import User
 from .user_setting import UserSetting
+from .writing import WritingSession

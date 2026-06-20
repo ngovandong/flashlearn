@@ -23,6 +23,7 @@ import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import HeadphonesOutlinedIcon from "@mui/icons-material/HeadphonesOutlined";
 import RecordVoiceOverOutlinedIcon from "@mui/icons-material/RecordVoiceOverOutlined";
+import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import SearchDeckInput from "./searchDeck";
 
 const userMenuItemSx = {
@@ -46,6 +47,12 @@ const links = [
     name: "Speaking Coach",
     tour: "speaking-coach",
     icon: RecordVoiceOverOutlinedIcon,
+  },
+  {
+    link: "writing-coach",
+    name: "Writing Coach",
+    tour: "writing-coach",
+    icon: EditNoteOutlinedIcon,
   },
 ];
 

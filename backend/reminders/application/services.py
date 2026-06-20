@@ -30,6 +30,7 @@ class ReminderService:
         """
         reminders = [
             {"type": "speaking_new", "route": "/speaking-coach", "label": None},
+            {"type": "writing_new", "route": "/writing-coach", "label": None},
             {"type": "listening", "route": "/number-test", "label": None},
         ]
 
@@ -40,6 +41,16 @@ class ReminderService:
                     "type": "speaking_revise",
                     "route": f"/speaking-coach/{conversation.id}",
                     "label": conversation.topic or "your last conversation",
+                }
+            )
+
+        writing_session = self._repo.latest_writing_session(user)
+        if writing_session is not None:
+            reminders.append(
+                {
+                    "type": "writing_revise",
+                    "route": f"/writing-coach/{writing_session.id}",
+                    "label": writing_session.topic or "your last writing session",
                 }
             )
 

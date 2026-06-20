@@ -6,6 +6,7 @@ import { getTourForPath } from "@constants/tours";
 import { REMINDER_META } from "@constants/reminders";
 import { useReminders } from "@hooks/useLatestDecks";
 import {
+  Avatar,
   Box,
   Divider,
   Fab,
@@ -111,6 +112,7 @@ async function requestAiReply() {
 
 function MessageBubble({ role, children }) {
   const isUser = role === "user";
+  const user = useSelector(selectUser);
   return (
     <Box
       sx={{
@@ -139,6 +141,23 @@ function MessageBubble({ role, children }) {
       >
         {children}
       </Box>
+      {isUser && (
+        <Avatar
+          alt={user?.name || "You"}
+          src={user?.image_url}
+          sx={{
+            flexShrink: 0,
+            width: 26,
+            height: 26,
+            fontSize: "0.72rem",
+            fontWeight: 700,
+            bgcolor: "var(--fl-primary)",
+            color: "var(--fl-on-primary)",
+          }}
+        >
+          {(user?.name || "Y").charAt(0).toUpperCase()}
+        </Avatar>
+      )}
     </Box>
   );
 }

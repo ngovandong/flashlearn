@@ -9,3 +9,4 @@ from .speaking import SpeakingViewSet
 from .term import TermViewSet
 from .translate import TranslateView
 from .user import UserViewSet
+from .writing import WritingViewSet

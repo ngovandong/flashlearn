@@ -61,6 +61,12 @@ export const TOURS = [
         body: "Practice real conversations out loud — the AI generates dialogues, reads them aloud, and scores your pronunciation.",
       },
       {
+        id: "home.writing-coach",
+        selector: '[data-tour="writing-coach"]',
+        title: "Writing Coach",
+        body: "Improve your writing — chat with Dragon for instant feedback on every message, or write freely and get an IELTS-style band score.",
+      },
+      {
         id: "home.assistant",
         selector: '[data-tour="assistant"]',
         title: "Meet Dragon, your buddy",
@@ -301,6 +307,49 @@ export const TOURS = [
         selector: '[data-tour="sc-course-tab"]',
         title: "Follow a guided course",
         body: "Open Course to work through structured dialogues organized by level. Listen, study the transcript, then pass each lesson with a Live Role-play scored by Dragon.",
+      },
+    ],
+  },
+  {
+    id: "writing-coach",
+    label: "Writing Coach",
+    match: (p) => p.endsWith("/writing-coach") || p === "/writing-coach",
+    steps: [
+      {
+        id: "wc.setup",
+        selector: '[data-tour="wc-setup"]',
+        title: "Set up your practice",
+        body: "Pick a suggested topic or type your own, then choose your level. Dragon tailors everything to it.",
+      },
+      {
+        id: "wc.mode",
+        selector: '[data-tour="wc-mode"]',
+        title: "Chat or Free-form",
+        body: "Chat: have a back-and-forth with Dragon and get feedback on every message. Free-form: write a full piece and get an IELTS-style band score.",
+      },
+      {
+        id: "wc.feedback",
+        selector: '[data-tour="wc-feedback"]',
+        title: "Instant feedback",
+        body: "In chat, click any of your messages to see its corrections, a better version, tips and examples — Dragon reads each reply aloud too.",
+      },
+      {
+        id: "wc.suggestions",
+        selector: '[data-tour="wc-suggestions"]',
+        title: "Writing support",
+        body: "In free-form, the side panel suggests useful words, phrases, grammar and a structure to follow before you submit.",
+      },
+      {
+        id: "wc.vocab",
+        selector: '[data-tour="wc-vocab"]',
+        title: "Learn & save vocabulary",
+        body: "Select any word or phrase to see its meaning and examples — then save it as a term or highlight it to revisit. Saved words appear underlined.",
+      },
+      {
+        id: "wc.tabs",
+        selector: '[data-tour="wc-tabs"]',
+        title: "Review your history",
+        body: "Switch to History to revisit past sessions, star favorites, or restart a topic to write an even better version.",
       },
     ],
   },

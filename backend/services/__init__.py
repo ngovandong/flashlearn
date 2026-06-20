@@ -19,12 +19,16 @@ from backend.shared.composition import (
     term_enrichment_service,
     term_service,
     user_service,
+    writing_coach_service,
+    writing_service,
 )
 from backend.speaking.application.services import SpeakingCoachService
 from backend.speaking.application.speaking_service import SpeakingService
 from backend.term.application.ai_enrichment import TermEnrichmentService
 from backend.term.application.services import TermService
 from backend.user.application.services import AuthService, UserService
+from backend.writing.application.services import WritingCoachService
+from backend.writing.application.writing_service import WritingService
 
 __all__ = [
     "AuthService",
@@ -38,6 +42,8 @@ __all__ = [
     "TermEnrichmentService",
     "TermService",
     "UserService",
+    "WritingCoachService",
+    "WritingService",
     "auth_service",
     "course_service",
     "deck_service",
@@ -51,4 +57,6 @@ __all__ = [
     "term_service",
     "url_to_base64",
     "user_service",
+    "writing_coach_service",
+    "writing_service",
 ]

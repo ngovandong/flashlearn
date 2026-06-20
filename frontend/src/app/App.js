@@ -53,6 +53,9 @@ const NumberTest = lazyWithRetry(() =>
 const SpeakingCoach = lazyWithRetry(() =>
   import("@pages/home/deckDetail/speakingCoach")
 );
+const WritingCoach = lazyWithRetry(() =>
+  import("@pages/home/deckDetail/writingCoach")
+);
 const Course = lazyWithRetry(() => import("@pages/home/course"));
 const PrivacyPage = lazyWithRetry(() => import("@pages/privacy"));
 
@@ -137,6 +140,9 @@ function App() {
             <Route path="speaking-coach/course/:courseId" element={<SpeakingCoach />} />
             <Route path="speaking-coach/course/:courseId/:lessonId" element={<SpeakingCoach />} />
             <Route path="speaking-coach/:id" element={<SpeakingCoach />} />
+            <Route path="writing-coach" element={<WritingCoach />} />
+            <Route path="writing-coach/history" element={<WritingCoach />} />
+            <Route path="writing-coach/:id" element={<WritingCoach />} />
             <Route path="learn/:termId" element={<SingleTermLearn />} />
             <Route path="folder" element={<Folder />} />
             <Route path="create-deck" element={<CreateDeck />} />

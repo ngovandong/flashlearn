@@ -14,6 +14,7 @@ from .views import (
     TermViewSet,
     TranslateView,
     UserViewSet,
+    WritingViewSet,
 )
 
 router = routers.DefaultRouter()
@@ -24,6 +25,7 @@ router.register(r"folders", FolderViewSet, basename="folder")
 router.register(r"roles", RoleViewSet, basename="role")
 router.register(r"learnings", LearningViewSet, basename="learning")
 router.register(r"speaking", SpeakingViewSet, basename="speaking")
+router.register(r"writing", WritingViewSet, basename="writing")
 router.register(r"courses", CourseViewSet, basename="course")
 router.register(r"reminders", ReminderViewSet, basename="reminder")
 

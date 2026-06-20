@@ -5,6 +5,8 @@ import ForumRoundedIcon from "@mui/icons-material/ForumRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import StyleRoundedIcon from "@mui/icons-material/StyleRounded";
 import CasinoRoundedIcon from "@mui/icons-material/CasinoRounded";
+import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
+import HistoryEduRoundedIcon from "@mui/icons-material/HistoryEduRounded";
 
 // Presentation for each reminder `type` the API returns. Copy + icon + color
 // tone live here; the dynamic `label` (deck/course/conversation name) is woven
@@ -24,6 +26,21 @@ export const REMINDER_META = {
     title: "Revise a conversation",
     description: (label) => `Revisit “${label}” and sharpen your pronunciation.`,
     cta: "Revise now",
+  },
+  writing_new: {
+    tone: "violet-blue",
+    icon: <EditNoteRoundedIcon />,
+    title: "Practice writing",
+    description: () =>
+      "Draft a piece or chat with your AI writing coach for instant feedback.",
+    cta: "Start writing",
+  },
+  writing_revise: {
+    tone: "blue-amber",
+    icon: <HistoryEduRoundedIcon />,
+    title: "Revisit your writing",
+    description: (label) => `Pick up “${label}” and refine it further.`,
+    cta: "Open writing",
   },
   listening: {
     tone: "amber",
