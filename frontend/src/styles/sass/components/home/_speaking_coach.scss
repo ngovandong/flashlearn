@@ -1349,6 +1349,30 @@ $sc-low: $error-red;
     }
 }
 
+.sc-wordmap__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $space-3;
+
+    .sc-section-label,
+    .sc-hint {
+        margin-bottom: 0;
+    }
+
+    .sc-btn {
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 600px) {
+        flex-direction: column;
+
+        .sc-btn {
+            width: 100%;
+        }
+    }
+}
+
 .sc-wordmap__words {
     display: flex;
     flex-wrap: wrap;
@@ -1357,6 +1381,7 @@ $sc-low: $error-red;
     border: 1px solid $border-subtle;
     border-radius: $radius-md;
     padding: $space-3;
+    margin-top: 0.6rem;
 }
 
 .sc-word {
@@ -1722,6 +1747,11 @@ $sc-low: $error-red;
     &__card {
         width: 100%;
         max-width: 32rem;
+        // Never taller than the viewport (minus the modal's own padding) so the
+        // header stays pinned and the body scrolls instead of clipping on mobile.
+        max-height: 100%;
+        display: flex;
+        flex-direction: column;
         background: $surface;
         border-radius: $radius-lg;
         overflow: hidden;
@@ -1730,6 +1760,7 @@ $sc-low: $error-red;
     }
 
     &__head {
+        flex-shrink: 0;
         background: $brand-gradient;
         color: $on-primary;
         padding: $space-4;
@@ -1755,6 +1786,10 @@ $sc-low: $error-red;
     }
 
     &__body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
         padding: $space-4;
         display: flex;
         flex-direction: column;

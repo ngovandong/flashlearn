@@ -1498,7 +1498,6 @@ export default function SpeakingCoach() {
                       savedWords={savedWords}
                       onSaveWord={saveWordAsTerm}
                       onSaveSentence={saveSentence}
-                      onPlayWord={(text) => speak(text)}
                       onPlayReference={(text) => speak(text)}
                     />
                   </div>
@@ -1524,7 +1523,6 @@ export default function SpeakingCoach() {
                         const cur = conversation.lines.find((l) => l.id === activeLineId);
                         if (cur) playLine(cur);
                       }}
-                      onPlayWord={(text) => speak(text)}
                     />
                   </div>
                 )}

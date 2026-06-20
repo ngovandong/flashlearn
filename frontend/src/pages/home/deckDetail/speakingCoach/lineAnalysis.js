@@ -12,6 +12,16 @@ import InsightsIcon from "@mui/icons-material/Insights";
 
 const scoreLevel = (score) => (score >= 80 ? "good" : score >= 50 ? "mid" : "low");
 
+// Uses the browser's built-in Web Speech voice for instant playback (no network
+// round-trip), so word/sentence previews have no perceptible delay.
+const speakWithBrowser = (text) => {
+  if (!text || typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  window.speechSynthesis.speak(utterance);
+};
+
 const wpmStatus = (wpm) => {
   if (wpm < 100) return { label: "Slow & deliberate", level: "mid" };
   if (wpm <= 160) return { label: "Optimal pace", level: "good" };
@@ -28,7 +38,6 @@ export default function LineAnalysis({
   onSaveWord,
   onSaveSentence,
   onPlayReference,
-  onPlayWord,
   savedWords = {},
 }) {
   const [selectedWord, setSelectedWord] = useState(
@@ -210,8 +219,23 @@ export default function LineAnalysis({
 
       {result.wordAnalysis.length > 0 && (
         <div className="sc-wordmap">
-          <span className="sc-section-label">Interactive sentence map</span>
-          <p className="sc-hint">Tap any word to view its acoustic guide.</p>
+          <div className="sc-wordmap__head">
+            <div>
+              <span className="sc-section-label">Interactive sentence map</span>
+              <p className="sc-hint">Tap any word to view its acoustic guide.</p>
+            </div>
+            {onPlayReference && (
+              <button
+                type="button"
+                className="sc-btn sc-btn--ghost sc-btn--sm"
+                onClick={onPlayReference}
+                title="Hear the whole sentence"
+              >
+                <VolumeUpIcon fontSize="small" />
+                Hear sentence
+              </button>
+            )}
+          </div>
           <div className="sc-wordmap__words">
             {result.wordAnalysis.map((word, idx) => (
               <button
@@ -233,16 +257,14 @@ export default function LineAnalysis({
           <div className="sc-word-detail__head">
             <div className="sc-word-detail__title">
               <span className="sc-mono sc-mono--lg">"{selectedWord.word}"</span>
-              {onPlayWord && (
-                <button
-                  type="button"
-                  className="sc-icon-btn"
-                  onClick={() => onPlayWord(selectedWord.word)}
-                  title="Hear the correct pronunciation"
-                >
-                  <VolumeUpIcon fontSize="small" />
-                </button>
-              )}
+              <button
+                type="button"
+                className="sc-icon-btn"
+                onClick={() => speakWithBrowser(selectedWord.word)}
+                title="Hear the correct pronunciation"
+              >
+                <VolumeUpIcon fontSize="small" />
+              </button>
               <span className={`sc-status sc-status--${selectedWord.status}`}>
                 {selectedWord.status === "correct" && <CheckCircleIcon fontSize="inherit" />}
                 {selectedWord.status === "incorrect" && <CancelIcon fontSize="inherit" />}

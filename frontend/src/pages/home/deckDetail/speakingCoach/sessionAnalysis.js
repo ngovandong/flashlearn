@@ -14,7 +14,6 @@ export default function SessionAnalysis({
   sessions,
   savedWords = {},
   onSaveWord,
-  onPlayWord,
   onSaveSentence,
   onPlayReference,
 }) {
@@ -53,7 +52,6 @@ export default function SessionAnalysis({
                   result={session.result}
                   savedWords={savedWords}
                   onSaveWord={onSaveWord}
-                  onPlayWord={onPlayWord}
                   onSaveSentence={() => onSaveSentence(session.text)}
                   onPlayReference={() => onPlayReference(session.text)}
                 />
