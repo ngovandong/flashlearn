@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import subprocess  # nosec B404
 import tempfile
 from datetime import UTC, datetime, timedelta
@@ -80,10 +81,62 @@ _COLLATION_REPLACEMENTS = {
 }
 
 
+# MariaDB allows literal DEFAULTs on TEXT/BLOB/JSON columns (e.g. `longtext ...
+# DEFAULT _utf8mb3'[]'`); MySQL 8.0 rejects them with error 1101. Strip the
+# literal default from text-type column lines only — `DEFAULT NULL` and defaults
+# on other column types are left untouched.
+# A column-definition line inside a CREATE TABLE: leading whitespace, a
+# backtick-quoted name, then a text-family type. Restricting to this shape keeps
+# the rewrite away from INSERT data rows that merely contain the word "text".
+_TEXT_COLUMN_DEF_RE = re.compile(
+    r"^\s*`[^`]+`\s+(?:(?:tiny|medium|long)?(?:text|blob)|json)\b",
+    re.IGNORECASE,
+)
+_LITERAL_DEFAULT_RE = re.compile(
+    r"\s+DEFAULT\s+(?:_[A-Za-z0-9]+)?'(?:[^'\\]|\\.)*'",
+    re.IGNORECASE,
+)
+
+
+def _strip_text_column_defaults(sql: str) -> str:
+    lines = sql.splitlines(keepends=True)
+    for i, line in enumerate(lines):
+        if _TEXT_COLUMN_DEF_RE.match(line):
+            lines[i] = _LITERAL_DEFAULT_RE.sub("", line)
+    return "".join(lines)
+
+
 def _normalize_sql_dump(sql: str) -> str:
     for old, new in _COLLATION_REPLACEMENTS.items():
         sql = sql.replace(old, new)
+    sql = _strip_text_column_defaults(sql)
     return sql
+
+
+# MariaDB 11.5+ changed the implicit default collation for utf8mb3/utf8mb4 to the
+# uca1400 family. A MySQL 8.0 dump emits legacy tables as `DEFAULT CHARSET=utf8mb3`
+# with no explicit COLLATE (utf8mb3_general_ci is MySQL's default, so mysqldump
+# omits it). On MariaDB those columns silently become utf8mb3_uca1400_ai_ci, while
+# FK child columns are pinned to the explicit utf8mb3_general_ci -> the FK columns
+# no longer match and CREATE TABLE fails with errno 150. Forcing MySQL 8.0's
+# implicit defaults for the session makes collations resolve exactly as they did
+# in the source dump. `/*M!...*/` is a MariaDB-only executable comment (>= 11.2,
+# version 110200); MySQL treats it as a plain comment and ignores it.
+_MARIADB_COLLATION_COMPAT = (
+    "/*M!110200 SET @@character_set_collations='utf8mb3=utf8mb3_general_ci,utf8mb4=utf8mb4_0900_ai_ci' */;\n"
+)
+
+# mysqldump disables UNIQUE/FOREIGN_KEY checks but leaves autocommit on, so every
+# INSERT commits separately and InnoDB fsyncs per statement. On slow SD/eMMC
+# storage (e.g. Armbian boards) that turns a small dump into a 20+ minute import.
+# Wrapping the whole restore in one transaction collapses the per-statement
+# fsyncs into a single flush.
+_RESTORE_PROLOGUE = f"{_MARIADB_COLLATION_COMPAT}SET autocommit=0;\nSET unique_checks=0;\nSET foreign_key_checks=0;\n"
+_RESTORE_EPILOGUE = "\nCOMMIT;\n"
+
+
+def _wrap_restore_sql(sql: str) -> str:
+    return f"{_RESTORE_PROLOGUE}{sql}{_RESTORE_EPILOGUE}"
 
 
 def _backup_files_query():
@@ -183,6 +236,44 @@ def _download_drive_file(service, file_id, dest_path):
             _, done = downloader.next_chunk()
 
 
+def _mysql_base_cmd(db, *, include_db_name):
+    cmd = [
+        "mysql",
+        f"--user={db['USER']}",
+        f"--password={db['PASSWORD']}",
+        f"--host={db['HOST']}",
+        f"--port={db.get('PORT') or '3306'}",
+    ]
+    if include_db_name:
+        cmd.append(db["NAME"])
+    return cmd
+
+
+def _strip_password_warning(stderr: str) -> str:
+    return "\n".join(line for line in stderr.splitlines() if "Using a password on the command line" not in line)
+
+
+def _reset_database(db):
+    """Drop and recreate the target database so the dump restores into a clean schema.
+
+    Without this, ``mysql`` recreates tables in alphabetical order against the
+    *existing* schema; an inline foreign key (e.g. ``backend_speakinganalysis``
+    before ``backend_speakingconversation``) then points at a stale table whose
+    column collation differs from the dump, raising MySQL error 3780. A clean
+    schema makes every referenced table consistent with the dump.
+    """
+    name = db["NAME"]
+    reset_sql = f"DROP DATABASE IF EXISTS `{name}`; CREATE DATABASE `{name}`;"
+    result = subprocess.run(  # nosec B603
+        _mysql_base_cmd(db, include_db_name=False),
+        input=reset_sql,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"database reset failed: {_strip_password_warning(result.stderr).strip()}")
+
+
 def restore_database_from_drive(backup_file=None):
     from django.conf import settings
 
@@ -203,21 +294,17 @@ def restore_database_from_drive(backup_file=None):
         with open(tmp_path) as f:
             sql = _normalize_sql_dump(f.read())
 
-        cmd = [
-            "mysql",
-            f"--user={db['USER']}",
-            f"--password={db['PASSWORD']}",
-            f"--host={db['HOST']}",
-            f"--port={db.get('PORT') or '3306'}",
-            db["NAME"],
-        ]
-        result = subprocess.run(cmd, input=sql, stderr=subprocess.PIPE, text=True)  # nosec B603
+        _reset_database(db)
+
+        result = subprocess.run(  # nosec B603
+            _mysql_base_cmd(db, include_db_name=True),
+            input=_wrap_restore_sql(sql),
+            stderr=subprocess.PIPE,
+            text=True,
+        )
 
         if result.returncode != 0:
-            stderr = "\n".join(
-                line for line in result.stderr.splitlines() if "Using a password on the command line" not in line
-            )
-            raise RuntimeError(f"mysql restore failed: {stderr.strip()}")
+            raise RuntimeError(f"mysql restore failed: {_strip_password_warning(result.stderr).strip()}")
 
         logger.info("Database restored from Drive backup: %s", latest["name"])
         return latest

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import MicIcon from "@mui/icons-material/Mic";
 import AddIcon from "@mui/icons-material/Add";
@@ -11,6 +11,16 @@ import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import InsightsIcon from "@mui/icons-material/Insights";
 
 const scoreLevel = (score) => (score >= 80 ? "good" : score >= 50 ? "mid" : "low");
+
+// Uses the browser's built-in Web Speech voice for instant playback (no network
+// round-trip), so word/sentence previews have no perceptible delay.
+const speakWithBrowser = (text) => {
+  if (!text || typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  window.speechSynthesis.speak(utterance);
+};
 
 const wpmStatus = (wpm) => {
   if (wpm < 100) return { label: "Slow & deliberate", level: "mid" };
@@ -37,6 +47,15 @@ export default function LineAnalysis({
   );
   const [isUserPlaying, setIsUserPlaying] = useState(false);
   const userAudioRef = useRef(null);
+
+  // The component is reused across consecutive analyses, so the cached Audio
+  // element must be rebuilt whenever a new recording arrives — otherwise
+  // "My recording" replays a stale clip.
+  useEffect(() => {
+    userAudioRef.current?.pause();
+    userAudioRef.current = null;
+    setIsUserPlaying(false);
+  }, [result.userAudioUrl]);
 
   const handlePlayUserAudio = () => {
     if (!result.userAudioUrl) return;
@@ -200,8 +219,23 @@ export default function LineAnalysis({
 
       {result.wordAnalysis.length > 0 && (
         <div className="sc-wordmap">
-          <span className="sc-section-label">Interactive sentence map</span>
-          <p className="sc-hint">Tap any word to view its acoustic guide.</p>
+          <div className="sc-wordmap__head">
+            <div>
+              <span className="sc-section-label">Interactive sentence map</span>
+              <p className="sc-hint">Tap any word to view its acoustic guide.</p>
+            </div>
+            {onPlayReference && (
+              <button
+                type="button"
+                className="sc-btn sc-btn--ghost sc-btn--sm"
+                onClick={onPlayReference}
+                title="Hear the whole sentence"
+              >
+                <VolumeUpIcon fontSize="small" />
+                Hear sentence
+              </button>
+            )}
+          </div>
           <div className="sc-wordmap__words">
             {result.wordAnalysis.map((word, idx) => (
               <button
@@ -223,12 +257,25 @@ export default function LineAnalysis({
           <div className="sc-word-detail__head">
             <div className="sc-word-detail__title">
               <span className="sc-mono sc-mono--lg">"{selectedWord.word}"</span>
+              <button
+                type="button"
+                className="sc-icon-btn"
+                onClick={() => speakWithBrowser(selectedWord.word)}
+                title="Hear the correct pronunciation"
+              >
+                <VolumeUpIcon fontSize="small" />
+              </button>
               <span className={`sc-status sc-status--${selectedWord.status}`}>
                 {selectedWord.status === "correct" && <CheckCircleIcon fontSize="inherit" />}
                 {selectedWord.status === "incorrect" && <CancelIcon fontSize="inherit" />}
                 {selectedWord.status === "missing" && <WarningAmberIcon fontSize="inherit" />}
                 {selectedWord.status}
               </span>
+              {selectedWord.accuracyScore > 0 && (
+                <span className={`sc-pct sc-pct--${scoreLevel(selectedWord.accuracyScore)}`}>
+                  {selectedWord.accuracyScore}%
+                </span>
+              )}
             </div>
             <button
               className="sc-btn sc-btn--primary sc-btn--sm"

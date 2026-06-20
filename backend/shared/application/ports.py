@@ -16,7 +16,13 @@ class ImageStoragePort(Protocol):
 
     def upload_file(self, file_obj) -> str: ...
 
+    def upload_svg(self, svg_markup: str, public_id: str) -> str: ...
+
     def url_to_base64(self, url: str) -> str: ...
+
+
+class AudioStoragePort(Protocol):
+    def upload_audio(self, data: bytes, *, public_id: str | None = None) -> str: ...
 
 
 class OAuthPort(Protocol):

@@ -4,8 +4,6 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/Add";
-import MenuIcon from "@mui/icons-material/Menu";
-import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import Container from "@mui/material/Container";
 import Avatar from "@mui/material/Avatar";
@@ -13,7 +11,7 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import { COLORS } from "@constants/colors";
 
-import { logout, selectUser } from "@app/store/authSlice";
+import { logoutUser, selectUser } from "@app/store/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
 import { Divider, ListItemIcon, ListItemText } from "@mui/material";
@@ -21,6 +19,10 @@ import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
 import AutoAwesomeMotionOutlinedIcon from "@mui/icons-material/AutoAwesomeMotionOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
+import HeadphonesOutlinedIcon from "@mui/icons-material/HeadphonesOutlined";
+import RecordVoiceOverOutlinedIcon from "@mui/icons-material/RecordVoiceOverOutlined";
 import SearchDeckInput from "./searchDeck";
 
 const userMenuItemSx = {
@@ -34,16 +36,21 @@ const userMenuItemSx = {
 };
 
 const links = [
-  { link: "", name: "Home" },
+  { link: "", name: "Home", icon: HomeOutlinedIcon },
   // { link: "folder", name: "Folder" },
-  { link: "deck", name: "Deck", tour: "decks" },
-  { link: "number-test", name: "Number Listening", tour: "number-test" },
-  { link: "speaking-coach", name: "Speaking Coach", tour: "speaking-coach" },
+  { link: "deck", name: "Deck", tour: "decks", icon: AutoAwesomeMotionOutlinedIcon },
+  { link: "course", name: "Course", tour: "course", icon: SchoolOutlinedIcon },
+  { link: "number-test", name: "Number Listening", tour: "number-test", icon: HeadphonesOutlinedIcon },
+  {
+    link: "speaking-coach",
+    name: "Speaking Coach",
+    tour: "speaking-coach",
+    icon: RecordVoiceOverOutlinedIcon,
+  },
 ];
 
 function ResponsiveAppBar()
 {
-  const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [ancharElCreate, setAncharElCreate] = useState(null);
   const navigate = useNavigate();
@@ -54,16 +61,6 @@ function ResponsiveAppBar()
   const handleOpenUserMenu = (event) =>
   {
     setAnchorElUser(event.currentTarget);
-  };
-
-  const handleOpenNavMenu = (event) =>
-  {
-    setAnchorElNav(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () =>
-  {
-    setAnchorElNav(null);
   };
 
   const handleCloseUserMenu = () =>
@@ -86,10 +83,13 @@ function ResponsiveAppBar()
     >
       <Container maxWidth="xxl">
         <Toolbar disableGutters>
-          <img
+          <Box
+            component="img"
             src="/icons/flashlearn.svg"
             alt="FlashLearn logo"
             className="flash-learn-icon"
+            onClick={() => navigate("/")}
+            sx={{ cursor: "pointer" }}
           />
 
           <Box
@@ -97,72 +97,32 @@ function ResponsiveAppBar()
               flexGrow: 1,
               minWidth: 0,
               alignSelf: "stretch",
-              display: "flex",
+              flexWrap: "nowrap",
+              display: { xs: "none", lg: "flex" },
             }}
           >
-            <Box sx={{ flexGrow: 1, display: { xs: "flex", lg: "none" } }}>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleOpenNavMenu}
-                color="inherit"
-              >
-                <MenuIcon />
-              </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorElNav}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "left",
-                }}
-                open={Boolean(anchorElNav)}
-                onClose={handleCloseNavMenu}
-                sx={{
-                  display: { xs: "block", lg: "none" },
-                }}
-              >
-                {links.map((link) => (
-                  <MenuItem key={link.name} onClick={handleCloseNavMenu}>
-                    <NavLink
-                      to={link.link}
-                      style={{ textDecoration: "none", color: "inherit" }}
-                    >
-                      <Typography textAlign="center">{link.name}</Typography>
-                    </NavLink>
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Box>
-            <Box
-              sx={{
-                flexGrow: 1,
-                alignSelf: "stretch",
-                flexWrap: "nowrap",
-                display: { xs: "none", lg: "flex" },
-              }}
-            >
-              {links.map((link) => (
+            {links.map((link) => {
+              const Icon = link.icon;
+              return (
                 <NavLink
                   key={link.link}
                   data-tour={link.tour}
+                  end={link.link === ""}
                   className={({ isActive }) =>
                     isActive ? "nav-item nav-item--active" : "nav-item"
                   }
                   to={link.link}
                 >
+                  {Icon && <Icon fontSize="small" />}
                   {link.name}
                 </NavLink>
-              ))}
-            </Box>
+              );
+            })}
           </Box>
+
+          {/* Spacer pushes the action cluster right on mobile, where the
+              horizontal nav row below replaces the inline links. */}
+          <Box sx={{ flexGrow: 1, display: { xs: "block", lg: "none" } }} />
           <Box
             sx={{ flexGrow: 0, flexShrink: 0, mr: { xs: "0.5rem", sm: "1.25rem" } }}
           >
@@ -361,7 +321,7 @@ function ResponsiveAppBar()
               <MenuItem
                 onClick={() => {
                   handleCloseUserMenu();
-                  dispatch(logout());
+                  dispatch(logoutUser());
                 }}
                 sx={{
                   borderRadius: "0.55rem",
@@ -384,6 +344,27 @@ function ResponsiveAppBar()
             </Menu>
           </Box>
         </Toolbar>
+
+        {/* Mobile: an always-visible, scrollable icon bar so every section is
+            discoverable at a glance instead of hidden behind a hamburger. */}
+        <Box className="nav-mobile" sx={{ display: { xs: "flex", lg: "none" } }}>
+          {links.map((link) => {
+            const Icon = link.icon;
+            return (
+              <NavLink
+                key={link.link}
+                end={link.link === ""}
+                className={({ isActive }) =>
+                  isActive ? "nav-chip nav-chip--active" : "nav-chip"
+                }
+                to={link.link}
+              >
+                {Icon && <Icon fontSize="small" />}
+                <span>{link.name}</span>
+              </NavLink>
+            );
+          })}
+        </Box>
       </Container>
     </AppBar>
   ) : (

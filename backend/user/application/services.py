@@ -1,3 +1,4 @@
+from datetime import UTC, timedelta
 from typing import Any
 
 from django.db import transaction
@@ -98,10 +99,31 @@ class AuthService:
             update_last_login(cast(Any, None), user)
         return token
 
+    # Invite links embed the granted role, so they must not be valid forever —
+    # a leaked link would otherwise be a permanent unauthenticated grant.
+    INVITE_TOKEN_LIFETIME = timedelta(days=7)
+
+    def blacklist_refresh_token(self, refresh_token: str) -> None:
+        """Revoke a refresh token on logout so it can't be reused for its full
+        30-day lifetime if leaked. No-op for already invalid/expired tokens."""
+        from rest_framework_simplejwt.exceptions import TokenError
+        from rest_framework_simplejwt.tokens import RefreshToken
+
+        try:
+            RefreshToken(refresh_token).blacklist()
+        except TokenError:
+            pass
+
     def get_invite_token(self, deck_id, role):
+        from datetime import datetime
+
         from backend.token import JWTToken
 
-        payload = {"deck_id": deck_id, "role": role}
+        payload = {
+            "deck_id": deck_id,
+            "role": role,
+            "exp": datetime.now(UTC) + self.INVITE_TOKEN_LIFETIME,
+        }
         return JWTToken.generate_token(payload)
 
     def google_validate_id_token(self, id_token: str):

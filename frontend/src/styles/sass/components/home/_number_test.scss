@@ -87,6 +87,7 @@
   .number-test-body {
     flex-grow: 1;
     overflow-y: auto;
+    overflow-x: hidden; // never scroll/clip sideways on narrow phones
     padding: 2rem 1rem;
     // Leave room so the last controls can scroll clear of the floating assistant.
     padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
@@ -143,11 +144,11 @@
 
     .modes-row {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0.75rem;
 
       @media (max-width: 580px) {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .mode-option {
@@ -199,6 +200,7 @@
 
       .input-field {
         flex: 1;
+        min-width: 0; // let the field shrink instead of forcing the row wide
         display: flex;
         flex-direction: column;
         gap: 0.4rem;
@@ -210,6 +212,8 @@
         }
 
         input {
+          width: 100%;
+          max-width: 100%;
           padding: 0.6rem 0.8rem;
           border-radius: 0.5rem;
           border: 2px solid $border-color;
@@ -237,6 +241,7 @@
 
       .setting-item {
         flex: 1;
+        min-width: 0; // long <option> labels must not force the row wide
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
@@ -247,6 +252,8 @@
         }
 
         select {
+          width: 100%;
+          max-width: 100%;
           padding: 0.75rem 1rem;
           border-radius: 0.5rem;
           border: 2px solid $border-color;

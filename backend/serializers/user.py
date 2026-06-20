@@ -5,10 +5,21 @@ from ..models import User
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
+    is_superuser = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
-        fields = ["id", "email", "name", "password", "first_name", "last_name", "image_url", "default_deck"]
+        fields = [
+            "id",
+            "email",
+            "name",
+            "password",
+            "first_name",
+            "last_name",
+            "image_url",
+            "default_deck",
+            "is_superuser",
+        ]
 
     def create(self, validated_data):
         ModelClass = self.Meta.model

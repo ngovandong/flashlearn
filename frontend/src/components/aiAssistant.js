@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { selectUser } from "@app/store/authSlice";
 import { getTourForPath } from "@constants/tours";
+import { REMINDER_META } from "@constants/reminders";
+import { useReminders } from "@hooks/useLatestDecks";
 import {
   Box,
   Divider,
@@ -84,7 +86,7 @@ function writeHiddenUntil(ts) {
 const WELCOME_TEXT =
   `Hi, I'm ${ASSISTANT_NAME} — your FlashLearn study buddy! 🐉 ` +
   `I can help you create decks, learn, revise, and more. ` +
-  `Want a quick tour of what you can do here?`;
+  `Want a quick tour, or pick a starter below?`;
 
 let messageId = 0;
 const nextId = () => {
@@ -165,6 +167,14 @@ function AiAssistant() {
   const user = useSelector(selectUser);
   const { startTour } = useTour();
   const location = useLocation();
+  const navigate = useNavigate();
+  // Reminders drive the tappable shortcuts under the welcome message — the same
+  // availability-checked set the home page shows. Tapping one navigates to its
+  // destination, exactly like clicking the reminder card.
+  const { data: reminders } = useReminders();
+  const reminderSuggestions = (reminders || []).filter(
+    (r) => REMINDER_META[r.type]
+  );
   // The guide shown matches the page the user is currently on. Pages without a
   // registered tour simply don't offer the button.
   const currentTour = getTourForPath(location.pathname, location.search);
@@ -172,7 +182,7 @@ function AiAssistant() {
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
   const [messages, setMessages] = useState([
-    { id: nextId(), role: "assistant", text: WELCOME_TEXT, showGuideButton: true },
+    { id: nextId(), role: "assistant", text: WELCOME_TEXT, showSuggestions: true },
   ]);
   const scrollRef = useRef(null);
 
@@ -275,8 +285,8 @@ function AiAssistant() {
     setMenu(null);
   };
 
-  const send = async () => {
-    const text = input.trim();
+  const send = async (override) => {
+    const text = (typeof override === "string" ? override : input).trim();
     if (!text || typing) return;
     setMessages((prev) => [...prev, { id: nextId(), role: "user", text }]);
     setInput("");
@@ -413,33 +423,100 @@ function AiAssistant() {
               {messages.map((m) => (
                 <Box key={m.id} sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
                   <MessageBubble role={m.role}>{m.text}</MessageBubble>
-                  {m.showGuideButton && currentTour && (
-                    <Box sx={{ pl: 4.25 }}>
-                      <Box
-                        role="button"
-                        onClick={() => {
-                          setOpen(false);
-                          startTour(currentTour.id, { all: true });
-                        }}
-                        sx={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 0.75,
-                          px: 1.5,
-                          py: 0.85,
-                          cursor: "pointer",
-                          borderRadius: "0.7rem",
-                          fontSize: "0.82rem",
-                          fontWeight: 700,
-                          color: "var(--fl-on-primary)",
-                          background: "var(--fl-gradient)",
-                          transition: "transform 0.15s ease, filter 0.15s ease",
-                          "&:hover": { filter: "brightness(1.05)", transform: "translateY(-1px)" },
-                        }}
-                      >
-                        <AutoAwesomeRoundedIcon sx={{ fontSize: "1rem" }} />
-                        Show me the guide
-                      </Box>
+                  {m.showSuggestions && (
+                    <Box
+                      sx={{
+                        pl: 4.25,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1,
+                      }}
+                    >
+                      {currentTour && (
+                        <Box
+                          role="button"
+                          onClick={() => {
+                            setOpen(false);
+                            startTour(currentTour.id, { all: true });
+                          }}
+                          sx={{
+                            alignSelf: "flex-start",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 0.75,
+                            px: 1.5,
+                            py: 0.85,
+                            cursor: "pointer",
+                            borderRadius: "0.7rem",
+                            fontSize: "0.82rem",
+                            fontWeight: 700,
+                            color: "var(--fl-on-primary)",
+                            background: "var(--fl-gradient)",
+                            transition: "transform 0.15s ease, filter 0.15s ease",
+                            "&:hover": { filter: "brightness(1.05)", transform: "translateY(-1px)" },
+                          }}
+                        >
+                          <AutoAwesomeRoundedIcon sx={{ fontSize: "1rem" }} />
+                          Show me the guide
+                        </Box>
+                      )}
+
+                      {reminderSuggestions.length > 0 && (
+                        <>
+                          <Box
+                            sx={{
+                              fontSize: "0.68rem",
+                              fontWeight: 700,
+                              letterSpacing: "0.04em",
+                              textTransform: "uppercase",
+                              color: "var(--fl-text-muted)",
+                            }}
+                          >
+                            Or jump back in
+                          </Box>
+                          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
+                            {reminderSuggestions.map((reminder) => {
+                              const meta = REMINDER_META[reminder.type];
+                              return (
+                                <Box
+                                  key={reminder.type}
+                                  role="button"
+                                  onClick={() => {
+                                    setOpen(false);
+                                    navigate(reminder.route);
+                                  }}
+                                  sx={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 0.6,
+                                    px: 1.25,
+                                    py: 0.65,
+                                    cursor: "pointer",
+                                    borderRadius: "0.9rem",
+                                    fontSize: "0.78rem",
+                                    fontWeight: 600,
+                                    lineHeight: 1.3,
+                                    color: "var(--fl-text)",
+                                    backgroundColor: "var(--fl-surface-2)",
+                                    border: "1px solid var(--fl-border)",
+                                    transition: "all 0.15s ease",
+                                    "& .MuiSvgIcon-root": { fontSize: "1rem" },
+                                    "&:hover": {
+                                      color: "var(--fl-primary)",
+                                      borderColor: "var(--fl-primary)",
+                                      backgroundColor: "rgba(var(--fl-primary-rgb), 0.08)",
+                                      transform: "translateY(-1px)",
+                                    },
+                                  }}
+                                >
+                                  {meta.icon}
+                                  {meta.title}
+                                </Box>
+                              );
+                            })}
+                          </Box>
+                        </>
+                      )}
                     </Box>
                   )}
                 </Box>

@@ -360,7 +360,7 @@ $sc-low: $error-red;
 
 .sc-grid-2 {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: $space-4;
 }
 
@@ -396,6 +396,7 @@ $sc-low: $error-red;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    min-width: 0;
     background: $surface-2;
     border: 1px solid $border-subtle;
     border-radius: $radius-sm;
@@ -407,6 +408,7 @@ $sc-low: $error-red;
         background: transparent;
         padding: 0.7rem 0;
         flex: 1;
+        min-width: 0; // allow the text field to shrink below its default size
         font-weight: 600;
         color: $main-text-color;
         outline: none;
@@ -793,6 +795,26 @@ $sc-low: $error-red;
     }
 }
 
+.sc-loading {
+    @include card;
+    padding: $space-8 $space-6;
+    text-align: center;
+    border-style: dashed;
+
+    h4 {
+        margin: 0.9rem 0 0.3rem;
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: $main-text-color;
+    }
+
+    p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: $minor-text-color;
+    }
+}
+
 .sc-spinner {
     width: 44px;
     height: 44px;
@@ -854,6 +876,104 @@ $sc-low: $error-red;
     display: flex;
     flex-direction: column;
     gap: $space-4;
+}
+
+.sc-sessions {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+
+    &__head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: $space-3;
+        flex-wrap: wrap;
+    }
+
+    &__hint {
+        font-size: 0.72rem;
+        color: $minor-text-color;
+    }
+}
+
+.sc-session {
+    border: 1px solid $border-subtle;
+    border-radius: $radius-md;
+    background: $surface;
+    overflow: hidden;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &--open {
+        border-color: rgba(var(--fl-primary-rgb), 0.45);
+        box-shadow: 0 0 0 1px rgba(var(--fl-primary-rgb), 0.18);
+    }
+
+    &__head {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: $space-3;
+        padding: $space-3 $space-4;
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        text-align: left;
+        color: $main-text-color;
+        font: inherit;
+
+        &:hover {
+            background: rgba(var(--fl-primary-rgb), 0.06);
+        }
+    }
+
+    &__index {
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border-radius: $radius-pill;
+        background: rgba(var(--fl-primary-rgb), 0.12);
+        color: $main-purple;
+        font-size: 0.75rem;
+        font-weight: 800;
+    }
+
+    &__text {
+        flex: 1;
+        min-width: 0;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__chev {
+        flex-shrink: 0;
+        color: $minor-text-color;
+        transition: transform 0.2s ease;
+    }
+
+    &--open &__chev {
+        transform: rotate(180deg);
+    }
+
+    &__body {
+        padding: 0 $space-3 $space-3;
+        border-top: 1px solid $border-subtle;
+    }
+}
+
+@media (max-width: 600px) {
+    .sc-session__head {
+        padding: $space-3;
+    }
+
+    .sc-session__text {
+        white-space: normal;
+    }
 }
 
 .sc-analysis {
@@ -1229,6 +1349,30 @@ $sc-low: $error-red;
     }
 }
 
+.sc-wordmap__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $space-3;
+
+    .sc-section-label,
+    .sc-hint {
+        margin-bottom: 0;
+    }
+
+    .sc-btn {
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 600px) {
+        flex-direction: column;
+
+        .sc-btn {
+            width: 100%;
+        }
+    }
+}
+
 .sc-wordmap__words {
     display: flex;
     flex-wrap: wrap;
@@ -1237,6 +1381,7 @@ $sc-low: $error-red;
     border: 1px solid $border-subtle;
     border-radius: $radius-md;
     padding: $space-3;
+    margin-top: 0.6rem;
 }
 
 .sc-word {
@@ -1427,7 +1572,7 @@ $sc-low: $error-red;
 
     &__cols {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
         gap: $space-4;
     }
 
@@ -1457,6 +1602,20 @@ $sc-low: $error-red;
         display: flex;
         align-items: center;
         gap: 0.4rem;
+    }
+}
+
+.sc-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-top: $space-2;
+
+    &__info {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: $minor-text-color;
     }
 }
 
@@ -1498,7 +1657,7 @@ $sc-low: $error-red;
         .sc-tag {
             max-width: 100%;
             white-space: normal;
-            overflow-wrap: anywhere;
+            overflow-wrap: break-word; // wrap by word; never one letter per line
         }
     }
 
@@ -1588,6 +1747,11 @@ $sc-low: $error-red;
     &__card {
         width: 100%;
         max-width: 32rem;
+        // Never taller than the viewport (minus the modal's own padding) so the
+        // header stays pinned and the body scrolls instead of clipping on mobile.
+        max-height: 100%;
+        display: flex;
+        flex-direction: column;
         background: $surface;
         border-radius: $radius-lg;
         overflow: hidden;
@@ -1596,6 +1760,7 @@ $sc-low: $error-red;
     }
 
     &__head {
+        flex-shrink: 0;
         background: $brand-gradient;
         color: $on-primary;
         padding: $space-4;
@@ -1621,6 +1786,10 @@ $sc-low: $error-red;
     }
 
     &__body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
         padding: $space-4;
         display: flex;
         flex-direction: column;
@@ -1785,5 +1954,829 @@ $sc-low: $error-red;
 
     .sc-segmented {
         flex-direction: column;
+    }
+
+    // Give the topic tag the full row width and drop the action buttons onto
+    // their own line so nothing is squeezed or clipped on phones.
+    .sc-history-item--row {
+        flex-wrap: wrap;
+        row-gap: 0.5rem;
+    }
+
+    .sc-history-item__main {
+        flex: 1 1 60%;
+    }
+
+    .sc-history-item__tools {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .sc-course__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sc-course-line__bubble {
+        max-width: 88%;
+    }
+
+    .sc-course-roleplay-setup {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sc-course-roleplay-setup__pick {
+        flex-wrap: wrap;
+    }
+}
+
+/* ---------- Guided courses ---------- */
+.sc-course {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+
+    &__intro {
+        h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin: 0 0 0.25rem;
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        p {
+            margin: 0;
+            color: $minor-text-color;
+            font-size: 0.9rem;
+        }
+    }
+
+    &__back {
+        align-self: flex-start;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: $surface;
+        border: 1px solid $border-subtle;
+        border-radius: $radius-sm;
+        padding: 0.4rem 0.75rem;
+        color: $minor-text-color;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.18s $ease;
+
+        &:hover {
+            color: $main-purple;
+            border-color: $hover-purple;
+        }
+    }
+
+    &__empty {
+        @include card;
+        padding: $space-5;
+        text-align: center;
+        color: $minor-text-color;
+    }
+
+    &__filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    &__filter {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        padding: 0.35rem 0.85rem;
+        border: 1px solid $border-subtle;
+        border-radius: 999px;
+        background: $surface;
+        color: $minor-text-color;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.18s $ease;
+
+        &:hover {
+            border-color: $hover-purple;
+            color: $main-purple;
+        }
+
+        &.is-active {
+            background: rgba(var(--fl-primary-rgb), 0.12);
+            border-color: $main-purple;
+            color: $main-purple;
+        }
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: $space-3;
+    }
+}
+
+.sc-course-card-wrap {
+    position: relative;
+    display: flex;
+
+    // Reveal the admin delete control on hover/focus (always visible on touch).
+    &:hover .sc-course-card__delete,
+    &:focus-within .sc-course-card__delete {
+        opacity: 1;
+    }
+}
+
+.sc-course-card {
+    @include card_interactive;
+    width: 100%;
+    text-align: left;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    overflow: hidden;
+
+    &__cover {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        background-color: $surface-2;
+        background-image: $brand-gradient;
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 0.6rem;
+
+        // Legibility scrim so the level/done chips read on any generated art.
+        &::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                180deg,
+                rgba(0, 0, 0, 0.28) 0%,
+                rgba(0, 0, 0, 0) 38%,
+                rgba(0, 0, 0, 0.18) 100%
+            );
+            pointer-events: none;
+        }
+    }
+
+    &__cover-icon {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: rgba(255, 255, 255, 0.85);
+
+        svg {
+            font-size: 2.6rem;
+        }
+    }
+
+    &__level {
+        position: relative;
+        z-index: 1;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: $on-primary;
+        background: rgba(var(--fl-primary-rgb), 0.92);
+        border-radius: $radius-sm;
+        padding: 0.2rem 0.55rem;
+        box-shadow: $shadow-sm;
+    }
+
+    &__done {
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #fff;
+        background: rgba(46, 158, 107, 0.95);
+        border-radius: $radius-sm;
+        padding: 0.2rem 0.45rem;
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: $space-4;
+        flex: 1;
+    }
+
+    h4 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    p {
+        margin: 0;
+        color: $minor-text-color;
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    &__delete {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: $radius-sm;
+        background: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.18s $ease, background 0.18s $ease;
+
+        &:hover {
+            background: $error-red;
+        }
+
+        // No hover on touch devices — keep the control discoverable there.
+        @media (hover: none) {
+            opacity: 1;
+        }
+    }
+}
+
+.sc-course__pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: $space-3;
+
+    .MuiPaginationItem-root {
+        color: $main-text-color;
+    }
+}
+
+.sc-course-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: auto;
+
+    &__track {
+        flex: 1;
+        height: 6px;
+        border-radius: 999px;
+        background: $surface-2;
+        overflow: hidden;
+    }
+
+    &__fill {
+        height: 100%;
+        background: $brand-gradient;
+        transition: width 0.3s $ease;
+    }
+
+    span {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: $minor-text-color;
+        white-space: nowrap;
+    }
+}
+
+.sc-course-section {
+    @include card;
+    padding: $space-4;
+
+    h4 {
+        margin: 0 0 $space-3;
+        font-size: 0.95rem;
+        font-weight: 800;
+    }
+}
+
+.sc-course-lessons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.sc-course-lesson-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    text-align: left;
+    background: $surface-2;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-sm;
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+    color: $main-text-color;
+    transition: all 0.16s $ease;
+
+    &:hover {
+        border-color: $hover-purple;
+    }
+
+    &__icon {
+        display: grid;
+        place-items: center;
+        color: $minor-text-color;
+
+        &.is-passed {
+            color: $sc-good;
+        }
+    }
+
+    &__title {
+        flex: 1;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    &__score {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: $minor-text-color;
+    }
+}
+
+.sc-course-lesson__head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 800;
+    }
+}
+
+.sc-course-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0.2rem 0.55rem;
+    border-radius: $radius-sm;
+
+    &.is-passed {
+        color: $sc-good;
+        background: rgba(46, 158, 107, 0.12);
+    }
+}
+
+.sc-course-cast {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    &__chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: $surface-2;
+        border: 1px solid $border-subtle;
+        border-radius: 999px;
+        padding: 0.2rem 0.7rem 0.2rem 0.2rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+    }
+
+    &__avatar {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-weight: 800;
+        font-size: 0.78rem;
+    }
+}
+
+.sc-course-roleplay-setup {
+    @include card;
+    padding: $space-4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-3;
+
+    &__text {
+        strong {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.95rem;
+        }
+
+        small {
+            color: $minor-text-color;
+        }
+    }
+
+    &__pick {
+        display: flex;
+        gap: 0.5rem;
+
+        button {
+            @include purple_btn;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+    }
+}
+
+.sc-course-roleplay-bar {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-3;
+    background: $surface;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-md;
+    padding: 0.6rem 0.9rem;
+    box-shadow: $shadow-md;
+    font-weight: 700;
+
+    button {
+        background: transparent;
+        border: 1px solid $border-color;
+        border-radius: $radius-sm;
+        padding: 0.4rem 0.85rem;
+        color: $minor-text-color;
+        font-weight: 700;
+        cursor: pointer;
+
+        &:hover {
+            color: $sc-low;
+            border-color: $sc-low;
+        }
+    }
+}
+
+.sc-course-scoring {
+    @include card;
+    padding: $space-4;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: $minor-text-color;
+    font-weight: 600;
+}
+
+.sc-course-result {
+    @include card;
+    padding: $space-4;
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+
+    &__score {
+        font-size: 1.8rem;
+        font-weight: 900;
+    }
+
+    strong {
+        display: block;
+    }
+
+    small {
+        color: $minor-text-color;
+    }
+
+    &.is-pass &__score {
+        color: $sc-good;
+    }
+
+    &.is-fail &__score {
+        color: $sc-mid;
+    }
+}
+
+.sc-course-transcript {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.sc-course-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+
+    &.is-right {
+        flex-direction: row-reverse;
+    }
+
+    &.is-current .sc-course-line__bubble {
+        border-color: $main-purple;
+        box-shadow: 0 0 0 2px rgba(var(--fl-primary-rgb), 0.25);
+    }
+
+    &__avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-weight: 800;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+
+    &__bubble {
+        max-width: 78%;
+        background: $surface;
+        border: 1px solid $border-subtle;
+        border-radius: $radius-md;
+        padding: 0.55rem 0.8rem;
+
+        p {
+            margin: 0.15rem 0 0;
+            font-size: 0.92rem;
+            line-height: 1.45;
+        }
+    }
+
+    &__text {
+        cursor: text;
+    }
+
+    &__speaker {
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: $minor-text-color;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+
+    &__play {
+        margin-top: 0.4rem;
+        display: inline-flex;
+        align-items: center;
+        background: $surface-2;
+        border: 1px solid $border-subtle;
+        border-radius: 999px;
+        width: 30px;
+        height: 30px;
+        justify-content: center;
+        color: $main-purple;
+        cursor: pointer;
+
+        &:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+    }
+
+    &__rec {
+        margin-top: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        @include purple_btn;
+        padding: 0.4rem 0.85rem;
+        font-size: 0.82rem;
+
+        &.is-rec {
+            background: $sc-low;
+            border-color: $sc-low;
+        }
+    }
+}
+
+.sc-course-exercises {
+    @include card;
+    padding: $space-4;
+
+    summary {
+        cursor: pointer;
+        font-weight: 700;
+        color: $minor-text-color;
+    }
+}
+
+.sc-course-exercise {
+    margin-top: $space-3;
+    padding-top: $space-3;
+    border-top: 1px solid $border-subtle;
+
+    &__prompt {
+        margin: 0 0 0.35rem;
+        font-size: 0.85rem;
+        color: $minor-text-color;
+    }
+
+    &__sentence {
+        margin: 0;
+        font-weight: 600;
+
+        em {
+            color: $main-purple;
+            font-style: normal;
+        }
+    }
+
+    &__q {
+        p {
+            margin: 0 0 0.25rem;
+            font-weight: 600;
+        }
+
+        ul {
+            margin: 0 0 0.5rem 1.1rem;
+            color: $minor-text-color;
+            font-size: 0.88rem;
+        }
+    }
+}
+
+/* ---------- Illustrated scene stage ---------- */
+.sc-course-stage {
+    position: relative;
+    border-radius: $radius-lg;
+    overflow: hidden;
+    background-color: $surface-2;
+    background-size: cover;
+    background-position: center;
+    border: 1px solid $border-subtle;
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+
+    &__cast {
+        flex: 1;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: $space-3;
+        padding: $space-4 $space-4 0;
+        min-height: 200px;
+    }
+
+    &__caption {
+        background: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        padding: 0.7rem 1rem;
+        font-size: 0.95rem;
+        line-height: 1.45;
+        backdrop-filter: blur(2px);
+
+        strong {
+            display: block;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            opacity: 0.85;
+            margin-bottom: 0.15rem;
+        }
+
+        &.is-right {
+            text-align: right;
+        }
+    }
+
+    &__play {
+        position: absolute;
+        top: $space-3;
+        right: $space-3;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: rgba(var(--fl-primary-rgb), 0.92);
+        color: $on-primary;
+        border: none;
+        border-radius: 999px;
+        padding: 0.4rem 0.9rem;
+        font-weight: 700;
+        font-size: 0.82rem;
+        cursor: pointer;
+        box-shadow: $shadow-md;
+        transition: transform 0.15s $ease;
+
+        &:hover {
+            transform: translateY(-1px);
+        }
+
+        &.is-playing {
+            background: rgba(0, 0, 0, 0.6);
+        }
+    }
+}
+
+.sc-course-figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    transition: opacity 0.25s $ease, transform 0.25s $ease;
+
+    &.side-left {
+        align-self: flex-end;
+        margin-right: auto;
+    }
+
+    &.side-right {
+        align-self: flex-end;
+        margin-left: auto;
+    }
+
+    &.is-active {
+        transform: translateY(-6px) scale(1.04);
+        filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
+    }
+
+    // Subtle "talking" pulse for the active speaker (no per-phoneme lip-sync).
+    &.is-active .sc-course-figure__layers {
+        animation: sc-talk 0.5s $ease infinite alternate;
+    }
+
+    &.is-dim {
+        opacity: 0.55;
+    }
+
+    &__layers {
+        position: relative;
+        width: 120px;
+        height: 180px;
+
+        img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: bottom;
+        }
+    }
+
+    &__fallback {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-weight: 800;
+        font-size: 1.6rem;
+        align-self: center;
+    }
+
+    &__name {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.45);
+        border-radius: 999px;
+        padding: 0.1rem 0.6rem;
+    }
+}
+
+@keyframes sc-talk {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-2px);
+    }
+}
+
+@media (max-width: 600px) {
+    .sc-course-stage {
+        min-height: 200px;
+
+        &__cast {
+            min-height: 150px;
+            padding: $space-3 $space-3 0;
+        }
+    }
+
+    .sc-course-figure__layers {
+        width: 92px;
+        height: 140px;
     }
 }

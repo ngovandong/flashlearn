@@ -37,8 +37,9 @@ class SpeakingService extends BaseService {
     return this.request.post(this.action("explain_phrase"), { text, context }, AI_CONFIG);
   }
 
-  // Returns { audio: base64, mime_type } from the voice's TTS provider
+  // Returns { audio_url, audio: base64, mime_type } from the voice's TTS provider
   // (ElevenLabs MP3 for active voices, Gemini raw 16-bit PCM for legacy voices).
+  // Prefer audio_url (hosted on Cloudinary); audio is a fallback for un-migrated clips.
   generateSpeech(text, voice) {
     return this.request.post(this.action("speak"), { text, voice }, AI_CONFIG);
   }
@@ -64,10 +65,13 @@ class SpeakingService extends BaseService {
   }
 
   // Returns { matches: [{ term_id, deck_id, name }] } — the user's own terms
-  // found in the conversation so they can be highlighted and deep-linked to
-  // /deck/:deck_id/learn/:term_id.
-  matchTerms(conversationId) {
-    return this.request.post(this.action("match_terms"), { conversation_id: conversationId });
+  // found in the given lines so they can be highlighted and deep-linked to
+  // /deck/:deck_id/learn/:term_id. Pass a conversation id string, or an object
+  // with an explicit `texts` array (used by the Course lesson transcript).
+  matchTerms(arg) {
+    const payload =
+      arg && typeof arg === "object" ? { texts: arg.texts } : { conversation_id: arg };
+    return this.request.post(this.action("match_terms"), payload);
   }
 
   // Add/update (or remove with { remove: true }) a noted word/phrase on a

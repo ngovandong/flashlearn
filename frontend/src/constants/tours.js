@@ -31,10 +31,22 @@ export const TOURS = [
         body: "Tap the + button to build a brand-new deck — add terms, definitions, and images, then start studying.",
       },
       {
+        id: "home.reminders",
+        selector: '[data-tour="reminders"]',
+        title: "Pick up where you left off",
+        body: "These cards suggest your next move — continue a course, revise a deck, replay a conversation, or train your listening. They refresh each visit.",
+      },
+      {
         id: "home.decks",
         selector: '[data-tour="decks"]',
         title: "Browse & clone public decks",
         body: "Open Decks to explore community decks. Found one you like? Clone it into your own library and make it yours.",
+      },
+      {
+        id: "home.course",
+        selector: '[data-tour="course"]',
+        title: "Guided courses",
+        body: "Open Course to work through structured, level-based dialogues — listen, study the transcript, then pass each lesson with a Live Role-play.",
       },
       {
         id: "home.number-test",
@@ -219,6 +231,25 @@ export const TOURS = [
     ],
   },
   {
+    id: "course",
+    label: "Course",
+    match: (p) => p === "/course" || p.startsWith("/course/"),
+    steps: [
+      {
+        id: "course.catalog",
+        selector: '[data-tour="sc-course-catalog"]',
+        title: "Guided courses",
+        body: "Pick a level-based course, then open a lesson to listen to the dialogue, study the transcript, and pass it with a Live Role-play scored by Dragon.",
+      },
+      {
+        id: "course.vocab",
+        selector: '[data-tour="sc-course-vocab"]',
+        title: "Tap words to study",
+        body: "In a lesson, select any word or phrase to see its meaning, IPA and a speaking tip — then save it as a term or highlight it. Your saved words stay underlined, and your last role-play breakdown is kept here so you can revisit it.",
+      },
+    ],
+  },
+  {
     id: "speaking-coach",
     label: "Speaking Coach",
     match: (p) => p.endsWith("/speaking-coach") || p === "/speaking-coach",
@@ -263,7 +294,13 @@ export const TOURS = [
         id: "sc.tabs",
         selector: '[data-tour="sc-tabs"]',
         title: "Review your history",
-        body: "Switch to History anytime to revisit past conversations and pronunciation scores. Star favorites to pin them to the top, or select several to delete in one go.",
+        body: "Switch to History anytime to revisit past conversations. Star favorites to pin them to the top, or select several to delete in one go.",
+      },
+      {
+        id: "sc.course",
+        selector: '[data-tour="sc-course-tab"]',
+        title: "Follow a guided course",
+        body: "Open Course to work through structured dialogues organized by level. Listen, study the transcript, then pass each lesson with a Live Role-play scored by Dragon.",
       },
     ],
   },

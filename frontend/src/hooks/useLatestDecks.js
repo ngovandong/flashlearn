@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { deckService } from "@api-services/deckService";
 import { userSettingService } from "@api-services/userSettingService";
+import { reminderService } from "@api-services/reminderService";
 import { getFirstError } from "@utils/errorHandler";
 
 export function useLatestDecks() {
@@ -21,6 +22,19 @@ export function useLearningStreak() {
     queryKey: ["user", "learningStreak"],
     queryFn: async () => {
       const res = await userSettingService.getLearningStreak();
+      if (res.error) {
+        throw new Error(getFirstError(res.error));
+      }
+      return res.data;
+    },
+  });
+}
+
+export function useReminders() {
+  return useQuery({
+    queryKey: ["reminders"],
+    queryFn: async () => {
+      const res = await reminderService.getReminders();
       if (res.error) {
         throw new Error(getFirstError(res.error));
       }

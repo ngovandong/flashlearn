@@ -6,6 +6,13 @@ from backend.term.domain.access import TermAccessPolicy
 from .models import Deck, Term
 
 
+class IsSuperUser(permissions.BasePermission):
+    """Allow only authenticated superusers (the app's admins)."""
+
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated and request.user.is_superuser)
+
+
 class IsOwnerPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         owner = getattr(obj, "owner", obj)
@@ -27,7 +34,7 @@ class EditableDeck(permissions.BasePermission):
 class EditableTerm(permissions.BasePermission):
     def has_object_permission(self, request, view, obj: Term):
         if request.method in permissions.SAFE_METHODS:
-            return True
+            return DeckAccessPolicy.can_view(obj.deck, request.user)
         return TermAccessPolicy.can_edit(obj, request.user)
 
 

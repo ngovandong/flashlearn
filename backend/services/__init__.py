@@ -9,15 +9,19 @@ from backend.services.image import url_to_base64
 from backend.services.mail import MailService
 from backend.shared.composition import (
     auth_service,
+    course_service,
     deck_service,
     learning_context,
     learning_service,
+    reminder_service,
     speaking_coach_service,
+    speaking_service,
     term_enrichment_service,
     term_service,
     user_service,
 )
 from backend.speaking.application.services import SpeakingCoachService
+from backend.speaking.application.speaking_service import SpeakingService
 from backend.term.application.ai_enrichment import TermEnrichmentService
 from backend.term.application.services import TermService
 from backend.user.application.services import AuthService, UserService
@@ -30,15 +34,19 @@ __all__ = [
     "MailService",
     "RoleService",
     "SpeakingCoachService",
+    "SpeakingService",
     "TermEnrichmentService",
     "TermService",
     "UserService",
     "auth_service",
+    "course_service",
     "deck_service",
     "learning_context",
     "learning_service",
     "learning_progress_cache",
+    "reminder_service",
     "speaking_coach_service",
+    "speaking_service",
     "term_enrichment_service",
     "term_service",
     "url_to_base64",

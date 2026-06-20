@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import HistoryIcon from "@mui/icons-material/History";
+import SchoolIcon from "@mui/icons-material/School";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
@@ -28,6 +29,9 @@ import { speakingService } from "@api-services/speakingService";
 import { termService } from "@api-services/termService";
 import { userSettingService } from "@api-services/userSettingService";
 import LineAnalysis from "./lineAnalysis";
+import SessionAnalysis from "./sessionAnalysis";
+import CoursePanel from "./coursePanel";
+import { blobToWav } from "./audioWav";
 import { markSpeakingCoachPracticed } from "@utils/practiceBanner";
 
 const ACCENTS = [
@@ -44,6 +48,8 @@ const TONES = [
   { id: "academic", label: "Academic" },
 ];
 const FALLBACK_TOPICS = ["Ordering Coffee", "Job Interview", "Airport Check-in"];
+// History list is paginated client-side to keep the conversations column tidy.
+const CONVERSATIONS_PER_PAGE = 8;
 
 // Tutor voices are loaded from the backend (ElevenLabs is the active provider;
 // Gemini voices are legacy and only shown when an old conversation used one).
@@ -81,10 +87,20 @@ function pcm16ToAudioBuffer(bytes, ctx, sampleRate) {
   return buffer;
 }
 
+// Get a clip's raw bytes — from its hosted URL (clips migrated to Cloudinary)
+// or the inline base64 fallback (clips not yet migrated).
+async function clipBytes(entry) {
+  if (entry.audioUrl) {
+    const resp = await fetch(entry.audioUrl);
+    return new Uint8Array(await resp.arrayBuffer());
+  }
+  return base64ToBytes(entry.audio);
+}
+
 // Decode a cached clip to an AudioBuffer. Gemini → raw PCM; ElevenLabs → MP3
 // (decoded via the Web Audio API).
 async function decodeClip(entry, ctx) {
-  const bytes = base64ToBytes(entry.audio);
+  const bytes = await clipBytes(entry);
   if (isPcmMime(entry.mimeType)) {
     return pcm16ToAudioBuffer(bytes, ctx, sampleRateFromMime(entry.mimeType));
   }
@@ -99,20 +115,20 @@ function errorMessage(err, fallback) {
   return fallback;
 }
 
-function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(String(reader.result).split(",")[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
 export default function SpeakingCoach() {
   const navigate = useNavigate();
   const { id: routeId } = useParams();
+  const { pathname } = useLocation();
 
-  const [view, setView] = useState("practice"); // practice | history
+  // The active tab is derived from the URL so each view is deep-linkable:
+  //   /speaking-coach            → practice
+  //   /speaking-coach/history    → history
+  //   /speaking-coach/course/**  → course (catalog/course/lesson handled inside)
+  const view = pathname.startsWith("/speaking-coach/course")
+    ? "course"
+    : pathname === "/speaking-coach/history"
+    ? "history"
+    : "practice";
   const [mode, setMode] = useState("topic"); // topic | custom
   const [vocabMode, setVocabMode] = useState(false); // build dialogue from saved words
   const [topic, setTopic] = useState("");
@@ -140,6 +156,10 @@ export default function SpeakingCoach() {
   const [voices, setVoices] = useState([]);
   const [conversation, setConversation] = useState(null);
   const [loading, setLoading] = useState(false);
+  // Gate the whole practice screen until the critical APIs (voices, suggested
+  // topics, and the URL-loaded conversation) have resolved, so the UI renders
+  // once in its final state instead of flipping (e.g. legacy voice → active).
+  const [initializing, setInitializing] = useState(true);
 
   const [activeLineId, setActiveLineId] = useState(null);
   const [speakingLineId, setSpeakingLineId] = useState(null);
@@ -148,6 +168,8 @@ export default function SpeakingCoach() {
   const [isRecording, setIsRecording] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
+  // Per-sentence results for a role-play session (one entry per spoken line).
+  const [sessionAnalyses, setSessionAnalyses] = useState([]);
   const [savedWords, setSavedWords] = useState({});
 
   const [selected, setSelected] = useState(null); // vocab popup
@@ -155,6 +177,7 @@ export default function SpeakingCoach() {
   const [termMatches, setTermMatches] = useState([]); // user's own terms in this convo
   const [history, setHistory] = useState({ conversations: [], analyses: [] });
   const [selectedIds, setSelectedIds] = useState(() => new Set());
+  const [convPage, setConvPage] = useState(1);
 
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -167,27 +190,65 @@ export default function SpeakingCoach() {
   const speedRef = useRef(1.0);
   const inflightRef = useRef(new Map());
   const conversationRef = useRef(null);
+  // Marks the one-time bootstrap as done so the per-dependency effects below
+  // (suggested topics on level change, conversation on URL change) skip the
+  // initial load the bootstrap already covered.
+  const bootstrappedRef = useRef(false);
 
-  // ---- Tutor voices (active + legacy) loaded from the backend ----
+  const applyVoices = useCallback((data) => {
+    if (!data) return;
+    setTtsVoices(data.voices?.length ? data.voices : FALLBACK_VOICES);
+    const legacy = {};
+    (data.legacy_voices || []).forEach((v) => {
+      legacy[v.id] = v.label;
+    });
+    setLegacyVoiceMap(legacy);
+    setAccentDefaults(data.accent_defaults || {});
+  }, []);
+
+  // ---- One-time bootstrap: await every API the initial screen depends on
+  // (active voices, suggested topics, and the URL-loaded conversation) before
+  // revealing the UI. Everything else (term matches, prefetch, browser voices)
+  // stays lazy. ----
   useEffect(() => {
     let active = true;
-    speakingService.getVoices().then((res) => {
-      if (!active || !res.data) return;
-      const list = res.data.voices?.length ? res.data.voices : FALLBACK_VOICES;
-      setTtsVoices(list);
-      const legacy = {};
-      (res.data.legacy_voices || []).forEach((v) => {
-        legacy[v.id] = v.label;
-      });
-      setLegacyVoiceMap(legacy);
-      setAccentDefaults(res.data.accent_defaults || {});
-      // Default to the active provider's voice for new conversations only; a
-      // conversation opened by URL keeps the voice it was generated with.
-      if (!routeId) {
-        const initial = res.data.accent_defaults?.[accent] || res.data.default;
+    (async () => {
+      const tasks = [
+        speakingService.getVoices(),
+        speakingService.suggestTopics([], level),
+      ];
+      if (routeId) tasks.push(speakingService.getConversation(routeId));
+      let voicesRes, topicsRes, convRes;
+      try {
+        [voicesRes, topicsRes, convRes] = await Promise.all(tasks);
+      } catch {
+        /* fall through to fallbacks below */
+      }
+      if (!active) return;
+
+      applyVoices(voicesRes?.data);
+      setSuggestedTopics(
+        topicsRes?.data?.topics?.length ? topicsRes.data.topics : FALLBACK_TOPICS
+      );
+
+      if (routeId) {
+        if (convRes?.data?.id) {
+          setConversation(convRes.data);
+          if (convRes.data.accent) setAccent(convRes.data.accent);
+          if (convRes.data.voice) setSelectedVoice(convRes.data.voice);
+        } else {
+          toast.error("Conversation not found.");
+          navigate("/speaking-coach", { replace: true });
+        }
+      } else {
+        // New session: default to the active provider's voice for this accent.
+        const initial = voicesRes?.data?.accent_defaults?.[accent] || voicesRes?.data?.default;
         if (initial) setSelectedVoice(initial);
       }
-    });
+
+      bootstrappedRef.current = true;
+      setInitializing(false);
+    })();
     return () => {
       active = false;
     };
@@ -225,8 +286,10 @@ export default function SpeakingCoach() {
   );
 
   // Refresh suggested topics whenever the chosen proficiency level changes;
-  // topics are drawn from a curated table filtered by CEFR level.
+  // topics are drawn from a curated table filtered by CEFR level. The initial
+  // fetch is handled by the bootstrap effect, so skip the first run here.
   useEffect(() => {
+    if (!bootstrappedRef.current) return;
     speakingService.suggestTopics([], level).then((res) => {
       setSuggestedTopics(res.data?.topics?.length ? res.data.topics : FALLBACK_TOPICS);
     });
@@ -301,9 +364,10 @@ export default function SpeakingCoach() {
       const promise = speakingService
         .generateSpeech(clean, voice)
         .then((res) => {
-          if (res.error || !res.data?.audio) throw new Error("tts-failed");
+          if (res.error || (!res.data?.audio && !res.data?.audio_url)) throw new Error("tts-failed");
           const entry = {
             audio: res.data.audio,
+            audioUrl: res.data.audio_url,
             mimeType: res.data.mime_type || "audio/mpeg",
           };
           cache.set(key, entry);
@@ -454,6 +518,7 @@ export default function SpeakingCoach() {
     }
     setIsRecording(false);
     setAnalysisResult(null);
+    setSessionAnalyses([]);
     setActiveLineId(null);
     setAnalyzing(false);
   }
@@ -497,6 +562,7 @@ export default function SpeakingCoach() {
     if (!conversation) return;
     sessionChunksRef.current = [];
     setAnalysisResult(null);
+    setSessionAnalyses([]);
     stepRolePlay(0);
   };
 
@@ -525,23 +591,35 @@ export default function SpeakingCoach() {
     setRolePlayIndex(null);
     rolePlayRef.current = null;
     setActiveLineId(null);
-    if (!sessionChunksRef.current.length || !conversation) return;
+    const turns = sessionChunksRef.current;
+    if (!turns.length || !conversation) return;
     setAnalyzing(true);
     try {
-      const blob = new Blob(sessionChunksRef.current, {
-        type: mediaRecorderRef.current?.mimeType || "audio/webm",
-      });
-      const audio = await blobToBase64(blob);
-      const target = conversation.lines.map((l) => l.text).join(" ");
-      const res = await speakingService.analyze({
-        targetText: target,
-        audio,
-        mimeType: blob.type,
-        kind: "full",
-        conversationId: conversation.id,
-      });
-      if (res.data?.result) {
-        setAnalysisResult({ ...res.data.result, userAudioUrl: URL.createObjectURL(blob) });
+      // Analyze each spoken turn on its own so the result is one reliable
+      // section per sentence instead of a single merged (and noisy) score.
+      const sessions = [];
+      for (const { line, blob } of turns) {
+        // eslint-disable-next-line no-await-in-loop
+        const { base64: audio } = await blobToWav(blob);
+        // eslint-disable-next-line no-await-in-loop
+        const res = await speakingService.analyze({
+          targetText: line.text,
+          audio,
+          mimeType: "audio/wav",
+          kind: "single",
+          conversationId: conversation.id,
+        });
+        if (res.data?.result) {
+          sessions.push({
+            id: line.id,
+            text: line.text,
+            result: { ...res.data.result, userAudioUrl: URL.createObjectURL(blob) },
+          });
+        }
+      }
+      if (sessions.length) {
+        setAnalysisResult(null);
+        setSessionAnalyses(sessions);
       } else {
         toast.error("Session evaluation failed.");
       }
@@ -575,21 +653,24 @@ export default function SpeakingCoach() {
       const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
       recorder.stream?.getTracks().forEach((t) => t.stop());
       if (rolePlayRef.current !== null) {
-        sessionChunksRef.current.push(blob);
+        const recordedLine = conversation?.lines[rolePlayRef.current];
+        if (recordedLine) sessionChunksRef.current.push({ line: recordedLine, blob });
         stepRolePlay(rolePlayRef.current + 1);
         return;
       }
       setAnalyzing(true);
       try {
-        const audio = await blobToBase64(blob);
+        // Azure needs 16 kHz mono WAV; keep the original recording for playback.
+        const { base64: audio } = await blobToWav(blob);
         const res = await speakingService.analyze({
           targetText: lineText,
           audio,
-          mimeType: blob.type,
+          mimeType: "audio/wav",
           kind: "single",
           conversationId: conversation?.id,
         });
         if (res.data?.result) {
+          setSessionAnalyses([]);
           setAnalysisResult({ ...res.data.result, userAudioUrl: URL.createObjectURL(blob) });
         } else {
           toast.error("Pronunciation analysis failed. Please try again.");
@@ -792,10 +873,10 @@ export default function SpeakingCoach() {
     toast.success(`"${word.word}" saved to your default deck.`);
   };
 
-  const saveActiveSentence = async () => {
-    const line = conversation?.lines.find((l) => l.id === activeLineId);
-    if (!line) return;
-    const res = await termService.addToDefaultDeck({ name: line.text, ai_filled: false });
+  const saveSentence = async (text) => {
+    const name = (text || "").trim();
+    if (!name) return;
+    const res = await termService.addToDefaultDeck({ name, ai_filled: false });
     if (res.error) {
       toast.error(errorMessage(res.error, "Could not save sentence."));
       return;
@@ -803,17 +884,29 @@ export default function SpeakingCoach() {
     toast.success("Sentence saved to your default deck.");
   };
 
+  const saveActiveSentence = () => {
+    const line = conversation?.lines.find((l) => l.id === activeLineId);
+    if (line) saveSentence(line.text);
+  };
+
   const swapRoles = () => {
     setUserName(partnerName);
     setPartnerName(userName);
   };
 
-  const openHistory = async () => {
-    setView("history");
+  // Load history whenever the History tab becomes active (it's now a URL view).
+  useEffect(() => {
+    if (view !== "history") return;
     setSelectedIds(new Set());
-    const res = await speakingService.getHistory();
-    if (res.data) setHistory(res.data);
-  };
+    setConvPage(1);
+    let active = true;
+    speakingService.getHistory().then((res) => {
+      if (active && res.data) setHistory(res.data);
+    });
+    return () => {
+      active = false;
+    };
+  }, [view]);
 
   // Starred first, then most recent.
   const sortedConversations = useMemo(
@@ -823,6 +916,22 @@ export default function SpeakingCoach() {
         return new Date(b.created_at) - new Date(a.created_at);
       }),
     [history.conversations]
+  );
+
+  const totalConvPages = Math.max(1, Math.ceil(sortedConversations.length / CONVERSATIONS_PER_PAGE));
+
+  // Keep the current page valid after deletions shrink the list.
+  useEffect(() => {
+    setConvPage((p) => Math.min(Math.max(1, p), totalConvPages));
+  }, [totalConvPages]);
+
+  const pagedConversations = useMemo(
+    () =>
+      sortedConversations.slice(
+        (convPage - 1) * CONVERSATIONS_PER_PAGE,
+        convPage * CONVERSATIONS_PER_PAGE
+      ),
+    [sortedConversations, convPage]
   );
 
   const toggleSelect = (id) =>
@@ -932,9 +1041,12 @@ export default function SpeakingCoach() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected?.text]);
 
-  // Load a conversation straight from the URL (/speaking-coach/:id) — on direct
-  // open, refresh, or when reopening a past conversation.
+  // Load a conversation straight from the URL (/speaking-coach/:id) when
+  // navigating between conversations after the initial load (the first load is
+  // handled by the bootstrap effect). Restores the accent and voice it was
+  // generated with so the setup reflects the saved conversation.
   useEffect(() => {
+    if (!bootstrappedRef.current) return;
     if (!routeId) return;
     if (conversationRef.current?.id === routeId) return;
     let active = true;
@@ -943,8 +1055,8 @@ export default function SpeakingCoach() {
       if (res.data?.id) {
         resetPracticeState();
         setConversation(res.data);
+        if (res.data.accent) setAccent(res.data.accent);
         if (res.data.voice) setSelectedVoice(res.data.voice);
-        setView("practice");
       } else {
         toast.error("Conversation not found.");
         navigate("/speaking-coach", { replace: true });
@@ -995,18 +1107,36 @@ export default function SpeakingCoach() {
         <div className="sc-tabs" data-tour="sc-tabs">
           <button
             className={view === "practice" ? "active" : ""}
-            onClick={() => setView("practice")}
+            onClick={() => navigate("/speaking-coach")}
           >
             <MicIcon fontSize="small" /> Practice
           </button>
-          <button className={view === "history" ? "active" : ""} onClick={openHistory}>
+          <button
+            className={view === "history" ? "active" : ""}
+            onClick={() => navigate("/speaking-coach/history")}
+          >
             <HistoryIcon fontSize="small" /> History
+          </button>
+          <button
+            className={view === "course" ? "active" : ""}
+            onClick={() => navigate("/speaking-coach/course")}
+            data-tour="sc-course-tab"
+          >
+            <SchoolIcon fontSize="small" /> Course
           </button>
         </div>
       </header>
 
       <div className="sc-body">
-        {view === "practice" && (
+        {initializing && (
+          <div className="sc-loading">
+            <div className="sc-spinner" />
+            <h4>Setting up your coach…</h4>
+            <p>Loading voices, topics, and your conversation.</p>
+          </div>
+        )}
+
+        {!initializing && view === "practice" && (
           <div className="sc-practice">
             <section className="sc-setup" data-tour="sc-setup">
               <div className="sc-mode-toggle">
@@ -1361,7 +1491,19 @@ export default function SpeakingCoach() {
                   </div>
                 )}
 
-                {analysisResult && (
+                {sessionAnalyses.length > 0 && (
+                  <div className="sc-result">
+                    <SessionAnalysis
+                      sessions={sessionAnalyses}
+                      savedWords={savedWords}
+                      onSaveWord={saveWordAsTerm}
+                      onSaveSentence={saveSentence}
+                      onPlayReference={(text) => speak(text)}
+                    />
+                  </div>
+                )}
+
+                {analysisResult && !sessionAnalyses.length && (
                   <div className="sc-result">
                     {analysisResult.overallFeedback && (
                       <div className="sc-callout sc-callout--brand">
@@ -1389,7 +1531,9 @@ export default function SpeakingCoach() {
           </div>
         )}
 
-        {view === "history" && (
+        {!initializing && view === "course" && <CoursePanel />}
+
+        {!initializing && view === "history" && (
           <div className="sc-history">
             <div className="sc-history__banner">
               <span className="sc-brand__icon">
@@ -1423,7 +1567,7 @@ export default function SpeakingCoach() {
                   )}
                 </div>
                 {sortedConversations.length ? (
-                  sortedConversations.map((c) => (
+                  pagedConversations.map((c) => (
                     <div
                       key={c.id}
                       className={`sc-history-item sc-history-item--row ${
@@ -1460,8 +1604,8 @@ export default function SpeakingCoach() {
                           onClick={() => {
                             resetPracticeState();
                             setConversation(c);
+                            if (c.accent) setAccent(c.accent);
                             if (c.voice) setSelectedVoice(c.voice);
-                            setView("practice");
                             navigate(`/speaking-coach/${c.id}`);
                           }}
                         >
@@ -1480,24 +1624,26 @@ export default function SpeakingCoach() {
                 ) : (
                   <p className="sc-empty">No saved conversations yet.</p>
                 )}
-              </div>
-
-              <div className="sc-history__col">
-                <h4>Pronunciation scores ({history.analyses.length})</h4>
-                {history.analyses.length ? (
-                  history.analyses.map((a) => (
-                    <div key={a.id} className="sc-history-item">
-                      <div className="sc-history-item__row">
-                        <span className={`sc-score sc-score--${a.accuracy_score >= 80 ? "good" : a.accuracy_score >= 50 ? "mid" : "low"}`}>
-                          {a.accuracy_score}%
-                        </span>
-                        <p className="sc-history-item__text">"{a.target_text}"</p>
-                      </div>
-                      {a.overall_feedback && <span className="sc-empty">{a.overall_feedback}</span>}
-                    </div>
-                  ))
-                ) : (
-                  <p className="sc-empty">No analyses yet — record a line to get started.</p>
+                {totalConvPages > 1 && (
+                  <div className="sc-pager">
+                    <button
+                      className="sc-btn sc-btn--ghost sc-btn--sm"
+                      disabled={convPage <= 1}
+                      onClick={() => setConvPage((p) => Math.max(1, p - 1))}
+                    >
+                      Prev
+                    </button>
+                    <span className="sc-pager__info">
+                      Page {convPage} of {totalConvPages}
+                    </span>
+                    <button
+                      className="sc-btn sc-btn--ghost sc-btn--sm"
+                      disabled={convPage >= totalConvPages}
+                      onClick={() => setConvPage((p) => Math.min(totalConvPages, p + 1))}
+                    >
+                      Next
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

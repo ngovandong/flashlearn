@@ -16,9 +16,13 @@ chrome.runtime.onStartup.addListener(openFrontendIfEnabled);
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   switch (message.type) {
-    case "get_auth_token":
-      chrome.tabs.create({ url: FRONTEND_URL });
+    case "get_auth_token": {
+      // Flag the tab so the web app hands a token to the extension even when the
+      // user is already logged in (no fresh login event fires in that case).
+      const sep = FRONTEND_URL.includes("?") ? "&" : "?";
+      chrome.tabs.create({ url: `${FRONTEND_URL}${sep}source=extension` });
       break;
+    }
     case "login":
       chrome.storage.sync.set({ token: message.token });
       break;

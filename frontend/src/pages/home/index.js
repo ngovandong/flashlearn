@@ -1,7 +1,11 @@
 import { LocalLoadingWrapper } from "@components/loading";
 import { Alert, Box, Snackbar } from "@mui/material";
-import { useLatestDecks, useLearningStreak } from "@hooks/useLatestDecks";
-import React, { useState } from "react";
+import {
+  useLatestDecks,
+  useLearningStreak,
+  useReminders,
+} from "@hooks/useLatestDecks";
+import React, { useMemo, useState } from "react";
 import DeckCard from "./deckCard";
 import PaginatedDeckSection, { fetchPublicDecksPage } from "./paginatedDeckSection";
 import { useSelector } from "react-redux";
@@ -9,29 +13,8 @@ import { selectUser } from "@app/store/authSlice";
 import InstallExtensionReminder from "@components/installExtensionReminder";
 import ThemeSuggestion from "@components/themeSuggestion";
 import { Link } from "react-router-dom";
-import HearingIcon from "@mui/icons-material/Hearing";
-import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
-import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
-import { getActivePracticeBanner } from "@utils/practiceBanner";
-
-const PRACTICE_BANNERS = {
-  speaking: {
-    icon: <RecordVoiceOverIcon />,
-    title: "Practice speaking with your AI coach",
-    description:
-      "Generate real-life conversations, role-play out loud, and get instant feedback on your pronunciation.",
-    to: "/speaking-coach",
-    cta: "Start speaking",
-  },
-  number: {
-    icon: <HearingIcon />,
-    title: "Sharpen your number listening",
-    description:
-      "Train your ear by typing the English numbers you hear — from quick digits to phone, tax, and ID numbers.",
-    to: "/number-test",
-    cta: "Start practice",
-  },
-};
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import { REMINDER_META } from "@constants/reminders";
 
 function streakCopy({ streak, studied_today }) {
   if (streak === 0) {
@@ -58,12 +41,17 @@ function Home() {
     error: decksError,
   } = useLatestDecks();
   const { data: learningStreak } = useLearningStreak();
+  const { data: reminders } = useReminders();
 
   const queryError = decksError?.message;
 
   const streakText = learningStreak ? streakCopy(learningStreak) : null;
 
-  const banner = PRACTICE_BANNERS[getActivePracticeBanner()];
+  // Drop any reminder whose type we don't know how to render.
+  const visibleReminders = useMemo(
+    () => (reminders || []).filter((r) => REMINDER_META[r.type]),
+    [reminders]
+  );
 
   return user ? (
     <div className="home-page">
@@ -103,36 +91,44 @@ function Home() {
       </div>
       <section>
         <div className="section-header">
-          <h5>Your progress</h5>
+          <h5>Pick up where you left off</h5>
         </div>
-        <div className="progress-row">
-          <div className="streak-container">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/1869/1869397.png"
-              alt="streak-calendar"
-            />
-            <div className="streak-text">
-              {streakText && (
-                <>
-                  <div>{streakText.main}</div>
-                  <span>{streakText.sub}</span>
-                </>
-              )}
-            </div>
-          </div>
-          <div className="practice-reminder">
-            <div className="practice-reminder__content">
-              <div className="practice-reminder__icon">{banner.icon}</div>
-              <div className="practice-reminder__text">
-                <h4>{banner.title}</h4>
-                <p>{banner.description}</p>
+        <div className="reminders-grid" data-tour="reminders">
+          {streakText && (
+            <div className="reminder-card reminder-card--streak">
+              <div className="reminder-card__icon">
+                <img
+                  src="https://cdn-icons-png.flaticon.com/512/1869/1869397.png"
+                  alt="streak-calendar"
+                />
+              </div>
+              <div className="reminder-card__body">
+                <h4>{streakText.main}</h4>
+                <p>{streakText.sub}</p>
               </div>
             </div>
-            <Link to={banner.to} className="practice-reminder__cta">
-              <PlayArrowRoundedIcon />
-              <span>{banner.cta}</span>
-            </Link>
-          </div>
+          )}
+          {visibleReminders.map((reminder, index) => {
+            const meta = REMINDER_META[reminder.type];
+            return (
+              <Link
+                key={reminder.type}
+                to={reminder.route}
+                className={`reminder-card reminder-card--link reminder-card--${meta.tone}`}
+                style={{ animationDelay: `${index * 70}ms` }}
+              >
+                <div className="reminder-card__icon">{meta.icon}</div>
+                <div className="reminder-card__body">
+                  <h4>{meta.title}</h4>
+                  <p>{meta.description(reminder.label)}</p>
+                  <span className="reminder-card__cta">
+                    {meta.cta}
+                    <ArrowForwardRoundedIcon />
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
       {mydecks && mydecks.length !== 0 && (

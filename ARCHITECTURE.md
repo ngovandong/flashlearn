@@ -64,9 +64,11 @@ mindmap
       Flashcards and Decks
       Learn Revise Quiz
       Number Test
+      Guided courses and Live Role-play
     AI
       Term enrichment
       Speaking Coach
+      Pronunciation scoring
       Image crawler
       Translation
     Social
@@ -208,9 +210,10 @@ flashlearn/
 ├── backend/                   🧠  All domain logic (see "DDD backend" below)
 │   ├── deck/  term/  user/    📦  Bounded contexts (DDD: domain/application/infrastructure)
 │   ├── learning/  role/  folder/  speaking/
+│   ├── course/  reminders/    📚  Guided courses & home "pick up where you left off"
 │   ├── shared/                🔌  Cross-context: composition root, AI, cache, ports
 │   │   ├── composition.py     🧩  Wires concrete infra into services (DI root)
-│   │   └── infrastructure/ai/ 🤖  Gemini, OpenRouter, failover, rate-limit gate
+│   │   └── infrastructure/ai/ 🤖  Gemini · OpenRouter · ElevenLabs · Azure Speech/TTS, failover, rate-gate
 │   ├── models/                🗃️  Django ORM models (schema owner)
 │   ├── views/                 🚪  DRF ViewSets per resource
 │   ├── serializers/           🔄  DRF serializers
@@ -231,9 +234,12 @@ flashlearn/
 ## 🧩 The DDD backend (bounded contexts)
 
 The `backend/` package is organized as **Domain‑Driven Design bounded contexts**.
-Each context (`deck`, `term`, `user`, `learning`, `role`, `folder`, `speaking`)
-has the same internal layering, and they talk to each other only through small
-**Context APIs** — never by reaching into each other's internals.
+Each context (`deck`, `term`, `user`, `learning`, `role`, `folder`, `speaking`,
+`course`, `reminders`) has the same internal layering, and they talk to each
+other only through small **Context APIs** (or another context's application
+service, injected at the composition root) — never by reaching into each other's
+internals. Simple contexts (e.g. `reminders`) may omit the `domain/` layer; when
+present, `domain/` stays **pure Python** with no Django/ORM/I/O imports.
 
 ```mermaid
 flowchart LR
@@ -263,11 +269,14 @@ flowchart TB
         DS["deck_service = DeckService(repo, user_context, learning_context)"]
         LS["learning_service = LearningService(repo, term_context, user_context, cache)"]
         TE["term_enrichment_service = TermEnrichmentService(ai=default_ai_provider)"]
-        SC["speaking_coach_service = SpeakingCoachService(ai=default_ai_provider)"]
+        SC["speaking_coach_service = SpeakingCoachService(ai, pronunciation=AzureSpeech?)"]
+        SS["speaking_service = SpeakingService(coach=speaking_coach_service, repo)"]
+        CS["course_service = CourseService(repo, speaking_service, ai, tts=AzureTTS?, image_storage)"]
+        RS["reminder_service = ReminderService(repo)"]
     end
 
     Ports["📜 application/ports.py<br/>AiTextPort · CachePort ·<br/>ImageStoragePort · OAuthPort"]
-    Adapters["🔌 infrastructure adapters<br/>Gemini · Redis cache ·<br/>Cloudinary · Google OAuth"]
+    Adapters["🔌 infrastructure adapters<br/>Gemini · OpenRouter · ElevenLabs ·<br/>Azure Speech/TTS · Redis cache ·<br/>Cloudinary · Google OAuth"]
 
     Ports -. implemented by .-> Adapters
     Adapters --> compose
@@ -319,6 +328,10 @@ erDiagram
     USER ||--o{ SPEAKING_CONVERSATION : "practices"
     SPEAKING_CONVERSATION ||--o{ SPEAKING_ANALYSIS : "scored by"
     USER ||--o{ SPEAKING_ANALYSIS : "earns"
+    COURSE ||--o{ COURSE_SECTION : "contains"
+    COURSE_SECTION ||--o{ COURSE_LESSON : "contains"
+    USER ||--o{ USER_COURSE_LESSON_PROGRESS : "progresses"
+    COURSE_LESSON ||..o{ USER_COURSE_LESSON_PROGRESS : "keyed by lesson_key"
 
     USER {
         uuid id PK
@@ -385,7 +398,44 @@ erDiagram
         string request_hash
         json response
     }
+    COURSE {
+        uuid id PK
+        slug slug "unique"
+        string title
+        string level "e.g. A2 / B1"
+        image background
+    }
+    COURSE_SECTION {
+        uuid id PK
+        slug slug
+        string title
+        int order
+        uuid course_FK
+    }
+    COURSE_LESSON {
+        uuid id PK
+        string key "unique natural key (re-crawl safe)"
+        string title
+        json characters "name, voice, art layers"
+        json lines "speaker, text, voice"
+        json exercises
+        uuid section_FK
+    }
+    USER_COURSE_LESSON_PROGRESS {
+        uuid id PK
+        string lesson_key "= CourseLesson.key (no FK)"
+        char status "in_progress / passed"
+        int best_score
+        int attempts
+        json last_result "replayed role-play breakdown"
+        json highlights
+    }
 ```
+
+**Course progress is decoupled from content:** `UserCourseLessonProgress` is keyed
+on the lesson's stable string `lesson_key` (not a row FK), so a clean re‑crawl can
+delete and recreate every lesson row without ever cascading away a learner's
+role‑play progress.
 
 **Sharing model:** access to a deck is governed by `UserDeckRole` with three
 roles, enforced by the framework‑independent `DeckAccessPolicy` in the domain
@@ -451,6 +501,8 @@ is available at `POST /api/users/google_login`.
 | `/api/learnings/` | Learning progress & revision |
 | `/api/roles/` | Deck membership / invites |
 | `/api/speaking/` | Speaking Coach (dialogue, TTS, analysis, history) |
+| `/api/courses/` | Guided courses: catalog, content, lesson audio, Live Role‑play scoring |
+| `/api/reminders/` | Home‑page "pick up where you left off" prompts |
 | `/api/images/` | Image crawler (Google/Bing/Openverse/Wikimedia) |
 | `/api/translate/` | Translation |
 | `/ws/quick-revise/` | WebSocket multiplayer game |
@@ -523,12 +575,25 @@ sequenceDiagram
 
 | Provider | Text / JSON | Multimodal (audio in) | TTS (audio out) | Role |
 |----------|:-----------:|:---------------------:|:---------------:|------|
-| **Gemini** | ✅ | ✅ | ✅ | Primary — required for pronunciation & TTS |
+| **Gemini** | ✅ | ✅ | ✅ | Primary text/JSON + multimodal listener; legacy TTS voices |
 | **OpenRouter** | ✅ | ❌ | ❌ | Text/JSON fallback (free tier by default) |
+| **ElevenLabs** | ❌ | ❌ | ✅ | Active Speaking‑Coach tutor TTS (US/UK/AU voices) |
+| **Azure Speech** | ❌ | ✅ | ❌ | *Measured* pronunciation assessment (accuracy/fluency/phonemes) |
+| **Azure TTS** | ❌ | ❌ | ✅ | Per‑character course dialogue voices |
+
+> [!NOTE]
+> Only **Gemini** and **OpenRouter** sit in the env‑driven failover chain
+> (`AI_PROVIDER` / `AI_FALLBACK_PROVIDERS`). **ElevenLabs**, **Azure Speech**, and
+> **Azure TTS** are single‑purpose adapters wired directly at the composition
+> root and used only when their credentials are present — each degrades
+> gracefully (e.g. Azure pronunciation falls back to the Gemini multimodal
+> listener; ElevenLabs falls back to legacy Gemini voices).
 
 AI responses are also persisted in `AiResponseCache`, keyed by a stable
 `sha256(context + request inputs)` so identical generations are never paid for
-twice.
+twice. Synthesized speech is cached forever in `SpeakingAudioClip`
+(keyed by `voice + text_hash`), shared by both the Speaking Coach and course
+dialogue audio.
 
 ---
 
@@ -581,17 +646,21 @@ flowchart TB
 
     subgraph tts["2 · Hear the tutor"]
         Lines --> Clip{"clip cached?<br/>(voice, text_hash)"}
-        Clip -->|hit| Play["🔊 replay base64 PCM"]
-        Clip -->|miss| Synth["🤖 Gemini TTS (per line)"]
+        Clip -->|hit| Play["🔊 replay cached audio"]
+        Clip -->|miss| Synth["🤖 ElevenLabs TTS (per line)<br/>legacy: Gemini voices"]
         Synth --> Store[("SpeakingAudioClip<br/>cache forever")]
         Store --> Play
     end
 
     subgraph rec["3 · Practice & score"]
         Play --> Rec["🎙️ user records audio"]
-        Rec --> Analyze["🤖 multimodal analysis<br/>audio + target text"]
-        Analyze --> Scores["📊 accuracy · fluency · completeness<br/>· rhythm · WPM"]
-        Analyze --> Words["🔤 per-word: status, IPA target/spoken,<br/>mouth tip, syllable stress"]
+        Rec --> Assess{"Azure Speech<br/>configured?"}
+        Assess -->|yes| Azure["📐 Azure measured assessment<br/>(accuracy/fluency/phonemes)"]
+        Assess -->|no| Listen["🤖 Gemini multimodal listener<br/>(fallback)"]
+        Azure --> Scores["📊 accuracy · fluency · completeness<br/>· rhythm · WPM"]
+        Listen --> Scores
+        Azure --> Words["🔤 per-word: status, IPA target/spoken,<br/>mouth tip, syllable stress"]
+        Listen --> Words
         Scores --> Hist[("SpeakingAnalysis<br/>saved history")]
         Words --> Hist
     end
@@ -601,13 +670,25 @@ flowchart TB
 
 > [!NOTE]
 > **Why audio is cached per‑line:** TTS is a billed call and a sentence renders
-> identically every time. Gemini can't emit per‑line clips from one
-> multi‑speaker call (it returns a merged blob), so the coach synthesizes **one
-> clip per line** and stores it in `SpeakingAudioClip` (shared across all users,
-> keyed by `voice + text_hash`) — replayed forever, generated once.
+> identically every time, so the coach synthesizes **one clip per line** and
+> stores it in `SpeakingAudioClip` (shared across all users, keyed by
+> `voice + text_hash`) — replayed forever, generated once. The same cache backs
+> the guided‑course dialogue audio (see below).
 
 Conversations are saved to history (star, note words/phrases, reopen by URL),
 and the coach can surface **your own deck terms** that appear in a dialogue.
+
+### Guided courses & Live Role‑play
+
+The `course` context reuses the same engine to teach structured, level‑based
+curricula (imported from freeCodeCamp via `crawl_english_courses`). Each lesson
+is a dialogue scene: characters get a fixed **Azure TTS** voice matching their
+gender (assigned once by `generate_course_audio`), and the learner passes a
+lesson by recording a **Live Role‑play** that `CourseService` scores
+sentence‑by‑sentence through the Speaking Coach's pronunciation analysis. A
+lesson flips to *passed* only when the averaged score clears
+`COURSE_PASS_THRESHOLD` (a pure rule in `course/domain/progress.py`); the latest
+breakdown is persisted so the lesson page can replay it on revisit.
 
 ---
 

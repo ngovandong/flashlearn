@@ -44,7 +44,13 @@ class SpeakingAudioClip(DateTimeUUIDModel):
     voice = models.CharField(max_length=32)
     text_hash = models.CharField(max_length=64, db_index=True)
     text = models.TextField()
-    audio = models.TextField()
+    # Legacy inline storage: base64-encoded audio bytes. Kept for backward
+    # compatibility and as a fallback, but new clips are uploaded to Cloudinary
+    # and this is cleared once ``audio_url`` is set (see migrate_audio_to_cloudinary).
+    audio = models.TextField(blank=True)
+    # Cloudinary URL of the raw audio bytes. Preferred over ``audio`` when set;
+    # the frontend fetches it and decodes with the Web Audio API using mime_type.
+    audio_url = models.CharField(max_length=500, blank=True, default="")
     mime_type = models.CharField(max_length=64, default="audio/L16;rate=24000")
 
     class Meta:
