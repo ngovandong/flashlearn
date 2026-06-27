@@ -49,14 +49,27 @@ class CloudinaryAudioStorage:
     with the Web Audio API using the clip's ``mime_type``.
     """
 
-    def upload_audio(self, data: bytes, *, public_id: str | None = None) -> str:
+    def upload_audio(self, data: bytes, *, public_id: str | None = None, invalidate: bool = False) -> str:
         # A deterministic public_id + overwrite keeps re-runs idempotent (a
         # re-synthesized clip replaces its asset instead of orphaning copies).
-        options = {"resource_type": "raw", "overwrite": True}
+        # ``invalidate`` busts the CDN edge cache so a regenerated clip isn't
+        # served stale at the unchanged URL.
+        options = {"resource_type": "raw", "overwrite": True, "invalidate": invalidate}
         if public_id:
             options["public_id"] = public_id
         result = cloudinary.uploader.upload(io.BytesIO(data), **options)
         return result.get("secure_url") or result.get("url", "")
+
+    def delete_audio(self, public_id: str) -> bool:
+        """Delete a previously uploaded raw audio asset. Returns True when removed.
+
+        Idempotent: a missing asset (already gone / never uploaded) returns False
+        rather than raising, so callers can prune freely.
+        """
+        if not public_id:
+            return False
+        result = cloudinary.uploader.destroy(public_id, resource_type="raw", invalidate=True)
+        return result.get("result") == "ok"
 
 
 default_audio_storage = CloudinaryAudioStorage()

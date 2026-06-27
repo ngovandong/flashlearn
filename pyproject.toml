@@ -59,6 +59,13 @@ dev = [
 crawler = [
     "playwright>=1.60.0",
 ]
+# Local open-source TTS (Kokoro-82M) for `generate_course_audio --tts kokoro`.
+# Heavy (pulls in torch); install on demand with `uv sync --group tts` and also
+# `brew install espeak-ng` for phoneme fallback.
+tts = [
+    "kokoro>=0.9.4",
+    "numpy>=1.26",
+]
 
 [tool.ruff]
 line-length = 120

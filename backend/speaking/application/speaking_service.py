@@ -214,7 +214,9 @@ class SpeakingService:
         )
 
     # ── Cache maintenance ─────────────────────────────────────────────────
-    def prune_orphan_audio_clips(self, *, extra_referenced_keys=None, dry_run=False) -> dict[str, Any]:
+    def prune_orphan_audio_clips(
+        self, *, extra_referenced_keys=None, dry_run=False, delete_remote=False
+    ) -> dict[str, Any]:
         """Delete cached TTS clips nothing references any more.
 
         The :class:`SpeakingAudioClip` cache is shared and never expires, so clips
@@ -224,32 +226,48 @@ class SpeakingService:
         ``extra_referenced_keys`` (e.g. course lesson lines, which reuse this
         cache). Everything else is an orphan.
 
-        Pass ``dry_run=True`` to count orphans (and list each one's voice/text/size
-        via ``previews``) without deleting. Returns
-        ``{scanned, referenced, orphans, deleted, previews}``.
+        ``delete_remote`` also destroys each orphan's hosted Cloudinary asset (not
+        just the DB row), so switching a course to a different TTS voice/engine
+        reclaims the old audio. Pass ``dry_run=True`` to count orphans (and list
+        each one's voice/text/size via ``previews``) without deleting. Returns
+        ``{scanned, referenced, orphans, deleted, remote_deleted, previews}``.
         """
         referenced = self._referenced_clip_keys(extra_referenced_keys)
 
         scanned = 0
-        orphan_ids: list = []
+        orphans: list[tuple] = []  # (id, voice, text_hash)
         for clip_id, voice, text_hash in self._repo.clip_identity_rows():
             scanned += 1
             if (voice, text_hash) not in referenced:
-                orphan_ids.append(clip_id)
+                orphans.append((clip_id, voice, text_hash))
 
+        orphan_ids = [o[0] for o in orphans]
         previews: list = []
-        deleted = 0
+        deleted = remote_deleted = 0
         if dry_run:
             previews = self._repo.clip_previews_by_ids(orphan_ids)
         else:
+            if delete_remote and self._audio_storage is not None:
+                for _id, voice, text_hash in orphans:
+                    if self._delete_remote_audio(voice, text_hash):
+                        remote_deleted += 1
             deleted = self._repo.delete_clips_by_ids(orphan_ids)
         return {
             "scanned": scanned,
             "referenced": len(referenced),
             "orphans": len(orphan_ids),
             "deleted": deleted,
+            "remote_deleted": remote_deleted,
             "previews": previews,
         }
+
+    def _delete_remote_audio(self, voice: str, text_hash: str) -> bool:
+        """Best-effort delete of one clip's hosted audio asset."""
+        try:
+            return bool(self._audio_storage.delete_audio(audio_clip_public_id(voice, text_hash)))
+        except Exception:  # noqa: BLE001 — never fail a prune on a CDN hiccup
+            logger.exception("Failed to delete hosted audio for clip (%s)", voice)
+            return False
 
     def migrate_audio_to_storage(self, *, max_clips=None, purge_audio=True, dry_run=False, on_progress=None) -> dict:
         """Upload clips still holding inline base64 to the audio store, one at a time.

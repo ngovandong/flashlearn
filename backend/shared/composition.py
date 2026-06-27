@@ -12,7 +12,7 @@ from backend.reminders.application.services import ReminderService
 from backend.reminders.infrastructure.repository import ReminderRepository
 from backend.shared.infrastructure.ai import (
     AzureSpeechProvider,
-    AzureTextToSpeechProvider,
+    build_tts_provider,
     default_ai_provider,
 )
 from backend.shared.infrastructure.cache import default_cache
@@ -69,14 +69,14 @@ speaking_service = SpeakingService(
     repo=SpeakingRepository,
     audio_storage=default_audio_storage,
 )
-# Azure TTS gives each course dialogue character a fixed neural voice matching
-# their gender; only wired when credentials are present.
-_azure_tts = AzureTextToSpeechProvider()
+# Course dialogue audio: each character gets a fixed gender-matched voice. The TTS
+# provider (azure / elevenlabs / kokoro) is chosen at generation time via the
+# injected factory (`generate_course_audio --tts`), so each is built on demand.
 course_service = CourseService(
     repo=CourseRepository,
     speaking_service=speaking_service,
     ai=default_ai_provider,
-    tts=_azure_tts if _azure_tts.is_configured else None,
+    tts_factory=build_tts_provider,
     image_storage=default_image_storage,
     audio_storage=default_audio_storage,
 )

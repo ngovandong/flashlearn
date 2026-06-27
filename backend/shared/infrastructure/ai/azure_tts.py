@@ -25,7 +25,11 @@ logger = logging.getLogger(__name__)
 _DEFAULT_TIMEOUT = 30
 _DEFAULT_MAX_RETRIES = 2
 _RETRY_STATUSES = {429, 500, 502, 503, 504}
-_OUTPUT_FORMAT = "audio-24khz-48kbitrate-mono-mp3"
+# Azure neural voices render natively at 24 kHz, so a higher *bitrate* (not a
+# higher sample rate) is what removes the compressed/robotic feel. 96 kbit/s is a
+# clean default for speech; override with AZURE_TTS_OUTPUT_FORMAT for max quality
+# (e.g. "audio-24khz-160kbitrate-mono-mp3" or "audio-48khz-192kbitrate-mono-mp3").
+_DEFAULT_OUTPUT_FORMAT = "audio-24khz-96kbitrate-mono-mp3"
 
 
 class AzureTextToSpeechProvider:
@@ -39,6 +43,7 @@ class AzureTextToSpeechProvider:
         region: str | None = None,
         timeout: int | None = None,
         max_retries: int | None = None,
+        output_format: str | None = None,
     ):
         # Shares the pronunciation-assessment credentials (same Speech resource).
         self._api_key = api_key if api_key is not None else os.getenv("AZURE_SPEECH_KEY", "")
@@ -49,6 +54,7 @@ class AzureTextToSpeechProvider:
             if max_retries is not None
             else int(os.getenv("AZURE_SPEECH_MAX_RETRIES", str(_DEFAULT_MAX_RETRIES)))
         )
+        self._output_format = output_format or os.getenv("AZURE_TTS_OUTPUT_FORMAT", _DEFAULT_OUTPUT_FORMAT)
 
     @property
     def is_configured(self) -> bool:
@@ -74,7 +80,7 @@ class AzureTextToSpeechProvider:
         headers = {
             "Ocp-Apim-Subscription-Key": self._api_key,
             "Content-Type": "application/ssml+xml",
-            "X-Microsoft-OutputFormat": _OUTPUT_FORMAT,
+            "X-Microsoft-OutputFormat": self._output_format,
             "User-Agent": "flashlearn-course-tts",
         }
         audio = self._post(url, headers=headers, data=ssml.encode("utf-8"))

@@ -294,7 +294,7 @@ export const TOURS = [
         id: "sc.vocab",
         selector: '[data-tour="sc-vocab"]',
         title: "Learn & save vocabulary",
-        body: "Select any word or phrase in a line for its meaning, IPA and a speaking tip — then save it as a term or highlight it to revisit. Words you've already saved appear underlined; click them to study.",
+        body: "Select any word or phrase in a line for its meaning, IPA and a speaking tip — then save it as a term (with a picture) or highlight it to revisit. Saved words appear underlined and highlights are tinted; click either to open it and study, remove or re-highlight.",
       },
       {
         id: "sc.tabs",

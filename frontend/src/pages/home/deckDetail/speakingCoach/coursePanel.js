@@ -14,6 +14,7 @@ import SchoolIcon from "@mui/icons-material/School";
 import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import UndoIcon from "@mui/icons-material/Undo";
 
 import { selectUser } from "@app/store/authSlice";
 import { COURSE_PAGE_SIZE } from "@constants/pageSize";
@@ -34,6 +35,29 @@ function errorMessage(err, fallback) {
   if (typeof err === "string") return err;
   if (err.errors) return typeof err.errors === "string" ? err.errors : fallback;
   return fallback;
+}
+
+// Success toast with an inline Undo action so the last highlight / save can be
+// reverted in one tap.
+function undoToast(message, onUndo) {
+  toast.success(
+    ({ closeToast }) => (
+      <div className="sc-toast">
+        <span className="sc-toast__msg">{message}</span>
+        <button
+          type="button"
+          className="sc-toast__undo"
+          onClick={() => {
+            onUndo();
+            closeToast?.();
+          }}
+        >
+          <UndoIcon fontSize="small" /> Undo
+        </button>
+      </div>
+    ),
+    { autoClose: 6000 }
+  );
 }
 
 function base64ToBytes(b64) {
@@ -470,20 +494,19 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
   );
 
   // ── Vocabulary coach + highlighting ───────────────────────────────────
-  // Open the popup for an explicit word/phrase. Backend caches enrich +
-  // explain_phrase, so re-opening a noted highlight costs no extra AI call.
+  // Open the popup for an explicit word/phrase. Only explain_phrase is called
+  // (meaning + IPA + speaking tip); the heavier enrichment was redundant for a
+  // quick lookup. The backend caches explain_phrase, so re-opening a noted
+  // highlight costs no extra AI call.
   const openVocab = useCallback(async (rawText, lineText) => {
     const text = (rawText || "").trim();
     if (!text || text.length < 2 || text.length > 80) return;
     setSelected({ text, context: lineText, loading: true });
     try {
-      const [enrichRes, explainRes] = await Promise.all([
-        termService.aiEnrich(text, ""),
-        speakingService.explainPhrase(text, lineText),
-      ]);
+      const explainRes = await speakingService.explainPhrase(text, lineText);
       setSelected((prev) =>
         prev && prev.text === text
-          ? { ...prev, loading: false, fields: enrichRes.data || {}, explain: explainRes.data || {} }
+          ? { ...prev, loading: false, explain: explainRes.data || {} }
           : prev
       );
     } catch {
@@ -505,40 +528,84 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
     [highlights]
   );
 
+  // The user's own saved term that exactly matches the given text (if any).
+  const findTermMatch = useCallback(
+    (text) =>
+      termMatches.find(
+        (m) => (m.name || "").toLowerCase() === (text || "").toLowerCase()
+      ) || null,
+    [termMatches]
+  );
+
+  // Re-resolve which of the user's terms appear in this lesson so a newly saved
+  // or removed word re-highlights (and the popup status updates).
+  const refreshTermMatches = useCallback(() => {
+    const texts = (lesson?.lines || []).map((l) => l.text || "");
+    speakingService.matchTerms({ texts }).then((r) => {
+      if (r.data?.matches) setTermMatches(r.data.matches);
+    });
+  }, [lesson]);
+
   const toggleHighlight = async (remove = false) => {
     if (!lesson?.id || !selected?.text) return;
-    const res = await courseService.setHighlight(lesson.id, {
-      text: selected.text,
-      note: noteDraft,
-      remove,
-    });
+    const text = selected.text;
+    const note = noteDraft;
+    const res = await courseService.setHighlight(lesson.id, { text, note, remove });
     if (res.error) {
       toast.error("Could not update highlight.");
       return;
     }
     setHighlights(res.data?.highlights || []);
-    toast.success(remove ? "Highlight removed." : "Saved to this lesson.");
+    if (remove) {
+      toast.success("Highlight removed.");
+      return;
+    }
+    undoToast("Highlighted in this lesson.", async () => {
+      const undoRes = await courseService.setHighlight(lesson.id, { text, remove: true });
+      if (!undoRes.error) setHighlights(undoRes.data?.highlights || []);
+    });
   };
 
-  const saveSelectionAsTerm = async () => {
-    if (!selected?.fields) return;
+  // Save the selected word/phrase to the default deck with the meaning from
+  // explain_phrase and the (optional) chosen image. Returns false on failure so
+  // the modal keeps its save panel open. Offers an Undo toast.
+  const saveSelectionAsTerm = async (image = "") => {
+    if (!selected?.text) return false;
     const res = await termService.addToDefaultDeck({
       name: selected.text,
       meaning: selected.explain?.meaning || "",
-      ...selected.fields,
-      ai_filled: true,
+      image: image || "",
+      ai_filled: false,
     });
     if (res.error) {
       toast.error(errorMessage(res.error, "Could not save term."));
+      return false;
+    }
+    const termId = res.data?.id;
+    refreshTermMatches();
+    undoToast(`"${selected.text}" saved to your default deck.`, async () => {
+      if (!termId) return;
+      await termService.delete(termId);
+      refreshTermMatches();
+    });
+    return true;
+  };
+
+  // Open the term's single-term study page (saved terms are deep-linkable).
+  const openTermPage = (match) => {
+    if (match?.term_id) navigate(`/learn/${match.term_id}`);
+  };
+
+  // Remove a saved term straight from the popup (reversible by saving again).
+  const removeTermFromDeck = async (match) => {
+    if (!match?.term_id) return;
+    const res = await termService.delete(match.term_id);
+    if (res.error) {
+      toast.error("Could not remove the term.");
       return;
     }
-    toast.success(`"${selected.text}" saved to your default deck.`);
-    setSelected(null);
-    // Re-highlight: the phrase is now one of the user's terms.
-    const texts = (lesson?.lines || []).map((l) => l.text || "");
-    speakingService.matchTerms({ texts }).then((r) => {
-      if (r.data?.matches) setTermMatches(r.data.matches);
-    });
+    refreshTermMatches();
+    toast.success(`"${match.name}" removed from your deck.`);
   };
 
   const saveWordAsTerm = async (word) => {
@@ -1013,9 +1080,9 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
             <InfoOutlinedIcon fontSize="small" />
             <span>
               <strong>Tip:</strong> select any word or phrase to get its meaning, IPA and a
-              speaking tip — then save it as a term or highlight it to revisit later. Words you
-              already saved appear <mark className="sc-hl sc-hl--term">underlined</mark>; click them
-              to study.
+              speaking tip — then save it as a term (with a picture) or highlight it to revisit
+              later. Saved words appear <mark className="sc-hl sc-hl--term">underlined</mark> and
+              highlights are <mark className="sc-hl sc-hl--note">tinted</mark>; click them to manage.
             </span>
           </div>
         )}
@@ -1044,13 +1111,7 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
                       : renderMarkedText(line.text, {
                           highlights,
                           termMatches,
-                          onNoteClick: (segment, full) => openVocab(segment, full),
-                          onTermClick: (payload) => {
-                            const url = payload.deck_id
-                              ? `/deck/${payload.deck_id}/learn/${payload.term_id}`
-                              : `/learn/${payload.term_id}`;
-                            window.open(url, "_blank", "noopener");
-                          },
+                          onMarkClick: (segment, full) => openVocab(segment, full),
                         })}
                   </p>
                   {!rpActive && (
@@ -1136,13 +1197,16 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
           selected={selected}
           noteDraft={noteDraft}
           setNoteDraft={setNoteDraft}
-          isHighlighted={isHighlighted}
+          highlighted={selected ? isHighlighted(selected.text) : false}
+          termMatch={selected ? findTermMatch(selected.text) : null}
           showHighlightControls={!!lesson?.id}
           onClose={() => setSelected(null)}
           onRetry={() => openVocab(selected?.text, selected?.context)}
           onSpeak={(text) => speakText(text)}
           onSaveTerm={saveSelectionAsTerm}
           onToggleHighlight={toggleHighlight}
+          onOpenTerm={openTermPage}
+          onRemoveTerm={removeTermFromDeck}
         />
       </div>
     );

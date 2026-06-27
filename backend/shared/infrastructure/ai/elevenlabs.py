@@ -65,6 +65,11 @@ class ElevenLabsProvider(RetryingHttpProvider):
     def is_configured(self) -> bool:
         return bool(self._api_key)
 
+    def synthesize(self, text: str, voice: str, *, language: str | None = None) -> dict[str, str]:
+        """TTS-port alias for :meth:`generate_speech` (``language`` is ignored —
+        the model is multilingual and inferred from the text)."""
+        return self.generate_speech(text, voice)
+
     def generate_speech(self, text: str, voice: str) -> dict[str, str]:
         """Synthesize ``text`` to speech with an ElevenLabs voice id.
 

@@ -22,7 +22,9 @@ class ImageStoragePort(Protocol):
 
 
 class AudioStoragePort(Protocol):
-    def upload_audio(self, data: bytes, *, public_id: str | None = None) -> str: ...
+    def upload_audio(self, data: bytes, *, public_id: str | None = None, invalidate: bool = False) -> str: ...
+
+    def delete_audio(self, public_id: str) -> bool: ...
 
 
 class OAuthPort(Protocol):
@@ -31,6 +33,23 @@ class OAuthPort(Protocol):
     def get_access_token(self, code: str, redirect_uri: str) -> str: ...
 
     def get_user_info(self, access_token: str) -> dict[str, Any]: ...
+
+
+class TtsPort(Protocol):
+    """Provider-agnostic text-to-speech port.
+
+    Implementations talk to a concrete TTS engine (Azure, ElevenLabs, the local
+    Kokoro model, …) and return ``{"audio": base64, "mime_type": str}``.
+    ``is_configured`` reports whether credentials / model files are available so
+    callers can skip an unusable provider.
+    """
+
+    label: str
+
+    @property
+    def is_configured(self) -> bool: ...
+
+    def synthesize(self, text: str, voice: str, *, language: str | None = None) -> dict[str, str]: ...
 
 
 class AiTextPort(Protocol):

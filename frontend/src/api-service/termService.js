@@ -95,6 +95,8 @@ class TermService extends BaseService {
       word_family: term.word_family ?? [],
       ai_filled: term.ai_filled ?? true,
     };
+    // An https image URL is normalized (uploaded to Cloudinary) server-side.
+    if (term.image) payload.image = term.image;
     return this.request.post(this.action("add_to_default_deck"), payload);
   }
 }

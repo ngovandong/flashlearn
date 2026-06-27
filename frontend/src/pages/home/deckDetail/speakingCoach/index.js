@@ -18,12 +18,10 @@ import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
-import CloseIcon from "@mui/icons-material/Close";
-import AddIcon from "@mui/icons-material/Add";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import BorderColorIcon from "@mui/icons-material/BorderColor";
+import UndoIcon from "@mui/icons-material/Undo";
 
 import { speakingService } from "@api-services/speakingService";
 import { termService } from "@api-services/termService";
@@ -31,6 +29,8 @@ import { userSettingService } from "@api-services/userSettingService";
 import LineAnalysis from "./lineAnalysis";
 import SessionAnalysis from "./sessionAnalysis";
 import CoursePanel from "./coursePanel";
+import VocabModal from "./vocabModal";
+import { renderMarkedText } from "./vocabMarks";
 import { blobToWav } from "./audioWav";
 import { markSpeakingCoachPracticed } from "@utils/practiceBanner";
 
@@ -113,6 +113,30 @@ function errorMessage(err, fallback) {
   if (typeof err === "string") return err;
   if (err.errors) return typeof err.errors === "string" ? err.errors : fallback;
   return fallback;
+}
+
+// Success toast with an inline Undo action so the user can revert the last
+// highlight / save in one tap. react-toastify passes { closeToast } to a
+// content renderer.
+function undoToast(message, onUndo) {
+  toast.success(
+    ({ closeToast }) => (
+      <div className="sc-toast">
+        <span className="sc-toast__msg">{message}</span>
+        <button
+          type="button"
+          className="sc-toast__undo"
+          onClick={() => {
+            onUndo();
+            closeToast?.();
+          }}
+        >
+          <UndoIcon fontSize="small" /> Undo
+        </button>
+      </div>
+    ),
+    { autoClose: 6000 }
+  );
 }
 
 export default function SpeakingCoach() {
@@ -685,26 +709,20 @@ export default function SpeakingCoach() {
     setIsRecording(false);
   };
 
-  // ---- Vocabulary popup (reuses term enrichment) ----
-  // Open the coach for an explicit word/phrase. Backend caches enrich +
+  // ---- Vocabulary popup ----
+  // Open the coach for an explicit word/phrase. Only ``explain_phrase`` is called
+  // here (meaning + IPA + speaking tip); the heavier Oxford-style enrichment was
+  // redundant for a quick lookup, so it's dropped. The backend caches
   // explain_phrase, so re-opening a noted highlight costs no extra AI call.
   const openVocab = useCallback(async (rawText, lineText) => {
     const text = (rawText || "").trim();
     if (!text || text.length < 2 || text.length > 80) return;
     setSelected({ text, context: lineText, loading: true });
     try {
-      const [enrichRes, explainRes] = await Promise.all([
-        termService.aiEnrich(text, ""),
-        speakingService.explainPhrase(text, lineText),
-      ]);
+      const explainRes = await speakingService.explainPhrase(text, lineText);
       setSelected((prev) =>
         prev && prev.text === text
-          ? {
-              ...prev,
-              loading: false,
-              fields: enrichRes.data || {},
-              explain: explainRes.data || {},
-            }
+          ? { ...prev, loading: false, explain: explainRes.data || {} }
           : prev
       );
     } catch {
@@ -729,133 +747,94 @@ export default function SpeakingCoach() {
     [conversation]
   );
 
+  // The user's own saved term that exactly matches the given text (if any), so
+  // the popup can offer "open to study" / "remove from deck".
+  const findTermMatch = useCallback(
+    (text) =>
+      termMatches.find(
+        (m) => (m.name || "").toLowerCase() === (text || "").toLowerCase()
+      ) || null,
+    [termMatches]
+  );
+
+  // Refresh the user's terms that appear in this conversation so newly saved or
+  // removed words re-highlight (and the popup status updates) without a reload.
+  const refreshTermMatches = useCallback(() => {
+    if (!conversation?.id) return;
+    speakingService.matchTerms(conversation.id).then((r) => {
+      if (r.data?.matches) setTermMatches(r.data.matches);
+    });
+  }, [conversation?.id]);
+
   // Persist (or remove) a noted word/phrase on the current conversation so it
-  // re-highlights on revisit.
+  // re-highlights on revisit. Adding offers an Undo toast.
   const toggleHighlight = async (remove = false) => {
     if (!conversation?.id || !selected?.text) return;
-    const res = await speakingService.setHighlight(conversation.id, {
-      text: selected.text,
-      note: noteDraft,
-      remove,
-    });
+    const text = selected.text;
+    const note = noteDraft;
+    const res = await speakingService.setHighlight(conversation.id, { text, note, remove });
     if (res.error) {
       toast.error("Could not update highlight.");
       return;
     }
-    const highlights = res.data?.highlights || [];
-    setConversation((prev) => (prev ? { ...prev, highlights } : prev));
-    toast.success(remove ? "Highlight removed." : "Saved to this conversation.");
-  };
-
-  // Compute non-overlapping highlight ranges for a line: user notes win over
-  // saved-term matches when they overlap.
-  const buildMarks = useCallback(
-    (text) => {
-      const lower = text.toLowerCase();
-      const isWordChar = (ch) => /[a-z0-9']/i.test(ch || "");
-      const marks = [];
-      const addOccurrences = (phrase, type, payload) => {
-        const needle = (phrase || "").toLowerCase().trim();
-        if (!needle) return;
-        let from = 0;
-        for (;;) {
-          const idx = lower.indexOf(needle, from);
-          if (idx === -1) break;
-          const end = idx + needle.length;
-          if (!isWordChar(lower[idx - 1]) && !isWordChar(lower[end])) {
-            marks.push({ start: idx, end, type, payload });
-          }
-          from = end;
-        }
-      };
-      (conversation?.highlights || []).forEach((h) => addOccurrences(h.text, "note", h));
-      termMatches.forEach((m) => addOccurrences(m.name, "term", m));
-      // Earliest first; on ties prefer notes, then the longest span.
-      marks.sort(
-        (a, b) =>
-          a.start - b.start ||
-          (a.type === b.type ? 0 : a.type === "note" ? -1 : 1) ||
-          b.end - b.start - (a.end - a.start)
-      );
-      const out = [];
-      let lastEnd = 0;
-      for (const m of marks) {
-        if (m.start >= lastEnd) {
-          out.push(m);
-          lastEnd = m.end;
-        }
-      }
-      return out;
-    },
-    [conversation, termMatches]
-  );
-
-  const renderLineContent = (text) => {
-    const marks = buildMarks(text);
-    if (!marks.length) return text;
-    const nodes = [];
-    let cursor = 0;
-    marks.forEach((m, i) => {
-      if (m.start > cursor) nodes.push(text.slice(cursor, m.start));
-      const segment = text.slice(m.start, m.end);
-      if (m.type === "note") {
-        nodes.push(
-          <mark
-            key={`n${i}`}
-            className="sc-hl sc-hl--note"
-            title={m.payload.note ? `Note: ${m.payload.note}` : "Your highlight — click to view"}
-            onClick={(e) => {
-              e.stopPropagation();
-              openVocab(segment, text);
-            }}
-          >
-            {segment}
-          </mark>
-        );
-      } else {
-        nodes.push(
-          <mark
-            key={`t${i}`}
-            className="sc-hl sc-hl--term"
-            title="Saved term — open to study"
-            onClick={(e) => {
-              e.stopPropagation();
-              const url = m.payload.deck_id
-                ? `/deck/${m.payload.deck_id}/learn/${m.payload.term_id}`
-                : `/learn/${m.payload.term_id}`;
-              window.open(url, "_blank", "noopener");
-            }}
-          >
-            {segment}
-          </mark>
+    setConversation((prev) => (prev ? { ...prev, highlights: res.data?.highlights || [] } : prev));
+    if (remove) {
+      toast.success("Highlight removed.");
+      return;
+    }
+    undoToast("Highlighted in this conversation.", async () => {
+      const undoRes = await speakingService.setHighlight(conversation.id, { text, remove: true });
+      if (!undoRes.error) {
+        setConversation((prev) =>
+          prev ? { ...prev, highlights: undoRes.data?.highlights || [] } : prev
         );
       }
-      cursor = m.end;
     });
-    if (cursor < text.length) nodes.push(text.slice(cursor));
-    return nodes;
   };
 
-  const saveSelectionAsTerm = async () => {
-    if (!selected?.fields) return;
+  // Save the selected word/phrase to the default deck with the meaning from
+  // explain_phrase and the (optional) chosen image. Returns false on failure so
+  // the modal keeps its save panel open. Offers an Undo toast.
+  const saveSelectionAsTerm = async (image = "") => {
+    if (!selected?.text) return false;
     const res = await termService.addToDefaultDeck({
       name: selected.text,
       meaning: selected.explain?.meaning || "",
-      ...selected.fields,
-      ai_filled: true,
+      image: image || "",
+      ai_filled: false,
     });
     if (res.error) {
       toast.error(errorMessage(res.error, "Could not save term."));
+      return false;
+    }
+    const termId = res.data?.id;
+    // Re-highlight: the phrase is now one of the user's terms (keeps the popup
+    // open so its status flips to "saved").
+    refreshTermMatches();
+    undoToast(`"${selected.text}" saved to your default deck.`, async () => {
+      if (!termId) return;
+      await termService.delete(termId);
+      refreshTermMatches();
+    });
+    return true;
+  };
+
+  // Open the term's single-term study page (saved terms are deep-linkable).
+  const openTermPage = (match) => {
+    if (match?.term_id) navigate(`/learn/${match.term_id}`);
+  };
+
+  // Remove a saved term straight from the popup (no Undo — it's reversible by
+  // saving again).
+  const removeTermFromDeck = async (match) => {
+    if (!match?.term_id) return;
+    const res = await termService.delete(match.term_id);
+    if (res.error) {
+      toast.error("Could not remove the term.");
       return;
     }
-    toast.success(`"${selected.text}" saved to your default deck.`);
-    setSelected(null);
-    // Re-highlight: the phrase is now one of the user's terms.
-    if (conversation?.id) {
-      speakingService.matchTerms(conversation.id).then((r) => {
-        if (r.data?.matches) setTermMatches(r.data.matches);
-      });
-    }
+    refreshTermMatches();
+    toast.success(`"${match.name}" removed from your deck.`);
   };
 
   const saveWordAsTerm = async (word) => {
@@ -1402,8 +1381,9 @@ export default function SpeakingCoach() {
                   <span>
                     <strong>Tip:</strong> select any word or phrase to get its meaning, IPA and a
                     speaking tip — then save it as a term or highlight it to revisit later.
-                    Words you already saved appear <mark className="sc-hl sc-hl--term">underlined</mark>;
-                    click them to study.
+                    Words you already saved appear <mark className="sc-hl sc-hl--term">underlined</mark>
+                    and highlights are <mark className="sc-hl sc-hl--note">tinted</mark>; click them
+                    to manage.
                   </span>
                 </div>
 
@@ -1424,7 +1404,11 @@ export default function SpeakingCoach() {
                             className="sc-line__text"
                             onMouseUp={() => handleSelection(line.text)}
                           >
-                            {renderLineContent(line.text)}
+                            {renderMarkedText(line.text, {
+                              highlights: conversation?.highlights || [],
+                              termMatches,
+                              onMarkClick: openVocab,
+                            })}
                           </p>
 
                           {rolePlayIndex === null ? (
@@ -1651,115 +1635,21 @@ export default function SpeakingCoach() {
         )}
       </div>
 
-      {selected && (
-        <div className="sc-modal" onClick={() => setSelected(null)}>
-          <div className="sc-modal__card" onClick={(e) => e.stopPropagation()}>
-            <div className="sc-modal__head">
-              <div>
-                <span className="sc-modal__eyebrow">Vocabulary coach</span>
-                <h3>"{selected.text}"</h3>
-              </div>
-              <button className="sc-icon-btn sc-icon-btn--light" onClick={() => setSelected(null)}>
-                <CloseIcon fontSize="small" />
-              </button>
-            </div>
-
-            <div className="sc-modal__body">
-              {selected.loading ? (
-                <div className="sc-modal__loading">
-                  <div className="sc-spinner" />
-                  <p>Looking it up…</p>
-                </div>
-              ) : selected.error ? (
-                <div className="sc-modal__error">
-                  <p>{selected.error}</p>
-                  <button
-                    className="sc-btn sc-btn--ghost sc-btn--sm"
-                    onClick={() => openVocab(selected.text, selected.context)}
-                  >
-                    Retry
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="sc-modal__meaning">
-                    <span className="sc-section-label">Meaning</span>
-                    <p>{selected.explain?.meaning || selected.fields?.definition || "—"}</p>
-                  </div>
-                  <div className="sc-grid-2">
-                    <div className="sc-modal__cell">
-                      <span className="sc-section-label">Pronunciation</span>
-                      <span className="sc-mono sc-mono--good">
-                        {selected.fields?.pronunciation || "/--/"}
-                      </span>
-                    </div>
-                    <div className="sc-modal__cell">
-                      <span className="sc-section-label">Word type</span>
-                      <span>{selected.fields?.word_type || "—"}</span>
-                    </div>
-                  </div>
-                  {selected.explain?.mouthTip && (
-                    <div className="sc-modal__cell">
-                      <span className="sc-section-label">Speaking tip</span>
-                      <p>{selected.explain.mouthTip}</p>
-                    </div>
-                  )}
-                  {selected.fields?.examples?.length > 0 && (
-                    <div className="sc-modal__cell">
-                      <span className="sc-section-label">Example</span>
-                      <p
-                        className="sc-modal__example"
-                        dangerouslySetInnerHTML={{ __html: selected.fields.examples[0] }}
-                      />
-                    </div>
-                  )}
-                  {conversation?.id && (
-                    <div className="sc-modal__note">
-                      <span className="sc-section-label">Note (optional)</span>
-                      <input
-                        type="text"
-                        value={noteDraft}
-                        onChange={(e) => setNoteDraft(e.target.value)}
-                        placeholder="Add a quick note for this highlight…"
-                      />
-                      <div className="sc-modal__note-actions">
-                        <button
-                          className={`sc-btn sc-btn--sm ${
-                            isHighlighted(selected.text) ? "sc-btn--primary" : "sc-btn--ghost"
-                          }`}
-                          onClick={() => toggleHighlight(false)}
-                        >
-                          <BorderColorIcon fontSize="small" />
-                          {isHighlighted(selected.text) ? "Update highlight" : "Highlight in chat"}
-                        </button>
-                        {isHighlighted(selected.text) && (
-                          <button
-                            className="sc-btn sc-btn--ghost sc-btn--sm"
-                            onClick={() => toggleHighlight(true)}
-                          >
-                            <CloseIcon fontSize="small" /> Remove
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  <div className="sc-modal__actions">
-                    <button
-                      className="sc-btn sc-btn--ghost"
-                      onClick={() => speak(selected.text)}
-                    >
-                      <VolumeUpIcon fontSize="small" /> Listen
-                    </button>
-                    <button className="sc-btn sc-btn--primary" onClick={saveSelectionAsTerm}>
-                      <AddIcon fontSize="small" /> Save as term
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <VocabModal
+        selected={selected}
+        noteDraft={noteDraft}
+        setNoteDraft={setNoteDraft}
+        highlighted={selected ? isHighlighted(selected.text) : false}
+        termMatch={selected ? findTermMatch(selected.text) : null}
+        showHighlightControls={!!conversation?.id}
+        onClose={() => setSelected(null)}
+        onRetry={() => openVocab(selected?.text, selected?.context)}
+        onSpeak={(text) => speak(text)}
+        onSaveTerm={saveSelectionAsTerm}
+        onToggleHighlight={toggleHighlight}
+        onOpenTerm={openTermPage}
+        onRemoveTerm={removeTermFromDeck}
+      />
     </div>
   );
 }
