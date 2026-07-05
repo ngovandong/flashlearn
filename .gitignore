@@ -141,3 +141,6 @@ graphify-out/manifest.json
 graphify-out/.graphify_python
 graphify-out/.graphify_labels.json
 graphify-out/.graphify_semantic_new.json
+
+# Mac OS X #
+.DS_Store
