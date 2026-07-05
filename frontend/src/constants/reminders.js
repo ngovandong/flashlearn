@@ -1,5 +1,6 @@
 import React from "react";
 import HearingIcon from "@mui/icons-material/Hearing";
+import HeadphonesRoundedIcon from "@mui/icons-material/HeadphonesRounded";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import ForumRoundedIcon from "@mui/icons-material/ForumRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
@@ -41,6 +42,14 @@ export const REMINDER_META = {
     title: "Revisit your writing",
     description: (label) => `Pick up “${label}” and refine it further.`,
     cta: "Open writing",
+  },
+  listening_dictation: {
+    tone: "violet-blue",
+    icon: <HeadphonesRoundedIcon />,
+    title: "Take a listening test",
+    description: () =>
+      "Listen to a short clip and type what you hear — the coach scores every word.",
+    cta: "Start dictation",
   },
   listening: {
     tone: "amber",

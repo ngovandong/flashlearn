@@ -1,0 +1,791 @@
+// Listening hub (dictation) — catalog + listen-and-type page.
+// Reuses the Speaking Coach shell classes (.sc-wrapper/.sc-topbar/.sc-tabs/
+// .sc-btn/.sc-modal/.sc-back). Brand/neutral colors use theme tokens; only the
+// correct/wrong diff colors stay static (green = correct, red = wrong).
+
+$lt-good: #2e9e6b;
+$lt-mid: #e0992f;
+$lt-low: $error-red;
+
+.listening-wrapper {
+    .sc-brand__icon {
+        background: $brand-gradient;
+    }
+}
+
+.listening-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-8 $space-4;
+    color: $minor-text-color;
+}
+
+.listening-empty {
+    padding: $space-6 $space-4;
+    text-align: center;
+    color: $minor-text-color;
+}
+
+.listening-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.55rem;
+    border-radius: $radius-pill;
+    background: rgba(var(--fl-primary-rgb), 0.12);
+    color: $main-purple;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+/* ---------- Topic grid ---------- */
+.listening-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: $space-4;
+}
+
+.listening-topic-card {
+    @include card;
+    text-align: left;
+    padding: $space-4;
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    cursor: pointer;
+    border: 1px solid $border-subtle;
+    transition: transform 0.18s $ease, box-shadow 0.18s $ease, border-color 0.18s $ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: $shadow-md;
+        border-color: $hover-purple;
+    }
+
+    &__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    &__icon {
+        width: 40px;
+        height: 40px;
+        border-radius: $radius-md;
+        display: grid;
+        place-items: center;
+        background: rgba(var(--fl-primary-rgb), 0.12);
+        color: $main-purple;
+    }
+
+    h4 {
+        margin: $space-2 0 0;
+        font-size: 1rem;
+        font-weight: 800;
+        color: $main-text-color;
+    }
+
+    p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: $minor-text-color;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    &__foot {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        gap: $space-2;
+        padding-top: $space-2;
+    }
+
+    &__count {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: $minor-text-color;
+        white-space: nowrap;
+    }
+}
+
+.listening-progress {
+    flex: 1;
+    height: 6px;
+    border-radius: $radius-pill;
+    background: $surface-2;
+    overflow: hidden;
+
+    &__bar {
+        height: 100%;
+        border-radius: $radius-pill;
+        background: $brand-gradient;
+        transition: width 0.3s $ease;
+    }
+}
+
+/* ---------- Topic → exercise list ---------- */
+.listening-topic {
+    &__head {
+        margin: $space-4 0 $space-5;
+
+        h3 {
+            display: inline-block;
+            margin: 0 $space-2 0 0;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: $main-text-color;
+        }
+
+        p {
+            margin: $space-2 0 0;
+            color: $minor-text-color;
+            font-size: 0.85rem;
+        }
+    }
+}
+
+.listening-ex-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+}
+
+.listening-ex {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: 0.75rem 1rem;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-md;
+    background: $surface;
+    color: $main-text-color;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.18s $ease, background 0.18s $ease;
+
+    &:hover:not(:disabled) {
+        border-color: $hover-purple;
+        background: rgba(var(--fl-primary-rgb), 0.05);
+    }
+
+    &:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    &.is-done .listening-ex__icon {
+        background: rgba($lt-good, 0.15);
+        color: $lt-good;
+    }
+
+    &__icon {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+        border-radius: $radius-sm;
+        display: grid;
+        place-items: center;
+        background: rgba(var(--fl-primary-rgb), 0.12);
+        color: $main-purple;
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__title {
+        font-weight: 700;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__meta {
+        font-size: 0.75rem;
+        color: $minor-text-color;
+    }
+
+    &__chev {
+        color: $minor-text-color;
+        flex-shrink: 0;
+    }
+}
+
+/* ---------- Listen & type page ---------- */
+.lt-wrapper {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: $space-5 $space-4 $space-8;
+    color: $main-text-color;
+}
+
+.lt-header {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    flex-wrap: wrap;
+    margin-bottom: $space-4;
+
+    &__title {
+        display: flex;
+        align-items: center;
+        gap: $space-2;
+        margin-right: auto;
+        min-width: 0;
+
+        h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+}
+
+.lt-best {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: $radius-pill;
+    background: rgba($lt-mid, 0.15);
+    color: $lt-mid;
+    font-weight: 800;
+    font-size: 0.8rem;
+}
+
+.lt-restart-all {
+    font-size: 0.78rem;
+    padding: 0.35rem 0.7rem;
+}
+
+.lt-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: $space-4;
+
+    .lt-dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 1px solid $border-color;
+        background: $surface-2;
+        cursor: pointer;
+        padding: 0;
+        transition: transform 0.15s $ease;
+
+        &:hover {
+            transform: scale(1.2);
+        }
+
+        &.is-current {
+            box-shadow: 0 0 0 3px rgba(var(--fl-primary-rgb), 0.25);
+            border-color: $main-purple;
+        }
+
+        &.good {
+            background: $lt-good;
+            border-color: $lt-good;
+        }
+        &.mid {
+            background: $lt-mid;
+            border-color: $lt-mid;
+        }
+        &.low {
+            background: $lt-low;
+            border-color: $lt-low;
+        }
+    }
+}
+
+.lt-card {
+    @include card;
+    padding: $space-5;
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+
+    &__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $space-3;
+        flex-wrap: wrap;
+    }
+}
+
+.lt-counter {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: $minor-text-color;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.lt-audio-controls {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    flex-wrap: wrap;
+}
+
+.lt-input {
+    width: 100%;
+    resize: vertical;
+    min-height: 60px;
+    padding: 0.85rem 1rem;
+    border-radius: $radius-md;
+    border: 1px solid $border-color;
+    background: $surface-2;
+    color: $main-text-color;
+    font-size: 1rem;
+    font-family: inherit;
+    line-height: 1.5;
+    transition: border-color 0.18s $ease, box-shadow 0.18s $ease;
+
+    &:focus {
+        outline: none;
+        border-color: $main-purple;
+        box-shadow: 0 0 0 3px rgba(var(--fl-primary-rgb), 0.18);
+    }
+
+    &:disabled {
+        opacity: 0.85;
+    }
+}
+
+.lt-reveal {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    padding: $space-3 $space-4;
+    border-radius: $radius-md;
+    background: $surface-2;
+    border: 1px solid $border-subtle;
+
+    &__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: $radius-pill;
+        font-weight: 800;
+        font-size: 0.78rem;
+
+        &.is-good {
+            background: rgba($lt-good, 0.15);
+            color: $lt-good;
+        }
+        &.is-mid {
+            background: rgba($lt-mid, 0.15);
+            color: $lt-mid;
+        }
+        &.is-low {
+            background: rgba($lt-low, 0.15);
+            color: $lt-low;
+        }
+    }
+
+    &__text {
+        margin: 0;
+        font-size: 1.05rem;
+        line-height: 1.7;
+    }
+
+    &__typed {
+        margin: 0;
+        font-size: 0.85rem;
+        color: $minor-text-color;
+
+        .sc-section-label {
+            margin-right: 0.4rem;
+        }
+    }
+
+    &__note {
+        margin: 0;
+        font-size: 0.82rem;
+        color: $minor-text-color;
+        font-style: italic;
+    }
+
+    &__pron {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        margin-top: $space-2;
+        padding-top: $space-2;
+        border-top: 1px dashed $border-subtle;
+    }
+}
+
+/* ---------- Per-sentence helpers: translation & note ---------- */
+.lt-helpers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-3;
+}
+
+.lt-helper {
+    display: flex;
+    flex-direction: column;
+    gap: $space-2;
+    padding: $space-3;
+    border-radius: $radius-md;
+    border: 1px solid $border-subtle;
+    background: $surface-2;
+
+    &__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $space-2;
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: $space-2;
+    }
+
+    &__text {
+        margin: 0;
+        font-size: 0.92rem;
+        line-height: 1.5;
+        color: $main-text-color;
+        white-space: pre-wrap;
+    }
+
+    &__edit {
+        display: flex;
+        flex-direction: column;
+        gap: $space-2;
+
+        textarea {
+            width: 100%;
+            resize: vertical;
+            min-height: 48px;
+            padding: 0.55rem 0.7rem;
+            border-radius: $radius-sm;
+            border: 1px solid $border-color;
+            background: $surface;
+            color: $main-text-color;
+            font-family: inherit;
+            font-size: 0.9rem;
+            line-height: 1.5;
+
+            &:focus {
+                outline: none;
+                border-color: $main-purple;
+                box-shadow: 0 0 0 3px rgba(var(--fl-primary-rgb), 0.18);
+            }
+        }
+    }
+
+    &__actions {
+        display: flex;
+        gap: $space-2;
+        flex-wrap: wrap;
+    }
+}
+
+.lt-lang {
+    border: 1px solid $border-color;
+    background: $surface;
+    color: $main-text-color;
+    border-radius: $radius-sm;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.78rem;
+    font-family: inherit;
+    cursor: pointer;
+
+    &:focus {
+        outline: none;
+        border-color: $main-purple;
+    }
+}
+
+/* ---------- Pronunciation (per word) ---------- */
+.lt-pron {
+    font-size: 1.02rem;
+    line-height: 2;
+
+    &__word {
+        border: none;
+        background: none;
+        padding: 0 1px;
+        margin: 0;
+        font: inherit;
+        color: $main-text-color;
+        cursor: pointer;
+        border-bottom: 2px dotted $minor-text-color;
+        border-radius: 2px;
+        transition: background 0.15s $ease, border-color 0.15s $ease;
+
+        &:hover {
+            background: rgba(var(--fl-primary-rgb), 0.12);
+            border-bottom-color: $main-purple;
+        }
+    }
+
+    &__overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+    }
+
+    &__pop {
+        position: fixed;
+        z-index: 41;
+        width: 232px;
+        max-width: calc(100vw - 16px);
+        padding: $space-3;
+        border-radius: $radius-md;
+        background: $surface;
+        border: 1px solid $border-subtle;
+        box-shadow: $shadow-lg;
+        display: flex;
+        flex-direction: column;
+        gap: $space-2;
+    }
+
+    &__pop-word {
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: $main-text-color;
+    }
+
+    &__loading {
+        display: grid;
+        place-items: center;
+        padding: $space-2 0;
+    }
+
+    &__err {
+        margin: 0;
+        font-size: 0.82rem;
+        color: $minor-text-color;
+    }
+
+    &__btns {
+        display: flex;
+        gap: $space-2;
+
+        .sc-btn {
+            flex: 1;
+            justify-content: center;
+            gap: 0.3rem;
+        }
+    }
+
+    &__ipa {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        padding-top: $space-2;
+        border-top: 1px solid $border-subtle;
+        font-size: 0.82rem;
+        color: $minor-text-color;
+
+        b {
+            color: $main-text-color;
+            font-weight: 700;
+        }
+    }
+}
+
+.lt-token {
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 0 1px;
+    transition: background 0.15s $ease;
+
+    &.is-correct {
+        color: $lt-good;
+    }
+
+    &.is-wrong {
+        color: $lt-low;
+        text-decoration: underline wavy $lt-low;
+        text-underline-offset: 3px;
+    }
+
+    &:hover {
+        background: rgba(var(--fl-primary-rgb), 0.12);
+    }
+
+    // Saved highlight / term underlines (reuse the Speaking Coach semantics).
+    &--note {
+        background: rgba(var(--fl-accent-2-rgb), 0.28);
+    }
+    &--term {
+        box-shadow: inset 0 -2px 0 $main-purple;
+    }
+}
+
+.lt-actions {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+    flex-wrap: wrap;
+
+    .lt-check {
+        margin-left: auto;
+    }
+}
+
+.lt-summary {
+    @include card;
+    margin-top: $space-4;
+    padding: $space-4 $space-5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-4;
+    flex-wrap: wrap;
+
+    &__score {
+        display: flex;
+        align-items: center;
+        gap: $space-3;
+        color: $main-purple;
+
+        svg {
+            font-size: 2rem;
+        }
+
+        strong {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: $main-text-color;
+        }
+
+        span {
+            font-size: 0.8rem;
+            color: $minor-text-color;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        gap: $space-2;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 600px) {
+    .lt-wrapper {
+        padding: $space-4 $space-3 $space-7;
+    }
+
+    .lt-card {
+        padding: $space-4;
+    }
+
+    .lt-dots {
+        gap: 0.6rem;
+
+        .lt-dot {
+            width: 28px;
+            height: 28px;
+        }
+    }
+
+    .lt-audio-controls {
+        width: 100%;
+
+        .sc-btn {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+
+    .lt-helpers {
+        grid-template-columns: 1fr;
+    }
+
+    .lt-restart-all {
+        flex: 1 0 100%;
+        justify-content: center;
+    }
+
+    .lt-actions {
+        .sc-btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .lt-check {
+            margin-left: 0;
+        }
+    }
+
+    .listening-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .course-type-tabs {
+        .course-type-tab {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+}
+
+// ── Course page: Speaking / Listening course switch ─────────────────────────
+.course-type-tabs {
+    display: flex;
+    gap: 0.35rem;
+    margin: 0 auto $space-5;
+    max-width: 1100px;
+    width: 100%;
+    background: $surface-2;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-md;
+    padding: 0.3rem;
+
+    .course-type-tab {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        flex: 0 1 auto;
+        border: none;
+        background: transparent;
+        color: $minor-text-color;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 0.6rem 1.1rem;
+        border-radius: $radius-sm;
+        cursor: pointer;
+        transition: all 0.18s $ease;
+
+        &:hover {
+            color: $main-text-color;
+        }
+
+        &.is-active {
+            background: $surface;
+            color: $main-purple;
+            box-shadow: $shadow-sm;
+        }
+    }
+}

@@ -52,6 +52,15 @@ class TtsPort(Protocol):
     def synthesize(self, text: str, voice: str, *, language: str | None = None) -> dict[str, str]: ...
 
 
+class TranslationPort(Protocol):
+    """Provider-agnostic machine-translation port.
+
+    Implementations return the translated text, or ``""`` on failure so callers
+    can fall back (e.g. to an :class:`AiTextPort`)."""
+
+    def translate(self, text: str, target_language: str = "vi", source_language: str = "auto") -> str: ...
+
+
 class AiTextPort(Protocol):
     """Provider-agnostic text/JSON generation port.
 

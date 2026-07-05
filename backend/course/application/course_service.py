@@ -10,6 +10,8 @@ import base64
 import logging
 import time
 
+from django.utils import timezone
+
 from backend.course.domain.progress import (
     COURSE_PASS_THRESHOLD,
     is_passing,
@@ -209,6 +211,39 @@ class CourseService:
         """Add, update or remove a per-user noted highlight on a lesson."""
         lesson = self.get_lesson(lesson_id)
         return self._repo.set_highlight(user, lesson, text=text, note=note, remove=remove)
+
+    # ── Listen & type (dictation) ─────────────────────────────────────────
+    def save_dictation(self, user, lesson_id, *, score, lines):
+        """Persist a listen-and-type attempt so it can be replayed on revisit.
+
+        The frontend evaluates the typed text against the transcript (a word-level
+        diff for instant, intuitive feedback); here we only clamp the score and
+        store the breakdown verbatim. Dictation never affects the lesson's pass
+        status — it's a listening drill.
+
+        ``lines`` is ``[{"target", "typed", "correct", "total"}]`` — one per
+        transcript line. Returns the saved ``{score, lines, at}`` dictation dict.
+        """
+        lesson = self.get_lesson(lesson_id)
+        try:
+            score = max(0, min(100, int(round(float(score)))))
+        except (TypeError, ValueError):
+            raise ValidationError("Invalid dictation score.")
+        clean_lines = [
+            {
+                "target": str(line.get("target") or ""),
+                "typed": str(line.get("typed") or ""),
+                "correct": int(line.get("correct") or 0),
+                "total": int(line.get("total") or 0),
+            }
+            for line in (lines or [])
+            if isinstance(line, dict)
+        ]
+        if not clean_lines:
+            raise ValidationError("Nothing to save — the dictation has no lines.")
+        dictation = {"score": score, "lines": clean_lines, "at": timezone.now().isoformat()}
+        self._repo.save_dictation(user, lesson, dictation=dictation)
+        return dictation
 
     # ── Import (crawler) ──────────────────────────────────────────────────
     def import_course(self, *, slug, defaults):

@@ -49,21 +49,21 @@ export const TOURS = [
         body: "Open Course to work through structured, level-based dialogues — listen, study the transcript, then pass each lesson with a Live Role-play.",
       },
       {
-        id: "home.number-test",
-        selector: '[data-tour="number-test"]',
-        title: "Number Listening",
-        body: "Train your ear by typing the English numbers you hear — from quick digits to phone, tax, and ID numbers.",
+        id: "home.listening",
+        selector: '[data-tour="listening"]',
+        title: "Listening",
+        body: "Open Listening for dictation tests — hear a clip and type what you say — plus the classic Number listening drill.",
       },
       {
         id: "home.speaking-coach",
         selector: '[data-tour="speaking-coach"]',
-        title: "Speaking Coach",
+        title: "Speaking",
         body: "Practice real conversations out loud — the AI generates dialogues, reads them aloud, and scores your pronunciation.",
       },
       {
         id: "home.writing-coach",
         selector: '[data-tour="writing-coach"]',
-        title: "Writing Coach",
+        title: "Writing",
         body: "Improve your writing — chat with Dragon for instant feedback on every message, or write freely and get an IELTS-style band score.",
       },
       {
@@ -138,7 +138,7 @@ export const TOURS = [
         id: "learn.navigate",
         selector: ".navigate-btns",
         title: "Move between cards",
-        body: "Use these arrows to go back and forward — you can also swipe or use the left/right arrow keys.",
+        body: "Use the arrows to go back and forward — you can also swipe or use the left/right arrow keys. Tap the shuffle button in the middle to study the deck in random order.",
       },
       {
         id: "learn.ai",
@@ -212,9 +212,65 @@ export const TOURS = [
     ],
   },
   {
+    id: "listening",
+    label: "Listening",
+    match: (p) => p === "/listening" || p.startsWith("/listening/topics"),
+    steps: [
+      {
+        id: "listening.tabs",
+        selector: '[data-tour="listening-tabs"]',
+        title: "Two ways to listen",
+        body: "Listening test is the main event — a dictation where you type what you hear. Number listening keeps the classic numbers drill.",
+      },
+      {
+        id: "listening.topics",
+        selector: '[data-tour="listening-topics"]',
+        title: "Pick a topic",
+        body: "Choose a topic to see its exercises. Each card shows how many you've completed so you can pick up where you left off.",
+      },
+      {
+        id: "listening.exercises",
+        selector: '[data-tour="listening-exercises"]',
+        title: "Choose an exercise",
+        body: "Open any exercise to start the listen-and-type practice. Your best score shows next to each one.",
+      },
+    ],
+  },
+  {
+    id: "listen-and-type",
+    label: "Listen & type",
+    match: (p) => /^\/listening\/exercise\/[^/]+\/listen-and-type$/.test(p),
+    steps: [
+      {
+        id: "lt.audio",
+        selector: '[data-tour="lt-audio"]',
+        title: "Listen carefully",
+        body: "Play the sentence, slow it down, or replay it as many times as you need. You can also play the whole clip.",
+      },
+      {
+        id: "lt.input",
+        selector: '[data-tour="lt-input"]',
+        title: "Type what you hear",
+        body: "Write the sentence, then press Enter or Check. Stuck? Reveal shows the answer without scoring it.",
+      },
+      {
+        id: "lt.helpers",
+        selector: '[data-tour="lt-helpers"]',
+        title: "Translate & take notes",
+        body: "Translate the sentence into your language (tap Edit to fix it), or jot a personal note. After you check a sentence, tap any word in the answer to hear its UK/US pronunciation and see the IPA.",
+      },
+      {
+        id: "lt.reveal",
+        selector: '[data-tour="lt-progress"]',
+        title: "Track every sentence",
+        body: "Each dot is a sentence — green, amber or red shows how you did. Your progress saves automatically, so you can stop and finish a long exercise later. Tap a dot to jump around, or use Restart all to start over.",
+      },
+    ],
+  },
+  {
     id: "number-test",
     label: "Number Listening",
-    match: (p) => p.endsWith("/number-test") || p === "/number-test",
+    match: (p) => p.endsWith("/number-test") || p === "/listening/numbers",
     steps: [
       {
         id: "nt.modes",
@@ -242,6 +298,12 @@ export const TOURS = [
     match: (p) => p === "/course" || p.startsWith("/course/"),
     steps: [
       {
+        id: "course.type",
+        selector: '[data-tour="course-type-tabs"]',
+        title: "Two ways to train",
+        body: "Switch between Speaking courses — freeCodeCamp dialogues you play and role-play line by line — and Listening courses, where you listen and type each sentence to sharpen your ear.",
+      },
+      {
         id: "course.catalog",
         selector: '[data-tour="sc-course-catalog"]',
         title: "Guided courses",
@@ -252,6 +314,12 @@ export const TOURS = [
         selector: '[data-tour="sc-course-vocab"]',
         title: "Tap words to study",
         body: "In a lesson, select any word or phrase to see its meaning, IPA and a speaking tip — then save it as a term or highlight it. Your saved words stay underlined, and your last role-play breakdown is kept here so you can revisit it.",
+      },
+      {
+        id: "course.dictation",
+        selector: '[data-tour="sc-course-dictation"]',
+        title: "Listen & type",
+        body: "Turn this on to hide the script and type each line as you hear it. Play the dialogue (optionally on repeat), then Check to see the words you missed and your accuracy — your result is saved for later revision.",
       },
     ],
   },

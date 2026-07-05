@@ -7,6 +7,7 @@ import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import CircleButton from "@components/circleButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ShuffleIcon from "@mui/icons-material/Shuffle";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import { useCallback, useEffect, useRef, useState } from "react";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
@@ -21,11 +22,29 @@ import { deckService } from "@api-services/deckService";
 import { LEARNING_TERM_PAGE_SIZE } from "@constants/pageSize";
 import { highlightMainWord } from "@utils/exampleText";
 
+// Fisher–Yates shuffle over [0, n) — produces a random visiting order of the
+// deck's absolute term indices.
+function buildShuffledOrder(n)
+{
+  const arr = Array.from({ length: n }, (_, i) => i);
+  for (let i = n - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 function LearnPage()
 {
   const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(true);
-  const [terms, setTerms] = useState();
+  // Terms are cached per API page (page -> term[]); navigation jumps to any
+  // absolute index and lazily loads the page that contains it.
+  const [termsByPage, setTermsByPage] = useState({});
+  // `order` maps a session position -> absolute term index. Sequential mode is
+  // the identity order; shuffle mode is a random permutation.
+  const [order, setOrder] = useState(null);
+  const [isShuffled, setIsShuffled] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [newSynonym, setNewSynonym] = useState("");
   const [newAntonym, setNewAntonym] = useState("");
@@ -33,20 +52,35 @@ function LearnPage()
   const [newWordForm, setNewWordForm] = useState("");
   const [newWordFamily, setNewWordFamily] = useState("");
   const touchStartRef = useRef(null);
+  // Last successfully loaded term — kept visible while the next page loads so
+  // the card doesn't flash the full-screen loader on every page boundary.
+  const lastTermRef = useRef(null);
+  const fetchingPagesRef = useRef(new Set());
 
   const [currentState, setCurrentState] = useState({
-    index: 0,
-    absolute_index: 0,
+    position: 0,
     isFlipped: false,
     latest_id: "",
-    currentPage: 0,
   });
-  let currentTerm = null;
+
+  const totalTerms = deck?.number_of_term ?? 0;
+  const absoluteIndex =
+    order && order.length > 0 ? order[currentState.position] : null;
+
+  let loadedTerm = null;
+  if (absoluteIndex != null) {
+    const page = Math.floor(absoluteIndex / LEARNING_TERM_PAGE_SIZE) + 1;
+    const offset = absoluteIndex % LEARNING_TERM_PAGE_SIZE;
+    loadedTerm = termsByPage[page]?.[offset] ?? null;
+  }
+  if (loadedTerm) {
+    lastTermRef.current = loadedTerm;
+  }
+  const currentTerm = loadedTerm || lastTermRef.current;
+
   let youglish = null;
   let google = null;
-
-  if (terms && terms.length > 0) {
-    currentTerm = terms[currentState.index];
+  if (currentTerm) {
     const encodedPhrase = encodeURIComponent(currentTerm.name);
     const definitionPhrase = encodeURIComponent(
       currentTerm.name + " definition"
@@ -69,9 +103,9 @@ function LearnPage()
     const touchEnd = event.changedTouches[0].clientX;
     const touchStart = touchStartRef.current;
     const distance = touchEnd - touchStart;
-    if (currentState.index > 0 && distance > 50) {
+    if (currentState.position > 0 && distance > 50) {
       handleBack();
-    } else if (currentState.index + 1 < terms.length && distance < -50) {
+    } else if (currentState.position + 1 < totalTerms && distance < -50) {
       handleNext();
     }
   };
@@ -92,103 +126,96 @@ function LearnPage()
   {
     return speak(currentTerm?.name);
   }, [currentTerm]);
-  const handleNext = async () =>
+  const handleNext = () =>
   {
-    if (currentState.index + 2 > terms.length) {
-      fetchMore(currentState.currentPage + 1);
-    } else {
-      setCurrentState((pre) => ({
-        ...pre,
-        index: pre.index + 1,
-        absolute_index: pre.absolute_index + 1,
-        isFlipped: false,
-      }));
-    }
+    setCurrentState((pre) =>
+      pre.position + 1 < totalTerms
+        ? { ...pre, position: pre.position + 1, isFlipped: false }
+        : pre
+    );
   };
-  const handleBack = async () =>
+  const handleBack = () =>
   {
-    if (currentState.index === 0 && currentState.currentPage !== 1) {
-      fetchMore(currentState.currentPage - 1, false);
-    } else {
-      setCurrentState((pre) => ({
-        ...pre,
-        index: pre.index - 1,
-        absolute_index: pre.absolute_index - 1,
-        isFlipped: false,
-      }));
-    }
+    setCurrentState((pre) =>
+      pre.position > 0
+        ? { ...pre, position: pre.position - 1, isFlipped: false }
+        : pre
+    );
   };
-  const handleRestart = async () =>
+  const handleRestart = () =>
   {
-    setCurrentState((pre) => ({ index: 0, isFlipped: false }));
+    setCurrentState((pre) => ({ ...pre, position: 0, isFlipped: false }));
   };
 
-  const fetchMore = async (page, isNext = true) =>
+  // Toggle between sequential (newest→oldest) and shuffled study order. When
+  // enabling shuffle the current card is moved to the front so the view stays
+  // put; disabling resumes sequentially from the current term.
+  const toggleShuffle = () =>
   {
-    setIsLoading(true);
-    try {
-      const res = await learningService.getLearningTerms(deckID, page);
-      if (!res.error) {
-        const res_terms = res.data.results;
-
-        if (isNext) {
-          setTerms((pre) => [...pre, ...res_terms]);
-          setCurrentState((pre) => ({
-            ...pre,
-            index: pre.index + 1,
-            isFlipped: false,
-            currentPage: pre.currentPage + 1,
-            absolute_index: pre.absolute_index + 1,
-          }));
-        } else {
-          setTerms((pre) => [...res_terms, ...pre]);
-          setCurrentState((pre) => ({
-            ...pre,
-            index: pre.index + LEARNING_TERM_PAGE_SIZE - 1,
-            isFlipped: false,
-            currentPage: pre.currentPage - 1,
-            absolute_index: pre.absolute_index - 1,
-          }));
-        }
-      } else {
-        const errorMessage = getFirstError(res.error);
-        toast.error(errorMessage);
+    if (!order || totalTerms === 0) return;
+    const currentAbs = order[currentState.position];
+    if (!isShuffled) {
+      const perm = buildShuffledOrder(totalTerms);
+      const at = perm.indexOf(currentAbs);
+      if (at > 0) {
+        perm[at] = perm[0];
+        perm[0] = currentAbs;
       }
-    } catch (error) {
-      setIsLoading(false);
-    } finally {
-      setIsLoading(false);
+      setOrder(perm);
+      setIsShuffled(true);
+      setCurrentState((pre) => ({ ...pre, position: 0, isFlipped: false }));
+    } else {
+      setOrder(Array.from({ length: totalTerms }, (_, i) => i));
+      setIsShuffled(false);
+      setCurrentState((pre) => ({
+        ...pre,
+        position: currentAbs,
+        isFlipped: false,
+      }));
     }
   };
+
+  // Lazily load the API page that holds the current absolute index into the
+  // per-page cache. Deduplicates concurrent requests for the same page.
+  const ensurePageLoaded = useCallback(
+    async (page) =>
+    {
+      if (termsByPage[page] || fetchingPagesRef.current.has(page)) return;
+      fetchingPagesRef.current.add(page);
+      setIsLoading(true);
+      try {
+        const res = await learningService.getLearningTerms(deckID, page);
+        if (!res.error) {
+          setTermsByPage((pre) => ({ ...pre, [page]: res.data.results }));
+        } else {
+          toast.error(getFirstError(res.error));
+        }
+      } catch (error) {
+        // Swallow; the loading overlay is cleared in `finally`.
+      } finally {
+        fetchingPagesRef.current.delete(page);
+        setIsLoading(false);
+      }
+    },
+    [deckID, termsByPage]
+  );
+
   const fetchWords = async () =>
   {
     try {
       const res1 = await learningService.getLatestLearnedTerm(deckID, termId);
       if (!res1.error) {
+        // `last_learned_index` is an absolute index; the sequential `order`
+        // (identity) maps position directly onto it.
         setCurrentState({
-          index: res1.data.last_learned_index % LEARNING_TERM_PAGE_SIZE,
-          absolute_index: res1.data.last_learned_index,
+          position: res1.data.last_learned_index,
           latest_id: res1.data.latest_id,
           isFlipped: false,
-          currentPage: res1.data.default_page,
         });
-        const res2 = await learningService.getLearningTerms(
-          deckID,
-          res1.data.default_page
-        );
-        if (!res2.error) {
-          setTerms(res2.data.results);
-        } else {
-          const errorMessage = getFirstError(res2.error);
-          toast.error(errorMessage);
-        }
       } else {
-        const errorMessage = getFirstError(res1.error);
-        toast.error(errorMessage);
+        toast.error(getFirstError(res1.error));
       }
     } catch (error) {
-      setIsLoading(false);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -216,18 +243,17 @@ function LearnPage()
     }
   };
 
-  const learned = async () =>
-  {
-    learningService.create({ term_id: currentTerm.id });
-  };
-
-  // Optimistically update the current card in local state, then persist the
+  // Optimistically update the current card in the page cache, then persist the
   // full term to the backend.
   const persistTerm = async (updated) =>
   {
-    setTerms((pre) =>
-      pre.map((t, i) => (i === currentState.index ? updated : t))
-    );
+    if (absoluteIndex == null) return;
+    const page = Math.floor(absoluteIndex / LEARNING_TERM_PAGE_SIZE) + 1;
+    const offset = absoluteIndex % LEARNING_TERM_PAGE_SIZE;
+    setTermsByPage((pre) => ({
+      ...pre,
+      [page]: (pre[page] || []).map((t, i) => (i === offset ? updated : t)),
+    }));
     try {
       await termService.updateTerms([
         {
@@ -305,17 +331,39 @@ function LearnPage()
 
   useEffect(() =>
   {
+    // A fresh mount / deep-link resumes sequentially from the resolved index.
+    setIsShuffled(false);
+    setOrder(null);
     fetchWords();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [termId]);
 
+  // Build the sequential (identity) order once the deck size is known and no
+  // order exists yet (initial load, or after a resume reset above).
   useEffect(() =>
   {
-    if (currentTerm != null) {
-      learned();
+    if (deck?.number_of_term != null && order === null) {
+      setOrder(Array.from({ length: deck.number_of_term }, (_, i) => i));
+    }
+  }, [deck, order]);
+
+  // Load the page that contains the current absolute index on demand.
+  useEffect(() =>
+  {
+    if (absoluteIndex == null) return;
+    const page = Math.floor(absoluteIndex / LEARNING_TERM_PAGE_SIZE) + 1;
+    if (!termsByPage[page]) {
+      ensurePageLoaded(page);
+    }
+  }, [absoluteIndex, termsByPage, ensurePageLoaded]);
+
+  useEffect(() =>
+  {
+    if (loadedTerm != null) {
+      learningService.create({ term_id: loadedTerm.id });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTerm]);
+  }, [loadedTerm]);
 
   useEffect(() =>
   {
@@ -349,16 +397,12 @@ function LearnPage()
   const handleKeyDown = (event) =>
   {
     if (event.key === "ArrowRight") {
-      if (
-        terms &&
-        currentState.absolute_index + 1 < deck.number_of_term &&
-        !isLoading
-      ) {
+      if (currentState.position + 1 < totalTerms && !isLoading) {
         handleNext();
       }
     }
     if (event.key === "ArrowLeft") {
-      if (currentState.absolute_index > 0 && !isLoading) {
+      if (currentState.position > 0 && !isLoading) {
         handleBack();
       }
     }
@@ -372,9 +416,9 @@ function LearnPage()
       window.removeEventListener("keydown", handleKeyDown);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentState.index]);
+  }, [currentState.position, totalTerms, isLoading]);
 
-  return deck && terms ? (
+  return deck && currentTerm ? (
     <div
       className="learn-wrapper"
       onTouchStart={handleTouchStart}
@@ -405,13 +449,14 @@ function LearnPage()
               <div
                 className="progress-bar-fill"
                 style={{
-                  width: `${(currentState.absolute_index / deck.number_of_term) * 100
+                  width: `${(currentState.position / totalTerms) * 100
                     }%`,
                 }}
               ></div>
             </div>
             <div style={{ textAlign: "center", marginBottom: "0.25rem", color: "#666", fontSize: "0.85rem" }}>
-              Card {currentState.absolute_index + 1} of {deck.number_of_term}
+              Card {currentState.position + 1} of {totalTerms}
+              {isShuffled && " · Shuffled"}
             </div>
 
             {/* Flip Card */}
@@ -466,18 +511,22 @@ function LearnPage()
                 <CircleButton
                   size={60}
                   onClick={handleBack}
-                  disabled={
-                    currentState.index === 0 && currentState.currentPage === 1
-                  }
+                  disabled={currentState.position === 0}
                 >
                   <ArrowBackIcon />
                 </CircleButton>
                 <CircleButton
+                  size={60}
+                  onClick={toggleShuffle}
+                  active={isShuffled}
+                  title={isShuffled ? "Shuffle: on" : "Shuffle: off"}
+                >
+                  <ShuffleIcon />
+                </CircleButton>
+                <CircleButton
                   onClick={handleNext}
                   size={60}
-                  disabled={
-                    currentState.absolute_index + 1 === deck.number_of_term
-                  }
+                  disabled={currentState.position + 1 === totalTerms}
                 >
                   <ArrowForwardIcon />
                 </CircleButton>

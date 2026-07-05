@@ -51,6 +51,18 @@ class CourseService extends BaseService {
     );
   }
 
+  // Persist a listen-and-type (dictation) attempt so it replays on revisit. The
+  // typed text is scored client-side (word-level diff); this only stores the
+  // breakdown. `lines` is [{ target, typed, correct, total }]. Returns
+  // { dictation: { score, lines, at } }. Never affects the lesson's pass status.
+  submitDictation({ lessonId, score, lines }) {
+    return this.request.post(this.action("dictation"), {
+      lesson_id: lessonId,
+      score,
+      lines,
+    });
+  }
+
   // Add/update (or remove with { remove: true }) a per-user noted word/phrase on
   // a lesson so it re-highlights on revisit. Returns { highlights }.
   setHighlight(lessonId, { text, note = "", remove = false } = {}) {

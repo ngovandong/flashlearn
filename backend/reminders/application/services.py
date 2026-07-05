@@ -31,7 +31,8 @@ class ReminderService:
         reminders = [
             {"type": "speaking_new", "route": "/speaking-coach", "label": None},
             {"type": "writing_new", "route": "/writing-coach", "label": None},
-            {"type": "listening", "route": "/number-test", "label": None},
+            {"type": "listening_dictation", "route": "/listening", "label": None},
+            {"type": "listening", "route": "/listening/numbers", "label": None},
         ]
 
         conversation = self._repo.latest_conversation(user)

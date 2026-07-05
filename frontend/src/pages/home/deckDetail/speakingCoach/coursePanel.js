@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -15,6 +15,8 @@ import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import UndoIcon from "@mui/icons-material/Undo";
+import HearingIcon from "@mui/icons-material/Hearing";
+import ReplayIcon from "@mui/icons-material/Replay";
 
 import { selectUser } from "@app/store/authSlice";
 import { COURSE_PAGE_SIZE } from "@constants/pageSize";
@@ -25,6 +27,11 @@ import SessionAnalysis from "./sessionAnalysis";
 import VocabModal from "./vocabModal";
 import { renderMarkedText } from "./vocabMarks";
 import { blobToWav } from "./audioWav";
+import { evaluateDictation, hydrateDictation } from "./dictationDiff";
+
+// A dictation is treated as a good listening pass at this % of words heard
+// correctly (label + colour only — it never affects the lesson's role-play pass).
+const DICTATION_GOOD = 80;
 
 // A role-play passes when the averaged score clears this (mirrors the backend's
 // COURSE_PASS_THRESHOLD); used only to label a replayed result on revisit.
@@ -225,6 +232,21 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
   const [sceneIndex, setSceneIndex] = useState(null);
   const scenePlayingRef = useRef(false);
 
+  // ── Listen & type (dictation) ─────────────────────────────────────────
+  // The transcript text is hidden and each line becomes an input the learner
+  // fills with what they hear; on submit we diff every line and score the %.
+  const [dictationOn, setDictationOn] = useState(false);
+  const [dictationInputs, setDictationInputs] = useState([]); // one string per line
+  const [dictationResult, setDictationResult] = useState(null); // { score, lines, at } | null
+  const [dictationPlaying, setDictationPlaying] = useState(false);
+  const [dictationIndex, setDictationIndex] = useState(null); // line being read aloud
+  const [dictationLoop, setDictationLoop] = useState(false); // repeat until all filled
+  const dictationPlayingRef = useRef(false);
+  const dictationLoopRef = useRef(false);
+  const dictationInputsRef = useRef([]); // latest inputs for the async playback loop
+  const dictationLoopTimerRef = useRef(null);
+  const dictationFieldRefs = useRef([]); // the <textarea> per line, for auto-grow
+
   const ensureCtx = useCallback(() => {
     if (!audioCtxRef.current) {
       const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -289,6 +311,7 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
   useEffect(
     () => () => {
       stopSource();
+      clearTimeout(dictationLoopTimerRef.current);
       audioCtxRef.current?.close?.();
     },
     [stopSource]
@@ -361,6 +384,15 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
       scenePlayingRef.current = false;
       setScenePlaying(false);
       setSceneIndex(null);
+      dictationPlayingRef.current = false;
+      dictationLoopRef.current = false;
+      dictationInputsRef.current = [];
+      clearTimeout(dictationLoopTimerRef.current);
+      setDictationOn(false);
+      setDictationPlaying(false);
+      setDictationIndex(null);
+      setDictationInputs([]);
+      setDictationResult(null);
       stopSource();
       buffersRef.current.clear();
       return;
@@ -379,6 +411,17 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
     scenePlayingRef.current = false;
     setScenePlaying(false);
     setSceneIndex(null);
+    dictationPlayingRef.current = false;
+    dictationLoopRef.current = false;
+    clearTimeout(dictationLoopTimerRef.current);
+    setDictationOn(false);
+    setDictationPlaying(false);
+    setDictationIndex(null);
+    setDictationLoop(false);
+    setDictationResult(null);
+    const emptyInputs = (found.lines || []).map(() => "");
+    dictationInputsRef.current = emptyInputs;
+    setDictationInputs(emptyInputs);
     buffersRef.current.clear();
     setSelected(null);
     setRpActive(false);
@@ -809,6 +852,149 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
     stepScene(0);
   };
 
+  // ── Listen & type (dictation) ─────────────────────────────────────────
+  const dictationFilledCount = () =>
+    dictationInputs.filter((s) => (s || "").trim()).length;
+
+  const allDictationFilled = () =>
+    !!lesson?.lines?.length &&
+    dictationInputsRef.current.filter((s) => (s || "").trim()).length >= lesson.lines.length;
+
+  const stopDictation = useCallback(() => {
+    dictationPlayingRef.current = false;
+    clearTimeout(dictationLoopTimerRef.current);
+    setDictationPlaying(false);
+    setDictationIndex(null);
+    stopSource();
+  }, [stopSource]);
+
+  // Read each line aloud in order (text stays hidden). When looping is on and the
+  // learner hasn't filled every line yet, restart from the top after a short gap.
+  const stepDictation = (index) => {
+    if (!dictationPlayingRef.current) return;
+    const lines = lesson.lines;
+    if (index >= lines.length) {
+      if (dictationLoopRef.current && !allDictationFilled()) {
+        dictationLoopTimerRef.current = setTimeout(() => {
+          if (dictationPlayingRef.current) stepDictation(0);
+        }, 900);
+        return;
+      }
+      stopDictation();
+      return;
+    }
+    setDictationIndex(index);
+    playLine(lines[index], () => {
+      if (dictationPlayingRef.current) stepDictation(index + 1);
+    });
+  };
+
+  const playDictation = () => {
+    if (dictationPlaying) {
+      stopDictation();
+      return;
+    }
+    if (!lesson?.lines?.length || !lesson.has_audio) return;
+    dictationPlayingRef.current = true;
+    setDictationPlaying(true);
+    stepDictation(0);
+  };
+
+  const toggleDictationLoop = () => {
+    const next = !dictationLoop;
+    dictationLoopRef.current = next;
+    setDictationLoop(next);
+  };
+
+  const setDictationInput = (index, value) => {
+    setDictationInputs((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      dictationInputsRef.current = next;
+      return next;
+    });
+    // A prior diff no longer matches the edited text — clear it until re-checked.
+    if (dictationResult) setDictationResult(null);
+  };
+
+  const enterDictation = () => {
+    stopScene();
+    stopSource();
+    setResult(null);
+    setSelected(null);
+    // Restore the learner's last attempt (typed answers + colour-coded diff) so
+    // dictation doubles as a revision tool; otherwise start from blank inputs.
+    const saved = hydrateDictation(lesson?.progress?.last_dictation);
+    if (saved) {
+      const typed = saved.lines.map((l) => l.typed || "");
+      dictationInputsRef.current = typed;
+      setDictationInputs(typed);
+      setDictationResult(saved);
+    } else {
+      const empty = (lesson?.lines || []).map(() => "");
+      dictationInputsRef.current = empty;
+      setDictationInputs(empty);
+      setDictationResult(null);
+    }
+    setDictationOn(true);
+  };
+
+  const exitDictation = () => {
+    stopDictation();
+    setDictationOn(false);
+  };
+
+  const clearDictation = () => {
+    stopDictation();
+    const empty = (lesson?.lines || []).map(() => "");
+    dictationInputsRef.current = empty;
+    setDictationInputs(empty);
+    setDictationResult(null);
+  };
+
+  // Score the typed text against the transcript (word-level diff), show the
+  // breakdown, and persist it so the result replays on the next visit.
+  const checkDictation = async () => {
+    if (!lesson?.lines?.length) return;
+    stopDictation();
+    const evaluated = evaluateDictation(lesson.lines, dictationInputsRef.current);
+    const result = { ...evaluated, at: new Date().toISOString() };
+    setDictationResult(result);
+    if (result.score >= DICTATION_GOOD) toast.success(`Great listening — ${result.score}%! 🎧`);
+    else toast.info(`${result.score}% heard correctly. Check the highlighted words.`);
+
+    const payloadLines = result.lines.map((l) => ({
+      target: l.target,
+      typed: l.typed,
+      correct: l.correct,
+      total: l.total,
+    }));
+    const res = await courseService.submitDictation({
+      lessonId: lesson.id,
+      score: result.score,
+      lines: payloadLines,
+    });
+    if (res.error) {
+      toast.error("Could not save your dictation result.");
+      return;
+    }
+    setLesson((prev) =>
+      prev ? { ...prev, progress: { ...(prev.progress || {}), last_dictation: res.data?.dictation } } : prev
+    );
+  };
+
+  // Grow every dictation textarea to fit its content so an input takes about the
+  // same room as the spoken line would — including when answers are restored or
+  // cleared (which don't fire onChange).
+  useLayoutEffect(() => {
+    if (!dictationOn) return;
+    dictationFieldRefs.current.forEach((el) => {
+      if (!el) return;
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
+    });
+  }, [dictationOn, dictationInputs]);
+
   // ── Render ──────────────────────────────────────────────────────────────
   // Full-page spinner only on the very first catalog load (or while a course is
   // still loading); filter/page switches keep the previous results on screen.
@@ -1027,7 +1213,7 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
               </div>
             )}
 
-            {lesson.has_audio && !rpActive && (
+            {lesson.has_audio && !rpActive && !dictationOn && (
               <button
                 className={`sc-course-stage__play ${scenePlaying ? "is-playing" : ""}`}
                 onClick={playScene}
@@ -1040,7 +1226,7 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
         )}
 
         {/* Live Role-play */}
-        {!rpActive && (
+        {!rpActive && !dictationOn && (
           <div className="sc-course-roleplay-setup" data-tour="sc-course-roleplay">
             <div className="sc-course-roleplay-setup__text">
               <strong>
@@ -1064,7 +1250,7 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
           </div>
         )}
 
-        {result && !rpActive && (
+        {result && !rpActive && !dictationOn && (
           <div className={`sc-course-result ${result.passed ? "is-pass" : "is-fail"}`}>
             <span className="sc-course-result__score">{result.score}</span>
             <div>
@@ -1074,8 +1260,76 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
           </div>
         )}
 
+        {/* Listen & type toggle */}
+        {!rpActive && lesson.has_audio && (
+          <button
+            type="button"
+            className={`sc-course-dictation-toggle ${dictationOn ? "is-on" : ""}`}
+            onClick={dictationOn ? exitDictation : enterDictation}
+            data-tour="sc-course-dictation"
+          >
+            <HearingIcon fontSize="small" />
+            <span>{dictationOn ? "Exit listen & type" : "Listen & type"}</span>
+            {!dictationOn && lesson.progress?.last_dictation?.score != null && (
+              <span className="sc-course-dictation-toggle__badge">
+                Last {lesson.progress.last_dictation.score}%
+              </span>
+            )}
+          </button>
+        )}
+
+        {/* Listen & type control bar */}
+        {dictationOn && (
+          <div className="sc-course-dictation-bar">
+            <div className="sc-course-dictation-bar__info">
+              <HearingIcon fontSize="small" />
+              <span>Play the dialogue and type what you hear into every line.</span>
+              <strong>
+                {dictationFilledCount()}/{lesson.lines.length} filled
+              </strong>
+            </div>
+            <div className="sc-course-dictation-bar__actions">
+              <button
+                type="button"
+                className={`sc-course-dictation-bar__play ${dictationPlaying ? "is-playing" : ""}`}
+                onClick={playDictation}
+              >
+                {dictationPlaying ? <StopIcon fontSize="small" /> : <ReplayIcon fontSize="small" />}
+                {dictationPlaying ? "Stop" : "Play all"}
+              </button>
+              <label className="sc-course-dictation-bar__loop">
+                <input type="checkbox" checked={dictationLoop} onChange={toggleDictationLoop} />
+                Repeat until filled
+              </label>
+              <button
+                type="button"
+                className="sc-course-dictation-bar__check"
+                onClick={checkDictation}
+                disabled={dictationFilledCount() === 0}
+              >
+                <CheckCircleIcon fontSize="small" /> Check
+              </button>
+              <button type="button" className="sc-course-dictation-bar__clear" onClick={clearDictation}>
+                <DeleteOutlineIcon fontSize="small" /> Clear
+              </button>
+            </div>
+          </div>
+        )}
+
+        {dictationOn && dictationResult && (
+          <div className={`sc-course-result ${dictationResult.score >= DICTATION_GOOD ? "is-pass" : "is-fail"}`}>
+            <span className="sc-course-result__score">{dictationResult.score}%</span>
+            <div>
+              <strong>
+                {dictationResult.score >= DICTATION_GOOD ? "Great listening!" : "Keep listening"}
+              </strong>
+              <small>Words heard correctly across all lines</small>
+            </div>
+          </div>
+        )}
+
         {/* Transcript */}
-        {!rpActive && (
+        {!rpActive && !dictationOn && (
           <div className="sc-tip" data-tour="sc-course-vocab">
             <InfoOutlinedIcon fontSize="small" />
             <span>
@@ -1090,30 +1344,76 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
           {lesson.lines.map((line, i) => {
             const isMine = rpActive && line.speaker === rpCharacter;
             const isCurrent = rpActive && rpIndex === i;
+            const isListening = dictationOn && dictationIndex === i;
+            const lineDiff = dictationOn ? dictationResult?.lines?.[i] : null;
             return (
               <div
                 key={i}
                 className={`sc-course-line ${line.align === "right" ? "is-right" : ""} ${
-                  isCurrent ? "is-current" : ""
-                }`}
+                  isCurrent || isListening ? "is-current" : ""
+                } ${dictationOn ? "is-dictation" : ""}`}
               >
                 <span className="sc-course-line__avatar" style={avatarStyle(line.speaker)}>
                   {initials(line.speaker)}
                 </span>
                 <div className="sc-course-line__bubble">
                   <span className="sc-course-line__speaker">{line.speaker}</span>
-                  <p
-                    className="sc-course-line__text"
-                    onMouseUp={!rpActive ? () => handleSelection(line.text) : undefined}
-                  >
-                    {rpActive
-                      ? line.text
-                      : renderMarkedText(line.text, {
-                          highlights,
-                          termMatches,
-                          onMarkClick: (segment, full) => openVocab(segment, full),
-                        })}
-                  </p>
+                  {dictationOn ? (
+                    <div className="sc-course-line__dictation">
+                      <textarea
+                        className="sc-course-line__input"
+                        ref={(el) => {
+                          dictationFieldRefs.current[i] = el;
+                        }}
+                        value={dictationInputs[i] || ""}
+                        placeholder="Type what you hear…"
+                        rows={1}
+                        onChange={(e) => setDictationInput(i, e.target.value)}
+                      />
+                      {lineDiff && (
+                        <div className="sc-dictation-diff">
+                          <div className="sc-dictation-diff__row">
+                            <span className="sc-dictation-diff__label">Answer</span>
+                            <span className="sc-dictation-diff__text">
+                              {lineDiff.targetTokens.map((t, k) => (
+                                <span key={k} className={`sc-dictation-tok is-${t.status}`}>
+                                  {t.word}{" "}
+                                </span>
+                              ))}
+                            </span>
+                          </div>
+                          {lineDiff.typedTokens.some((t) => t.status === "wrong") && (
+                            <div className="sc-dictation-diff__row">
+                              <span className="sc-dictation-diff__label">You</span>
+                              <span className="sc-dictation-diff__text">
+                                {lineDiff.typedTokens.map((t, k) => (
+                                  <span key={k} className={`sc-dictation-tok is-${t.status}`}>
+                                    {t.word}{" "}
+                                  </span>
+                                ))}
+                              </span>
+                            </div>
+                          )}
+                          <span className="sc-dictation-diff__pct">
+                            {lineDiff.total ? Math.round((lineDiff.correct / lineDiff.total) * 100) : 0}%
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p
+                      className="sc-course-line__text"
+                      onMouseUp={!rpActive ? () => handleSelection(line.text) : undefined}
+                    >
+                      {rpActive
+                        ? line.text
+                        : renderMarkedText(line.text, {
+                            highlights,
+                            termMatches,
+                            onMarkClick: (segment, full) => openVocab(segment, full),
+                          })}
+                    </p>
+                  )}
                   {!rpActive && (
                     <button
                       className="sc-course-line__play"
@@ -1149,7 +1449,7 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
         )}
 
         {/* Study exercises (read-only) */}
-        {lesson.exercises?.length > 0 && !rpActive && (
+        {lesson.exercises?.length > 0 && !rpActive && !dictationOn && (
           <details className="sc-course-exercises">
             <summary>Study notes &amp; exercises ({lesson.exercises.length})</summary>
             {lesson.exercises.map((ex, i) => (
@@ -1180,7 +1480,7 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
         )}
 
         {/* Per-sentence pronunciation breakdown (replayed on revisit) */}
-        {sessions.length > 0 && !rpActive && (
+        {sessions.length > 0 && !rpActive && !dictationOn && (
           <div className="sc-result">
             <SessionAnalysis
               sessions={sessions}

@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect, useRef } from "react";
-import { Routes, Route, BrowserRouter, Outlet } from "react-router-dom";
+import { Routes, Route, BrowserRouter, Outlet, Navigate } from "react-router-dom";
 import MainContainer from "@components/mainContainer";
 import { useDispatch, useSelector } from "react-redux";
 import authService from "@api-services/authService";
@@ -49,6 +49,10 @@ const QuickRevise = lazyWithRetry(() =>
 );
 const NumberTest = lazyWithRetry(() =>
   import("@pages/home/deckDetail/numberTest")
+);
+const Listening = lazyWithRetry(() => import("@pages/home/listening"));
+const ListenAndType = lazyWithRetry(() =>
+  import("@pages/home/listening/listenAndType")
 );
 const SpeakingCoach = lazyWithRetry(() =>
   import("@pages/home/deckDetail/speakingCoach")
@@ -130,7 +134,14 @@ function App() {
           <Route path="" element={<MainContainer />}>
             <Route path="" element={<Home />} />
             <Route path="deck" element={<DeckPage />} />
-            <Route path="number-test" element={<NumberTest />} />
+            <Route path="number-test" element={<Navigate to="/listening/numbers" replace />} />
+            <Route path="listening" element={<Listening />} />
+            <Route path="listening/numbers" element={<Listening />} />
+            <Route path="listening/topics/:topicSlug" element={<Listening />} />
+            <Route
+              path="listening/exercise/:exerciseId/listen-and-type"
+              element={<ListenAndType />}
+            />
             <Route path="course" element={<Course />} />
             <Route path="course/:courseId" element={<Course />} />
             <Route path="course/:courseId/:lessonId" element={<Course />} />

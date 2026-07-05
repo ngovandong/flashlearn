@@ -60,6 +60,20 @@ class CloudinaryAudioStorage:
         result = cloudinary.uploader.upload(io.BytesIO(data), **options)
         return result.get("secure_url") or result.get("url", "")
 
+    def mirror_url(self, source_url: str, *, public_id: str | None = None, invalidate: bool = False) -> str:
+        """Fetch ``source_url`` into Cloudinary as raw audio, returning the hosted URL.
+
+        Cloudinary downloads the bytes itself, so mirroring a source recording never
+        streams through our process. Idempotent at a deterministic ``public_id``
+        (``overwrite=False`` returns the existing asset on a re-run); pass
+        ``invalidate`` to bust the CDN edge cache when replacing an asset.
+        """
+        options = {"resource_type": "raw", "overwrite": bool(invalidate), "invalidate": invalidate}
+        if public_id:
+            options["public_id"] = public_id
+        result = cloudinary.uploader.upload(source_url, **options)
+        return result.get("secure_url") or result.get("url", "")
+
     def delete_audio(self, public_id: str) -> bool:
         """Delete a previously uploaded raw audio asset. Returns True when removed.
 

@@ -203,6 +203,11 @@
         background-color: $surface-2;
     }
 
+    &.active {
+        border-color: $main-purple;
+        background-color: rgba(var(--fl-primary-rgb), 0.12);
+    }
+
     &:disabled {
         opacity: 0.5;
         cursor: not-allowed;

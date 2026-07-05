@@ -8,6 +8,7 @@ from .course import (
 from .deck import Deck
 from .folder import Folder
 from .learning_progress import UserLearningProgress
+from .listening import ListeningExercise, ListeningProgress, ListeningTopic
 from .role import UserDeckRole
 from .speaking import SpeakingAnalysis, SpeakingAudioClip, SpeakingConversation
 from .term import Term

@@ -2176,6 +2176,31 @@ $sc-low: $error-red;
     .sc-course-roleplay-setup__pick {
         flex-wrap: wrap;
     }
+
+    // Stack the dictation controls and let each button take a full row so nothing
+    // is squeezed on a phone; keep the tap targets comfortable.
+    .sc-course-dictation-bar__actions {
+        flex-direction: column;
+        align-items: stretch;
+
+        button {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    .sc-course-dictation-bar__loop {
+        justify-content: center;
+    }
+
+    .sc-dictation-diff__label {
+        min-width: 2.6rem;
+    }
+
+    // Give the typing area as much of the row as possible on phones.
+    .sc-course-line.is-dictation .sc-course-line__bubble {
+        max-width: 94%;
+    }
 }
 
 /* ---------- Guided courses ---------- */
@@ -2749,6 +2774,218 @@ $sc-low: $error-red;
             background: $sc-low;
             border-color: $sc-low;
         }
+    }
+}
+
+/* ---------- Listen & type (dictation) ---------- */
+.sc-course-dictation-toggle {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    min-height: 44px;
+    border-radius: 999px;
+    border: 1px solid $border-subtle;
+    background: $surface;
+    color: $main-text-color;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+
+    &:hover {
+        border-color: $main-purple;
+        color: $main-purple;
+    }
+
+    &.is-on {
+        background: rgba(var(--fl-primary-rgb), 0.12);
+        border-color: $main-purple;
+        color: $main-purple;
+    }
+
+    &__badge {
+        margin-left: 0.15rem;
+        padding: 0.1rem 0.45rem;
+        border-radius: 999px;
+        background: $surface-2;
+        color: $minor-text-color;
+        font-size: 0.72rem;
+        font-weight: 800;
+    }
+}
+
+.sc-course-dictation-bar {
+    @include card;
+    padding: $space-4;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    &__info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: $minor-text-color;
+        font-size: 0.9rem;
+
+        strong {
+            margin-left: auto;
+            color: $main-text-color;
+            white-space: nowrap;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        min-height: 44px;
+        padding: 0.45rem 0.9rem;
+        border-radius: $radius-md;
+        border: 1px solid $border-subtle;
+        background: $surface-2;
+        color: $main-text-color;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+    }
+
+    &__play.is-playing {
+        border-color: $sc-low;
+        color: $sc-low;
+    }
+
+    &__check {
+        @include purple_btn;
+    }
+
+    &__loop {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: $minor-text-color;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+
+        input {
+            width: 18px;
+            height: 18px;
+            accent-color: $main-purple;
+            cursor: pointer;
+        }
+    }
+}
+
+// In dictation mode the bubble holds an input, so grow it to fill the row (up to
+// the same 78% cap as a spoken line) instead of shrinking to the field's width —
+// that keeps the typing area roughly the size the real conversation line uses.
+.sc-course-line.is-dictation .sc-course-line__bubble {
+    flex: 1 1 auto;
+    max-width: 78%;
+}
+
+.sc-course-line__dictation {
+    margin-top: 0.25rem;
+}
+
+.sc-course-line__input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    // Auto-grown to content by JS; no manual resize handle or inner scrollbar.
+    resize: none;
+    overflow: hidden;
+    padding: 0.5rem 0.7rem;
+    border-radius: $radius-sm;
+    border: 1px solid $border-subtle;
+    background: $app-background;
+    color: $main-text-color;
+    font-family: inherit;
+    // Match the spoken line's text so the typed answer reads at the same size.
+    font-size: 0.92rem;
+    line-height: 1.45;
+
+    &::placeholder {
+        color: $gray-text-color;
+    }
+
+    &:focus {
+        outline: none;
+        border-color: $main-purple;
+        box-shadow: 0 0 0 2px rgba(var(--fl-primary-rgb), 0.2);
+    }
+}
+
+.sc-dictation-diff {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed $border-subtle;
+    font-size: 0.88rem;
+
+    &__row {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.2rem;
+    }
+
+    &__label {
+        flex-shrink: 0;
+        min-width: 3.2rem;
+        color: $minor-text-color;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        padding-top: 0.1rem;
+    }
+
+    &__text {
+        line-height: 1.5;
+    }
+
+    &__pct {
+        display: inline-block;
+        margin-top: 0.15rem;
+        font-weight: 800;
+        font-size: 0.78rem;
+        color: $minor-text-color;
+    }
+}
+
+.sc-dictation-tok {
+    &.is-ok {
+        color: $sc-good;
+        font-weight: 600;
+    }
+
+    // A word the learner missed (present in the answer, absent/wrong in their text).
+    &.is-missing {
+        background: rgba($sc-low, 0.16);
+        color: $sc-low;
+        border-radius: 3px;
+        padding: 0 2px;
+        font-weight: 700;
+    }
+
+    // An extra/incorrect word the learner typed.
+    &.is-wrong {
+        color: $sc-low;
+        text-decoration: line-through;
+        opacity: 0.8;
     }
 }
 

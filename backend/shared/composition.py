@@ -8,6 +8,8 @@ from backend.learning.application.context_api import LearningContextApi
 from backend.learning.application.services import LearningService
 from backend.learning.infrastructure.cache import learning_progress_cache
 from backend.learning.infrastructure.repository import LearningRepository
+from backend.listening.application.listening_service import ListeningService
+from backend.listening.infrastructure.repository import ListeningRepository
 from backend.reminders.application.services import ReminderService
 from backend.reminders.infrastructure.repository import ReminderRepository
 from backend.shared.infrastructure.ai import (
@@ -18,6 +20,7 @@ from backend.shared.infrastructure.ai import (
 from backend.shared.infrastructure.cache import default_cache
 from backend.shared.infrastructure.cloudinary import default_audio_storage, default_image_storage
 from backend.shared.infrastructure.google_oauth import default_oauth_client
+from backend.shared.infrastructure.translate import default_translator
 from backend.speaking.application.services import SpeakingCoachService
 from backend.speaking.application.speaking_service import SpeakingService
 from backend.speaking.infrastructure.repository import SpeakingRepository
@@ -79,6 +82,18 @@ course_service = CourseService(
     tts_factory=build_tts_provider,
     image_storage=default_image_storage,
     audio_storage=default_audio_storage,
+)
+# Listening (dictation): cloned listen-and-type exercises. Sentence audio is
+# mirrored to our CDN by collect_listening_audio; the Speaking Coach TTS pipeline
+# is the fallback when a sentence has no source recording.
+listening_service = ListeningService(
+    repo=ListeningRepository,
+    speaking_service=speaking_service,
+    audio_storage=default_audio_storage,
+    image_storage=default_image_storage,
+    # Per-sentence translation: free Google endpoint first, AI provider as backup.
+    translator=default_translator,
+    ai=default_ai_provider,
 )
 reminder_service = ReminderService(repo=ReminderRepository)
 # Writing Coach: chat practice + IELTS-style free-form assessment. Text-only AI,
