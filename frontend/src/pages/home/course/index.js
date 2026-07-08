@@ -5,9 +5,11 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SchoolIcon from "@mui/icons-material/School";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import HeadphonesIcon from "@mui/icons-material/Headphones";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 
 import CoursePanel from "@pages/home/deckDetail/speakingCoach/coursePanel";
 import ListeningCourses from "./listeningCourses";
+import GrammarCourses from "./grammarCourses";
 
 // Standalone Course page mounted on /course so the navbar "Course" link gets
 // its own route (and stays highlighted) instead of redirecting into Speaking
@@ -22,11 +24,12 @@ export default function Course() {
   const { courseId } = useParams();
   const [params, setParams] = useSearchParams();
 
-  const tab = params.get("tab") === "listening" ? "listening" : "speaking";
+  const rawTab = params.get("tab");
+  const tab = rawTab === "listening" || rawTab === "grammar" ? rawTab : "speaking";
   const atRoot = !courseId;
 
   const selectTab = (next) => {
-    if (next === "listening") setParams({ tab: "listening" });
+    if (next === "listening" || next === "grammar") setParams({ tab: next });
     else setParams({});
   };
 
@@ -43,7 +46,7 @@ export default function Course() {
           </span>
           <div>
             <h2>Course</h2>
-            <p>Speaking dialogues &amp; listening dictation</p>
+            <p>Speaking dialogues, listening dictation &amp; grammar</p>
           </div>
         </div>
       </header>
@@ -70,11 +73,23 @@ export default function Course() {
             <HeadphonesIcon fontSize="small" />
             <span>Listening course</span>
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "grammar"}
+            className={`course-type-tab ${tab === "grammar" ? "is-active" : ""}`}
+            onClick={() => selectTab("grammar")}
+          >
+            <MenuBookIcon fontSize="small" />
+            <span>Grammar course</span>
+          </button>
         </div>
       )}
 
       <div className="sc-body">
-        {atRoot && tab === "listening" ? <ListeningCourses /> : <CoursePanel basePath="/course" />}
+        {atRoot && tab === "listening" && <ListeningCourses />}
+        {atRoot && tab === "grammar" && <GrammarCourses />}
+        {(!atRoot || tab === "speaking") && <CoursePanel basePath="/course" />}
       </div>
     </div>
   );

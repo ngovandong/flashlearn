@@ -4,6 +4,11 @@ from backend.course.application.course_service import CourseService
 from backend.course.infrastructure.repository import CourseRepository
 from backend.deck.application.services import DeckService
 from backend.deck.infrastructure.repository import DeckRepository
+from backend.grammar.application.grammar_service import GrammarService
+from backend.grammar.application.ingest import GrammarIngestService
+from backend.grammar.application.services import GrammarCoachService
+from backend.grammar.infrastructure.pdf import extract_pages as extract_pdf_pages
+from backend.grammar.infrastructure.repository import GrammarRepository
 from backend.learning.application.context_api import LearningContextApi
 from backend.learning.application.services import LearningService
 from backend.learning.infrastructure.cache import learning_progress_cache
@@ -100,3 +105,15 @@ reminder_service = ReminderService(repo=ReminderRepository)
 # so it just needs the default provider (no audio/TTS/pronunciation deps).
 writing_coach_service = WritingCoachService(ai=default_ai_provider)
 writing_service = WritingService(coach=writing_coach_service, repo=WritingRepository)
+# Grammar (Essential Grammar in Use): textbook units with server-graded exercises
+# and per-unit/per-exercise progress. The coach adds the text-only AI "explain"
+# option (explain a rule / why an answer is wrong).
+grammar_service = GrammarService(repo=GrammarRepository)
+grammar_coach_service = GrammarCoachService(ai=default_ai_provider)
+# PDF → structured book ingestion for `import_grammar_book`: extracts page text
+# (pypdf) and uses the coach's text AI to convert it into units, then upserts.
+grammar_ingest_service = GrammarIngestService(
+    coach=grammar_coach_service,
+    grammar_service=grammar_service,
+    extract_pages=extract_pdf_pages,
+)

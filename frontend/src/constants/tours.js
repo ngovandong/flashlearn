@@ -67,6 +67,12 @@ export const TOURS = [
         body: "Improve your writing — chat with Dragon for instant feedback on every message, or write freely and get an IELTS-style band score.",
       },
       {
+        id: "home.grammar",
+        selector: '[data-tour="grammar"]',
+        title: "Grammar",
+        body: "Open Grammar to study Essential Grammar in Use — read each rule, then practise with auto-graded exercises and track your progress per unit.",
+      },
+      {
         id: "home.assistant",
         selector: '[data-tour="assistant"]',
         title: "Meet Dragon, your buddy",
@@ -300,8 +306,8 @@ export const TOURS = [
       {
         id: "course.type",
         selector: '[data-tour="course-type-tabs"]',
-        title: "Two ways to train",
-        body: "Switch between Speaking courses — freeCodeCamp dialogues you play and role-play line by line — and Listening courses, where you listen and type each sentence to sharpen your ear.",
+        title: "Three ways to train",
+        body: "Switch between Speaking courses (dialogues you role-play line by line), Listening courses (listen and type each sentence), and the Grammar course — study each rule then practise with auto-graded exercises.",
       },
       {
         id: "course.catalog",
@@ -418,6 +424,43 @@ export const TOURS = [
         selector: '[data-tour="wc-tabs"]',
         title: "Review your history",
         body: "Switch to History to revisit past sessions, star favorites, or restart a topic to write an even better version.",
+      },
+    ],
+  },
+  {
+    id: "grammar",
+    label: "Grammar",
+    match: (p) => p === "/grammar" || p.startsWith("/grammar/"),
+    steps: [
+      {
+        id: "grammar.books",
+        selector: '[data-tour="grammar-filters"]',
+        title: "Filter by level or book",
+        body: "Choose a level — A1/A2 opens Essential Grammar in Use, B1 opens English Grammar in Use — or pick a book directly. Each book keeps its own units, sections and progress.",
+      },
+      {
+        id: "grammar.catalog",
+        selector: '[data-tour="grammar-catalog"]',
+        title: "Grammar units",
+        body: "Browse the book by section. Each unit card shows how many of its exercises you've completed — tap one to start.",
+      },
+      {
+        id: "grammar.sections",
+        selector: '[data-tour="grammar-sections"]',
+        title: "Work topic by topic",
+        body: "Units are grouped into topics like the present, the past, articles and prepositions. Your progress is saved for every unit and every exercise.",
+      },
+      {
+        id: "grammar.explanation",
+        selector: '[data-tour="grammar-explanation"]',
+        title: "Learn the rule first",
+        body: "Read the short reference — the explanation blocks and examples — then scroll down to practise it.",
+      },
+      {
+        id: "grammar.exercises",
+        selector: '[data-tour="grammar-exercises"]',
+        title: "Practise with instant feedback",
+        body: "Fill blanks, choose, rewrite, match or reorder, then tap Check to grade instantly. Got one wrong? Tap “Why?” and Dragon explains it.",
       },
     ],
   },

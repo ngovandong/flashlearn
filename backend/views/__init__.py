@@ -2,6 +2,7 @@ from .course import CourseViewSet
 from .crawler import GetImagesUrlView
 from .deck import DeckViewSet
 from .folder import FolderViewSet
+from .grammar import GrammarViewSet
 from .learning import LearningViewSet
 from .listening import ListeningViewSet
 from .reminders import ReminderViewSet

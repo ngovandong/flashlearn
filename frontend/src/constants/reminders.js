@@ -8,6 +8,7 @@ import StyleRoundedIcon from "@mui/icons-material/StyleRounded";
 import CasinoRoundedIcon from "@mui/icons-material/CasinoRounded";
 import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
 import HistoryEduRoundedIcon from "@mui/icons-material/HistoryEduRounded";
+import SpellcheckRoundedIcon from "@mui/icons-material/SpellcheckRounded";
 
 // Presentation for each reminder `type` the API returns. Copy + icon + color
 // tone live here; the dynamic `label` (deck/course/conversation name) is woven
@@ -65,6 +66,21 @@ export const REMINDER_META = {
     title: "Continue your course",
     description: (label) => `Pick up the next lesson in ${label}.`,
     cta: "Resume course",
+  },
+  grammar_new: {
+    tone: "violet",
+    icon: <MenuBookRoundedIcon />,
+    title: "Practise grammar",
+    description: () =>
+      "Study a grammar rule from Essential Grammar in Use, then nail it with auto-graded exercises.",
+    cta: "Start grammar",
+  },
+  grammar_revise: {
+    tone: "blue-amber",
+    icon: <SpellcheckRoundedIcon />,
+    title: "Finish a grammar unit",
+    description: (label) => `Pick up “${label}” and complete its exercises.`,
+    cta: "Resume unit",
   },
   learn: {
     tone: "blue-amber",

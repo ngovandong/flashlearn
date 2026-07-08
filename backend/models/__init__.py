@@ -7,6 +7,14 @@ from .course import (
 )
 from .deck import Deck
 from .folder import Folder
+from .grammar import (
+    GrammarBook,
+    GrammarExercise,
+    GrammarSection,
+    GrammarUnit,
+    UserGrammarExerciseProgress,
+    UserGrammarUnitProgress,
+)
 from .learning_progress import UserLearningProgress
 from .listening import ListeningExercise, ListeningProgress, ListeningTopic
 from .role import UserDeckRole

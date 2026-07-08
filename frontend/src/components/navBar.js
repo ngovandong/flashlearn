@@ -24,6 +24,7 @@ import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import HeadphonesOutlinedIcon from "@mui/icons-material/HeadphonesOutlined";
 import RecordVoiceOverOutlinedIcon from "@mui/icons-material/RecordVoiceOverOutlined";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import SearchDeckInput from "./searchDeck";
 
 const userMenuItemSx = {
@@ -53,6 +54,12 @@ const links = [
     name: "Writing",
     tour: "writing-coach",
     icon: EditNoteOutlinedIcon,
+  },
+  {
+    link: "grammar",
+    name: "Grammar",
+    tour: "grammar",
+    icon: MenuBookOutlinedIcon,
   },
 ];
 

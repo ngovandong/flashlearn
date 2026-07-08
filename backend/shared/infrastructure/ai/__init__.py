@@ -10,6 +10,7 @@ next. Add a provider by creating a sibling module and registering it in
 
 import os
 
+from .azure_openai import AzureOpenAIProvider
 from .azure_speech import AzureSpeechProvider
 from .azure_tts import AzureTextToSpeechProvider
 from .base import AiProviderError
@@ -17,12 +18,15 @@ from .elevenlabs import ElevenLabsProvider
 from .failover import FailoverAiProvider
 from .gemini import GeminiProvider
 from .kokoro_tts import KokoroTtsProvider
+from .lmstudio import LMStudioProvider
 from .openrouter import OpenRouterProvider
 
 __all__ = [
     "AiProviderError",
     "GeminiProvider",
     "OpenRouterProvider",
+    "LMStudioProvider",
+    "AzureOpenAIProvider",
     "ElevenLabsProvider",
     "AzureSpeechProvider",
     "AzureTextToSpeechProvider",
@@ -38,6 +42,9 @@ __all__ = [
 _BUILDERS = {
     "gemini": GeminiProvider,
     "openrouter": OpenRouterProvider,
+    "lmstudio": LMStudioProvider,
+    "azure_openai": AzureOpenAIProvider,
+    "azure": AzureOpenAIProvider,
     "elevenlabs": ElevenLabsProvider,
     "azure_speech": AzureSpeechProvider,
 }

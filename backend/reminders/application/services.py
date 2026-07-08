@@ -33,6 +33,7 @@ class ReminderService:
             {"type": "writing_new", "route": "/writing-coach", "label": None},
             {"type": "listening_dictation", "route": "/listening", "label": None},
             {"type": "listening", "route": "/listening/numbers", "label": None},
+            {"type": "grammar_new", "route": "/grammar", "label": None},
         ]
 
         conversation = self._repo.latest_conversation(user)
@@ -63,6 +64,16 @@ class ReminderService:
                     "type": "course",
                     "route": f"/speaking-coach/course/{course.slug}/{lesson_id}",
                     "label": course.title,
+                }
+            )
+
+        grammar_unit = self._repo.latest_grammar_unit(user)
+        if grammar_unit is not None:
+            reminders.append(
+                {
+                    "type": "grammar_revise",
+                    "route": f"/grammar/{grammar_unit['key']}",
+                    "label": grammar_unit["title"],
                 }
             )
 

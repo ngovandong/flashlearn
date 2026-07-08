@@ -14,8 +14,10 @@ from backend.models import (
     Course,
     CourseLesson,
     Deck,
+    GrammarUnit,
     SpeakingConversation,
     UserCourseLessonProgress,
+    UserGrammarUnitProgress,
     UserLearningProgress,
     WritingSession,
 )
@@ -72,6 +74,20 @@ class ReminderRepository:
                 status=UserCourseLessonProgress.STATUS_PASSED,
             ).values_list("lesson_key", flat=True)
         )
+
+    # ── Grammar ───────────────────────────────────────────────────────────
+    @staticmethod
+    def latest_grammar_unit(user):
+        """``{key, title, status}`` of the user's most recently touched grammar
+        unit, or ``None``. Progress is keyed on the unit's stable ``unit_key``,
+        so the title is resolved by looking the unit up by key."""
+        progress = UserGrammarUnitProgress.objects.filter(user=user).order_by("-updated_at").first()
+        if progress is None:
+            return None
+        unit = GrammarUnit.objects.filter(key=progress.unit_key).first()
+        if unit is None:
+            return None
+        return {"key": unit.key, "title": unit.title, "status": progress.status}
 
     # ── Decks ─────────────────────────────────────────────────────────────
     @staticmethod

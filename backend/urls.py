@@ -7,6 +7,7 @@ from .views import (
     DeckViewSet,
     FolderViewSet,
     GetImagesUrlView,
+    GrammarViewSet,
     LearningViewSet,
     ListeningViewSet,
     ReminderViewSet,
@@ -29,6 +30,7 @@ router.register(r"speaking", SpeakingViewSet, basename="speaking")
 router.register(r"writing", WritingViewSet, basename="writing")
 router.register(r"courses", CourseViewSet, basename="course")
 router.register(r"listening", ListeningViewSet, basename="listening")
+router.register(r"grammar", GrammarViewSet, basename="grammar")
 router.register(r"reminders", ReminderViewSet, basename="reminder")
 
 # Wire up our API using automatic URL routing.
