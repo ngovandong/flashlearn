@@ -25,6 +25,7 @@ import HeadphonesOutlinedIcon from "@mui/icons-material/HeadphonesOutlined";
 import RecordVoiceOverOutlinedIcon from "@mui/icons-material/RecordVoiceOverOutlined";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import SearchDeckInput from "./searchDeck";
 
 const userMenuItemSx = {
@@ -60,6 +61,12 @@ const links = [
     name: "Grammar",
     tour: "grammar",
     icon: MenuBookOutlinedIcon,
+  },
+  {
+    link: "revise",
+    name: "Revise",
+    tour: "revise",
+    icon: AutoAwesomeOutlinedIcon,
   },
 ];
 

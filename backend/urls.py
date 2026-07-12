@@ -11,6 +11,7 @@ from .views import (
     LearningViewSet,
     ListeningViewSet,
     ReminderViewSet,
+    ReviseViewSet,
     RoleViewSet,
     SpeakingViewSet,
     TermViewSet,
@@ -32,6 +33,7 @@ router.register(r"courses", CourseViewSet, basename="course")
 router.register(r"listening", ListeningViewSet, basename="listening")
 router.register(r"grammar", GrammarViewSet, basename="grammar")
 router.register(r"reminders", ReminderViewSet, basename="reminder")
+router.register(r"revise", ReviseViewSet, basename="revise")
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

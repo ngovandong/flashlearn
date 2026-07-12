@@ -62,6 +62,7 @@ const WritingCoach = lazyWithRetry(() =>
 );
 const Course = lazyWithRetry(() => import("@pages/home/course"));
 const Grammar = lazyWithRetry(() => import("@pages/home/grammar"));
+const ReviseMix = lazyWithRetry(() => import("@pages/home/revise"));
 const PrivacyPage = lazyWithRetry(() => import("@pages/privacy"));
 
 function RouteFallback() {
@@ -157,6 +158,7 @@ function App() {
             <Route path="writing-coach/:id" element={<WritingCoach />} />
             <Route path="grammar" element={<Grammar />} />
             <Route path="grammar/:unitKey" element={<Grammar />} />
+            <Route path="revise" element={<ReviseMix />} />
             <Route path="learn/:termId" element={<SingleTermLearn />} />
             <Route path="folder" element={<Folder />} />
             <Route path="create-deck" element={<CreateDeck />} />

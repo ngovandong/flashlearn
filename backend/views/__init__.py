@@ -6,6 +6,7 @@ from .grammar import GrammarViewSet
 from .learning import LearningViewSet
 from .listening import ListeningViewSet
 from .reminders import ReminderViewSet
+from .revise import ReviseViewSet
 from .role import RoleViewSet
 from .speaking import SpeakingViewSet
 from .term import TermViewSet

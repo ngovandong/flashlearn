@@ -9,11 +9,20 @@ import CasinoRoundedIcon from "@mui/icons-material/CasinoRounded";
 import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
 import HistoryEduRoundedIcon from "@mui/icons-material/HistoryEduRounded";
 import SpellcheckRoundedIcon from "@mui/icons-material/SpellcheckRounded";
+import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 
 // Presentation for each reminder `type` the API returns. Copy + icon + color
 // tone live here; the dynamic `label` (deck/course/conversation name) is woven
 // into the description by the API.
 export const REMINDER_META = {
+  revise_all: {
+    tone: "violet",
+    icon: <AutoAwesomeRoundedIcon />,
+    title: "Revise your mistakes",
+    description: () =>
+      "A quick mixed round — words, grammar, listening and speaking — focused on what you got wrong.",
+    cta: "Start revising",
+  },
   speaking_new: {
     tone: "violet",
     icon: <RecordVoiceOverIcon />,

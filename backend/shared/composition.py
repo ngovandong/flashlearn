@@ -17,6 +17,8 @@ from backend.listening.application.listening_service import ListeningService
 from backend.listening.infrastructure.repository import ListeningRepository
 from backend.reminders.application.services import ReminderService
 from backend.reminders.infrastructure.repository import ReminderRepository
+from backend.revise.application.services import ReviseService
+from backend.revise.infrastructure.repository import ReviseRepository
 from backend.shared.infrastructure.ai import (
     AzureSpeechProvider,
     build_tts_provider,
@@ -101,6 +103,15 @@ listening_service = ListeningService(
     ai=default_ai_provider,
 )
 reminder_service = ReminderService(repo=ReminderRepository)
+# Revise: a mixed, priority-ordered review session that pulls the learner's
+# past mistakes across vocab, grammar, listening and speaking. It writes vocab
+# results back through the learning service and grades spoken answers with the
+# Speaking Coach's pronunciation analysis.
+revise_service = ReviseService(
+    repo=ReviseRepository,
+    learning_service=learning_service,
+    speaking_service=speaking_service,
+)
 # Writing Coach: chat practice + IELTS-style free-form assessment. Text-only AI,
 # so it just needs the default provider (no audio/TTS/pronunciation deps).
 writing_coach_service = WritingCoachService(ai=default_ai_provider)

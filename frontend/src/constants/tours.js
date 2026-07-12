@@ -465,6 +465,25 @@ export const TOURS = [
     ],
   },
   {
+    id: "revise",
+    label: "Revise",
+    match: exact("/revise"),
+    steps: [
+      {
+        id: "revise.card",
+        selector: '[data-tour="revise-card"]',
+        title: "One mixed round",
+        body: "Each card is something you slipped up on before — a word, a grammar blank, a sentence to type from audio, or one to say out loud. Answer it to move on.",
+      },
+      {
+        id: "revise.progress",
+        selector: '[data-tour="revise-progress"]',
+        title: "Your streak & progress",
+        body: "The bar tracks how far you are through the round, and the 🔥 counts your answer streak. We put the things you got most wrong first.",
+      },
+    ],
+  },
+  {
     id: "settings",
     label: "Settings",
     match: exact("/settings"),

@@ -98,6 +98,21 @@ class LearningService:
         if adjust_point:
             self._learning_repo.adjust_priority(progress, adjust_point)
 
+    def record_answer(self, user, term_id, correct):
+        """Apply a correct/incorrect vocabulary result from a revise session.
+
+        Get-or-creates the term's progress, moves its score the same way the
+        deck learn flow does (+2 right / −3 wrong) and counts study activity so
+        the mixed Revise page feeds the same streak and priority as learning.
+        """
+        progress, _ = self._learning_repo.get_or_create(user, term_id)
+        if correct:
+            self._learning_repo.record_correct(progress)
+        else:
+            self._learning_repo.record_incorrect(progress)
+        self._learning_cache.delete_combine(progress.term.deck_id, user.id)
+        self.record_study_activity(user)
+
     def record_quick_revise_answer(self, user, term_id):
         progress, _ = self._learning_repo.get_or_create(user, term_id)
         self._learning_repo.record_quick_revise_answer(progress)

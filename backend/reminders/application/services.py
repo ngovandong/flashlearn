@@ -29,6 +29,7 @@ class ReminderService:
         into its copy, or ``None`` for context-free reminders.
         """
         reminders = [
+            {"type": "revise_all", "route": "/revise", "label": None},
             {"type": "speaking_new", "route": "/speaking-coach", "label": None},
             {"type": "writing_new", "route": "/writing-coach", "label": None},
             {"type": "listening_dictation", "route": "/listening", "label": None},
