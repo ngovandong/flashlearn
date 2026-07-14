@@ -10,12 +10,13 @@ A language-learning platform with **flashcards**, guided **courses**, **Grammar*
 dual **Django + Rust** backend sharing one database.
 
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
-![Django](https://img.shields.io/badge/Django-4.2-092E20?logo=django&logoColor=white)
+![Django](https://img.shields.io/badge/Django-5.2-092E20?logo=django&logoColor=white)
 ![Rust](https://img.shields.io/badge/Rust-2021-000000?logo=rust&logoColor=white)
-![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
-![React Native](https://img.shields.io/badge/React_Native-0.74-61DAFB?logo=react&logoColor=black)
-![Expo](https://img.shields.io/badge/Expo-51-000020?logo=expo&logoColor=white)
-![MUI](https://img.shields.io/badge/MUI-7-007FFF?logo=mui&logoColor=white)
+![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=black)
+![React Native](https://img.shields.io/badge/React_Native-0.86-61DAFB?logo=react&logoColor=black)
+![Expo](https://img.shields.io/badge/Expo-57-000020?logo=expo&logoColor=white)
+![MUI](https://img.shields.io/badge/MUI-9.2-007FFF?logo=mui&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8.1-646CFF?logo=vite&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-6-DC382D?logo=redis&logoColor=white)
 ![Gemini](https://img.shields.io/badge/Gemini_AI-multimodal-8E75B2?logo=googlegemini&logoColor=white)
@@ -52,11 +53,11 @@ dual **Django + Rust** backend sharing one database.
 <tr><th>Layer</th><th>Technology</th><th>Role in FlashLearn</th></tr>
 
 <tr><td rowspan="7"><b>🐍 Django backend</b><br/><sub>primary API</sub></td>
-<td>Python 3.11 · Django 4.2</td><td>Core web framework, ORM, migrations (owns the schema)</td></tr>
-<tr><td>Django REST Framework 3.15</td><td>ViewSets, serializers, the REST API surface</td></tr>
-<tr><td>Django Channels 4 + Daphne</td><td>ASGI server & WebSockets for the multiplayer game</td></tr>
-<tr><td>SQLAlchemy 2 (read side)</td><td>Hand‑tuned read queries alongside the Django ORM</td></tr>
-<tr><td>django‑rq + rq‑scheduler</td><td>Background jobs & cron (emails, cache cleanup, backups)</td></tr>
+<td>Python 3.11 · Django 5.2 LTS</td><td>Core web framework, ORM, migrations (owns the schema)</td></tr>
+<tr><td>Django REST Framework 3.17</td><td>ViewSets, serializers, the REST API surface</td></tr>
+<tr><td>Django Channels 4.3 + Daphne</td><td>ASGI server & WebSockets for the multiplayer game</td></tr>
+<tr><td>SQLAlchemy 2.0 (read side)</td><td>Hand‑tuned read queries alongside the Django ORM</td></tr>
+<tr><td>django‑rq 4.1 + rq‑scheduler 0.14</td><td>Background jobs & cron (emails, cache cleanup, backups)</td></tr>
 <tr><td>drf‑yasg</td><td>Swagger / ReDoc API docs (DEBUG only)</td></tr>
 <tr><td>DDD / clean architecture</td><td>Bounded contexts wired through <code>backend/shared/composition.py</code></td></tr>
 
@@ -66,20 +67,22 @@ dual **Django + Rust** backend sharing one database.
 <tr><td>JWT · pbkdf2</td><td>Token validation & Django‑compatible password checks</td></tr>
 <tr><td>DDD layering</td><td>domain / application / infrastructure / interfaces</td></tr>
 
-<tr><td rowspan="6"><b>⚛️ Web frontend</b></td>
-<td>React 18</td><td>SPA UI</td></tr>
-<tr><td>Material UI 7 + Emotion</td><td>Component library & styling</td></tr>
-<tr><td>Redux Toolkit 2 + React‑Redux</td><td>Global state</td></tr>
-<tr><td>TanStack Query 5</td><td>Server‑state caching & fetching</td></tr>
-<tr><td>React Router 7</td><td>Routing</td></tr>
+<tr><td rowspan="7"><b>⚛️ Web frontend</b></td>
+<td>React 19.2</td><td>SPA UI</td></tr>
+<tr><td>Material UI 9.2 + Emotion 11</td><td>Component library & styling</td></tr>
+<tr><td>Redux Toolkit 2.12 + React‑Redux 9.3</td><td>Global state</td></tr>
+<tr><td>TanStack Query 5.101</td><td>Server‑state caching & fetching</td></tr>
+<tr><td>React Router 7.18</td><td>Routing</td></tr>
+<tr><td>Vite 8.1 + Vitest 4.1</td><td>Development, production builds, and unit tests</td></tr>
 <tr><td>Sass + CSS custom properties</td><td>Runtime theming (light/dark + palettes)</td></tr>
 
-<tr><td rowspan="6"><b>📱 Mobile frontend</b></td>
-<td>Expo 51 · React Native 0.74</td><td>Native iOS and Android client</td></tr>
-<tr><td>Expo Router 3</td><td>File-based routes and tab navigation</td></tr>
-<tr><td>React Native Paper 5</td><td>Material components and runtime themes</td></tr>
-<tr><td>Redux Toolkit 2</td><td>Authentication and client state</td></tr>
-<tr><td>TanStack Query 5</td><td>Server-state caching and fetching</td></tr>
+<tr><td rowspan="7"><b>📱 Mobile frontend</b></td>
+<td>Expo 57 · React Native 0.86 · React 19.2</td><td>Native iOS and Android client</td></tr>
+<tr><td>Expo Router 57</td><td>File-based routes and tab navigation</td></tr>
+<tr><td>React Native Paper 5.15</td><td>Material components and runtime themes</td></tr>
+<tr><td>Redux Toolkit 2.12</td><td>Authentication and client state</td></tr>
+<tr><td>TanStack Query 5.101</td><td>Server-state caching and fetching</td></tr>
+<tr><td>Reanimated 4.5 · Gesture Handler 2.32</td><td>Native animations and gestures</td></tr>
 <tr><td>SecureStore · AuthSession</td><td>Native token storage and Google sign-in</td></tr>
 
 <tr><td rowspan="4"><b>🗄️ Data & infra</b></td>
@@ -97,7 +100,7 @@ dual **Django + Rust** backend sharing one database.
 <tr><td>Playwright (Chromium)</td><td>Headless fallback for the Google image crawler</td></tr>
 
 <tr><td><b>🧩 Extension</b></td>
-<td>React + Chrome MV3</td><td>Select‑text‑to‑save on any web page</td></tr>
+<td>React 19.2 · Vite 8.1 · Chrome MV3</td><td>Select‑text‑to‑save on any web page</td></tr>
 
 <tr><td><b>🚢 Delivery</b></td>
 <td>Docker Compose · Podman · Nginx</td><td>Local, dev hot‑reload, and self‑service deployment</td></tr>
@@ -173,7 +176,7 @@ flowchart TB
 ### Prerequisites
 
 - Python 3.11+
-- Node.js 18+
+- Node.js 22+ recommended (Vite 8 requires Node.js 20.19+)
 - MySQL
 - Redis
 
