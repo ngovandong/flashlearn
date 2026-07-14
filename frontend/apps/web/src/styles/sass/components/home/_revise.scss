@@ -1,0 +1,661 @@
+@use "../../base/shared" as *;
+
+// Revise — the global mixed-review session player (vocab / grammar / listening /
+// speaking). A focused, one-card-at-a-time Duolingo-style flow: progress on top,
+// the card in the middle, a sticky verdict/action bar at the bottom. Brand +
+// neutral colours use theme tokens; only correct/wrong diff colours stay static.
+
+$rv-good: #2e9e6b;
+$rv-good-soft: rgba(46, 158, 107, 0.14);
+$rv-wrong: $error-red;
+$rv-wrong-soft: rgba(255, 120, 115, 0.16);
+
+.revise-page {
+    min-height: calc(100vh - #{$nav-height});
+    display: flex;
+    flex-direction: column;
+    background: $app-background;
+}
+
+/* ---------- Header ---------- */
+.revise-header {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-4 $space-5;
+    max-width: 820px;
+    width: 100%;
+    margin: 0 auto;
+
+    &__close {
+        color: $minor-text-color;
+        flex-shrink: 0;
+    }
+
+    &__bar {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+.revise-progressbar {
+    height: 12px !important;
+    border-radius: $radius-pill !important;
+    background-color: $surface-2 !important;
+
+    .MuiLinearProgress-bar {
+        border-radius: $radius-pill;
+        background-image: $brand-gradient;
+    }
+}
+
+.revise-streak {
+    flex-shrink: 0;
+    font-weight: 800;
+    font-size: 1rem;
+    color: $orange;
+    min-width: 52px;
+    text-align: right;
+}
+
+/* ---------- Body / stage ---------- */
+.revise-body {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: $space-4 $space-5 $space-8;
+}
+
+.revise-stage {
+    width: 100%;
+    max-width: 640px;
+}
+
+/* ---------- Card ---------- */
+.revise-card {
+    @include card;
+    padding: $space-6 $space-5;
+    text-align: center;
+    animation: rv-pop 0.28s $ease both;
+
+    &__kind {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: $main-purple;
+        background: rgba(var(--fl-primary-rgb), 0.12);
+        padding: 0.2rem 0.7rem;
+        border-radius: $radius-pill;
+        margin-bottom: $space-4;
+    }
+
+    &__prompt {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: $space-3;
+    }
+
+    &__visual {
+        width: min(220px, 70%);
+        aspect-ratio: 1;
+        border-radius: $radius-lg;
+        overflow: hidden;
+        background: $surface-2;
+        border: 1px solid $border-subtle;
+        box-shadow: $shadow-sm;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+    }
+
+    &__word {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: $space-2;
+        flex-wrap: wrap;
+
+        h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: $main-text-color;
+            word-break: break-word;
+        }
+    }
+
+    &__say {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: $space-2;
+        margin-top: $space-2;
+        flex-wrap: wrap;
+
+        h3 {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: $main-text-color;
+            line-height: 1.4;
+        }
+    }
+
+    &__ipa {
+        margin: $space-1 0 0;
+        color: $minor-text-color;
+        font-size: 0.95rem;
+    }
+
+    &__hint {
+        margin: $space-2 0 $space-4;
+        color: $minor-text-color;
+        font-size: 0.95rem;
+    }
+
+    &__sentence {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $main-text-color;
+        line-height: 1.9;
+        margin: $space-2 0 $space-4;
+
+        &--fill {
+            font-weight: 600;
+        }
+    }
+
+    &__reveal {
+        margin: $space-4 0 0;
+        color: $minor-text-color;
+        font-size: 0.95rem;
+
+        strong {
+            color: $rv-good;
+        }
+    }
+}
+
+@keyframes rv-pop {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* ---------- Options (MCQ / choose) ---------- */
+.revise-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $space-3;
+    margin-top: $space-4;
+}
+
+.revise-option {
+    @include card;
+    padding: $space-4;
+    font-size: 1rem;
+    font-weight: 600;
+    color: $main-text-color;
+    cursor: pointer;
+    border: 2px solid $border-subtle;
+    box-shadow: none;
+    transition: transform 0.12s $ease, border-color 0.12s $ease, background 0.12s $ease;
+    min-height: 56px;
+
+    &:hover:not(:disabled) {
+        border-color: $main-purple;
+        transform: translateY(-2px);
+    }
+
+    &:disabled {
+        cursor: default;
+    }
+
+    &.is-correct {
+        border-color: $rv-good;
+        background: $rv-good-soft;
+        color: $rv-good;
+    }
+
+    &.is-wrong {
+        border-color: $rv-wrong;
+        background: $rv-wrong-soft;
+        color: $rv-wrong;
+    }
+
+    &.is-dim {
+        opacity: 0.5;
+    }
+}
+
+/* ---------- Inline blanks + text lines ---------- */
+.revise-blank {
+    display: inline-block;
+    min-width: 90px;
+    margin: 0 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    color: $main-text-color;
+    background: $surface-2;
+    border: none;
+    border-bottom: 2px solid $main-purple;
+    border-radius: $radius-sm $radius-sm 0 0;
+    outline: none;
+
+    &.is-correct {
+        color: $rv-good;
+        border-color: $rv-good;
+    }
+    &.is-wrong {
+        color: $rv-wrong;
+        border-color: $rv-wrong;
+    }
+}
+
+.revise-textline {
+    width: 100%;
+    margin-top: $space-4;
+    padding: $space-4;
+    font-size: 1.1rem;
+    color: $main-text-color;
+    background: $surface-2;
+    border: 2px solid $border-subtle;
+    border-radius: $radius-md;
+    outline: none;
+    transition: border-color 0.12s $ease;
+
+    &:focus {
+        border-color: $main-purple;
+    }
+    &.is-correct {
+        border-color: $rv-good;
+        background: $rv-good-soft;
+    }
+    &.is-wrong {
+        border-color: $rv-wrong;
+        background: $rv-wrong-soft;
+    }
+}
+
+/* ---------- Listening audio ---------- */
+.revise-play {
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    margin: $space-2 auto;
+    padding: $space-3 $space-6;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: $on-primary;
+    background: $brand-gradient;
+    border: none;
+    border-radius: $radius-pill;
+    cursor: pointer;
+    box-shadow: $shadow-purple;
+    transition: transform 0.12s $ease;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+}
+
+/* ---------- Hear-word chip ---------- */
+.revise-speak-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    color: $on-primary;
+    background: $brand-gradient;
+    box-shadow: $shadow-purple;
+    transition: transform 0.15s $ease, box-shadow 0.15s $ease;
+
+    svg {
+        font-size: 1.35rem;
+    }
+
+    &:hover {
+        transform: scale(1.08);
+        box-shadow: 0 8px 20px rgba(var(--fl-primary-rgb), 0.36);
+    }
+
+    &:active {
+        transform: scale(0.96);
+    }
+}
+
+/* ---------- Speaking mic ---------- */
+.revise-mic {
+    margin-top: $space-5;
+    display: flex;
+    justify-content: center;
+
+    &__btn {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: $space-1;
+        width: 128px;
+        height: 128px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        color: $on-primary;
+        background: $brand-gradient;
+        box-shadow: $shadow-purple, 0 0 0 10px rgba(var(--fl-primary-rgb), 0.1);
+        font-size: 0.82rem;
+        font-weight: 800;
+        letter-spacing: 0.01em;
+        transition: transform 0.18s $ease, box-shadow 0.18s $ease;
+        z-index: 0;
+
+        svg {
+            font-size: 2.35rem;
+        }
+
+        &:hover {
+            transform: scale(1.06);
+            box-shadow: 0 10px 28px rgba(var(--fl-primary-rgb), 0.38),
+                0 0 0 14px rgba(var(--fl-primary-rgb), 0.12);
+        }
+
+        &:active {
+            transform: scale(0.97);
+        }
+
+        &.is-recording {
+            background: $rv-wrong;
+            box-shadow: 0 8px 22px rgba(255, 120, 115, 0.35);
+            animation: rv-pulse 1.3s infinite;
+        }
+    }
+
+    &__ring {
+        position: absolute;
+        inset: -10px;
+        border-radius: 50%;
+        border: 2px solid rgba(var(--fl-primary-rgb), 0.28);
+        pointer-events: none;
+        animation: rv-ring 2s $ease infinite;
+    }
+
+    &__btn.is-recording .revise-mic__ring {
+        border-color: rgba(255, 120, 115, 0.45);
+        animation: rv-ring-rec 1.2s $ease infinite;
+    }
+
+    &__busy {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: $space-2;
+        color: $minor-text-color;
+        font-weight: 600;
+    }
+}
+
+@keyframes rv-pulse {
+    0% {
+        box-shadow: 0 8px 22px rgba(255, 120, 115, 0.35), 0 0 0 0 rgba(255, 120, 115, 0.45);
+    }
+    70% {
+        box-shadow: 0 8px 22px rgba(255, 120, 115, 0.35), 0 0 0 20px rgba(255, 120, 115, 0);
+    }
+    100% {
+        box-shadow: 0 8px 22px rgba(255, 120, 115, 0.35), 0 0 0 0 rgba(255, 120, 115, 0);
+    }
+}
+
+@keyframes rv-ring {
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.06);
+        opacity: 1;
+    }
+}
+
+@keyframes rv-ring-rec {
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.85;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.35;
+    }
+}
+
+.revise-score {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: $space-5;
+    padding: $space-4 $space-6;
+    border-radius: $radius-lg;
+    background: $surface-2;
+
+    &__num {
+        font-size: 2.2rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+    &__label {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: $minor-text-color;
+        margin-top: $space-1;
+    }
+    &.is-correct .revise-score__num {
+        color: $rv-good;
+    }
+    &.is-wrong .revise-score__num {
+        color: $rv-wrong;
+    }
+}
+
+/* ---------- Footer verdict / actions ---------- */
+.revise-footer {
+    position: sticky;
+    bottom: 0;
+    border-top: 1px solid $border-subtle;
+    background: $surface;
+    padding: $space-4 $space-5;
+    transition: background 0.2s $ease;
+
+    &.is-correct {
+        background: $rv-good-soft;
+    }
+    &.is-wrong {
+        background: $rv-wrong-soft;
+    }
+
+    &__inner {
+        max-width: 640px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $space-4;
+
+        &--centered {
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            gap: $space-3;
+        }
+    }
+
+    &__verdict {
+        font-weight: 800;
+        font-size: 1.05rem;
+        color: $main-text-color;
+    }
+
+    &__hint {
+        max-width: 640px;
+        margin: 0 auto;
+        text-align: center;
+        color: $minor-text-color;
+        font-size: 0.9rem;
+    }
+}
+
+.revise-btn {
+    text-transform: none !important;
+    font-weight: 700 !important;
+    border-radius: $radius-pill !important;
+    padding: 0.55rem 1.6rem !important;
+    color: $on-primary !important;
+    background: $brand-gradient !important;
+    box-shadow: $shadow-purple !important;
+
+    &.Mui-disabled {
+        opacity: 0.5;
+        color: $on-primary !important;
+    }
+
+    &--ghost {
+        background: transparent !important;
+        color: $main-purple !important;
+        box-shadow: none !important;
+        border: 2px solid $border-subtle !important;
+    }
+}
+
+.revise-continue {
+    min-width: min(280px, 100%);
+    min-height: 48px;
+    padding: 0.7rem 2rem !important;
+    font-size: 1.05rem !important;
+}
+
+/* ---------- Empty + finish ---------- */
+.revise-empty,
+.revise-finish {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $space-6 $space-4;
+
+    &__card {
+        @include card;
+        max-width: 460px;
+        width: 100%;
+        padding: $space-7 $space-6;
+        text-align: center;
+
+        h2 {
+            margin: $space-3 0 $space-2;
+            color: $main-text-color;
+        }
+        p {
+            color: $minor-text-color;
+            line-height: 1.6;
+            margin: 0 0 $space-5;
+        }
+    }
+}
+
+.revise-empty__icon {
+    font-size: 2.6rem !important;
+    color: $main-purple;
+}
+
+.revise-finish__ring {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto $space-2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: $on-primary;
+    background: $brand-gradient;
+    box-shadow: $shadow-purple;
+}
+
+.revise-finish__actions {
+    display: flex;
+    gap: $space-3;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 600px) {
+    .revise-header {
+        padding: $space-3 $space-4;
+    }
+
+    .revise-body {
+        padding: $space-3 $space-4 $space-7;
+    }
+
+    .revise-card {
+        padding: $space-5 $space-4;
+
+        &__visual {
+            width: min(180px, 62%);
+        }
+
+        &__word h2 {
+            font-size: 1.5rem;
+        }
+        &__sentence {
+            font-size: 1.1rem;
+        }
+        &__say h3 {
+            font-size: 1.15rem;
+        }
+    }
+
+    .revise-options {
+        grid-template-columns: 1fr;
+    }
+
+    .revise-mic__btn {
+        width: 116px;
+        height: 116px;
+    }
+
+    .revise-footer__inner {
+        gap: $space-3;
+    }
+
+    .revise-continue {
+        width: 100%;
+        max-width: 320px;
+        min-width: 0;
+    }
+}

@@ -22,7 +22,14 @@ class GoogleOAuthClient:
 
         audience = response.json()["aud"]
 
-        if audience != settings.GOOGLE_OAUTH2_CLIENT_ID:
+        # Accept the web client ID plus any configured native (iOS/Android)
+        # client IDs. Falls back to the single web client ID if the allow-list
+        # setting is absent, preserving the original behavior.
+        allowed_audiences = getattr(settings, "GOOGLE_OAUTH2_ALLOWED_AUDIENCES", None) or [
+            settings.GOOGLE_OAUTH2_CLIENT_ID
+        ]
+
+        if audience not in allowed_audiences:
             raise ValidationError("Invalid audience.")
 
         stream = io.BytesIO(response.content)

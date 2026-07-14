@@ -7,7 +7,7 @@ alwaysApply: false
 # Backend layering is required for all Django code
 
 The Django backend is organized as bounded contexts (`deck/`, `term/`, `user/`,
-`learning/`, `folder/`, `role/`, `speaking/`, …) following a DDD / clean-architecture
+`learning/`, `role/`, `speaking/`, …) following a DDD / clean-architecture
 layering. Whenever you ADD or UPDATE backend code, it MUST respect these layers.
 Do not regress to fat views that talk to the ORM directly.
 

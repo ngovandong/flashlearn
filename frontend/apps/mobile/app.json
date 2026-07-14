@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "FlashLearn",
+    "slug": "flashlearn",
+    "scheme": "flashlearn",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "site.ngovandong.flashlearn"
+    },
+    "android": {
+      "package": "site.ngovandong.flashlearn",
+      "adaptiveIcon": {
+        "backgroundColor": "#4255ff"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-status-bar",
+      "expo-web-browser",
+      "expo-audio"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

@@ -1,0 +1,24 @@
+// Base
+@use "base/theme_vars";
+@use "base/animations";
+@use "base/layout";
+
+// Components
+@use "components/not_found";
+@use "components/custom";
+@use "components/home/home";
+@use "components/home/learn";
+@use "components/home/create_deck";
+@use "components/home/deck_page";
+@use "components/home/settings";
+@use "components/home/number_test";
+@use "components/home/listening";
+@use "components/home/speaking_coach";
+@use "components/home/writing_coach";
+@use "components/home/grammar";
+@use "components/home/revise";
+
+// Login and Register
+@use "components/login_register";
+
+@use "base/media_queries";

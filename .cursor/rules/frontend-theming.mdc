@@ -1,6 +1,6 @@
 ---
 description: All new/updated frontend UI must adhere to the runtime theme system
-globs: frontend/src/**
+globs: frontend/apps/web/src/**
 alwaysApply: false
 ---
 
@@ -8,8 +8,8 @@ alwaysApply: false
 
 Flashlearn is fully themeable at runtime: a "mode" (light/dark/system) and a
 "palette" (brand + accent colors) are materialized into CSS custom properties on
-`:root` by `frontend/src/utils/themeController.js`. The catalog in
-`frontend/src/constants/themes.js` is the single source of truth.
+`:root` by `frontend/apps/web/src/utils/themeController.js`. The catalog in
+`frontend/apps/web/src/constants/themes.js` is the single source of truth.
 
 Whenever you ADD or UPDATE any UI, it MUST use these theme tokens so it adapts to
 light/dark and every palette. Verify your change looks correct in both light and
@@ -17,7 +17,7 @@ dark mode.
 
 ## Use the tokens — never hardcode brand/neutral colors
 
-- **In SCSS** (`frontend/src/styles/sass/**`): use the Sass aliases from
+- **In SCSS** (`frontend/apps/web/src/styles/sass/**`): use the Sass aliases from
   `base/_variables.scss`, e.g. `$main-purple`, `$blue`, `$yellow`, `$surface`,
   `$surface-2`, `$app-background`, `$main-text-color`, `$minor-text-color`,
   `$gray-text-color`, `$border-subtle`, `$border-color`, `$brand-gradient`, and

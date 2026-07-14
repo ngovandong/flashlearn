@@ -5,7 +5,6 @@ from rest_framework import routers
 from .views import (
     CourseViewSet,
     DeckViewSet,
-    FolderViewSet,
     GetImagesUrlView,
     GrammarViewSet,
     LearningViewSet,
@@ -24,7 +23,6 @@ router = routers.DefaultRouter()
 router.register(r"decks", DeckViewSet, basename="deck")
 router.register(r"terms", TermViewSet, basename="term")
 router.register(r"users", UserViewSet, basename="user")
-router.register(r"folders", FolderViewSet, basename="folder")
 router.register(r"roles", RoleViewSet, basename="role")
 router.register(r"learnings", LearningViewSet, basename="learning")
 router.register(r"speaking", SpeakingViewSet, basename="speaking")

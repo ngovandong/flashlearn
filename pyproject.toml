@@ -7,35 +7,34 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "django>=4.2.0,<5.0.0",
-    "djangorestframework>=3.15.0,<4.0.0",
-    "djangorestframework-simplejwt>=5.3.0,<6.0.0",
-    "django-cors-headers>=4.3.0,<5.0.0",
-    "python-dotenv>=1.0.0,<2.0.0",
-    "requests>=2.31.0,<3.0.0",
-    "pillow>=10.0.0,<11.0.0",
-    "drf-yasg>=1.21.7,<2.0.0",
-    "cloudinary>=1.40.0,<2.0.0",
-    "mysqlclient>=2.2.0,<3.0.0",
-    "django-rq>=2.10.0,<3.0.0",
-    "rq-scheduler>=0.13.0,<1.0.0",
+    "django>=5.2,<5.3",
+    "djangorestframework>=3.17,<4",
+    "djangorestframework-simplejwt>=5.5,<6",
+    "django-cors-headers>=4.9,<5",
+    "python-dotenv>=1.2,<2",
+    "requests>=2.34,<3",
+    "pillow>=12.3,<13",
+    "drf-yasg>=1.21.15,<2",
+    "cloudinary>=1.45,<2",
+    "mysqlclient>=2.2.8,<3",
+    "django-rq>=4.1,<5",
+    "rq-scheduler>=0.14,<1",
     "elasticsearch>=8.11.0,<9.0.0",
     "elasticsearch-dsl>=8.11.0,<9.0.0",
     "django-elasticsearch-dsl>=8.0.0,<9.0.0",
-    "django-redis>=5.4.0,<6.0.0",
-    "beautifulsoup4>=4.12.0,<5.0.0",
+    "django-redis>=7,<8",
+    "beautifulsoup4>=4.15,<5",
     "django-revproxy>=0.12.0,<1.0.0",
     "channels[daphne]>=4.0.0",
     "channels-redis>=4.0.0",
-    "google-auth>=2.23.0,<3.0.0",
+    "google-auth>=2.55,<3",
     "google-auth-httplib2>=0.2.0,<1.0.0",
-    "google-api-python-client>=2.100.0,<3.0.0",
+    "google-api-python-client>=2.198,<3",
     "curl-cffi>=0.15.0",
-    "sqlalchemy>=2.0.0,<3.0.0",
+    "sqlalchemy>=2.0.51,<3",
+    "pyjwt>=2.10,<3",
+    "certifi>=2026.6.0",
 ]
-
-[tool.uv]
-allow-insecure-host = ["pypi.org", "files.pythonhosted.org", "pypi.python.org"]
 
 [project.optional-dependencies]
 dev = [
@@ -45,15 +44,15 @@ dev = [
 
 [dependency-groups]
 dev = [
-    "debugpy>=1.8.20",
-    "django-debug-toolbar>=4.2.0,<5.0.0",
-    "ruff>=0.9.0",
+    "debugpy>=1.8.21",
+    "django-debug-toolbar>=7,<8",
+    "ruff>=0.15.21",
     "pre-commit>=4.0.0",
-    "django-stubs>=6.0.5",
+    "django-stubs>=6.0.6",
     "djangorestframework-stubs>=3.17.0",
-    "types-requests>=2.33.0.20260518",
-    "pyright>=1.1.410",
-    "gunicorn>=21.2.0,<22.0.0",
+    "types-requests>=2.33.0.20260712",
+    "pyright>=1.1.411",
+    "gunicorn>=26,<27",
     "google-auth-oauthlib>=1.1.0,<2.0.0",
     "pypdf>=6.14.2",
     "pymupdf>=1.28.0",

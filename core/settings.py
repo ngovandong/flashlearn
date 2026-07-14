@@ -281,6 +281,20 @@ BASE_FRONTEND_URL = os.getenv("BASE_FRONTEND_URL")
 BASE_BACKEND_URL = os.getenv("BASE_BACKEND_URL")
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv("GOOGLE_OAUTH2_CLIENT_ID")
 GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH2_CLIENT_SECRET")
+# Native iOS/Android Google Sign-In uses its own OAuth client IDs, so the ID
+# tokens those apps mint carry a different `aud`. Accept them alongside the web
+# client ID when validating ID tokens; web behavior is unchanged.
+GOOGLE_OAUTH2_IOS_CLIENT_ID = os.getenv("GOOGLE_OAUTH2_IOS_CLIENT_ID")
+GOOGLE_OAUTH2_ANDROID_CLIENT_ID = os.getenv("GOOGLE_OAUTH2_ANDROID_CLIENT_ID")
+GOOGLE_OAUTH2_ALLOWED_AUDIENCES = [
+    aud
+    for aud in (
+        GOOGLE_OAUTH2_CLIENT_ID,
+        GOOGLE_OAUTH2_IOS_CLIENT_ID,
+        GOOGLE_OAUTH2_ANDROID_CLIENT_ID,
+    )
+    if aud
+]
 # AI provider (provider-agnostic; AI_PROVIDER selects the concrete client)
 AI_PROVIDER = os.getenv("AI_PROVIDER", "gemini")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")

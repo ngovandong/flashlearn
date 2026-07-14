@@ -24,8 +24,10 @@ services:
   frontend:
     build:
       context: ./frontend
+      dockerfile: apps/web/Dockerfile
       target: build
-    command: npm start
+    command: npm run start -w @flashlearn/web -- --host 0.0.0.0 --port 3000
+    working_dir: /app
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -35,4 +37,3 @@ services:
       - .env.docker
     environment:
       - CHOKIDAR_USEPOLLING=true
-      - WDS_SOCKET_PORT=0

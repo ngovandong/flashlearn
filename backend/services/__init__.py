@@ -1,7 +1,6 @@
 """Service layer entry point — prefer composition singletons for new code."""
 
 from backend.deck.application.services import DeckService
-from backend.folder.application.services import FolderService
 from backend.learning.application.services import LearningService
 from backend.learning.infrastructure.cache import learning_progress_cache
 from backend.role.application.services import RoleService
@@ -38,7 +37,6 @@ from backend.writing.application.writing_service import WritingService
 __all__ = [
     "AuthService",
     "DeckService",
-    "FolderService",
     "LearningService",
     "MailService",
     "RoleService",

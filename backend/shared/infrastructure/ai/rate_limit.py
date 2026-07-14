@@ -195,6 +195,7 @@ class GlobalAiGate:
 
     def _acquire_lock(self, deadline: float) -> str | None:
         """Take the single in-flight slot; returns the lock token (None = timed out)."""
+        assert self._redis is not None
         token = uuid.uuid4().hex
         while True:
             try:
@@ -214,6 +215,8 @@ class GlobalAiGate:
 
     def _await_rate_token(self, deadline: float, token: str | None) -> None:
         """Consume one RPM token, sleeping (and refreshing the lock) until allowed."""
+        assert self._redis is not None
+        assert self._rate_sha is not None
         while True:
             now_ms = int(time.time() * 1000)
             try:
@@ -241,12 +244,15 @@ class GlobalAiGate:
     def _refresh_lock(self, token: str | None) -> None:
         if token is None:
             return
+        assert self._redis is not None
         try:
             self._redis.pexpire(self._lock_key, self._lock_ttl_ms)
         except Exception:  # noqa: BLE001
             pass
 
     def _release_lock(self, token: str) -> None:
+        assert self._redis is not None
+        assert self._unlock_sha is not None
         try:
             self._redis.evalsha(self._unlock_sha, 1, self._lock_key, token)
         except Exception:  # noqa: BLE001

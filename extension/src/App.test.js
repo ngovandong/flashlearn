@@ -3,7 +3,7 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import App from "./App";
 
-jest.mock("./pages/home", () => () => <div>Home</div>);
+vi.mock("./pages/home", () => ({ default: () => <div>Home</div> }));
 
 function renderApp() {
   const store = configureStore({

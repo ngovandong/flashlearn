@@ -6,7 +6,6 @@ from .course import (
     UserCourseLessonProgress,
 )
 from .deck import Deck
-from .folder import Folder
 from .grammar import (
     GrammarBook,
     GrammarExercise,

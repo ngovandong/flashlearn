@@ -1,0 +1,23 @@
+// The theme catalog + color math now live in @flashlearn/core so the mobile app
+// can build its React Native Paper / navigation themes from the same tokens.
+export {
+  THEME_STORAGE_KEY,
+  SETTING_MODE_KEY,
+  SETTING_PALETTE_KEY,
+  MODES,
+  DEFAULT_MODE,
+  DEFAULT_PALETTE,
+  hexToRgb,
+  rgbTriplet,
+  darken,
+  lighten,
+  rgbToHsl,
+  hslToHex,
+  NEUTRALS,
+  PALETTES,
+  PALETTE_MAP,
+  PALETTE_CATEGORIES,
+  CATEGORY_ORDER,
+  getPalette,
+  resolveMode,
+} from "@flashlearn/core";

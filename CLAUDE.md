@@ -84,13 +84,20 @@ cargo build --release  # production build
 cargo test
 ```
 
-### Frontend
+### Frontend (npm-workspace monorepo)
+The `frontend/` folder is an npm-workspace umbrella:
+`apps/web` (Vite website), `apps/mobile` (Expo app), and shared packages under
+`packages/*` (`@flashlearn/core`, `@flashlearn/api`, `@flashlearn/auth`).
+
 ```bash
 cd frontend
-npm install
-npm start    # dev server on port 3000
-npm run build
-npm test
+npm install                 # installs all workspaces (hoisted node_modules)
+
+npm run dev:web             # web dev server on port 3000
+npm run build:web           # production web build
+npm test -w @flashlearn/web # web unit tests
+
+npm run dev:mobile          # Expo dev server (apps/mobile)
 ```
 
 ### RQ Worker + Scheduler
@@ -112,17 +119,22 @@ Add new scheduled tasks there and restart the worker to pick them up.
 ### Docker
 ```bash
 # Production — starts db, redis, backend, worker, frontend
-docker-compose up
+docker compose --env-file .env.docker up --build
 
 # Production — worker only
-docker-compose up worker
+docker compose --env-file .env.docker up worker
 
-# Development (hot-reload) — mounts local code into containers
-docker-compose -f docker-compose.dev.yml up
+# Development overlay (hot-reload) — mounts local code into containers
+docker compose --env-file .env.docker \
+  -f docker-compose.yml -f docker-compose.dev.yml up --build
 
 # Build the worker image explicitly (same Dockerfile as backend)
-docker-compose build worker
+docker compose --env-file .env.docker build worker
 ```
+
+The frontend image receives client-visible `VITE_*` values at build time.
+Set them in `.env.docker`; runtime container variables cannot alter an already
+built Vite bundle.
 
 ### Building & Pushing Images to Docker Hub
 ```bash
@@ -139,7 +151,8 @@ Images: `ngovandong/flashlearn_backend:<tag>` and `ngovandong/flashlearn_fronten
 ### Running from Docker Hub (self-service, no local build)
 ```bash
 # Uses pre-built images from Docker Hub
-docker-compose -f docker-compose.dockerhub.selfservice.yml up -d
+docker compose --env-file .env.docker \
+  -f docker-compose.dockerhub.arm.selfservice.yml up -d
 ```
 Requires `.env.docker`. The selfservice compose file targets ARM64 (`platform: linux/arm64`, tag `:arm64`).
 
@@ -160,7 +173,7 @@ Nginx routes to the appropriate backend. Both backends expose the same port 8005
 - `base/` — shared base model classes
 
 **`backend/` internal layout:**
-- `models/` — User, Deck, Term, Folder, LearningProgress, UserDeckRole (OWNER/EDIT/VIEW)
+- `models/` — User, Deck, Term, LearningProgress, UserDeckRole (OWNER/EDIT/VIEW)
 - `views/` — DRF ViewSets per resource
 - `services/` — business logic (UserService, DeckService, LearningService, AuthService, CacheService, MailService)
 - `serializers/` — DRF serializers

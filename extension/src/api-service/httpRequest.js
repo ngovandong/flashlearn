@@ -1,8 +1,8 @@
 import axios from "axios";
-import jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import store, { logout, setToken } from "../store";
 
-axios.defaults.baseURL = process.env.REACT_APP_BASE_URL;
+axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 // Refresh a bit before the real expiry to absorb clock skew and avoid racing a
 // request against the boundary.
@@ -11,7 +11,7 @@ const EXP_SKEW_SECONDS = 30;
 function isAccessExpired(token) {
   if (!token?.access) return false;
   try {
-    const { exp } = jwt_decode(token.access);
+    const { exp } = jwtDecode(token.access);
     if (!exp) return false;
     return Date.now() >= exp * 1000 - EXP_SKEW_SECONDS * 1000;
   } catch {

@@ -4,9 +4,10 @@
 
 #### *Learn faster. Speak better. Remember forever.*
 
-A flashcard study platform with **AI term enrichment**, an **AI Speaking Coach**,
-real-time **multiplayer revision**, a **Chrome extension**, and a dual
-**Django + Rust** backend sharing one database.
+A language-learning platform with **flashcards**, guided **courses**, **Grammar**,
+**Listening**, AI **Speaking and Writing Coaches**, mixed cross-feature
+**revision**, **web and React Native clients**, a **Chrome extension**, and a
+dual **Django + Rust** backend sharing one database.
 
 <br/>
 
@@ -16,6 +17,8 @@ real-time **multiplayer revision**, a **Chrome extension**, and a dual
 ![Rust](https://img.shields.io/badge/Rust-2021-000000?logo=rust&logoColor=white)
 ![Axum](https://img.shields.io/badge/Axum-0.7-000000?logo=rust&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
+![React Native](https://img.shields.io/badge/React_Native-0.74-61DAFB?logo=react&logoColor=black)
+![Expo](https://img.shields.io/badge/Expo-51-000020?logo=expo&logoColor=white)
 ![MUI](https://img.shields.io/badge/MUI-7-007FFF?logo=mui&logoColor=white)
 ![Redux](https://img.shields.io/badge/Redux_Toolkit-2-764ABC?logo=redux&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)
@@ -46,12 +49,13 @@ real-time **multiplayer revision**, a **Chrome extension**, and a dual
 | 8 | [🤖 The AI engine](#-the-ai-engine) | Providers, failover, rate‑gate |
 | 9 | [✨ AI term enrichment](#-ai-flow-1--term-enrichment) | Bare word → dictionary entry |
 | 10 | [🗣️ AI Speaking Coach](#️-ai-flow-2--the-speaking-coach) | Dialogue + pronunciation scoring |
-| 11 | [🎮 Realtime multiplayer](#-realtime-the-quick-revise-game) | The WebSocket game |
-| 12 | [🧠 Learning & memory](#-learning--spaced-revision) | The revision scoring model |
-| 13 | [Frontend architecture](#-frontend-architecture) | React app structure |
-| 14 | [Background jobs](#-background-jobs--cron) | Worker, scheduler, emails |
-| 15 | [Chrome extension](#-chrome-extension) | Select‑to‑save anywhere |
-| 16 | [Deployment](#-deployment) | Docker & images |
+| 11 | [📚 Learning surfaces](#-courses-listening-grammar-writing--mixed-revise) | Courses, dictation, grammar, writing, mixed review |
+| 12 | [🎮 Realtime multiplayer](#-realtime-the-quick-revise-game) | The WebSocket game |
+| 13 | [🧠 Learning & memory](#-learning--spaced-revision) | The revision scoring model |
+| 14 | [Frontend architecture](#-frontend-architecture) | Web, mobile, and shared packages |
+| 15 | [Background jobs](#-background-jobs--cron) | Worker, scheduler, emails |
+| 16 | [Chrome extension](#-chrome-extension) | Select‑to‑save anywhere |
+| 17 | [Deployment](#-deployment) | Docker & images |
 
 ---
 
@@ -65,9 +69,13 @@ mindmap
       Learn Revise Quiz
       Number Test
       Guided courses and Live Role-play
+      Listening dictation
+      Grammar practice
+      Mixed cross-feature Revise
     AI
       Term enrichment
       Speaking Coach
+      Writing Coach
       Pronunciation scoring
       Image crawler
       Translation
@@ -77,6 +85,7 @@ mindmap
       Realtime Quick-Revise game
     Reach
       React web app
+      Expo React Native app
       Chrome extension
       Email reminders
     Engine
@@ -85,10 +94,10 @@ mindmap
       MySQL · Redis · Elasticsearch
 ```
 
-FlashLearn turns a plain word into a rich, Oxford‑style flashcard using AI, lets
-you study it in multiple game modes, practice **speaking** it with an AI coach
-that scores your pronunciation, and **race friends** to revise — all themeable,
-mobile‑first, and installable as a browser extension.
+FlashLearn combines vocabulary decks with guided courses, listening dictation,
+grammar exercises, and AI speaking/writing practice. A mixed Revise session
+pulls mistakes from those features into one priority queue, while Quick-Revise
+supports real-time multiplayer study.
 
 ---
 
@@ -97,13 +106,14 @@ mobile‑first, and installable as a browser extension.
 <table>
 <tr><th>Layer</th><th>Technology</th><th>Role in FlashLearn</th></tr>
 
-<tr><td rowspan="6"><b>🐍 Django backend</b><br/><sub>primary API</sub></td>
+<tr><td rowspan="7"><b>🐍 Django backend</b><br/><sub>primary API</sub></td>
 <td>Python 3.11 · Django 4.2</td><td>Core web framework, ORM, migrations (owns the schema)</td></tr>
 <tr><td>Django REST Framework 3.15</td><td>ViewSets, serializers, the REST API surface</td></tr>
 <tr><td>Django Channels 4 + Daphne</td><td>ASGI server & WebSockets for the multiplayer game</td></tr>
 <tr><td>SQLAlchemy 2 (read side)</td><td>Hand‑tuned read queries alongside the Django ORM</td></tr>
 <tr><td>django‑rq + rq‑scheduler</td><td>Background jobs & cron (emails, cache cleanup, backups)</td></tr>
 <tr><td>drf‑yasg</td><td>Swagger / ReDoc API docs (DEBUG only)</td></tr>
+<tr><td>DDD / clean architecture</td><td>Bounded contexts wired through <code>backend/shared/composition.py</code></td></tr>
 
 <tr><td rowspan="4"><b>🦀 Rust backend</b><br/><sub>opt‑in replacement</sub></td>
 <td>Rust 2021 · Axum 0.7</td><td>High‑performance partial re‑implementation of the API</td></tr>
@@ -111,7 +121,7 @@ mobile‑first, and installable as a browser extension.
 <tr><td>JWT · pbkdf2</td><td>Token validation & Django‑compatible password checks</td></tr>
 <tr><td>DDD layering</td><td>domain / application / infrastructure / interfaces</td></tr>
 
-<tr><td rowspan="6"><b>⚛️ React frontend</b></td>
+<tr><td rowspan="6"><b>⚛️ Web frontend</b></td>
 <td>React 18</td><td>SPA UI</td></tr>
 <tr><td>Material UI 7 + Emotion</td><td>Component library & styling</td></tr>
 <tr><td>Redux Toolkit 2 + React‑Redux</td><td>Global state</td></tr>
@@ -119,15 +129,25 @@ mobile‑first, and installable as a browser extension.
 <tr><td>React Router 7</td><td>Routing</td></tr>
 <tr><td>Sass + CSS custom properties</td><td>Runtime theming (light/dark + palettes)</td></tr>
 
+<tr><td rowspan="6"><b>📱 Mobile frontend</b></td>
+<td>Expo 51 · React Native 0.74</td><td>Native iOS and Android client</td></tr>
+<tr><td>Expo Router 3</td><td>File-based routes and tab navigation</td></tr>
+<tr><td>React Native Paper 5</td><td>Material components and runtime themes</td></tr>
+<tr><td>Redux Toolkit 2</td><td>Authentication and client state</td></tr>
+<tr><td>TanStack Query 5</td><td>Server-state caching and fetching</td></tr>
+<tr><td>SecureStore · AuthSession</td><td>Native token storage and Google sign-in</td></tr>
+
 <tr><td rowspan="4"><b>🗄️ Data & infra</b></td>
 <td>MySQL 8</td><td>System of record (shared by both backends)</td></tr>
 <tr><td>Redis 6</td><td>Cache, RQ queue, Channels layer, AI rate‑gate</td></tr>
 <tr><td>Elasticsearch 8</td><td>Full‑text deck & term search</td></tr>
-<tr><td>Cloudinary</td><td>Image storage / optimization</td></tr>
+<tr><td>Cloudinary</td><td>Image and generated/listening audio storage</td></tr>
 
-<tr><td rowspan="4"><b>🤖 AI & external</b></td>
-<td>Google Gemini</td><td>Multimodal: term enrichment, dialogue, TTS, pronunciation</td></tr>
-<tr><td>OpenRouter</td><td>Text/JSON fallback provider</td></tr>
+<tr><td rowspan="6"><b>🤖 AI & external</b></td>
+<td>Google Gemini</td><td>Multimodal text/JSON, dialogue, TTS, and pronunciation fallback</td></tr>
+<tr><td>OpenRouter · Azure OpenAI · LM Studio</td><td>Configurable text/JSON providers and failover</td></tr>
+<tr><td>ElevenLabs · Azure TTS · Kokoro</td><td>Cloud or optional local text-to-speech</td></tr>
+<tr><td>Azure Speech</td><td>Measured pronunciation assessment</td></tr>
 <tr><td>Google OAuth</td><td>Social login</td></tr>
 <tr><td>Playwright (Chromium)</td><td>Headless fallback for the Google image crawler</td></tr>
 
@@ -146,6 +166,7 @@ mobile‑first, and installable as a browser extension.
 flowchart TB
     subgraph clients["👥 Clients"]
         Web["⚛️ React SPA<br/>(port 3000)"]
+        Mobile["📱 Expo / React Native<br/>(iOS + Android)"]
         Ext["🧩 Chrome Extension"]
     end
 
@@ -172,6 +193,7 @@ flowchart TB
     end
 
     Web --> Nginx
+    Mobile --> Nginx
     Ext --> Nginx
     Nginx --> Django
     Nginx -. swap .-> Rust
@@ -210,19 +232,23 @@ flashlearn/
 ├── backend/                   🧠  All domain logic (see "DDD backend" below)
 │   ├── deck/  term/  user/    📦  Bounded contexts (DDD: domain/application/infrastructure)
 │   ├── learning/  role/  folder/  speaking/
-│   ├── course/  reminders/    📚  Guided courses & home "pick up where you left off"
+│   ├── course/  listening/  grammar/  writing/  revise/
+│   ├── reminders/            📚  Learning features & home "pick up where you left off"
 │   ├── shared/                🔌  Cross-context: composition root, AI, cache, ports
 │   │   ├── composition.py     🧩  Wires concrete infra into services (DI root)
-│   │   └── infrastructure/ai/ 🤖  Gemini · OpenRouter · ElevenLabs · Azure Speech/TTS, failover, rate-gate
+│   │   └── infrastructure/ai/ 🤖  Text, multimodal, TTS, failover, and rate-gate adapters
 │   ├── models/                🗃️  Django ORM models (schema owner)
 │   ├── views/                 🚪  DRF ViewSets per resource
 │   ├── serializers/           🔄  DRF serializers
 │   ├── consumers.py           🎮  WebSocket consumer for the Quick-Revise game
-│   ├── tasks.py + cron/       ⏰  RQ tasks & schedules
+│   ├── tasks/ + cron/         ⏰  Domain-grouped RQ tasks & schedules
 │   └── documents/             🔎  Elasticsearch document mappings
 ├── base/                      🧱  Shared abstract models (UUID, timestamps, User base)
 ├── rust_backend/src/          🦀  domain / application / infrastructure / interfaces
-├── frontend/src/              ⚛️  React SPA (see "Frontend architecture")
+├── frontend/                  ⚛️  npm-workspace monorepo:
+│   ├── apps/web/src/          ⚛️  React SPA (see "Frontend architecture")
+│   ├── apps/mobile/           📱  Expo React Native app (see its README)
+│   └── packages/              🧰  Shared @flashlearn/core · api · auth
 ├── extension/                 🧩  Chrome extension (React + MV3)
 ├── media/  dump/              📂  Local media & DB dumps
 ├── docker-compose*.yml        🚢  Prod, dev hot-reload, self-service variants
@@ -234,12 +260,12 @@ flashlearn/
 ## 🧩 The DDD backend (bounded contexts)
 
 The `backend/` package is organized as **Domain‑Driven Design bounded contexts**.
-Each context (`deck`, `term`, `user`, `learning`, `role`, `folder`, `speaking`,
-`course`, `reminders`) has the same internal layering, and they talk to each
-other only through small **Context APIs** (or another context's application
-service, injected at the composition root) — never by reaching into each other's
-internals. Simple contexts (e.g. `reminders`) may omit the `domain/` layer; when
-present, `domain/` stays **pure Python** with no Django/ORM/I/O imports.
+The active contexts are `deck`, `term`, `user`, `learning`, `role`, `folder`,
+`speaking`, `course`, `listening`, `grammar`, `writing`, `revise`, and
+`reminders`. They use the same internal layering and communicate through small
+**Context APIs** or injected application services, rather than reaching into
+another context's internals. Simple contexts may omit `domain/`; when present,
+that layer stays **pure Python** with no Django/ORM/I/O imports.
 
 ```mermaid
 flowchart LR
@@ -269,14 +295,17 @@ flowchart TB
         DS["deck_service = DeckService(repo, user_context, learning_context)"]
         LS["learning_service = LearningService(repo, term_context, user_context, cache)"]
         TE["term_enrichment_service = TermEnrichmentService(ai=default_ai_provider)"]
-        SC["speaking_coach_service = SpeakingCoachService(ai, pronunciation=AzureSpeech?)"]
-        SS["speaking_service = SpeakingService(coach=speaking_coach_service, repo)"]
-        CS["course_service = CourseService(repo, speaking_service, ai, tts=AzureTTS?, image_storage)"]
-        RS["reminder_service = ReminderService(repo)"]
+        SC["speaking_service<br/>AI coach + pronunciation + audio storage"]
+        CS["course_service<br/>speaking + selectable TTS factory"]
+        Listen["listening_service<br/>translation + audio mirroring"]
+        Grammar["grammar_service + coach + ingest"]
+        Writing["writing_service + writing_coach_service"]
+        Revise["revise_service<br/>mixed candidate repository + learning + speaking"]
+        RS["reminder_service"]
     end
 
-    Ports["📜 application/ports.py<br/>AiTextPort · CachePort ·<br/>ImageStoragePort · OAuthPort"]
-    Adapters["🔌 infrastructure adapters<br/>Gemini · OpenRouter · ElevenLabs ·<br/>Azure Speech/TTS · Redis cache ·<br/>Cloudinary · Google OAuth"]
+    Ports["📜 application/ports.py<br/>AI · TTS · translation · cache ·<br/>image/audio storage · OAuth"]
+    Adapters["🔌 infrastructure adapters<br/>Gemini · OpenRouter · Azure OpenAI · LM Studio<br/>ElevenLabs · Azure Speech/TTS · Kokoro<br/>Redis · Cloudinary · Google OAuth"]
 
     Ports -. implemented by .-> Adapters
     Adapters --> compose
@@ -288,24 +317,10 @@ flowchart TB
 > cache can fall back from Redis to in‑process, and tests can inject fakes —
 > all without touching business logic.
 
-**The 10 most connected "god nodes"** (from the codebase knowledge graph) tell
-you where the gravity is:
-
-```mermaid
-flowchart LR
-    TS["TermService<br/>27 edges"]:::hot
-    DS["DeckService<br/>24"]:::hot
-    AE["AiProviderError<br/>22"]:::hot
-    SV["SpeakingViewSet<br/>20"]:::warm
-    DAP["DeckAccessPolicy<br/>17"]:::warm
-    VE["ValidationError<br/>17"]:::warm
-    TR["TermRepository<br/>16"]:::warm
-    LS["LearningService<br/>15"]:::warm
-    RHP["RetryingHttpProvider<br/>15"]:::warm
-
-    classDef hot fill:#7c2d12,stroke:#f97316,color:#fff
-    classDef warm fill:#1e3a5f,stroke:#60a5fa,color:#fff
-```
+The generated [`graphify-out/GRAPH_REPORT.md`](./graphify-out/GRAPH_REPORT.md)
+is the source of truth for current communities and highly connected nodes. It is
+rebuilt after code changes, so this guide intentionally avoids copying
+connection counts that would quickly become stale.
 
 ---
 
@@ -332,6 +347,14 @@ erDiagram
     COURSE_SECTION ||--o{ COURSE_LESSON : "contains"
     USER ||--o{ USER_COURSE_LESSON_PROGRESS : "progresses"
     COURSE_LESSON ||..o{ USER_COURSE_LESSON_PROGRESS : "keyed by lesson_key"
+    LISTENING_TOPIC ||--o{ LISTENING_EXERCISE : "contains"
+    USER ||--o{ LISTENING_PROGRESS : "tracks"
+    LISTENING_EXERCISE ||..o{ LISTENING_PROGRESS : "keyed by exercise_key"
+    GRAMMAR_BOOK ||--o{ GRAMMAR_SECTION : "contains"
+    GRAMMAR_SECTION ||--o{ GRAMMAR_UNIT : "contains"
+    GRAMMAR_UNIT ||--o{ GRAMMAR_EXERCISE : "contains"
+    USER ||--o{ WRITING_SESSION : "practices"
+    USER ||--o{ REVISE_CARD : "reviews"
 
     USER {
         uuid id PK
@@ -390,7 +413,9 @@ erDiagram
         uuid id PK
         string voice
         string text_hash "unique w/ voice"
-        text audio "base64 PCM"
+        string audio_url "preferred Cloudinary URL"
+        text audio "legacy base64 fallback"
+        string mime_type
     }
     AI_RESPONSE_CACHE {
         uuid id PK
@@ -430,6 +455,58 @@ erDiagram
         json last_result "replayed role-play breakdown"
         json highlights
     }
+    LISTENING_TOPIC {
+        uuid id PK
+        slug slug UK
+        string title
+    }
+    LISTENING_EXERCISE {
+        uuid id PK
+        string key "stable content key"
+        json sentences "text, tokens, audio_url"
+        string full_audio_url
+    }
+    LISTENING_PROGRESS {
+        uuid id PK
+        string exercise_key
+        int best_score
+        json last_result
+    }
+    GRAMMAR_BOOK {
+        uuid id PK
+        slug slug UK
+        string title
+        string level
+    }
+    GRAMMAR_SECTION {
+        uuid id PK
+        slug slug
+        int order
+    }
+    GRAMMAR_UNIT {
+        uuid id PK
+        string key
+        json explanation
+    }
+    GRAMMAR_EXERCISE {
+        uuid id PK
+        string kind
+        json items
+    }
+    WRITING_SESSION {
+        uuid id PK
+        string mode "chat or freeform"
+        json messages
+        text draft
+    }
+    REVISE_CARD {
+        uuid id PK
+        string kind "vocab grammar listening speaking"
+        text prompt
+        text answer
+        json payload
+        float priority
+    }
 ```
 
 **Course progress is decoupled from content:** `UserCourseLessonProgress` is keyed
@@ -451,12 +528,12 @@ flowchart LR
 
 ## 🔄 Request lifecycle
 
-A typical authenticated REST call from the SPA to the database:
+A typical authenticated REST call from a React client to the database:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant U as ⚛️ React (axios)
+    participant U as ⚛️ Web / 📱 Mobile (axios)
     participant N as 🔀 Nginx
     participant DRF as 🚪 DRF ViewSet
     participant Auth as 🔐 CustomTokenAuth
@@ -487,21 +564,30 @@ sequenceDiagram
     DRF-->>U: JSON (serialized)
 ```
 
-**Auth note:** FlashLearn uses **custom token auth** (not the standard
-SimpleJWT flow). `POST /api/users/login` returns a token; `SECRET_KEY` signs it
-and is shared with the Rust backend so tokens are interchangeable. Google OAuth
-is available at `POST /api/users/google_login`.
+**Auth note:** Django uses SimpleJWT through `CustomTokenAuthentication`.
+Both React clients keep the short-lived access JWT in memory. The SPA stores
+the rotating refresh token in an HttpOnly cookie; the native app stores it in
+the OS keychain/keystore through Expo SecureStore and sends it in the refresh
+request body. `POST /api/users/refresh/` rotates the session and
+`POST /api/users/logout/` revokes it. The extension also uses the body-token
+contract because it cannot read the SPA cookie. Google OAuth remains available
+through `/api/users/google_login/`.
 
 ### Key API routes
 
 | Route | Purpose |
 |-------|---------|
-| `/api/decks/` · `/api/terms/` · `/api/folders/` | CRUD via DRF router |
-| `/api/users/login` · `/api/users/google_login` | Custom token & OAuth login |
+| `/api/decks/` · `/api/terms/` | CRUD via DRF router |
+| `/api/users/login/` · `/api/users/google_login/` | Password and Google OAuth login |
+| `/api/users/refresh/` · `/api/users/logout/` | Rotate or revoke refresh-token sessions |
 | `/api/learnings/` | Learning progress & revision |
 | `/api/roles/` | Deck membership / invites |
 | `/api/speaking/` | Speaking Coach (dialogue, TTS, analysis, history) |
 | `/api/courses/` | Guided courses: catalog, content, lesson audio, Live Role‑play scoring |
+| `/api/listening/` | Dictation catalog, attempts, highlights, and progress |
+| `/api/grammar/` | Grammar books, exercises, grading, progress, and AI explanations |
+| `/api/writing/` | Writing Coach chat, assessment, and history |
+| `/api/revise/` | Mixed cross-feature review session and answer grading |
 | `/api/reminders/` | Home‑page "pick up where you left off" prompts |
 | `/api/images/` | Image crawler (Google/Bing/Openverse/Wikimedia) |
 | `/api/translate/` | Translation |
@@ -577,23 +663,25 @@ sequenceDiagram
 |----------|:-----------:|:---------------------:|:---------------:|------|
 | **Gemini** | ✅ | ✅ | ✅ | Primary text/JSON + multimodal listener; legacy TTS voices |
 | **OpenRouter** | ✅ | ❌ | ❌ | Text/JSON fallback (free tier by default) |
+| **Azure OpenAI** | ✅ | ❌ | ❌ | Hosted OpenAI-compatible text/JSON provider |
+| **LM Studio** | ✅ | ❌ | ❌ | Local OpenAI-compatible text/JSON provider |
 | **ElevenLabs** | ❌ | ❌ | ✅ | Active Speaking‑Coach tutor TTS (US/UK/AU voices) |
 | **Azure Speech** | ❌ | ✅ | ❌ | *Measured* pronunciation assessment (accuracy/fluency/phonemes) |
 | **Azure TTS** | ❌ | ❌ | ✅ | Per‑character course dialogue voices |
+| **Kokoro** | ❌ | ❌ | ✅ | Optional local/offline course TTS |
 
 > [!NOTE]
-> Only **Gemini** and **OpenRouter** sit in the env‑driven failover chain
-> (`AI_PROVIDER` / `AI_FALLBACK_PROVIDERS`). **ElevenLabs**, **Azure Speech**, and
-> **Azure TTS** are single‑purpose adapters wired directly at the composition
-> root and used only when their credentials are present — each degrades
-> gracefully (e.g. Azure pronunciation falls back to the Gemini multimodal
-> listener; ElevenLabs falls back to legacy Gemini voices).
+> **Gemini**, **OpenRouter**, **Azure OpenAI**, and **LM Studio** can participate
+> in the env-driven text/JSON chain (`AI_PROVIDER` /
+> `AI_FALLBACK_PROVIDERS`). TTS is selected separately from Azure, ElevenLabs,
+> or Kokoro; Azure Speech handles pronunciation assessment. Kokoro is optional:
+> install it with `uv sync --group tts` plus the platform's `espeak-ng` package.
 
-AI responses are also persisted in `AiResponseCache`, keyed by a stable
-`sha256(context + request inputs)` so identical generations are never paid for
-twice. Synthesized speech is cached forever in `SpeakingAudioClip`
-(keyed by `voice + text_hash`), shared by both the Speaking Coach and course
-dialogue audio.
+AI responses are persisted in `AiResponseCache`, keyed by a stable
+`sha256(context + request inputs)` so identical generations are not paid for
+twice. Synthesized speech is cached in `SpeakingAudioClip` (keyed by
+`voice + text_hash`) and uploaded to Cloudinary through the audio-storage port.
+The legacy inline base64 field remains only as a compatibility fallback.
 
 ---
 
@@ -648,7 +736,7 @@ flowchart TB
         Lines --> Clip{"clip cached?<br/>(voice, text_hash)"}
         Clip -->|hit| Play["🔊 replay cached audio"]
         Clip -->|miss| Synth["🤖 ElevenLabs TTS (per line)<br/>legacy: Gemini voices"]
-        Synth --> Store[("SpeakingAudioClip<br/>cache forever")]
+        Synth --> Store[("SpeakingAudioClip<br/>Cloudinary audio_url")]
         Store --> Play
     end
 
@@ -682,13 +770,46 @@ and the coach can surface **your own deck terms** that appear in a dialogue.
 
 The `course` context reuses the same engine to teach structured, level‑based
 curricula (imported from freeCodeCamp via `crawl_english_courses`). Each lesson
-is a dialogue scene: characters get a fixed **Azure TTS** voice matching their
-gender (assigned once by `generate_course_audio`), and the learner passes a
-lesson by recording a **Live Role‑play** that `CourseService` scores
-sentence‑by‑sentence through the Speaking Coach's pronunciation analysis. A
+is a dialogue scene: characters get fixed voices from the TTS provider selected
+by `generate_course_audio --tts` (Azure, ElevenLabs, or Kokoro), and the learner
+passes a lesson by recording a **Live Role‑play** that `CourseService` scores
+sentence-by-sentence through the Speaking Coach's pronunciation analysis. A
 lesson flips to *passed* only when the averaged score clears
 `COURSE_PASS_THRESHOLD` (a pure rule in `course/domain/progress.py`); the latest
 breakdown is persisted so the lesson page can replay it on revisit.
+
+---
+
+## 📚 Courses, Listening, Grammar, Writing & mixed Revise
+
+These learning surfaces are separate bounded contexts but reuse shared ports,
+storage, AI providers, and progress conventions:
+
+```mermaid
+flowchart LR
+    Course["📚 Course<br/>dialogue + Live Role-play"] --> Signals
+    Listening["🎧 Listening<br/>listen and type"] --> Signals
+    Grammar["📖 Grammar<br/>server-graded exercises"] --> Signals
+    Speaking["🗣️ Speaking<br/>pronunciation analysis"] --> Signals
+    Writing["✍️ Writing<br/>chat + free-form feedback"] --> History[("saved practice history")]
+
+    Signals["mistakes and weak scores"] --> Revise["🔁 ReviseService<br/>reseed + prioritize + interleave"]
+    Revise --> Cards["answer-free mixed cards"]
+    Cards --> Grade["grade by card kind"]
+    Grade --> Ledger[("ReviseCard stats")]
+    Grade --> Progress[("source progress")]
+```
+
+- **Listening** stores stable exercise keys so progress survives content
+  re-imports. Audio is mirrored to Cloudinary, with the shared TTS pipeline as a
+  fallback.
+- **Grammar** keeps book → section → unit → exercise content and grades attempts
+  server-side. PDF/OCR ingestion dependencies are development-only and are not
+  installed in production images.
+- **Writing** supports tutor chat and free-form assessment in one saved session
+  model.
+- **Mixed Revise** gathers vocabulary, grammar, listening, and speaking
+  candidates, returns answer-free cards, and records scheduling statistics.
 
 ---
 
@@ -752,37 +873,63 @@ the `term` and `user` contexts via their Context APIs — never direct imports.
 
 ## ⚛️ Frontend architecture
 
-A Material‑UI SPA with a clean separation between **pages**, a typed **API
-service layer**, global **Redux** state, and **server state** via TanStack Query.
+The `frontend/` npm workspace contains two React clients and three framework-
+independent TypeScript packages. The web SPA remains the primary desktop surface;
+the Expo app is a full native port of study features: authentication, home
+dashboard, deck library, learn/revise flows, courses, listening, grammar,
+speaking, writing, mixed revise, and the quick-revise WebSocket game.
 
 ```mermaid
 flowchart TB
-    subgraph app["frontend/src"]
-        Pages["📄 pages/<br/>home · deckDetail · login · folder · invite"]
-        subgraph deck["pages/home/deckDetail/"]
-            Learn["learn/"] ~~~ Revise["revise/ (quiz · fill · quickRevise)"]
-            Speak["speakingCoach/"] ~~~ NumTest["numberTest/"]
-            Edit["editDeck/"]
+    subgraph workspace["frontend/ npm workspace"]
+        subgraph web["apps/web — React SPA"]
+            WebPages["📄 Pages<br/>decks · courses · listening · grammar<br/>speaking · writing · revise"]
+            WebUI["🧱 MUI components<br/>responsive themes + Dragon tours"]
+            WebState["🗃️ Redux + TanStack Query"]
+            WebPages --> WebUI
+            WebPages --> WebState
         end
-        Comp["🧱 components/<br/>navBar · aiAssistant · guideTour · dragonAvatar"]
-        API["🔌 api-service/<br/>deck · term · learning · speaking · auth · crawler …"]
-        HTTP["📡 httpRequest.js<br/>axios + token refresh queue"]
-        Store["🗃️ Redux Toolkit store"]
-        Theme["🎨 themeController.js<br/>CSS vars: light/dark + palettes"]
-        Tours["🐉 tours.js<br/>onboarding registry"]
+
+        subgraph mobile["apps/mobile — Expo / React Native"]
+            Routes["🧭 Expo Router<br/>(auth) + (app) tabs & stacks"]
+            NativeUI["📱 React Native Paper<br/>Home · Library · Practice · Settings"]
+            NativeState["🗃️ Redux + TanStack Query"]
+            NativeAuth["🔐 AuthGate + AuthSession<br/>SecureStore refresh token"]
+            Routes --> NativeUI
+            Routes --> NativeState
+            NativeAuth --> Routes
+        end
+
+        subgraph shared["packages/* — shared TypeScript"]
+            Core["@flashlearn/core<br/>types · rules · themes · reminders<br/>dictation · quick-revise · audioClip (PCM→WAV)"]
+            API["@flashlearn/api<br/>Axios client + service factories<br/>(decks · terms · courses · listening · …)"]
+            Auth["@flashlearn/auth<br/>Redux auth slice factory"]
+            API --> Core
+            Auth --> API
+            Auth --> Core
+        end
     end
 
     Backend["🐍 / 🦀 Backend API"]
 
-    Pages --> Comp
-    Pages --> API
-    API --> HTTP --> Backend
-    Pages --> Store
-    Pages --> Theme
-    Pages --> Tours
+    WebPages --> API
+    NativeUI --> API
+    NativeAuth --> Auth
+    WebState --> Auth
+    API --> Backend
 ```
 
-**Three frontend conventions enforced by project rules:**
+The mobile root layout composes gesture handling, Redux, TanStack Query, safe
+areas, React Native Paper/navigation themes, and `AuthGate`. `AuthGate`
+restores the SecureStore session before routing into `(auth)` or `(app)`.
+Metro watches the workspace root so changes to `@flashlearn/*` packages are
+bundled and hot-reloaded without publishing them.
+
+See [`frontend/apps/mobile/README.md`](./frontend/apps/mobile/README.md) for
+native development setup, environment variables, Google OAuth configuration,
+commands, and current feature limitations.
+
+**Three web frontend conventions enforced by project rules:**
 
 | 🎨 Theming | 📱 Responsive | 🐉 Onboarding tour |
 |-----------|--------------|--------------------|
@@ -809,6 +956,8 @@ flowchart LR
     Wkr --> Mail["📧 daily study reminders"]
     Wkr --> CacheJob["🧹 cleanup learning cache"]
     Wkr --> Backfill["✨ AI backfill missing terms"]
+    Wkr --> Audio["🔊 prewarm speaking audio"]
+    Wkr --> Images["🖼️ mirror term images"]
     Wkr --> Backup["💾 DB dump → Google Drive"]
 ```
 
@@ -816,9 +965,15 @@ flowchart LR
 |-----|----------|---------|
 | `daily_reminders` | `0 1 * * *` | Email users who haven't studied today |
 | `cleanup_learning_cache` | `0 * * * *` | Evict stale learning‑progress cache |
+| `fill_terms_with_ai` | `*/2 * * * *` | Enrich terms missing AI fields |
+| `prewarm_speaking_audio` | `*/2 * * * *` | Generate uncached Speaking Coach audio |
+| `daily_database_backup` | `0 3 * * *` | Back up MySQL to Google Drive |
+| `convert_term_images_to_base64` | `0 4 * * *` | Mirror/convert term images |
 
-Define new schedules in `backend/cron.py → register_jobs()`. The
-`dispatch()` helper enqueues a job if a worker is live, otherwise runs it inline.
+Tasks live in domain modules under `backend/tasks/`; matching `CronJob`
+definitions live under `backend/cron/` and are collected by
+`backend/cron/__init__.py`. The `dispatch()` helper enqueues a job if a worker is
+live, otherwise runs it inline.
 
 ---
 
@@ -869,6 +1024,10 @@ flowchart LR
 | `docker-compose.dockerhub.*.selfservice.yml` | Run pre‑built Hub images (ARM64/AMD64) |
 
 Build & push with `DOCKER=podman ./build.sh [--platform linux/arm64]`.
+Production backend and worker images install the locked runtime set with
+`uv sync --frozen --no-dev`. Development-only grammar PDF/OCR tooling and
+optional crawler/Kokoro groups are therefore not present unless explicitly
+installed.
 
 ---
 

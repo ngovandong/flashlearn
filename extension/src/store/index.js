@@ -1,5 +1,5 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit";
-import jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const initialState = {
   user: null,
@@ -18,7 +18,7 @@ const authSlice = createSlice({
       }
       try {
         state.token = action.payload;
-        state.user = jwt_decode(action.payload.access).user;
+        state.user = jwtDecode(action.payload.access).user;
         // eslint-disable-next-line no-undef
         chrome.storage.sync.set({ token: action.payload });
       } catch (e) {
@@ -70,4 +70,3 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 });
 
 export default store;
-

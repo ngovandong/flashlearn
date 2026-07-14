@@ -22,16 +22,16 @@ npm run build
 
 | Variable | Description |
 |----------|-------------|
-| `REACT_APP_BASE_URL` | Flashlearn API base URL (with trailing slash) |
-| `REACT_APP_CRAWLER_URL` | Crawler/images API base URL |
-| `REACT_APP_BASE_FRONTEND_URL` | Flashlearn web app URL (used for login) |
+| `VITE_BASE_URL` | Flashlearn API base URL (with trailing slash) |
+| `VITE_CRAWLER_URL` | Crawler/images API base URL |
+| `VITE_BASE_FRONTEND_URL` | Flashlearn web app URL (used for login) |
 
-The frontend URL must also appear in `public/manifest.json` under `content_scripts` → `loginScript` matches so auth can sync after login.
+The frontend URL must also appear in `manifest.json` under `content_scripts` → `loginScript` matches so auth can sync after login.
 
 ## Development
 
 ```bash
-npm start    # popup UI only (CRA dev server)
+npm start    # Vite development build with extension reload support
 npm run build
 npm test
 ```

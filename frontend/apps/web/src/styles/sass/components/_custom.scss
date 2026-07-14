@@ -1,0 +1,254 @@
+@use "../base/shared" as *;
+
+.main-container {
+    background-color: $app-background;
+    min-height: calc(100vh - $nav-height - 0.5px);
+    padding-bottom: 20px;
+}
+
+.nav-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+    text-decoration: none;
+    color: $minor-text-color;
+    font-weight: 600;
+    margin: 0 $normal-font-size;
+    height: $nav-height;
+    line-height: 1.2;
+    position: relative;
+    transition: color 0.18s $ease;
+
+    svg {
+        font-size: 1.2rem;
+    }
+}
+
+// Tighten link spacing on narrower desktops so the row never overflows.
+@media (max-width: 1100px) {
+    .nav-item {
+        margin: 0 0.5rem;
+        font-size: $normal-font-size;
+    }
+}
+
+.nav-item:hover {
+    color: $main-text-color;
+}
+
+.nav-item:hover::after {
+    height: 0.1875rem;
+    width: 100%;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    bottom: 0;
+    content: " ";
+    left: 0;
+    position: absolute;
+    background-color: $hover-purple;
+}
+
+
+.nav-item--active {
+    color: $main-purple;
+}
+
+.nav-item--active::after {
+    height: 0.1875rem;
+    width: 100%;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    bottom: 0;
+    content: " ";
+    left: 0;
+    position: absolute;
+    background-color: $main-purple;
+}
+
+// Mobile navigation: a horizontal, scrollable pill bar that always shows every
+// section so users can see (and reach) the full app without opening a menu.
+.nav-mobile {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.1rem 0 0.65rem;
+    border-top: 0.0625rem solid $border-subtle;
+    margin-top: 0.1rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.nav-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 0 0 auto;
+    min-height: 2.5rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    text-decoration: none;
+    white-space: nowrap;
+    font-size: $normal-font-size;
+    font-weight: 600;
+    color: $minor-text-color;
+    background-color: $surface-2;
+    border: 0.0625rem solid $border-subtle;
+    transition: color 0.18s $ease, border-color 0.18s $ease,
+        background-color 0.18s $ease;
+
+    svg {
+        font-size: 1.2rem;
+    }
+
+    &:hover {
+        color: $main-text-color;
+        border-color: $main-purple;
+    }
+}
+
+.nav-chip--active {
+    color: $on-primary;
+    background: $brand-gradient;
+    border-color: transparent;
+}
+
+.flash-learn-icon {
+    width: 140px;
+    height: 50px;
+    flex-shrink: 0;
+    object-fit: cover;
+    // Shift the brand mark toward the active palette's primary hue.
+    filter: hue-rotate(var(--fl-logo-rotate, 0deg));
+    transition: filter 0.25s ease;
+}
+
+@media (max-width: 480px) {
+    .flash-learn-icon {
+        width: 110px;
+        height: 40px;
+    }
+}
+
+.custom-input {
+    padding: 0.5rem;
+
+    input {
+        width: 100%;
+        border: none;
+        border-bottom: 3px solid $border-color;
+        background-color: transparent;
+        color: $main-text-color;
+        font-size: 1rem;
+        height: 2.5rem;
+        margin-bottom: 0.2rem;
+        padding-left: .1rem;
+
+        &:focus {
+            border-bottom: 4px solid $yellow;
+        }
+    }
+
+    textarea {
+        width: 100%;
+        border: none;
+        border-bottom: 3px solid $border-color;
+        background-color: transparent;
+        color: $main-text-color;
+        font-size: 1rem;
+        height: 2.5rem;
+        margin-bottom: 0.2rem;
+        padding-left: .1rem;
+        resize: none;
+
+        &:focus {
+            border-bottom: 4px solid $yellow;
+        }
+    }
+
+    span {
+        padding-left: .1rem;
+        font-size: .75rem;
+        font-weight: 600;
+        color: $gray-text-color;
+    }
+}
+
+.display-none {
+    display: none;
+}
+
+.upload-button {
+    input[type='file'] {
+        display: none;
+    }
+
+    .button-text {
+        text-transform: capitalize;
+    }
+}
+
+.circle-btn {
+    background-color: $surface;
+    border-radius: 50%;
+    padding: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 0.0625rem solid $border-color;
+
+    &:hover {
+        background-color: $surface-2;
+    }
+
+    &.active {
+        border-color: $main-purple;
+        background-color: rgba(var(--fl-primary-rgb), 0.12);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+}
+
+.disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+
+.permissiondenied-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.permissiondenied-heading {
+    color: $main-purple;
+    font-size: 6rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 4rem 0;
+}
+
+.permissiondenied-message {
+    color: $gray-text-color;
+    font-size: 2rem;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.permissiondenied-button {
+    @include purple_btn;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    text-decoration: none;
+}

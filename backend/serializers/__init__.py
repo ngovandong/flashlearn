@@ -5,7 +5,6 @@ from .course import (
     CourseSummarySerializer,
 )
 from .deck import DeckDetailSerializer, DeckSerializer, MyDeckSerializer
-from .folder import FolderSerializer
 from .learning_progress import (
     CreateLearningProgressSerializer,
     LearningStreakSerializer,

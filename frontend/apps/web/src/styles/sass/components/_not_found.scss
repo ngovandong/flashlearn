@@ -1,0 +1,54 @@
+@use "../base/shared" as *;
+
+.error-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: $app-background;
+  }
+  
+  .error-text {
+    text-align: center;
+    margin-right: 40px;
+  }
+  
+  .error-text h1 {
+    font-size: 8rem;
+    font-weight: bold;
+    color: $main-purple;
+    margin-bottom: 20px;
+  }
+  
+  .error-text h2 {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .error-text p {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .error-text a {
+    display: inline-block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: $on-primary;
+    background-color: $main-purple;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+  }
+  
+  .error-text a:hover {
+    background-color: $dark-purple;
+  }
+  
+  .error-image img {
+    max-width: 600px;
+    width: 100%;
+  }
+  

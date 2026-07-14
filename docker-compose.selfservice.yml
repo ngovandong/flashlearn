@@ -43,7 +43,17 @@ services:
       - backend
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_BASE_URL: "${VITE_BASE_URL:-http://localhost:8005/api/}"
+        VITE_CRAWLER_URL: "${VITE_CRAWLER_URL:-http://localhost:8005/api/}"
+        VITE_SOCKET_URL: "${VITE_SOCKET_URL:-localhost:8005/ws}"
+        VITE_AI_REQUEST_TIMEOUT: "${VITE_AI_REQUEST_TIMEOUT:-240000}"
+        VITE_GOOGLE_CLIENT_ID: "${VITE_GOOGLE_CLIENT_ID:-}"
+        VITE_CLOUD_NAME: "${VITE_CLOUD_NAME:-}"
+        VITE_UPLOAD_PRESET: "${VITE_UPLOAD_PRESET:-}"
     container_name: flashlearn_frontend
     restart: unless-stopped
     ports:

@@ -20,7 +20,7 @@ Markdown (with a small YAML frontmatter header) and are readable by any tool —
 **open the linked file for the full rule.** Summaries:
 
 ### 1. Theme adherence (frontend) — `.cursor/rules/frontend-theming.mdc`
-Applies to `frontend/src/**`. The app is themeable at runtime (light/dark +
+Applies to `frontend/apps/web/src/**`. The app is themeable at runtime (light/dark +
 palette) via CSS custom properties. All new/updated UI MUST use theme tokens —
 never hardcode brand/neutral/surface/text/border colors.
 - SCSS: use Sass aliases (`$main-purple`, `$surface`, `$main-text-color`, …) and
@@ -30,7 +30,7 @@ never hardcode brand/neutral/surface/text/border colors.
 - Only static *semantic* colors (success green, `$error-red`) may stay hardcoded.
 
 ### 2. Mobile responsiveness (frontend) — `.cursor/rules/responsive-mobile.mdc`
-Applies to `frontend/src/**`. The app renders at `width=device-width`, so every
+Applies to `frontend/apps/web/src/**`. The app renders at `width=device-width`, so every
 screen is used on phones. New/updated UI MUST adapt to small viewports (verify
 at ~375px) with no horizontal scroll, overflow, or overlap.
 - Global overrides → `styles/sass/base/_media_queries.scss`; component-local
@@ -42,7 +42,7 @@ at ~375px) with no horizontal scroll, overflow, or overlap.
   (`{ xs, sm }`) instead of static values.
 
 ### 3. Onboarding tour / user guide (frontend) — `.cursor/rules/user-guide.mdc`
-Applies to `frontend/src/**`. The in-app "Dragon's tour" highlights real UI
+Applies to `frontend/apps/web/src/**`. The in-app "Dragon's tour" highlights real UI
 elements. Before finishing any frontend change, REVIEW whether the tour needs
 updating and state your decision (e.g. "no guide update needed").
 - New page/route → a tour is REQUIRED. Renamed/moved/removed element or changed

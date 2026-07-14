@@ -2,7 +2,7 @@
 
 import { translateText } from "./popup/translate";
 
-const FRONTEND_URL = process.env.REACT_APP_BASE_FRONTEND_URL;
+const FRONTEND_URL = import.meta.env.VITE_BASE_FRONTEND_URL;
 
 function openFrontendIfEnabled() {
   chrome.storage.sync.get(["openOnStartup"]).then((result) => {
@@ -60,7 +60,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 
   if (message.action === "fetch_images") {
-    const crawlerURL = process.env.REACT_APP_CRAWLER_URL;
+    const crawlerURL = import.meta.env.VITE_CRAWLER_URL;
     const count = message.count ?? 10;
     fetch(`${crawlerURL}images/`, {
       method: "POST",
