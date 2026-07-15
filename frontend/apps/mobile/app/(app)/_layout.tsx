@@ -1,64 +1,36 @@
+import { View } from "react-native";
 import { Tabs } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
-import { useTheme } from "react-native-paper";
+import { DragonFab } from "@/features/assistant/DragonFab";
+import { FloatingTabBar } from "@/components/ui/FloatingTabBar";
+import { useTokens } from "@/theme/tokens";
 
 export default function AppLayout() {
-  const theme = useTheme();
+  const t = useTokens();
+
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
-        tabBarStyle: { backgroundColor: theme.colors.surface },
-        headerStyle: { backgroundColor: theme.colors.surface },
-        headerTitleStyle: { color: theme.colors.onSurface },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="home" color={color} size={size} />
-          ),
+    <View style={{ flex: 1 }}>
+      <Tabs
+        tabBar={(props) => <FloatingTabBar {...props} />}
+        screenOptions={{
+          animation: "shift",
+          headerStyle: { backgroundColor: t.neutral.surface },
+          headerTitleStyle: { color: t.neutral.text, fontWeight: "800" },
+          headerShadowVisible: false,
         }}
-      />
-      <Tabs.Screen
-        name="library"
-        options={{
-          title: "Library",
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="style" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="practice"
-        options={{
-          title: "Practice",
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="school" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: "Settings",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="settings" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen name="courses" options={{ href: null, headerShown: false }} />
-      <Tabs.Screen name="listening" options={{ href: null, headerShown: false }} />
-      <Tabs.Screen name="grammar" options={{ href: null, headerShown: false }} />
-      <Tabs.Screen name="speaking" options={{ href: null, headerShown: false }} />
-      <Tabs.Screen name="writing" options={{ href: null, headerShown: false }} />
-      <Tabs.Screen name="revise" options={{ href: null }} />
-      <Tabs.Screen name="invite" options={{ href: null, title: "Join deck" }} />
-    </Tabs>
+      >
+        <Tabs.Screen name="index" options={{ title: "Home", headerShown: false }} />
+        <Tabs.Screen name="library" options={{ title: "Library", headerShown: false }} />
+        <Tabs.Screen name="practice" options={{ title: "Practice", headerShown: false }} />
+        <Tabs.Screen name="settings" options={{ title: "Settings", headerShown: false }} />
+        <Tabs.Screen name="courses" options={{ href: null, headerShown: false }} />
+        <Tabs.Screen name="listening" options={{ href: null, headerShown: false }} />
+        <Tabs.Screen name="grammar" options={{ href: null, headerShown: false }} />
+        <Tabs.Screen name="speaking" options={{ href: null, headerShown: false }} />
+        <Tabs.Screen name="writing" options={{ href: null, headerShown: false }} />
+        <Tabs.Screen name="revise" options={{ href: null, title: "Mixed revise" }} />
+        <Tabs.Screen name="invite" options={{ href: null, title: "Join deck" }} />
+      </Tabs>
+      <DragonFab />
+    </View>
   );
 }

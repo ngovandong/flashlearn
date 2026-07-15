@@ -4,6 +4,7 @@
 // ── Hub ──────────────────────────────────────────────────────────────────────
 .cmp-hub {
     @include page_shell(64rem);
+    @include page_enter;
 
     &__header {
         text-align: center;
@@ -30,6 +31,8 @@
 
 .cmp-card__link {
     text-decoration: none;
+    @include enter_fade;
+    @include stagger;
 
     &.is-locked {
         cursor: not-allowed;
@@ -819,7 +822,92 @@
     }
 }
 
+// ── 3D game shell (R3F) ──────────────────────────────────────────────────────
+.cmp-3d {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+    min-height: 380px;
+
+    &__scene {
+        position: relative;
+        flex: 1;
+        min-height: 300px;
+        border-radius: $radius-lg;
+        overflow: hidden;
+        border: 1px solid $border-subtle;
+        box-shadow: $shadow-lg;
+        background: #0d1030;
+    }
+
+    // Red damage flash when you miss.
+    &--hit &__scene::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        box-shadow: inset 0 0 90px 20px rgba(255, 60, 60, 0.7);
+        animation: cmp-hit 0.38s $ease;
+    }
+}
+.cmp-canvas { display: block; width: 100%; height: 100%; }
+
+// Fixed reticle in the middle of the shooter field.
+.cmp-crosshair {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 34px;
+    height: 34px;
+    margin: -17px 0 0 -17px;
+    border: 2px solid rgba(255, 255, 255, 0.55);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: cmp-reticle 2s $ease infinite;
+
+    &::before, &::after {
+        content: "";
+        position: absolute;
+        background: rgba(255, 255, 255, 0.55);
+    }
+    &::before { top: 50%; left: -8px; right: -8px; height: 2px; margin-top: -1px; }
+    &::after { left: 50%; top: -8px; bottom: -8px; width: 2px; margin-left: -1px; }
+}
+
+.cmp-quiz--overlay { margin: 0; }
+
+.cmp-blaster__hud--overlay {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    right: 14px;
+    z-index: 3;
+}
+.cmp-blaster__target--overlay {
+    position: absolute;
+    bottom: 14px;
+    left: 0;
+    right: 0;
+    z-index: 3;
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+
+    strong { color: #fff; }
+    .cmp-blaster__label { color: rgba(255, 255, 255, 0.75); }
+}
+
 // ── Keyframes ────────────────────────────────────────────────────────────────
+@keyframes cmp-hit {
+    0% { opacity: 0; }
+    40% { opacity: 1; }
+    100% { opacity: 0; }
+}
+@keyframes cmp-reticle {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.15); opacity: 0.85; }
+}
 @keyframes cmp-pop {
     from { transform: scale(0.7); opacity: 0; }
     to { transform: scale(1); opacity: 1; }

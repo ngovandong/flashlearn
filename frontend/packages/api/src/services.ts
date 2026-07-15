@@ -1,4 +1,5 @@
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { getFirstError } from "@flashlearn/core";
 import type {
   AuthUser,
   CourseDetail,
@@ -14,6 +15,23 @@ import type {
   ReviseTermsResponse,
   Term,
 } from "@flashlearn/core";
+
+/**
+ * The shared HTTP client resolves failed requests with `{ error }` (or a raw
+ * AxiosError) instead of rejecting. Methods that return the payload directly
+ * must surface those failures as thrown errors, otherwise a consumer like React
+ * Query receives `undefined` ("Query data cannot be undefined").
+ */
+function unwrapResponse<T>(res: AxiosResponse<T> | { error?: unknown } | unknown): T {
+  const r = res as { data?: T; error?: unknown };
+  if (r && typeof r === "object" && "error" in r && r.error !== undefined) {
+    throw new Error(getFirstError(r.error));
+  }
+  if (r && typeof r === "object" && "data" in r && r.data !== undefined) {
+    return r.data as T;
+  }
+  throw new Error("Something went wrong. Please try again.");
+}
 
 /**
  * Auth endpoints shared across platforms. `login`/`logout`/`extensionToken`
@@ -60,6 +78,7 @@ export type AuthApi = ReturnType<typeof createAuthApi>;
 export interface UserSettings {
   theme_mode?: string;
   theme_palette?: string;
+  theme_surface?: string;
   daily_reminder?: boolean;
   reminder_email?: string;
   [key: string]: unknown;
@@ -68,16 +87,18 @@ export interface UserSettings {
 export function createUserSettingsApi(client: AxiosInstance) {
   return {
     async getSettings(): Promise<UserSettings> {
-      const res = await client.get<UserSettings>("users/my_settings/");
-      return res.data;
+      return unwrapResponse<UserSettings>(
+        await client.get<UserSettings>("users/my_settings/")
+      );
     },
     async updateSettings(data: Partial<UserSettings>): Promise<UserSettings> {
       const res = await client.patch<UserSettings>("users/my_settings/", data);
       return res.data;
     },
     async getLearningStreak(): Promise<LearningStreak> {
-      const res = await client.get<LearningStreak>("users/learning_streak/");
-      return res.data;
+      return unwrapResponse<LearningStreak>(
+        await client.get<LearningStreak>("users/learning_streak/")
+      );
     },
     recordStudyActivity(): Promise<any> {
       return client.post("users/record_study/");
@@ -90,8 +111,7 @@ export type UserSettingsApi = ReturnType<typeof createUserSettingsApi>;
 export function createReminderApi(client: AxiosInstance) {
   return {
     async getReminders(): Promise<Reminder[]> {
-      const res = await client.get<Reminder[]>("reminders/");
-      return res.data;
+      return unwrapResponse<Reminder[]>(await client.get<Reminder[]>("reminders/"));
     },
   };
 }

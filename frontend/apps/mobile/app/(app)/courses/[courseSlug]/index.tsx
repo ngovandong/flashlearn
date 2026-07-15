@@ -1,18 +1,24 @@
 import React from "react";
 import { FlatList, StyleSheet, View } from "react-native";
-import { List, Text, useTheme } from "react-native-paper";
+import { Text } from "react-native-paper";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import type { CourseDetail, CourseLesson } from "@flashlearn/core";
 import { courseApi } from "@/api/services";
 import { ErrorView } from "@/components/ErrorView";
-import { LoadingView } from "@/components/LoadingView";
+import { ScreenSkeleton } from "@/components/ScreenSkeleton";
+import { FadeSlideIn } from "@/components/FadeSlideIn";
+import { NavCard } from "@/components/ui/NavCard";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
+import { useTokens } from "@/theme/tokens";
+
+const SUCCESS_GREEN = "#22c55e";
 
 export default function CourseDetailScreen() {
   const { courseSlug } = useLocalSearchParams<{ courseSlug: string }>();
-  const theme = useTheme();
+  const t = useTokens();
   const router = useRouter();
 
   const { data: course, isLoading, isError, refetch } = useQuery({
@@ -21,7 +27,7 @@ export default function CourseDetailScreen() {
     enabled: !!courseSlug,
   });
 
-  if (isLoading) return <LoadingView />;
+  if (isLoading) return <ScreenSkeleton />;
   if (isError || !course) return <ErrorView message="Could not load course" onRetry={() => refetch()} />;
 
   const lessons: (CourseLesson & { sectionTitle?: string })[] = [];
@@ -32,27 +38,38 @@ export default function CourseDetailScreen() {
   }
 
   return (
-    <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
-        <Text variant="headlineSmall" style={{ color: theme.colors.onBackground }}>
-          {course.title}
-        </Text>
-        {course.description ? (
-          <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}>
-            {course.description}
-          </Text>
-        ) : null}
-      </View>
+    <View style={[styles.flex, { backgroundColor: t.neutral.bg }]}>
       <FlatList
         data={lessons}
         keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => (
-          <List.Item
-            title={item.title}
-            description={item.sectionTitle}
-            onPress={() => router.push(`/courses/${courseSlug}/${item.id}`)}
-            right={() => <List.Icon icon={item.passed ? "check-circle" : "chevron-right"} />}
-          />
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <FadeSlideIn style={styles.header}>
+            <Text variant="headlineSmall" style={{ color: t.neutral.text, fontWeight: "800" }}>
+              {course.title}
+            </Text>
+            {course.description ? (
+              <Text variant="bodyMedium" style={{ color: t.neutral.textMinor, marginTop: 6 }}>
+                {course.description}
+              </Text>
+            ) : null}
+          </FadeSlideIn>
+        }
+        renderItem={({ item, index }) => (
+          <FadeSlideIn delay={index * 40}>
+            <NavCard
+              icon="record-voice-over"
+              title={item.title}
+              subtitle={item.sectionTitle}
+              onPress={() => router.push(`/courses/${courseSlug}/${item.id}`)}
+              trailing={
+                item.passed ? (
+                  <MaterialIcons name="check-circle" size={24} color={SUCCESS_GREEN} />
+                ) : undefined
+              }
+            />
+          </FadeSlideIn>
         )}
       />
     </View>
@@ -61,5 +78,6 @@ export default function CourseDetailScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  header: { padding: 16 },
+  header: { marginBottom: 14 },
+  list: { padding: 16, paddingBottom: 40, gap: 12 },
 });

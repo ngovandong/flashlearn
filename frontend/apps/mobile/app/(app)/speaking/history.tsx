@@ -1,14 +1,21 @@
 import React, { useMemo, useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
-import { Appbar, Button, IconButton, List, Text, useTheme } from "react-native-paper";
+import { FlatList, Pressable, StyleSheet, View } from "react-native";
+import { Appbar, Text } from "react-native-paper";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { speakingApi } from "@/api/services";
 import { EmptyState } from "@/components/EmptyState";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
+import { FadeSlideIn } from "@/components/FadeSlideIn";
+import { AppCard } from "@/components/ui/AppCard";
+import { FeatureTile } from "@/components/ui/FeatureTile";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
+import { useTokens } from "@/theme/tokens";
+
+const STAR_GOLD = "#f5a623";
 
 interface Conversation {
   id: string;
@@ -18,7 +25,7 @@ interface Conversation {
 }
 
 export default function SpeakingHistoryScreen() {
-  const theme = useTheme();
+  const t = useTokens();
   const router = useRouter();
   const qc = useQueryClient();
   const [selectMode, setSelectMode] = useState(false);
@@ -52,7 +59,6 @@ export default function SpeakingHistoryScreen() {
     },
   });
 
-  // Starred first, then most recent.
   const conversations = useMemo(() => {
     const list = [...(data?.conversations ?? [])];
     return list.sort(
@@ -69,8 +75,8 @@ export default function SpeakingHistoryScreen() {
   if (isError) return <ErrorView message="Could not load history" onRetry={() => refetch()} />;
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Appbar.Header mode="small" style={{ backgroundColor: theme.colors.surface }}>
+    <View style={{ flex: 1, backgroundColor: t.neutral.bg }}>
+      <Appbar.Header mode="small" style={{ backgroundColor: t.neutral.surface }}>
         {selectMode ? (
           <>
             <Appbar.Action icon="close" onPress={() => { setSelectMode(false); setSelected([]); }} />
@@ -95,42 +101,51 @@ export default function SpeakingHistoryScreen() {
       <FlatList
         data={conversations}
         keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={<EmptyState message="No conversations yet." />}
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           const isChecked = selected.includes(item.id);
           return (
-            <List.Item
-              title={item.topic ?? "Conversation"}
-              onPress={() =>
-                selectMode ? toggleSelect(item.id) : router.push(`/speaking/${item.id}`)
-              }
-              left={
-                selectMode
-                  ? () => (
-                      <List.Icon icon={isChecked ? "checkbox-marked" : "checkbox-blank-outline"} />
-                    )
-                  : undefined
-              }
-              right={() =>
-                selectMode ? (
-                  <View />
-                ) : (
-                  <View style={styles.actions}>
-                    <IconButton
-                      icon={item.starred ? "star" : "star-outline"}
-                      iconColor={item.starred ? "#f5a623" : theme.colors.onSurfaceVariant}
-                      size={22}
-                      onPress={() => starMutation.mutate({ id: item.id, starred: !item.starred })}
+            <FadeSlideIn delay={index * 30}>
+              <AppCard
+                onPress={() => (selectMode ? toggleSelect(item.id) : router.push(`/speaking/${item.id}`))}
+                padding={14}
+              >
+                <View style={styles.row}>
+                  {selectMode ? (
+                    <MaterialIcons
+                      name={isChecked ? "check-box" : "check-box-outline-blank"}
+                      size={26}
+                      color={isChecked ? t.palette.primary : t.neutral.textMuted}
                     />
-                    <IconButton
-                      icon="delete-outline"
-                      size={22}
-                      onPress={() => deleteMutation.mutate(item.id)}
-                    />
-                  </View>
-                )
-              }
-            />
+                  ) : (
+                    <FeatureTile icon="forum" size={44} />
+                  )}
+                  <Text
+                    variant="titleMedium"
+                    numberOfLines={1}
+                    style={{ color: t.neutral.text, fontWeight: "700", flex: 1 }}
+                  >
+                    {item.topic ?? "Conversation"}
+                  </Text>
+                  {!selectMode ? (
+                    <View style={styles.actions}>
+                      <Pressable hitSlop={8} onPress={() => starMutation.mutate({ id: item.id, starred: !item.starred })}>
+                        <MaterialIcons
+                          name={item.starred ? "star" : "star-outline"}
+                          size={22}
+                          color={item.starred ? STAR_GOLD : t.neutral.textMuted}
+                        />
+                      </Pressable>
+                      <Pressable hitSlop={8} onPress={() => deleteMutation.mutate(item.id)}>
+                        <MaterialIcons name="delete-outline" size={22} color={t.neutral.textMuted} />
+                      </Pressable>
+                    </View>
+                  ) : null}
+                </View>
+              </AppCard>
+            </FadeSlideIn>
           );
         }}
       />
@@ -139,5 +154,7 @@ export default function SpeakingHistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  actions: { flexDirection: "row", alignItems: "center" },
+  list: { padding: 16, paddingBottom: 40, gap: 12 },
+  row: { flexDirection: "row", alignItems: "center", gap: 14 },
+  actions: { flexDirection: "row", alignItems: "center", gap: 16 },
 });

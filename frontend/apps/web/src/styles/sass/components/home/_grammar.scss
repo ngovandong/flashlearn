@@ -228,6 +228,8 @@ $gr-wrong: $error-red;
 
 .gr-unit-card {
     @include card;
+    @include enter_fade;
+    @include stagger;
     display: flex;
     align-items: center;
     gap: $space-3;

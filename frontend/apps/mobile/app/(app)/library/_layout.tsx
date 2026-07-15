@@ -6,9 +6,11 @@ export default function LibraryLayout() {
   return (
     <Stack
       screenOptions={{
+        animation: "slide_from_right",
         headerStyle: { backgroundColor: theme.colors.surface },
         headerTitleStyle: { color: theme.colors.onSurface },
         headerTintColor: theme.colors.primary,
+        headerShadowVisible: false,
       }}
     >
       <Stack.Screen name="index" options={{ title: "My decks" }} />
@@ -17,9 +19,15 @@ export default function LibraryLayout() {
       <Stack.Screen name="[deckId]/edit" options={{ title: "Edit deck" }} />
       <Stack.Screen name="[deckId]/learn/index" options={{ title: "Learn" }} />
       <Stack.Screen name="[deckId]/revise/index" options={{ title: "Revise" }} />
-      <Stack.Screen name="[deckId]/revise/quick-revise" options={{ title: "Quick revise" }} />
+      <Stack.Screen
+        name="[deckId]/revise/quick-revise"
+        options={{ title: "Quick revise", animation: "slide_from_bottom" }}
+      />
       <Stack.Screen name="[deckId]/competition/index" options={{ title: "Competition" }} />
-      <Stack.Screen name="[deckId]/competition/[gameKey]" options={{ title: "Play" }} />
+      <Stack.Screen
+        name="[deckId]/competition/[gameKey]"
+        options={{ title: "Play", animation: "slide_from_bottom" }}
+      />
       <Stack.Screen name="[deckId]/share" options={{ title: "Share deck" }} />
     </Stack>
   );

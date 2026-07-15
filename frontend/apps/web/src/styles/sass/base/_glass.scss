@@ -1,0 +1,135 @@
+@use "shared" as *;
+
+/**
+ * Liquid Glass material.
+ *
+ * Activated by `data-material="glass"` on <html> (set by utils/themeController).
+ * The `card` mixin + neutral surface tokens already flip to translucent +
+ * frosted from JS, so most of the app becomes glass for free. This file covers
+ * the surfaces that *don't* go through that mixin — the MUI navbar, menus,
+ * dialogs, popovers, inputs and the app chrome — plus the ambient palette wash
+ * that gives the blur something colorful to refract, the way iOS does.
+ */
+
+$glass-blur: saturate(190%) blur(32px);
+// iOS "squircle" corner radius — much rounder than the solid theme.
+$glass-radius: 1.75rem;
+$glass-radius-lg: 2rem;
+
+[data-material="glass"] {
+    // Ambient, palette-tinted light so frosted panels pick up brand color and
+    // the very transparent surfaces have something vivid to refract.
+    // Fixed + behind everything, pointer-events off — purely decorative.
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background:
+            radial-gradient(
+                60rem 60rem at 12% -8%,
+                rgba(var(--fl-primary-rgb), 0.34),
+                transparent 60%
+            ),
+            radial-gradient(
+                48rem 48rem at 108% 12%,
+                rgba(var(--fl-accent-2-rgb), 0.30),
+                transparent 60%
+            ),
+            radial-gradient(
+                52rem 52rem at 50% 116%,
+                rgba(var(--fl-accent-rgb), 0.28),
+                transparent 62%
+            );
+    }
+
+    // Sticky top navigation bar — a floating frosted rail.
+    .MuiAppBar-root {
+        background-color: var(--fl-surface) !important;
+        backdrop-filter: $glass-blur;
+        -webkit-backdrop-filter: $glass-blur;
+        border-bottom: 1px solid var(--fl-border) !important;
+        box-shadow: inset 0 1px 0 var(--fl-border-strong),
+            0 10px 34px rgba(15, 23, 42, 0.10);
+    }
+
+    // Menus, dropdowns, dialogs, popovers, drawers — every floating MUI Paper.
+    .MuiMenu-paper,
+    .MuiPopover-paper,
+    .MuiDialog-paper,
+    .MuiDrawer-paper,
+    .MuiAutocomplete-paper {
+        background-color: var(--fl-surface) !important;
+        backdrop-filter: $glass-blur;
+        -webkit-backdrop-filter: $glass-blur;
+        border: 1px solid var(--fl-border);
+        box-shadow: var(--fl-card-shadow);
+        border-radius: $glass-radius !important;
+    }
+
+    // The scrim behind dialogs — a touch of blur reads as "depth".
+    .MuiBackdrop-root:not(.MuiBackdrop-invisible) {
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+
+    // Text inputs read as etched glass slabs.
+    .MuiOutlinedInput-root,
+    .custom-input,
+    .search-input {
+        background-color: var(--fl-surface-2);
+        backdrop-filter: saturate(170%) blur(14px);
+        -webkit-backdrop-filter: saturate(170%) blur(14px);
+        border-radius: $radius-pill;
+    }
+
+    // Pills, chips and round controls (mobile nav, filters, tags).
+    .nav-chip,
+    .MuiChip-root {
+        background-color: var(--fl-surface);
+        backdrop-filter: $glass-blur;
+        -webkit-backdrop-filter: $glass-blur;
+        box-shadow: var(--fl-card-shadow);
+        border: 1px solid var(--fl-border);
+    }
+
+    // AI assistant floating panel + any explicitly-tagged glass surface.
+    .ai-assistant__panel,
+    .chat-panel,
+    [data-glass-surface] {
+        background-color: var(--fl-surface);
+        backdrop-filter: $glass-blur;
+        -webkit-backdrop-filter: $glass-blur;
+        border: 1px solid var(--fl-border);
+        box-shadow: var(--fl-card-shadow);
+        border-radius: $glass-radius;
+    }
+
+    // Give card-based surfaces the soft, deeply-rounded iOS squircle silhouette.
+    // The specular rim + top highlight come from `--fl-card-shadow`.
+    .settings-card,
+    .set-card,
+    .deck-card,
+    .reminder-card {
+        border-radius: $glass-radius;
+    }
+
+    .settings-page .settings-card {
+        border-radius: $glass-radius-lg;
+    }
+
+    // No backdrop-filter support: fall back to a heavier opaque tint so text
+    // stays legible without true blur.
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+        --fl-surface: color-mix(in srgb, var(--fl-bg) 22%, #ffffff);
+        --fl-surface-2: color-mix(in srgb, var(--fl-bg) 32%, #ffffff);
+    }
+
+    &[data-theme="dark"] {
+        @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+            --fl-surface: color-mix(in srgb, var(--fl-bg) 60%, #000000);
+            --fl-surface-2: color-mix(in srgb, var(--fl-bg) 74%, #000000);
+        }
+    }
+}

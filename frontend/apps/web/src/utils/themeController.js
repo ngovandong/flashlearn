@@ -2,10 +2,12 @@ import { createTheme } from "@mui/material";
 import {
   DEFAULT_MODE,
   DEFAULT_PALETTE,
+  DEFAULT_SURFACE,
   NEUTRALS,
   THEME_STORAGE_KEY,
   getPalette,
   rgbTriplet,
+  resolveSurface,
 } from "@constants/themes";
 
 /** Resolve "system" to a concrete "light" | "dark" using the OS preference. */
@@ -21,17 +23,49 @@ export function resolveMode(mode) {
   return mode === "dark" ? "dark" : "light";
 }
 
+/** Flat card shadow — mirrors `$shadow-sm` so solid mode is byte-identical. */
+const FLAT_CARD_SHADOW =
+  "0 1px 2px rgba(40, 46, 62, 0.04), 0 1px 3px rgba(40, 46, 62, 0.06)";
+
+/**
+ * Translucent "Liquid Glass" overrides for the neutral surface tokens + the
+ * frost/shadow vars the `card` mixin reads. Because the base neutrals are
+ * written inline on `:root`, these overrides must also be produced here (an
+ * inline value can't be beaten by a stylesheet rule).
+ */
+function glassVars(resolved) {
+  if (resolved === "dark") {
+    return {
+      // Barely-there tint — the heavy blur behind carries the look, iOS-style.
+      "--fl-surface": "rgba(40, 46, 60, 0.28)",
+      "--fl-surface-2": "rgba(50, 57, 74, 0.20)",
+      "--fl-border": "rgba(255, 255, 255, 0.18)",
+      "--fl-border-strong": "rgba(255, 255, 255, 0.28)",
+      "--fl-glass-backdrop": "saturate(190%) blur(32px)",
+      // Bright specular rim (top edge + full-perimeter hairline) + float shadow.
+      "--fl-card-shadow":
+        "inset 0 1.5px 1px rgba(255, 255, 255, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.10), inset 0 -14px 26px rgba(255, 255, 255, 0.04), 0 16px 44px rgba(0, 0, 0, 0.52)",
+    };
+  }
+  return {
+    "--fl-surface": "rgba(255, 255, 255, 0.20)",
+    "--fl-surface-2": "rgba(255, 255, 255, 0.12)",
+    "--fl-border": "rgba(255, 255, 255, 0.55)",
+    "--fl-border-strong": "rgba(255, 255, 255, 0.75)",
+    "--fl-glass-backdrop": "saturate(190%) blur(32px)",
+    "--fl-card-shadow":
+      "inset 0 1.5px 1px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(255, 255, 255, 0.45), inset 0 -14px 26px rgba(255, 255, 255, 0.18), 0 16px 44px rgba(15, 23, 42, 0.20)",
+  };
+}
+
 /** Compute the full set of CSS custom property values for a theme selection. */
-export function computeVars(mode, paletteId) {
+export function computeVars(mode, paletteId, surface) {
   const resolved = resolveMode(mode);
   const neutral = NEUTRALS[resolved];
   const palette = getPalette(paletteId);
+  const glass = resolveSurface(surface) === "glass";
 
-  return {
-    resolved,
-    palette,
-    neutral,
-    vars: {
+  const base = {
       "--fl-primary": palette.primary,
       "--fl-primary-rgb": rgbTriplet(palette.primary),
       "--fl-primary-dark": palette.primaryDark,
@@ -59,17 +93,27 @@ export function computeVars(mode, paletteId) {
       "--fl-text-muted": neutral.textMuted,
       "--fl-border": neutral.border,
       "--fl-border-strong": neutral.borderStrong,
-    },
+
+      // Solid defaults for the glass-aware card vars; overridden below in glass.
+      "--fl-glass-backdrop": "none",
+      "--fl-card-shadow": FLAT_CARD_SHADOW,
   };
+
+  const vars = glass ? { ...base, ...glassVars(resolved) } : base;
+
+  return { resolved, palette, neutral, glass, vars };
 }
 
 /** Write the theme to the document root so the whole UI re-themes instantly. */
-export function applyTheme(mode, paletteId) {
+export function applyTheme(mode, paletteId, surface) {
   if (typeof document === "undefined") return;
-  const { resolved, vars } = computeVars(mode, paletteId);
+  const { resolved, vars } = computeVars(mode, paletteId, surface);
   const root = document.documentElement;
   Object.entries(vars).forEach(([key, value]) => root.style.setProperty(key, value));
   root.dataset.theme = resolved;
+  // The surface material (solid | glass) is a global attribute the SCSS keys off
+  // to swap every surface between opaque and the translucent "Liquid Glass" look.
+  root.dataset.material = resolveSurface(surface);
   root.style.colorScheme = resolved;
 }
 
@@ -109,17 +153,21 @@ export function readStoredTheme() {
       return {
         mode: parsed.mode || DEFAULT_MODE,
         palette: parsed.palette || DEFAULT_PALETTE,
+        surface: resolveSurface(parsed.surface),
       };
     }
   } catch {
     /* ignore malformed cache */
   }
-  return { mode: DEFAULT_MODE, palette: DEFAULT_PALETTE };
+  return { mode: DEFAULT_MODE, palette: DEFAULT_PALETTE, surface: DEFAULT_SURFACE };
 }
 
-export function writeStoredTheme(mode, palette) {
+export function writeStoredTheme(mode, palette, surface) {
   try {
-    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ mode, palette }));
+    localStorage.setItem(
+      THEME_STORAGE_KEY,
+      JSON.stringify({ mode, palette, surface: resolveSurface(surface) })
+    );
   } catch {
     /* storage may be unavailable (private mode) */
   }

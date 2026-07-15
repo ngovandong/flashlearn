@@ -25,6 +25,12 @@ function releaseActivePlayer(): void {
   activeTempFile = null;
 }
 
+/** Stop and release any clip that is currently playing (best-effort). */
+export function stopPlayback(): void {
+  Speech.stop();
+  releaseActivePlayer();
+}
+
 export async function speakText(text: string, language = "en-US"): Promise<void> {
   if (!text) return;
   Speech.stop();

@@ -2,7 +2,7 @@
 
 .deck-page {
     @include page_shell(60rem);
-    animation: fade-in 0.5s;
+    @include page_enter;
 
     .deck-header {
         h2 {

@@ -1,23 +1,43 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import { Button, Chip, Text, useTheme } from "react-native-paper";
+import {
+  Animated,
+  Easing,
+  Image,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
+import { ActivityIndicator, Button, Text } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { courseApi } from "@/api/services";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
-import { AudioRecorder, playSpeechClip, speakText, type PlaybackResult } from "@/utils/audio";
+import { AppCard } from "@/components/ui/AppCard";
+import { useTokens } from "@/theme/tokens";
+import {
+  AudioRecorder,
+  playSpeechClip,
+  speakText,
+  stopPlayback,
+  type PlaybackResult,
+} from "@/utils/audio";
 import { unwrap } from "@/utils/apiError";
 
+// ── Types ─────────────────────────────────────────────────────────────────
 interface LessonLine {
   speaker?: string;
   text?: string;
   voice?: string;
+  align?: "left" | "right";
 }
 
 interface LessonCharacter {
   name?: string;
-  role?: string;
+  images?: Record<string, string>;
 }
 
 interface AudioClipLine {
@@ -28,40 +48,285 @@ interface AudioClipLine {
   mime_type?: string;
 }
 
+interface RolePlaySession {
+  id: number;
+  text: string;
+  result: {
+    accuracyScore?: number;
+    fluencyScore?: number;
+    completenessScore?: number;
+  };
+}
+
+interface DictationSavedLine {
+  target?: string;
+  typed?: string;
+  correct?: number;
+  total?: number;
+}
+
 interface CourseLesson {
   id: string;
   title?: string;
+  description?: string;
   lines?: LessonLine[];
   characters?: LessonCharacter[];
+  has_audio?: boolean;
+  background?: string;
   progress?: {
     best_score?: number;
     status?: string;
-    last_result?: { score?: number; passed?: boolean; threshold?: number };
+    last_result?: { score?: number; passed?: boolean; sessions?: RolePlaySession[] };
+    last_dictation?: { score?: number; lines?: DictationSavedLine[]; at?: string };
   };
+}
+
+const PASS_THRESHOLD = 80;
+const DICTATION_GOOD = 80;
+
+// Character art is mirrored to our Cloudinary at crawl time; older lessons fall
+// back to freeCodeCamp's CDN (mirrors the web CoursePanel behaviour).
+const FCC_IMG_BASE =
+  "https://cdn.freecodecamp.org/curriculum/english/animation-assets/images";
+const FIGURE_LAYERS = ["base", "brows-normal", "eyes-open", "mouth-smile", "glasses"];
+
+function characterFolder(name?: string): string {
+  return (name || "").trim().toLowerCase().replace(/\s+/g, "-");
+}
+
+function backgroundUrl(background?: string): string | null {
+  if (!background) return null;
+  if (/^https?:\/\//.test(background)) return background;
+  return `${FCC_IMG_BASE}/backgrounds/${background}`;
+}
+
+function avatarColor(name?: string): string {
+  let hash = 0;
+  for (let i = 0; i < (name || "").length; i++) hash = (hash * 31 + name!.charCodeAt(i)) % 360;
+  return `hsl(${hash}, 55%, 52%)`;
+}
+
+function initials(name?: string): string {
+  return (name || "?").trim().slice(0, 1).toUpperCase();
 }
 
 function clipKey(voice?: string, text?: string): string {
   return `${voice || ""}|${text || ""}`;
 }
 
+// ── Word-level dictation diff (port of the web dictationDiff) ───────────────
+type DiffToken = { word: string; status: "ok" | "missing" | "wrong" };
+interface LineDiff {
+  target: string;
+  typed: string;
+  targetTokens: DiffToken[];
+  typedTokens: DiffToken[];
+  correct: number;
+  total: number;
+}
+
+function tokenize(text: string): string[] {
+  return (text || "").trim().split(/\s+/).filter(Boolean);
+}
+
+function normWord(word: string): string {
+  return (word || "").toLowerCase().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+}
+
+function diffLine(target: string, typed: string): Omit<LineDiff, "target" | "typed"> {
+  const tWords = tokenize(target);
+  const uWords = tokenize(typed);
+  const tn = tWords.map(normWord);
+  const un = uWords.map(normWord);
+  const n = tn.length;
+  const m = un.length;
+  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      dp[i][j] = tn[i] === un[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+  const targetTokens: DiffToken[] = [];
+  const typedTokens: DiffToken[] = [];
+  let i = 0;
+  let j = 0;
+  while (i < n && j < m) {
+    if (tn[i] === un[j]) {
+      targetTokens.push({ word: tWords[i], status: "ok" });
+      typedTokens.push({ word: uWords[j], status: "ok" });
+      i += 1;
+      j += 1;
+    } else if (dp[i + 1][j] >= dp[i][j + 1]) {
+      targetTokens.push({ word: tWords[i], status: "missing" });
+      i += 1;
+    } else {
+      typedTokens.push({ word: uWords[j], status: "wrong" });
+      j += 1;
+    }
+  }
+  while (i < n) targetTokens.push({ word: tWords[i++], status: "missing" });
+  while (j < m) typedTokens.push({ word: uWords[j++], status: "wrong" });
+  return { targetTokens, typedTokens, correct: dp[0][0], total: n };
+}
+
+function evaluateDictation(lines: LessonLine[], inputs: string[]) {
+  const perLine: LineDiff[] = (lines || []).map((line, index) => {
+    const target = line?.text || "";
+    const typed = inputs?.[index] || "";
+    return { target, typed, ...diffLine(target, typed) };
+  });
+  const totalWords = perLine.reduce((s, l) => s + l.total, 0);
+  const correctWords = perLine.reduce((s, l) => s + l.correct, 0);
+  const score = totalWords ? Math.round((correctWords / totalWords) * 100) : 0;
+  return { score, lines: perLine };
+}
+
+function hydrateDictation(saved?: { score?: number; lines?: DictationSavedLine[] }) {
+  if (!saved?.lines?.length) return null;
+  const lines: LineDiff[] = saved.lines.map((l) => ({
+    target: l.target || "",
+    typed: l.typed || "",
+    ...diffLine(l.target || "", l.typed || ""),
+  }));
+  return { score: saved.score || 0, lines };
+}
+
+// ── Illustrated character (stacked layers, or an initial avatar fallback) ───
+function StageFigure({
+  name,
+  images,
+  active,
+  dim,
+  primary,
+}: {
+  name?: string;
+  images?: Record<string, string>;
+  active: boolean;
+  dim: boolean;
+  primary: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  const stored = images && Object.keys(images).length > 0;
+  const layers = stored
+    ? FIGURE_LAYERS.filter((layer) => images![layer]).map((layer) => ({ layer, src: images![layer] }))
+    : FIGURE_LAYERS.map((layer) => ({
+        layer,
+        src: `${FCC_IMG_BASE}/characters/${characterFolder(name)}/${layer}.png`,
+      }));
+  const hasArt = layers.some((l) => l.layer === "base") && !failed;
+
+  return (
+    <View style={[styles.figure, { opacity: dim ? 0.4 : 1 }]}>
+      <View style={styles.figureArt}>
+        {hasArt ? (
+          layers.map(({ layer, src }) => (
+            <Image
+              key={layer}
+              source={{ uri: src }}
+              style={StyleSheet.absoluteFill}
+              resizeMode="contain"
+              onError={layer === "base" ? () => setFailed(true) : undefined}
+            />
+          ))
+        ) : (
+          <View style={[styles.figureFallback, { backgroundColor: avatarColor(name) }]}>
+            <Text style={styles.figureFallbackText}>{initials(name)}</Text>
+          </View>
+        )}
+      </View>
+      <View style={[styles.figureName, active && { backgroundColor: primary }]}>
+        <Text numberOfLines={1} style={styles.figureNameText}>
+          {name}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+// ── Animated "now playing" equalizer shown on the currently-spoken line ─────
+function PlayingIndicator({ color }: { color: string }) {
+  const bars = useRef([
+    new Animated.Value(0.4),
+    new Animated.Value(0.9),
+    new Animated.Value(0.55),
+  ]).current;
+
+  useEffect(() => {
+    const loops = bars.map((v, i) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(v, {
+            toValue: 1,
+            duration: 320 + i * 110,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(v, {
+            toValue: 0.3,
+            duration: 320 + i * 110,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ])
+      )
+    );
+    loops.forEach((l) => l.start());
+    return () => loops.forEach((l) => l.stop());
+  }, [bars]);
+
+  return (
+    <View style={styles.eq}>
+      {bars.map((v, i) => (
+        <Animated.View
+          key={i}
+          style={[styles.eqBar, { backgroundColor: color, transform: [{ scaleY: v }] }]}
+        />
+      ))}
+    </View>
+  );
+}
+
+const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 export default function CourseLessonScreen() {
   const { courseSlug, lessonId } = useLocalSearchParams<{ courseSlug: string; lessonId: string }>();
-  const theme = useTheme();
+  const t = useTokens();
 
-  const [mode, setMode] = useState<"listen" | "roleplay">("listen");
-  const [lineIndex, setLineIndex] = useState(0);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
-  const [rpCharacter, setRpCharacter] = useState<string | null>(null);
+  const [playingLine, setPlayingLine] = useState<string | null>(null);
+
+  // Scene playback
+  const [scenePlaying, setScenePlaying] = useState(false);
+  const [sceneIndex, setSceneIndex] = useState<number | null>(null);
+  const sceneRef = useRef(false);
+
+  // Role-play
   const [rpActive, setRpActive] = useState(false);
-  const [rpLineIndex, setRpLineIndex] = useState<number | null>(null);
+  const [rpCharacter, setRpCharacter] = useState<string | null>(null);
+  const [rpIndex, setRpIndex] = useState<number | null>(null);
   const [rpRecording, setRpRecording] = useState(false);
-  const [rpResult, setRpResult] = useState<{ score: number; passed: boolean; threshold: number } | null>(null);
+  const [result, setResult] = useState<{ score: number; passed: boolean; threshold: number } | null>(null);
+  const [sessions, setSessions] = useState<RolePlaySession[]>([]);
+  const rpRef = useRef(false);
+  const rpIndexRef = useRef<number | null>(null);
+  const rpCharacterRef = useRef<string | null>(null);
+  const turnsRef = useRef<{ target_text: string; audio: string; mime_type: string }[]>([]);
   const recorder = useRef(new AudioRecorder());
-  const rpTurns = useRef<{ target_text: string; audio: string; mime_type: string }[]>([]);
+
+  // Listen & type (dictation)
+  const [dictationOn, setDictationOn] = useState(false);
+  const [dictationInputs, setDictationInputs] = useState<string[]>([]);
+  const [dictationResult, setDictationResult] = useState<{ score: number; lines: LineDiff[] } | null>(null);
+  const [dictationPlaying, setDictationPlaying] = useState(false);
+  const [dictationIndex, setDictationIndex] = useState<number | null>(null);
+  const [dictationLoop, setDictationLoop] = useState(false);
+  const dictRef = useRef(false);
+  const dictLoopRef = useRef(false);
+  const dictInputsRef = useRef<string[]>([]);
 
   const courseQuery = useQuery({
     queryKey: ["course", courseSlug],
-    queryFn: async () => unwrap(await courseApi.getCourse(courseSlug!)),
+    queryFn: async () => unwrap<{ sections?: { lessons?: CourseLesson[] }[] }>(await courseApi.getCourse(courseSlug!)),
     enabled: !!courseSlug,
   });
 
@@ -73,89 +338,158 @@ export default function CourseLessonScreen() {
 
   const lesson: CourseLesson | undefined = useMemo(() => {
     for (const section of courseQuery.data?.sections ?? []) {
-      const found = (section.lessons ?? []).find((l: { id: string }) => String(l.id) === String(lessonId));
-      if (found) return found as CourseLesson;
+      const found = (section.lessons ?? []).find((l) => String(l.id) === String(lessonId));
+      if (found) return found;
     }
     return undefined;
   }, [courseQuery.data, lessonId]);
 
   const audioMap = useMemo(() => {
     const map = new Map<string, AudioClipLine>();
-    for (const line of audioQuery.data?.lines ?? []) {
-      map.set(clipKey(line.voice, line.text), line);
-    }
+    for (const line of audioQuery.data?.lines ?? []) map.set(clipKey(line.voice, line.text), line);
     return map;
   }, [audioQuery.data]);
 
-  const lines = lesson?.lines ?? [];
-  const current = lines[lineIndex];
-  const characters = (lesson?.characters ?? []).map((c) => c.name).filter(Boolean) as string[];
+  const lines = useMemo(() => lesson?.lines ?? [], [lesson]);
+  const characters = lesson?.characters ?? [];
+  const passed = lesson?.progress?.status === "passed";
+  const hasAudio = !!lesson?.has_audio;
+
+  // Restore the last saved role-play / dictation so a revisit shows prior work.
+  useEffect(() => {
+    if (!lesson) return;
+    const saved = lesson.progress?.last_result;
+    if (saved?.sessions?.length) {
+      setSessions(saved.sessions);
+      setResult({ score: saved.score ?? 0, passed: !!saved.passed, threshold: PASS_THRESHOLD });
+    } else {
+      setSessions([]);
+      setResult(null);
+    }
+    const empty = (lesson.lines ?? []).map(() => "");
+    dictInputsRef.current = empty;
+    setDictationInputs(empty);
+    setDictationResult(null);
+    setDictationOn(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lesson?.id]);
+
+  // Tear playback down on unmount.
+  useEffect(
+    () => () => {
+      sceneRef.current = false;
+      rpRef.current = false;
+      dictRef.current = false;
+      stopPlayback();
+    },
+    []
+  );
 
   const playLine = useCallback(
     async (line: LessonLine): Promise<PlaybackResult> => {
       setPlaybackError(null);
+      setPlayingLine(line.text ?? null);
       const clip = audioMap.get(clipKey(line.voice, line.text));
+      let res: PlaybackResult;
       if (clip) {
-        const result = await playSpeechClip(
+        res = await playSpeechClip(
           { audio_url: clip.audio_url, audio: clip.audio, mime_type: clip.mime_type },
           line.text
         );
-        if (!result.ok) setPlaybackError(result.error);
-        return result;
-      }
-      if (line.text) {
+      } else if (line.text) {
         await speakText(line.text);
-        return { ok: true };
+        res = { ok: true };
+      } else {
+        res = { ok: false, error: "Nothing to play." };
       }
-      return { ok: false, error: "Nothing to play." };
+      if (!res.ok) setPlaybackError(res.error);
+      setPlayingLine((cur) => (cur === line.text ? null : cur));
+      return res;
     },
     [audioMap]
   );
 
-  useEffect(() => {
-    if (mode !== "listen" || !current) return;
-    playLine(current);
-  }, [mode, lineIndex, current, playLine]);
+  // ── Scene ─────────────────────────────────────────────────────────────
+  const stopScene = useCallback(() => {
+    sceneRef.current = false;
+    setScenePlaying(false);
+    setSceneIndex(null);
+    stopPlayback();
+  }, []);
 
+  const playScene = async () => {
+    if (scenePlaying) {
+      stopScene();
+      return;
+    }
+    if (!lines.length) return;
+    setResult(null);
+    sceneRef.current = true;
+    setScenePlaying(true);
+    for (let i = 0; i < lines.length; i++) {
+      if (!sceneRef.current) return;
+      setSceneIndex(i);
+      await playLine(lines[i]);
+      if (!sceneRef.current) return;
+    }
+    stopScene();
+  };
+
+  // ── Role-play ───────────────────────────────────────────────────────────
   const rolePlayMutation = useMutation({
     mutationFn: async (segments: { target_text: string; audio: string; mime_type: string }[]) => {
       const res = await courseApi.submitRolePlay({ lessonId: lessonId!, segments });
-      return unwrap<{
-        score: number;
-        passed: boolean;
-        threshold: number;
-        progress?: CourseLesson["progress"];
-      }>(res);
+      return unwrap<{ score: number; passed: boolean; threshold: number; sessions?: RolePlaySession[] }>(res);
     },
     onSuccess: (data) => {
-      setRpResult({ score: data.score, passed: data.passed, threshold: data.threshold });
+      setResult({ score: data.score, passed: data.passed, threshold: data.threshold });
+      setSessions(data.sessions ?? []);
       courseQuery.refetch();
     },
+    onError: () => setPlaybackError("Could not score your role-play."),
   });
 
-  const beginRolePlay = (character: string) => {
-    setRpCharacter(character);
-    setRpActive(true);
-    setRpResult(null);
-    rpTurns.current = [];
-    setRpLineIndex(0);
-    stepRolePlay(0, character);
+  const runRolePlayFrom = async (start: number, character: string) => {
+    for (let i = start; i < lines.length; i++) {
+      if (!rpRef.current) return;
+      rpIndexRef.current = i;
+      setRpIndex(i);
+      const line = lines[i];
+      if (line.speaker === character) return; // learner's turn — wait for a recording
+      await playLine(line);
+      if (!rpRef.current) return;
+    }
+    finishRolePlay();
   };
 
-  const stepRolePlay = async (index: number, character: string) => {
-    if (index >= lines.length) {
-      setRpActive(false);
-      setRpLineIndex(null);
-      if (rpTurns.current.length) {
-        rolePlayMutation.mutate(rpTurns.current);
-      }
-      return;
-    }
-    setRpLineIndex(index);
-    const line = lines[index];
-    if (line.speaker === character) return;
-    await playLine(line);
-    stepRolePlay(index + 1, character);
+  const beginRolePlay = (character: string) => {
+    if (!lines.length) return;
+    setResult(null);
+    setSessions([]);
+    setRpCharacter(character);
+    rpCharacterRef.current = character;
+    setRpActive(true);
+    rpRef.current = true;
+    turnsRef.current = [];
+    runRolePlayFrom(0, character);
+  };
+
+  const finishRolePlay = () => {
+    rpRef.current = false;
+    setRpActive(false);
+    setRpIndex(null);
+    rpIndexRef.current = null;
+    if (turnsRef.current.length) rolePlayMutation.mutate(turnsRef.current);
+  };
+
+  const cancelRolePlay = async () => {
+    rpRef.current = false;
+    stopPlayback();
+    if (recorder.current.isRecording) await recorder.current.cancel();
+    setRpActive(false);
+    setRpIndex(null);
+    setRpRecording(false);
+    rpIndexRef.current = null;
   };
 
   const startRecording = async () => {
@@ -170,16 +504,117 @@ export default function CourseLessonScreen() {
   const stopRecording = async () => {
     const recorded = await recorder.current.stop();
     setRpRecording(false);
-    if (!recorded || rpLineIndex === null) return;
-    const line = lines[rpLineIndex];
-    if (line?.text) {
-      rpTurns.current.push({
-        target_text: line.text,
-        audio: recorded.base64,
-        mime_type: recorded.mimeType,
-      });
+    const idx = rpIndexRef.current;
+    if (idx == null) return;
+    const line = lines[idx];
+    if (recorded && line?.text) {
+      turnsRef.current.push({ target_text: line.text, audio: recorded.base64, mime_type: recorded.mimeType });
     }
-    if (rpCharacter) stepRolePlay(rpLineIndex + 1, rpCharacter);
+    runRolePlayFrom(idx + 1, rpCharacterRef.current || rpCharacter || "");
+  };
+
+  // ── Listen & type ─────────────────────────────────────────────────────
+  const dictationFilled = dictationInputs.filter((s) => (s || "").trim()).length;
+  const allDictationFilled = () =>
+    !!lines.length && dictInputsRef.current.filter((s) => (s || "").trim()).length >= lines.length;
+
+  const stopDictation = useCallback(() => {
+    dictRef.current = false;
+    setDictationPlaying(false);
+    setDictationIndex(null);
+    stopPlayback();
+  }, []);
+
+  const enterDictation = () => {
+    stopScene();
+    setResult(null);
+    const saved = hydrateDictation(lesson?.progress?.last_dictation);
+    if (saved) {
+      const typed = saved.lines.map((l) => l.typed || "");
+      dictInputsRef.current = typed;
+      setDictationInputs(typed);
+      setDictationResult(saved);
+    } else {
+      const empty = lines.map(() => "");
+      dictInputsRef.current = empty;
+      setDictationInputs(empty);
+      setDictationResult(null);
+    }
+    setDictationOn(true);
+  };
+
+  const exitDictation = () => {
+    stopDictation();
+    setDictationOn(false);
+  };
+
+  const playDictation = async () => {
+    if (dictationPlaying) {
+      stopDictation();
+      return;
+    }
+    if (!lines.length) return;
+    dictRef.current = true;
+    setDictationPlaying(true);
+    do {
+      for (let i = 0; i < lines.length; i++) {
+        if (!dictRef.current) return;
+        setDictationIndex(i);
+        await playLine(lines[i]);
+        if (!dictRef.current) return;
+      }
+      if (dictLoopRef.current && !allDictationFilled()) {
+        await delay(800);
+        continue;
+      }
+      break;
+    } while (dictRef.current);
+    stopDictation();
+  };
+
+  const toggleDictationLoop = () => {
+    const next = !dictationLoop;
+    dictLoopRef.current = next;
+    setDictationLoop(next);
+  };
+
+  const setDictationInput = (index: number, value: string) => {
+    setDictationInputs((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      dictInputsRef.current = next;
+      return next;
+    });
+    if (dictationResult) setDictationResult(null);
+  };
+
+  const clearDictation = () => {
+    stopDictation();
+    const empty = lines.map(() => "");
+    dictInputsRef.current = empty;
+    setDictationInputs(empty);
+    setDictationResult(null);
+  };
+
+  const dictationMutation = useMutation({
+    mutationFn: async (payload: { score: number; lines: DictationSavedLine[] }) =>
+      unwrap(await courseApi.submitDictation({ lessonId: lessonId!, ...payload })),
+  });
+
+  const checkDictation = () => {
+    if (!lines.length) return;
+    stopDictation();
+    const evaluated = evaluateDictation(lines, dictInputsRef.current);
+    setDictationResult(evaluated);
+    dictationMutation.mutate({
+      score: evaluated.score,
+      lines: evaluated.lines.map((l) => ({
+        target: l.target,
+        typed: l.typed,
+        correct: l.correct,
+        total: l.total,
+      })),
+    });
   };
 
   if (courseQuery.isLoading || audioQuery.isLoading) return <LoadingView />;
@@ -187,126 +622,442 @@ export default function CourseLessonScreen() {
     return <ErrorView message="Could not load lesson" onRetry={() => courseQuery.refetch()} />;
   }
 
-  return (
-    <ScrollView contentContainerStyle={[styles.pad, { backgroundColor: theme.colors.background }]}>
-      <Text variant="headlineSmall" style={{ color: theme.colors.onBackground }}>
-        {lesson.title}
-      </Text>
+  const activeIndex = scenePlaying ? sceneIndex : rpActive ? rpIndex : null;
+  const activeLine = activeIndex != null ? lines[activeIndex] : null;
+  const activeSpeaker = activeLine?.speaker || null;
+  const bg = backgroundUrl(lesson.background);
+  const scoring = rolePlayMutation.isPending;
 
-      <View style={styles.modeRow}>
-        <Chip selected={mode === "listen"} onPress={() => setMode("listen")}>
-          Listen
-        </Chip>
-        <Chip selected={mode === "roleplay"} onPress={() => setMode("roleplay")}>
-          Role-play
-        </Chip>
+  return (
+    <ScrollView
+      contentContainerStyle={[styles.pad, { backgroundColor: t.neutral.bg }]}
+      keyboardShouldPersistTaps="handled"
+    >
+      {/* Title + pass badge */}
+      <View style={styles.titleRow}>
+        <Text variant="headlineSmall" style={{ color: t.neutral.text, fontWeight: "800", flex: 1 }}>
+          {lesson.title}
+        </Text>
+        {passed ? (
+          <View style={[styles.badge, { backgroundColor: t.alpha("#2e9e5b", 0.16) }]}>
+            <MaterialCommunityIcons name="check-circle" size={16} color="#2e9e5b" />
+            <Text style={{ color: "#2e9e5b", fontWeight: "700", fontSize: 13 }}>Passed</Text>
+          </View>
+        ) : null}
       </View>
 
       {playbackError ? (
-        <Text style={{ color: theme.colors.error, marginTop: 8 }}>{playbackError}</Text>
+        <Text style={{ color: t.palette.primary, marginTop: 8 }}>{playbackError}</Text>
       ) : null}
 
-      {mode === "listen" ? (
-        <>
-          <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant, marginTop: 12 }}>
-            Line {lineIndex + 1} / {lines.length}
+      {/* Scene stage */}
+      {characters.length > 0 ? (
+        <View style={[styles.stageWrap, { borderRadius: t.radii.lg }, t.shadow]}>
+          <ImageBackground
+            source={bg ? { uri: bg } : undefined}
+            style={[styles.stage, { backgroundColor: t.neutral.surface2 }]}
+            imageStyle={{ borderRadius: t.radii.lg }}
+          >
+            {hasAudio && !rpActive && !dictationOn ? (
+              <Button
+                mode="contained"
+                compact
+                icon={scenePlaying ? "stop" : "play"}
+                onPress={playScene}
+                style={styles.stagePlay}
+              >
+                {scenePlaying ? "Stop" : "Play scene"}
+              </Button>
+            ) : null}
+
+            <View style={styles.cast}>
+              {characters.map((c) => (
+                <StageFigure
+                  key={c.name}
+                  name={c.name}
+                  images={c.images}
+                  active={activeSpeaker === c.name}
+                  dim={!!activeSpeaker && activeSpeaker !== c.name}
+                  primary={t.palette.primary}
+                />
+              ))}
+            </View>
+
+            {activeLine ? (
+              <View style={[styles.caption, { backgroundColor: t.alpha("#000000", 0.55) }]}>
+                <Text style={styles.captionName}>{activeLine.speaker}</Text>
+                <Text style={styles.captionText}>{activeLine.text}</Text>
+              </View>
+            ) : null}
+          </ImageBackground>
+        </View>
+      ) : null}
+
+      {/* Live Role-play */}
+      {!rpActive && !dictationOn ? (
+        <AppCard style={styles.section}>
+          <View style={styles.rowCenter}>
+            <MaterialCommunityIcons name="drama-masks" size={20} color={t.palette.primary} />
+            <Text style={{ color: t.neutral.text, fontWeight: "800", fontSize: 16 }}>Live Role-play</Text>
+          </View>
+          <Text style={{ color: t.neutral.textMinor, marginTop: 4, marginBottom: 12 }}>
+            Pick a character and speak their lines.{" "}
+            {lesson.progress?.best_score ? `Your best is ${lesson.progress.best_score}.` : "Score to pass."}
           </Text>
-          {current?.speaker ? (
-            <Text variant="titleSmall" style={{ color: theme.colors.primary, marginTop: 8 }}>
-              {current.speaker}
+          <View style={styles.pickRow}>
+            {characters.map((c) => (
+              <Button
+                key={c.name}
+                mode="contained"
+                disabled={scoring}
+                onPress={() => beginRolePlay(c.name!)}
+                style={styles.pickBtn}
+              >
+                Play {c.name}
+              </Button>
+            ))}
+          </View>
+        </AppCard>
+      ) : null}
+
+      {scoring ? (
+        <AppCard style={styles.section}>
+          <View style={styles.rowCenter}>
+            <ActivityIndicator color={t.palette.primary} />
+            <Text style={{ color: t.neutral.textMinor }}>Scoring your role-play…</Text>
+          </View>
+        </AppCard>
+      ) : null}
+
+      {/* Result */}
+      {result && !rpActive && !dictationOn ? (
+        <AppCard style={styles.section}>
+          <View style={styles.resultRow}>
+            <Text style={[styles.resultScore, { color: result.passed ? "#2e9e5b" : t.palette.primary }]}>
+              {result.score}
             </Text>
-          ) : null}
-          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, marginTop: 8 }}>
-            {current?.text}
+            <View style={styles.flex}>
+              <Text style={{ color: t.neutral.text, fontWeight: "800", fontSize: 16 }}>
+                {result.passed ? "Passed!" : "Keep practicing"}
+              </Text>
+              <Text style={{ color: t.neutral.textMinor }}>Pass mark: {result.threshold || PASS_THRESHOLD}</Text>
+            </View>
+          </View>
+        </AppCard>
+      ) : null}
+
+      {/* Listen & type toggle */}
+      {!rpActive && hasAudio ? (
+        <Button
+          mode={dictationOn ? "contained" : "contained-tonal"}
+          icon="ear-hearing"
+          onPress={dictationOn ? exitDictation : enterDictation}
+          style={styles.section}
+        >
+          {dictationOn ? "Exit listen & type" : "Listen & type"}
+          {!dictationOn && lesson.progress?.last_dictation?.score != null
+            ? `  ·  Last ${lesson.progress.last_dictation.score}%`
+            : ""}
+        </Button>
+      ) : null}
+
+      {/* Listen & type control bar */}
+      {dictationOn ? (
+        <AppCard style={styles.section}>
+          <Text style={{ color: t.neutral.textMinor }}>
+            Play the dialogue and type what you hear into every line.
           </Text>
-          <View style={styles.row}>
-            <Button mode="outlined" disabled={lineIndex === 0} onPress={() => setLineIndex((i) => i - 1)}>
-              Previous
+          <Text style={{ color: t.neutral.text, fontWeight: "700", marginTop: 4 }}>
+            {dictationFilled}/{lines.length} filled
+          </Text>
+          <View style={styles.dictBar}>
+            <Button mode="contained" compact icon={dictationPlaying ? "stop" : "replay"} onPress={playDictation}>
+              {dictationPlaying ? "Stop" : "Play all"}
             </Button>
-            <Button mode="contained-tonal" icon="volume-up" onPress={() => current && playLine(current)}>
-              Replay
+            <Button
+              mode={dictationLoop ? "contained-tonal" : "outlined"}
+              compact
+              icon={dictationLoop ? "repeat" : "repeat-off"}
+              onPress={toggleDictationLoop}
+            >
+              Repeat
             </Button>
             <Button
               mode="contained"
-              disabled={lineIndex >= lines.length - 1}
-              onPress={() => setLineIndex((i) => i + 1)}
+              compact
+              icon="check-circle"
+              onPress={checkDictation}
+              disabled={dictationFilled === 0}
             >
-              Next
+              Check
+            </Button>
+            <Button mode="outlined" compact icon="delete-outline" onPress={clearDictation}>
+              Clear
             </Button>
           </View>
-        </>
-      ) : (
-        <>
-          {!rpActive && !rpResult ? (
-            <>
-              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 12 }}>
-                Pick your character, then speak every line assigned to you.
-              </Text>
-              <View style={styles.chars}>
-                {characters.map((name) => (
-                  <Button key={name} mode="contained-tonal" onPress={() => beginRolePlay(name)} style={styles.charBtn}>
-                    {name}
-                  </Button>
-                ))}
-              </View>
-            </>
-          ) : null}
+        </AppCard>
+      ) : null}
 
-          {rpActive && rpLineIndex !== null ? (
-            <>
-              <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant, marginTop: 12 }}>
-                Line {rpLineIndex + 1} / {lines.length}
+      {dictationOn && dictationResult ? (
+        <AppCard style={styles.section}>
+          <View style={styles.resultRow}>
+            <Text
+              style={[
+                styles.resultScore,
+                { color: dictationResult.score >= DICTATION_GOOD ? "#2e9e5b" : t.palette.primary },
+              ]}
+            >
+              {dictationResult.score}%
+            </Text>
+            <View style={styles.flex}>
+              <Text style={{ color: t.neutral.text, fontWeight: "800", fontSize: 16 }}>
+                {dictationResult.score >= DICTATION_GOOD ? "Great listening!" : "Keep listening"}
               </Text>
-              <Text variant="titleMedium" style={{ color: theme.colors.onSurface, marginTop: 8 }}>
-                {lines[rpLineIndex]?.text}
-              </Text>
-              {lines[rpLineIndex]?.speaker === rpCharacter ? (
-                <View style={styles.row}>
-                  <Button mode="outlined" icon="mic" onPress={startRecording} disabled={rpRecording}>
-                    {rpRecording ? "Recording…" : "Record"}
-                  </Button>
-                  <Button mode="contained" onPress={stopRecording} disabled={!rpRecording}>
-                    Stop
-                  </Button>
-                </View>
-              ) : (
-                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}>
-                  Playing coach line…
-                </Text>
-              )}
-            </>
-          ) : null}
-
-          {rolePlayMutation.isPending ? (
-            <Text style={{ color: theme.colors.onSurfaceVariant, marginTop: 12 }}>Scoring…</Text>
-          ) : null}
-
-          {rpResult ? (
-            <View style={[styles.result, { borderColor: theme.colors.outlineVariant }]}>
-              <Text variant="titleLarge" style={{ color: rpResult.passed ? "#2e7d32" : theme.colors.primary }}>
-                Score: {rpResult.score}% {rpResult.passed ? "— Passed!" : ""}
-              </Text>
-              {!rpResult.passed ? (
-                <Text style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}>
-                  Reach {rpResult.threshold}% to pass.
-                </Text>
-              ) : null}
-              <Button mode="text" onPress={() => { setRpResult(null); setRpCharacter(null); }} style={{ marginTop: 8 }}>
-                Try again
-              </Button>
+              <Text style={{ color: t.neutral.textMinor }}>Words heard correctly across all lines</Text>
             </View>
+          </View>
+        </AppCard>
+      ) : null}
+
+      {/* Transcript */}
+      <View style={styles.section}>
+        {lines.map((line, i) => {
+          const isRight = line.align === "right";
+          const isCurrent =
+            (scenePlaying && sceneIndex === i) ||
+            (rpActive && rpIndex === i) ||
+            (dictationOn && dictationIndex === i) ||
+            (playingLine != null && playingLine === line.text);
+          const isMine = rpActive && line.speaker === rpCharacter;
+          const lineDiff = dictationOn ? dictationResult?.lines?.[i] : null;
+          return (
+            <View key={i} style={[styles.line, isRight && styles.lineRight]}>
+              {!isRight ? (
+                <View style={[styles.avatar, { backgroundColor: avatarColor(line.speaker) }]}>
+                  <Text style={styles.avatarText}>{initials(line.speaker)}</Text>
+                </View>
+              ) : null}
+              <AppCard
+                flat
+                padding={12}
+                style={[
+                  styles.bubble,
+                  isCurrent
+                    ? {
+                        borderColor: t.palette.primary,
+                        borderWidth: 1.5,
+                        backgroundColor: t.primaryAlpha(0.1),
+                      }
+                    : null,
+                ]}
+              >
+                <View style={styles.speakerRow}>
+                  <Text style={{ color: t.palette.primary, fontWeight: "700", fontSize: 13 }}>
+                    {line.speaker}
+                  </Text>
+                  {isCurrent ? <PlayingIndicator color={t.palette.primary} /> : null}
+                </View>
+
+                {dictationOn ? (
+                  <>
+                    <TextInput
+                      value={dictationInputs[i] || ""}
+                      onChangeText={(v) => setDictationInput(i, v)}
+                      placeholder="Type what you hear…"
+                      placeholderTextColor={t.neutral.textMuted}
+                      multiline
+                      style={[
+                        styles.input,
+                        { color: t.neutral.text, borderColor: t.neutral.border, backgroundColor: t.neutral.surface2 },
+                      ]}
+                    />
+                    {lineDiff ? (
+                      <View style={{ marginTop: 8 }}>
+                        <Text style={styles.diffLabel}>Answer</Text>
+                        <Text style={styles.diffText}>
+                          {lineDiff.targetTokens.map((tok, k) => (
+                            <Text
+                              key={k}
+                              style={{
+                                color: tok.status === "missing" ? "#d14343" : t.neutral.text,
+                                fontWeight: tok.status === "missing" ? "700" : "400",
+                              }}
+                            >
+                              {tok.word}{" "}
+                            </Text>
+                          ))}
+                        </Text>
+                        {lineDiff.typedTokens.some((tk) => tk.status === "wrong") ? (
+                          <>
+                            <Text style={[styles.diffLabel, { marginTop: 4 }]}>You</Text>
+                            <Text style={styles.diffText}>
+                              {lineDiff.typedTokens.map((tok, k) => (
+                                <Text
+                                  key={k}
+                                  style={{
+                                    color: tok.status === "wrong" ? "#d14343" : t.neutral.textMinor,
+                                    textDecorationLine: tok.status === "wrong" ? "line-through" : "none",
+                                  }}
+                                >
+                                  {tok.word}{" "}
+                                </Text>
+                              ))}
+                            </Text>
+                          </>
+                        ) : null}
+                      </View>
+                    ) : null}
+                  </>
+                ) : (
+                  <Text style={{ color: t.neutral.text, marginTop: 4, lineHeight: 21 }}>{line.text}</Text>
+                )}
+
+                {!rpActive && !dictationOn ? (
+                  <Button
+                    mode="text"
+                    compact
+                    icon={playingLine === line.text ? "stop" : "volume-high"}
+                    disabled={!hasAudio}
+                    onPress={() => (playingLine === line.text ? stopPlayback() : playLine(line))}
+                    style={styles.linePlay}
+                  >
+                    {playingLine === line.text ? "Stop" : "Listen"}
+                  </Button>
+                ) : null}
+
+                {isCurrent && isMine ? (
+                  <Button
+                    mode="contained"
+                    compact
+                    icon="microphone"
+                    onPress={() => (rpRecording ? stopRecording() : startRecording())}
+                    style={{ marginTop: 8, alignSelf: "flex-start" }}
+                  >
+                    {rpRecording ? "Stop & next" : "Record your line"}
+                  </Button>
+                ) : null}
+              </AppCard>
+              {isRight ? (
+                <View style={[styles.avatar, { backgroundColor: avatarColor(line.speaker) }]}>
+                  <Text style={styles.avatarText}>{initials(line.speaker)}</Text>
+                </View>
+              ) : null}
+            </View>
+          );
+        })}
+      </View>
+
+      {/* Role-play active bar */}
+      {rpActive ? (
+        <AppCard style={styles.section}>
+          <View style={styles.resultRow}>
+            <Text style={{ color: t.neutral.text, fontWeight: "700", flex: 1 }}>
+              Role-play as {rpCharacter}
+            </Text>
+            <Button mode="outlined" compact onPress={cancelRolePlay}>
+              Cancel
+            </Button>
+          </View>
+          {rpIndex != null && lines[rpIndex]?.speaker !== rpCharacter ? (
+            <Text style={{ color: t.neutral.textMinor, marginTop: 8 }}>Playing coach line…</Text>
           ) : null}
-        </>
-      )}
+        </AppCard>
+      ) : null}
+
+      {/* Per-sentence role-play breakdown */}
+      {sessions.length > 0 && !rpActive && !dictationOn ? (
+        <AppCard style={styles.section}>
+          <Text style={{ color: t.neutral.text, fontWeight: "800", fontSize: 16, marginBottom: 8 }}>
+            Pronunciation breakdown
+          </Text>
+          {sessions.map((s) => {
+            const acc = Math.round(s.result?.accuracyScore ?? 0);
+            return (
+              <View key={s.id} style={[styles.sessionRow, { borderTopColor: t.neutral.border }]}>
+                <Text style={{ color: t.neutral.text, flex: 1 }} numberOfLines={2}>
+                  {s.text}
+                </Text>
+                <Text style={{ color: acc >= PASS_THRESHOLD ? "#2e9e5b" : t.palette.primary, fontWeight: "800" }}>
+                  {acc}
+                </Text>
+              </View>
+            );
+          })}
+        </AppCard>
+      ) : null}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  pad: { padding: 16 },
-  modeRow: { flexDirection: "row", gap: 8, marginTop: 12 },
-  row: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 16 },
-  chars: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
-  charBtn: { minHeight: 44 },
-  result: { marginTop: 16, padding: 16, borderWidth: 1, borderRadius: 12 },
+  pad: { padding: 16, paddingBottom: 40 },
+  flex: { flex: 1 },
+  section: { marginTop: 16 },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  rowCenter: { flexDirection: "row", alignItems: "center", gap: 8 },
+  badge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+  },
+  // Stage
+  stageWrap: { marginTop: 16, overflow: "hidden" },
+  stage: { minHeight: 200, justifyContent: "flex-end", padding: 12 },
+  stagePlay: { position: "absolute", top: 12, right: 12, zIndex: 2 },
+  cast: { flexDirection: "row", justifyContent: "space-around", alignItems: "flex-end" },
+  figure: { alignItems: "center", width: 130 },
+  figureArt: { width: 110, height: 150, justifyContent: "center", alignItems: "center" },
+  figureFallback: { width: 76, height: 76, borderRadius: 38, justifyContent: "center", alignItems: "center" },
+  figureFallbackText: { color: "#fff", fontWeight: "800", fontSize: 30 },
+  figureName: {
+    marginTop: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 999,
+    backgroundColor: "rgba(0,0,0,0.55)",
+  },
+  figureNameText: { color: "#fff", fontWeight: "700", fontSize: 12 },
+  caption: { marginTop: 10, padding: 10, borderRadius: 12 },
+  captionName: { color: "#fff", fontWeight: "800", fontSize: 13, marginBottom: 2 },
+  captionText: { color: "#fff", fontSize: 15, lineHeight: 21 },
+  // Role-play card
+  pickRow: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  pickBtn: { minHeight: 44 },
+  // Result
+  resultRow: { flexDirection: "row", alignItems: "center", gap: 14 },
+  resultScore: { fontSize: 40, fontWeight: "800" },
+  // Dictation
+  dictBar: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
+  input: {
+    marginTop: 8,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minHeight: 44,
+    fontSize: 15,
+  },
+  diffLabel: { fontSize: 11, fontWeight: "700", opacity: 0.6, textTransform: "uppercase" },
+  diffText: { fontSize: 15, lineHeight: 22 },
+  // Transcript
+  line: { flexDirection: "row", alignItems: "flex-end", gap: 8, marginTop: 12 },
+  lineRight: { flexDirection: "row-reverse" },
+  avatar: { width: 34, height: 34, borderRadius: 17, justifyContent: "center", alignItems: "center" },
+  avatarText: { color: "#fff", fontWeight: "800", fontSize: 14 },
+  bubble: { flex: 1 },
+  speakerRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  eq: { flexDirection: "row", alignItems: "center", height: 16, gap: 2 },
+  eqBar: { width: 3, height: 14, borderRadius: 2 },
+  linePlay: { alignSelf: "flex-start", marginTop: 4, marginLeft: -8 },
+  // Sessions
+  sessionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 10,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
 });

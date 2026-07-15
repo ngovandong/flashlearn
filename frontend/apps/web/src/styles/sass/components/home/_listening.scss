@@ -52,6 +52,8 @@ $lt-low: $error-red;
 
 .listening-topic-card {
     @include card;
+    @include enter_fade;
+    @include stagger;
     text-align: left;
     padding: $space-4;
     display: flex;

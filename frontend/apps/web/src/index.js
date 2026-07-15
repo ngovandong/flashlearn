@@ -28,7 +28,7 @@ try {
 
 // Apply the cached theme before first paint to avoid a flash of default colors.
 const storedTheme = readStoredTheme();
-applyTheme(storedTheme.mode, storedTheme.palette);
+applyTheme(storedTheme.mode, storedTheme.palette, storedTheme.surface);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

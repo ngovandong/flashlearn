@@ -1,16 +1,19 @@
 import React, { useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
-import { FAB, SegmentedButtons, Text, useTheme } from "react-native-paper";
+import { FAB, Text } from "react-native-paper";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import type { Deck, PaginatedResponse } from "@flashlearn/core";
 import { deckApi } from "@/api/services";
 import { DeckCard } from "@/components/DeckCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ErrorView } from "@/components/ErrorView";
-import { LoadingView } from "@/components/LoadingView";
-import { queryKeys } from "@/query/keys";
+import { ScreenSkeleton } from "@/components/ScreenSkeleton";
+import { FadeSlideIn } from "@/components/FadeSlideIn";
+import { PillTabs } from "@/components/ui/PillTabs";
 import { unwrap } from "@/utils/apiError";
+import { motion, useTokens } from "@/theme/tokens";
 
 type Tab = "mine" | "shared" | "public";
 
@@ -25,8 +28,9 @@ async function fetchPage(tab: Tab, page: number): Promise<PaginatedResponse<Deck
 }
 
 export default function LibraryScreen() {
-  const theme = useTheme();
+  const t = useTokens();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<Tab>("mine");
 
   const query = useInfiniteQuery({
@@ -38,16 +42,22 @@ export default function LibraryScreen() {
 
   const decks = query.data?.pages.flatMap((p) => p.results ?? []) ?? [];
 
-  if (query.isLoading) return <LoadingView />;
+  if (query.isLoading) return <ScreenSkeleton showTabs rows={6} />;
   if (query.isError) return <ErrorView message="Could not load decks" onRetry={() => query.refetch()} />;
 
   return (
-    <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.pad}>
-        <SegmentedButtons
+    <View style={[styles.flex, { backgroundColor: t.neutral.bg }]}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <Text
+          variant="headlineMedium"
+          style={{ color: t.neutral.text, fontWeight: "800", marginBottom: 14 }}
+        >
+          Library
+        </Text>
+        <PillTabs
           value={tab}
-          onValueChange={(v) => setTab(v as Tab)}
-          buttons={[
+          onChange={(v) => setTab(v)}
+          options={[
             { value: "mine", label: "Mine" },
             { value: "shared", label: "Shared" },
             { value: "public", label: "Public" },
@@ -56,20 +66,24 @@ export default function LibraryScreen() {
       </View>
 
       <FlatList
+        key={tab}
         data={decks}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} />}
         ListEmptyComponent={<EmptyState message="No decks here yet." />}
-        renderItem={({ item }) => (
-          <DeckCard deck={item} onPress={() => router.push(`/library/${item.id}`)} />
+        renderItem={({ item, index }) => (
+          <FadeSlideIn delay={Math.min(index, 6) * motion.stagger.list}>
+            <DeckCard deck={item} onPress={() => router.push(`/library/${item.id}`)} />
+          </FadeSlideIn>
         )}
         onEndReached={() => {
           if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
         }}
         ListFooterComponent={
           query.isFetchingNextPage ? (
-            <Text style={{ textAlign: "center", color: theme.colors.onSurfaceVariant, padding: 12 }}>
+            <Text style={{ textAlign: "center", color: t.neutral.textMinor, padding: 12 }}>
               Loading more…
             </Text>
           ) : null
@@ -78,7 +92,8 @@ export default function LibraryScreen() {
 
       <FAB
         icon="plus"
-        style={styles.fab}
+        color={t.palette.onPrimary}
+        style={[styles.fab, { backgroundColor: t.palette.primary }, t.shadowStrong]}
         onPress={() => router.push("/library/create")}
         label="New deck"
       />
@@ -88,7 +103,7 @@ export default function LibraryScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  pad: { padding: 16, paddingBottom: 8 },
-  list: { padding: 16, paddingTop: 0, gap: 10 },
-  fab: { position: "absolute", right: 16, bottom: 16 },
+  header: { paddingHorizontal: 16, paddingBottom: 12 },
+  list: { padding: 16, paddingTop: 4, gap: 12, paddingBottom: 110 },
+  fab: { position: "absolute", left: 16, bottom: 24, borderRadius: 18 },
 });

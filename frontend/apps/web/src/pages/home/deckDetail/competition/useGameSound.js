@@ -1,30 +1,26 @@
-import { useCallback, useRef, useState } from "react";
-import { useStudySounds } from "@hooks/useStudySounds";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { speak } from "@api-services/voiceService";
+import { sfx } from "./sfx";
 
 const STORAGE_KEY = "competition_muted";
 
 // One sound controller shared by the shell (mute toggle) and the active game.
+// All effects are synthesized (see sfx.js) so there are no audio assets.
 export function useGameSound() {
-  const sounds = useStudySounds();
   const [muted, setMuted] = useState(
     () => localStorage.getItem(STORAGE_KEY) === "1"
   );
   const mutedRef = useRef(muted);
   mutedRef.current = muted;
 
-  const play = useCallback(
-    (clip) => {
-      if (mutedRef.current || !clip) return;
-      try {
-        clip.currentTime = 0;
-        clip.play().catch(() => {});
-      } catch {
-        /* ignore autoplay errors */
-      }
-    },
-    []
-  );
+  const gate = useCallback((fn) => (...args) => {
+    if (mutedRef.current) return;
+    try {
+      fn(...args);
+    } catch {
+      /* audio is best-effort */
+    }
+  }, []);
 
   const toggleMute = useCallback(() => {
     setMuted((prev) => {
@@ -39,12 +35,21 @@ export function useGameSound() {
     speak(text).catch(() => {});
   }, []);
 
-  return {
-    muted,
-    toggleMute,
-    say,
-    playCorrect: () => play(sounds.correct),
-    playWrong: () => play(sounds.incorrect),
-    playFinish: () => play(sounds.finish),
-  };
+  return useMemo(
+    () => ({
+      muted,
+      toggleMute,
+      say,
+      unlock: () => sfx.unlock(),
+      playCorrect: gate(sfx.correct),
+      playWrong: gate(sfx.wrong),
+      playShoot: gate(sfx.shoot),
+      playExplode: gate(sfx.explode),
+      playCombo: gate(sfx.combo),
+      playBoost: gate(sfx.boost),
+      playBeep: gate(sfx.beep),
+      playFinish: gate(sfx.win),
+    }),
+    [muted, toggleMute, say, gate]
+  );
 }

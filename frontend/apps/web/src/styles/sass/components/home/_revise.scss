@@ -11,10 +11,16 @@ $rv-wrong: $error-red;
 $rv-wrong-soft: rgba(255, 120, 115, 0.16);
 
 .revise-page {
-    min-height: calc(100vh - #{$nav-height});
+    // Fill the viewport below the navbar and keep the footer pinned: the body
+    // scrolls internally instead of the whole document, so the verdict/action
+    // bar is always visible after answering (no scroll-to-bottom needed).
+    height: calc(100dvh - #{$nav-height});
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     background: $app-background;
+    // Opacity-only so the pinned footer / internal scroll never shift on enter.
+    @include enter_fade($dur-slow);
 }
 
 /* ---------- Header ---------- */
@@ -61,6 +67,8 @@ $rv-wrong-soft: rgba(255, 120, 115, 0.16);
 /* ---------- Body / stage ---------- */
 .revise-body {
     flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -483,8 +491,7 @@ $rv-wrong-soft: rgba(255, 120, 115, 0.16);
 
 /* ---------- Footer verdict / actions ---------- */
 .revise-footer {
-    position: sticky;
-    bottom: 0;
+    flex-shrink: 0;
     border-top: 1px solid $border-subtle;
     background: $surface;
     padding: $space-4 $space-5;

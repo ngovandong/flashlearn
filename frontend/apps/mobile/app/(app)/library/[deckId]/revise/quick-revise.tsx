@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { Button, Modal, Portal, ProgressBar, Text, useTheme } from "react-native-paper";
+import { Modal, Portal, Text } from "react-native-paper";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { QuickReviseQuestion } from "@flashlearn/core";
 import { QuizQuestion } from "@/features/study/QuizQuestion";
 import { useQuickReviseWs, type WsMessage } from "@/features/quickRevise/useQuickReviseWs";
+import { GradientButton } from "@/components/ui/GradientButton";
+import { AnimatedBar } from "@/components/ui/AnimatedBar";
 import { speakText } from "@/utils/audio";
+import { useTokens } from "@/theme/tokens";
 
 // Sent to the server when the user picks a wrong option so it can end the game.
 // The real answer is a term name, so this sentinel can never accidentally match.
@@ -13,7 +17,7 @@ const WRONG_ANSWER = "__flashlearn_wrong__";
 
 export default function QuickReviseScreen() {
   const { deckId } = useLocalSearchParams<{ deckId: string }>();
-  const theme = useTheme();
+  const t = useTokens();
   const router = useRouter();
   const [question, setQuestion] = useState<QuickReviseQuestion | null>(null);
   const [timer, setTimer] = useState(0);
@@ -45,7 +49,7 @@ export default function QuickReviseScreen() {
 
   React.useEffect(() => {
     if (timer <= 0 || disabled) return;
-    const id = setInterval(() => setTimer((t) => Math.max(0, t - 1)), 1000);
+    const id = setInterval(() => setTimer((tm) => Math.max(0, tm - 1)), 1000);
     return () => clearInterval(id);
   }, [timer, disabled]);
 
@@ -59,8 +63,7 @@ export default function QuickReviseScreen() {
   };
 
   const timerRatio = initialTimer > 0 ? timer / initialTimer : 0;
-  const timerColor =
-    timer < 3 ? theme.colors.error : timer < 5 ? "#ed6c02" : theme.colors.primary;
+  const timerColor = timer < 3 ? "#ef4444" : timer < 5 ? "#f59e0b" : t.palette.primary;
 
   const q = question
     ? {
@@ -73,53 +76,53 @@ export default function QuickReviseScreen() {
       }
     : null;
 
+  const Stat = ({ icon, value, color }: { icon: string; value: string; color: string }) => (
+    <View style={[styles.stat, { backgroundColor: t.neutral.surface2, borderRadius: t.radii.pill }]}>
+      <MaterialIcons name={icon as any} size={16} color={color} />
+      <Text style={{ color, fontWeight: "800" }}>{value}</Text>
+    </View>
+  );
+
   return (
-    <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.flex, { backgroundColor: t.neutral.bg }]}>
       <View style={styles.top}>
-        <Text variant="titleMedium" style={{ color: theme.colors.primary }}>
-          🔥 {score}
-        </Text>
-        <Text variant="titleMedium" style={{ color: timerColor }}>
-          ⏱ {timer}s
-        </Text>
-        <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-          Q{index}
-        </Text>
+        <Stat icon="local-fire-department" value={String(score)} color="#f97316" />
+        <Stat icon="timer" value={`${timer}s`} color={timerColor} />
+        <Stat icon="tag" value={`Q${index}`} color={t.neutral.textMinor} />
       </View>
-      <ProgressBar progress={timerRatio} color={timerColor} style={styles.timerBar} />
+      <AnimatedBar progress={timerRatio} color={timerColor} trackColor={t.neutral.surface2} height={8} style={styles.timerBar} />
 
       {q ? <QuizQuestion question={q} onAnswer={onAnswer} disabled={disabled} /> : null}
 
       <Portal>
-        <Modal visible={!!gameOver} onDismiss={() => router.back()} contentContainerStyle={[styles.modal, { backgroundColor: theme.colors.surface }]}>
-          <Text variant="titleLarge" style={{ color: theme.colors.onSurface }}>
+        <Modal visible={!!gameOver} onDismiss={() => router.back()} contentContainerStyle={[styles.modal, { backgroundColor: t.neutral.surface, borderRadius: t.radii.xl }]}>
+          <View style={[styles.modalIcon, { backgroundColor: t.alpha("#ef4444", 0.14), borderRadius: t.radii.pill }]}>
+            <MaterialIcons name="sports-esports" size={30} color="#ef4444" />
+          </View>
+          <Text variant="titleLarge" style={{ color: t.neutral.text, fontWeight: "800", marginTop: 12 }}>
             Game over
           </Text>
-          <Text style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}>
+          <Text style={{ color: t.neutral.textMinor, marginTop: 8, textAlign: "center" }}>
             {gameOver?.reason}
           </Text>
           {gameOver?.answer ? (
-            <Text style={{ color: theme.colors.onSurface, marginTop: 8 }}>
-              Answer: {gameOver.answer}
-            </Text>
+            <Text style={{ color: t.neutral.text, marginTop: 8 }}>Answer: {gameOver.answer}</Text>
           ) : null}
-          <Text style={{ color: theme.colors.primary, marginTop: 8 }}>
+          <Text style={{ color: t.palette.primary, marginTop: 8, fontWeight: "800" }}>
             Final score: {gameOver?.finalScore ?? score}
           </Text>
-          <Button mode="contained" onPress={() => router.back()} style={{ marginTop: 16 }}>
-            Exit
-          </Button>
+          <GradientButton label="Exit" onPress={() => router.back()} style={styles.modalBtn} />
         </Modal>
-        <Modal visible={finished} onDismiss={() => router.back()} contentContainerStyle={[styles.modal, { backgroundColor: theme.colors.surface }]}>
-          <Text variant="titleLarge" style={{ color: theme.colors.onSurface }}>
+
+        <Modal visible={finished} onDismiss={() => router.back()} contentContainerStyle={[styles.modal, { backgroundColor: t.neutral.surface, borderRadius: t.radii.xl }]}>
+          <View style={[styles.modalIcon, { backgroundColor: t.alpha("#10b981", 0.14), borderRadius: t.radii.pill }]}>
+            <MaterialIcons name="emoji-events" size={30} color="#10b981" />
+          </View>
+          <Text variant="titleLarge" style={{ color: t.neutral.text, fontWeight: "800", marginTop: 12 }}>
             Well done!
           </Text>
-          <Text style={{ color: theme.colors.primary, marginTop: 8 }}>
-            Score: {score}
-          </Text>
-          <Button mode="contained" onPress={() => router.back()} style={{ marginTop: 16 }}>
-            Done
-          </Button>
+          <Text style={{ color: t.palette.primary, marginTop: 8, fontWeight: "800" }}>Score: {score}</Text>
+          <GradientButton label="Done" onPress={() => router.back()} style={styles.modalBtn} />
         </Modal>
       </Portal>
     </View>
@@ -129,6 +132,9 @@ export default function QuickReviseScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   top: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 16, paddingBottom: 8 },
-  timerBar: { marginHorizontal: 16, height: 8, borderRadius: 4 },
-  modal: { margin: 24, padding: 24, borderRadius: 12 },
+  stat: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 7 },
+  timerBar: { marginHorizontal: 16 },
+  modal: { margin: 24, padding: 24, alignItems: "center" },
+  modalIcon: { width: 60, height: 60, alignItems: "center", justifyContent: "center" },
+  modalBtn: { marginTop: 20, alignSelf: "stretch" },
 });
