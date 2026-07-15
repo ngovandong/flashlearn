@@ -6,6 +6,7 @@ from urllib.parse import parse_qs
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -62,7 +63,7 @@ class QuickReviseConsumer(AsyncWebsocketConsumer):
             if DeckAccessPolicy.can_view(deck, user):
                 return user, deck
             return None, None
-        except (TokenError, User.DoesNotExist):
+        except (TokenError, User.DoesNotExist, Deck.DoesNotExist, ValidationError):
             return None, None
 
     @database_sync_to_async

@@ -29,8 +29,12 @@ class ReminderService:
         into its copy, or ``None`` for context-free reminders.
         """
         reminders = [
+            {"type": "revise_all", "route": "/revise", "label": None},
             {"type": "speaking_new", "route": "/speaking-coach", "label": None},
-            {"type": "listening", "route": "/number-test", "label": None},
+            {"type": "writing_new", "route": "/writing-coach", "label": None},
+            {"type": "listening_dictation", "route": "/listening", "label": None},
+            {"type": "listening", "route": "/listening/numbers", "label": None},
+            {"type": "grammar_new", "route": "/grammar", "label": None},
         ]
 
         conversation = self._repo.latest_conversation(user)
@@ -43,6 +47,16 @@ class ReminderService:
                 }
             )
 
+        writing_session = self._repo.latest_writing_session(user)
+        if writing_session is not None:
+            reminders.append(
+                {
+                    "type": "writing_revise",
+                    "route": f"/writing-coach/{writing_session.id}",
+                    "label": writing_session.topic or "your last writing session",
+                }
+            )
+
         course_target = self._next_course_lesson(user)
         if course_target is not None:
             course, lesson_id = course_target
@@ -51,6 +65,16 @@ class ReminderService:
                     "type": "course",
                     "route": f"/speaking-coach/course/{course.slug}/{lesson_id}",
                     "label": course.title,
+                }
+            )
+
+        grammar_unit = self._repo.latest_grammar_unit(user)
+        if grammar_unit is not None:
+            reminders.append(
+                {
+                    "type": "grammar_revise",
+                    "route": f"/grammar/{grammar_unit['key']}",
+                    "label": grammar_unit["title"],
                 }
             )
 

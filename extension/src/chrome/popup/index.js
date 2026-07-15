@@ -417,13 +417,6 @@ function sendMessageToBackgroundScript(message) {
   });
 }
 
-const SetupDeckHint = styled.p`
-  margin: 8px 0 0 !important;
-  font-size: 0.8rem !important;
-  color: #64748b !important;
-  line-height: 1.4;
-`;
-
 // Renders only <b>…</b> segments as bold; any other markup stays plain text (safe from XSS).
 const renderHighlighted = (text) =>
   String(text ?? "")
@@ -436,7 +429,6 @@ export default function TranslationPopup({
   left,
   top,
   onClose,
-  hasDefaultDeck = true,
 }) {
   const popupTop =
     top + 400 > window.innerHeight + window.scrollY ? top - 400 : top;
@@ -604,7 +596,7 @@ export default function TranslationPopup({
           {error && <img src={notFoundURL} alt="notfound icon" />}
           {error && <div className="error-text">{error}</div>}
 
-          {!isLoading && hasDefaultDeck && (
+          {!isLoading && (
             <AiButton onClick={handleFillWithAi} disabled={aiLoading}>
               {aiLoading
                 ? "Generating..."
@@ -613,16 +605,10 @@ export default function TranslationPopup({
                 : "✨ Fill with AI"}
             </AiButton>
           )}
-          {meaning && !isLoading && hasDefaultDeck && (
+          {meaning && !isLoading && (
             <AddToDeckButton onClick={handleAddToDefaultDeck}>
               + Add to Default Deck
             </AddToDeckButton>
-          )}
-          {meaning && !isLoading && !hasDefaultDeck && (
-            <SetupDeckHint>
-              Open the Flashlearn extension popup and choose a default deck to
-              save terms.
-            </SetupDeckHint>
           )}
         </MeaningContainer>
 

@@ -1,0 +1,885 @@
+@use "../../base/variables" as *;
+@use "../../base/mixins" as *;
+
+// ── Hub ──────────────────────────────────────────────────────────────────────
+.cmp-hub {
+    @include page_shell(64rem);
+
+    &__header {
+        text-align: center;
+        margin-bottom: $space-6;
+
+        h2 {
+            color: $main-text-color;
+            margin-bottom: $space-2;
+        }
+        p {
+            color: $minor-text-color;
+        }
+    }
+
+    &__error {
+        color: $error-red;
+        text-align: center;
+    }
+
+    &__grid {
+        @include card_grid(18rem, 1.1rem);
+    }
+}
+
+.cmp-card__link {
+    text-decoration: none;
+
+    &.is-locked {
+        cursor: not-allowed;
+    }
+}
+
+.cmp-card {
+    @include card_interactive;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: $space-4;
+    padding: $space-5;
+    min-height: 108px;
+    height: 100%;
+    overflow: hidden;
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 6px;
+        background: var(--fl-primary);
+    }
+    &.accent-accent::before { background: var(--fl-accent); }
+    &.accent-accent2::before { background: var(--fl-accent-2); }
+
+    &__icon {
+        font-size: 2.4rem;
+        display: grid;
+        place-items: center;
+        width: 56px;
+        height: 56px;
+        border-radius: $radius-md;
+        color: var(--fl-primary);
+        background: rgba(var(--fl-primary-rgb), 0.12);
+        flex-shrink: 0;
+    }
+    &.accent-accent .cmp-card__icon {
+        color: var(--fl-accent);
+        background: rgba(var(--fl-accent-rgb), 0.14);
+    }
+    &.accent-accent2 .cmp-card__icon {
+        color: var(--fl-accent-2-strong);
+        background: rgba(var(--fl-accent-2-rgb), 0.16);
+    }
+
+    &__body {
+        flex: 1;
+        min-width: 0;
+
+        h3 {
+            color: $main-text-color;
+            margin-bottom: $space-1;
+            font-size: 1.05rem;
+        }
+        p {
+            color: $minor-text-color;
+            font-size: 0.85rem;
+            line-height: 1.35;
+        }
+    }
+
+    &__board,
+    &__lock {
+        position: absolute;
+        top: $space-3;
+        right: $space-3;
+        display: grid;
+        place-items: center;
+        color: $gray-text-color;
+    }
+    &__board {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: $radius-pill;
+        background: transparent;
+        cursor: pointer;
+        transition: background-color 0.15s $ease, color 0.15s $ease;
+
+        &:hover {
+            background: rgba(var(--fl-accent-2-rgb), 0.18);
+            color: var(--fl-accent-2-strong);
+        }
+    }
+
+    &.locked {
+        opacity: 0.62;
+
+        &:hover {
+            transform: none;
+            box-shadow: $shadow-sm;
+            border-color: $border-subtle;
+        }
+        .cmp-card__icon {
+            color: $gray-text-color;
+            background: rgba(0, 0, 0, 0.05);
+        }
+        &::before { background: $border-color; }
+    }
+}
+
+// ── Game shell ───────────────────────────────────────────────────────────────
+.cmp-shell {
+    @include page_shell(52rem);
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100dvh - #{$nav-height});
+
+    &__bar {
+        display: flex;
+        align-items: center;
+        gap: $space-3;
+        margin-bottom: $space-4;
+    }
+    &__title {
+        flex: 1;
+        color: $main-text-color;
+        font-size: 1.15rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    &__meta {
+        display: flex;
+        align-items: center;
+        gap: $space-2;
+    }
+    &__stage {
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.cmp-score-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+.cmp-score {
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: var(--fl-primary);
+    min-width: 2ch;
+    text-align: right;
+    transition: transform 0.15s $ease;
+
+    &.bump {
+        animation: cmp-score-bump 0.26s $ease;
+    }
+}
+.cmp-score-pop {
+    position: absolute;
+    top: -4px;
+    right: 0;
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--fl-accent-2-strong);
+    pointer-events: none;
+    animation: cmp-float-up 0.9s $ease forwards;
+    text-shadow: 0 1px 6px rgba(var(--fl-accent-2-rgb), 0.5);
+}
+.cmp-best {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-weight: 700;
+    color: var(--fl-accent-2-strong);
+    font-size: 0.85rem;
+}
+
+.cmp-icon-btn {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-pill;
+    background: $surface;
+    color: $main-text-color;
+    cursor: pointer;
+    transition: background-color 0.15s $ease, border-color 0.15s $ease, transform 0.15s $ease;
+
+    &:hover {
+        border-color: $hover-purple;
+        transform: translateY(-1px);
+    }
+}
+
+// ── Shared quiz layout (race / tower / buzzer / tug) ─────────────────────────
+.cmp-quiz {
+    @include card;
+    padding: $space-5;
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+
+    &__prompt {
+        position: relative;
+        font-size: 1.35rem;
+        font-weight: 600;
+        color: $main-text-color;
+        text-align: center;
+        padding: $space-3 $space-6;
+        line-height: 1.4;
+    }
+    &__count {
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: $gray-text-color;
+    }
+    &__options {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: $space-3;
+    }
+}
+
+.cmp-option {
+    @include card;
+    padding: $space-4;
+    font-size: 1rem;
+    font-weight: 600;
+    color: $main-text-color;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.12s $ease, border-color 0.12s $ease, background-color 0.12s $ease;
+
+    &:hover:not(:disabled) {
+        border-color: $hover-purple;
+        transform: translateY(-2px);
+    }
+    &:disabled { cursor: default; }
+
+    &.correct {
+        border-color: $light-blue;
+        background: rgba(89, 232, 181, 0.18);
+        color: $main-text-color;
+        animation: cmp-pop 0.28s $ease;
+    }
+    &.wrong {
+        border-color: $error-red;
+        background: rgba(255, 120, 115, 0.16);
+        animation: cmp-shake 0.4s $ease;
+    }
+}
+
+// ── Buttons shared with overlays / leaderboard ───────────────────────────────
+.cmp-btn {
+    @include purple_btn;
+    display: inline-flex;
+    align-items: center;
+    gap: $space-2;
+    justify-content: center;
+
+    &--ghost {
+        background: transparent;
+        color: var(--fl-primary);
+        border: 1px solid $border-color;
+
+        &:hover {
+            background: rgba(var(--fl-primary-rgb), 0.1);
+            box-shadow: none;
+        }
+    }
+}
+
+// ── Race ─────────────────────────────────────────────────────────────────────
+.cmp-race {
+    display: flex;
+    flex-direction: column;
+    gap: $space-5;
+
+    &__track {
+        @include card;
+        position: relative;
+        padding: $space-4 $space-5;
+        display: flex;
+        flex-direction: column;
+        gap: $space-3;
+    }
+    &__flag {
+        position: absolute;
+        top: 6px;
+        right: 10px;
+        font-size: 1.1rem;
+        opacity: 0.6;
+    }
+}
+.cmp-lane {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+
+    &.me .cmp-lane__label { color: var(--fl-primary); font-weight: 800; }
+    &__label {
+        width: 52px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: $minor-text-color;
+        flex-shrink: 0;
+    }
+    &__road {
+        position: relative;
+        flex: 1;
+        height: 26px;
+        border-bottom: 2px dashed $border-color;
+        background: repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 18px,
+            rgba(var(--fl-primary-rgb), 0.12) 18px,
+            rgba(var(--fl-primary-rgb), 0.12) 22px
+        );
+    }
+    &__car {
+        position: absolute;
+        bottom: 0;
+        transform: translateX(-50%);
+        font-size: 1.4rem;
+        transition: left 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+
+        &.boost { animation: cmp-car-boost 0.5s $ease; }
+    }
+    &__nitro {
+        position: absolute;
+        right: 100%;
+        top: 50%;
+        width: 22px;
+        height: 6px;
+        margin-top: -3px;
+        border-radius: $radius-pill;
+        background: linear-gradient(90deg, transparent, var(--fl-accent-2));
+        animation: cmp-nitro 0.5s $ease;
+    }
+}
+
+// ── Tug of war ───────────────────────────────────────────────────────────────
+.cmp-tug {
+    display: flex;
+    flex-direction: column;
+    gap: $space-6;
+
+    &__bar {
+        display: flex;
+        align-items: center;
+        gap: $space-3;
+    }
+    &__side { font-size: 1.8rem; }
+    &__rail {
+        position: relative;
+        flex: 1;
+        height: 12px;
+        border-radius: $radius-pill;
+        background: linear-gradient(90deg,
+            rgba(var(--fl-accent-2-rgb), 0.4),
+            rgba(var(--fl-primary-rgb), 0.4));
+    }
+    &__knot {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.6rem;
+        transition: left 0.45s $ease;
+    }
+    &__prompt {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: $space-4;
+        flex-wrap: wrap;
+    }
+    &__word { color: var(--fl-primary); font-weight: 800; }
+    &__vs { color: $gray-text-color; font-size: 0.9rem; }
+    &__cand { color: $main-text-color; }
+    &__choices { grid-template-columns: repeat(2, 1fr); }
+}
+
+// ── Tower ────────────────────────────────────────────────────────────────────
+.cmp-tower {
+    --block: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+    align-items: center;
+
+    &__timer {
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: var(--fl-primary);
+        &[data-low="true"] { color: $error-red; }
+    }
+    &__arena {
+        width: 100%;
+        height: 240px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+    }
+    &__stack {
+        position: relative;
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 4px;
+        width: 120px;
+    }
+    &__block {
+        height: var(--block);
+        border-radius: 6px;
+        background: var(--fl-gradient);
+        animation: cmp-pop 0.25s $ease;
+    }
+    &__ghost {
+        position: absolute;
+        left: calc(100% + 8px);
+        font-size: 0.7rem;
+        color: $gray-text-color;
+        border-top: 2px dashed $gray-text-color;
+        width: 46px;
+        padding-top: 2px;
+    }
+}
+
+// ── Picture Rush ─────────────────────────────────────────────────────────────
+.cmp-picture {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+
+    &__prompt {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    &__count { font-size: 0.75rem; color: $gray-text-color; }
+    &__word { font-size: 1.6rem; font-weight: 800; color: $main-text-color; }
+    &__hint { font-size: 0.85rem; color: $minor-text-color; }
+    &__timer {
+        height: 8px;
+        border-radius: $radius-pill;
+        background: rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+
+        span {
+            display: block;
+            height: 100%;
+            background: var(--fl-primary);
+            &[data-low="true"] { background: $error-red; }
+        }
+    }
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: $space-3;
+    }
+    &__tile {
+        @include card;
+        padding: 0;
+        overflow: hidden;
+        aspect-ratio: 4 / 3;
+        cursor: pointer;
+        transition: transform 0.14s $ease, border-color 0.14s $ease, box-shadow 0.14s $ease;
+
+        img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.25s $ease; }
+
+        &:hover:not(:disabled) {
+            transform: translateY(-3px);
+            border-color: $hover-purple;
+            box-shadow: $shadow-lg;
+            img { transform: scale(1.06); }
+        }
+        &.correct { border-color: $light-blue; box-shadow: 0 0 0 3px rgba(89, 232, 181, 0.5); animation: cmp-pop 0.3s $ease; }
+        &.wrong { border-color: $error-red; box-shadow: 0 0 0 3px rgba(255, 120, 115, 0.4); animation: cmp-shake 0.4s $ease; }
+    }
+}
+
+// ── Sentence Sniper ──────────────────────────────────────────────────────────
+.cmp-sentence {
+    @include card;
+    padding: $space-6;
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+
+    &__count { font-size: 0.75rem; color: $gray-text-color; align-self: flex-end; }
+    &__text { font-size: 1.25rem; line-height: 1.7; color: $main-text-color; }
+    &__blank {
+        font-weight: 800;
+        color: var(--fl-primary);
+        padding: 0 4px;
+        &.correct { color: $light-blue; }
+        &.wrong { color: $error-red; }
+    }
+    &__hint { color: $minor-text-color; font-size: 0.9rem; }
+    &__form { display: flex; gap: $space-3; }
+    &__input {
+        flex: 1;
+        padding: $space-3 $space-4;
+        border-radius: $radius-sm;
+        border: 1px solid $border-color;
+        background: $surface;
+        color: $main-text-color;
+        font-size: 1rem;
+
+        &:focus { outline: none; border-color: $main-purple; }
+        &.correct { border-color: $light-blue; }
+        &.wrong { border-color: $error-red; }
+    }
+    &__answer { color: $error-red; font-size: 0.9rem; }
+}
+
+// ── Blaster ──────────────────────────────────────────────────────────────────
+.cmp-blaster {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+
+    &.shake { animation: cmp-shake 0.4s $ease; }
+
+    &__hud {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 26px;
+        font-size: 1.1rem;
+    }
+    &__combo {
+        font-weight: 800;
+        font-size: 0.9rem;
+        color: var(--fl-accent-2-strong);
+        padding: 2px 10px;
+        border-radius: $radius-pill;
+        background: rgba(var(--fl-accent-2-rgb), 0.16);
+        animation: cmp-pop 0.2s $ease;
+    }
+    &__sky {
+        position: relative;
+        height: 58dvh;
+        min-height: 340px;
+        overflow: hidden;
+        border-radius: $radius-lg;
+        border: 1px solid $border-subtle;
+        background:
+            radial-gradient(1200px 300px at 50% -140px, rgba(var(--fl-accent-2-rgb), 0.18), transparent 70%),
+            linear-gradient(180deg,
+                rgba(var(--fl-primary-rgb), 0.22),
+                rgba(var(--fl-accent-rgb), 0.12) 55%,
+                var(--fl-surface));
+    }
+    // Twinkling starfield built from layered radial gradients (no assets).
+    &__stars {
+        position: absolute;
+        inset: 0;
+        background-image:
+            radial-gradient(1.5px 1.5px at 20% 30%, rgba(255, 255, 255, 0.9), transparent),
+            radial-gradient(1.5px 1.5px at 70% 20%, rgba(255, 255, 255, 0.7), transparent),
+            radial-gradient(1.5px 1.5px at 40% 60%, rgba(255, 255, 255, 0.8), transparent),
+            radial-gradient(2px 2px at 85% 50%, rgba(255, 255, 255, 0.6), transparent),
+            radial-gradient(1.5px 1.5px at 55% 80%, rgba(255, 255, 255, 0.7), transparent);
+        animation: cmp-twinkle 3s $ease infinite alternate;
+        pointer-events: none;
+    }
+    &__ground {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 14px;
+        background: linear-gradient(180deg, rgba(var(--fl-primary-rgb), 0.45), rgba(var(--fl-primary-rgb), 0.25));
+    }
+    &__cannon {
+        position: absolute;
+        bottom: 2px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 1.8rem;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+    }
+    &__target {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        strong { font-size: 1.35rem; color: $main-text-color; }
+    }
+    &__label { font-size: 0.8rem; color: $minor-text-color; text-transform: uppercase; letter-spacing: 0.04em; }
+}
+.cmp-egg {
+    position: absolute;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    animation: cmp-egg-wobble 1.6s $ease infinite;
+    transition: transform 0.1s $ease;
+
+    &:hover { transform: translateX(-50%) scale(1.12); }
+    &:active { transform: translateX(-50%) scale(0.92); }
+
+    &__shell {
+        font-size: 2.1rem;
+        line-height: 1;
+        filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.25));
+    }
+    &__word {
+        margin-top: 2px;
+        padding: 2px 9px;
+        border-radius: $radius-pill;
+        background: $surface;
+        border: 1px solid $border-color;
+        box-shadow: $shadow-sm;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: $main-text-color;
+        white-space: nowrap;
+    }
+}
+
+// Explosion: 8 shards fan out from the pop point.
+.cmp-boom {
+    position: absolute;
+    width: 0;
+    height: 0;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+
+    &__bit {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        background: var(--fl-accent-2);
+        transform: rotate(var(--a)) translateX(0);
+        animation: cmp-shard 0.6s $ease forwards;
+    }
+}
+
+// ── Buzzer ───────────────────────────────────────────────────────────────────
+.cmp-buzzer {
+    display: flex;
+    flex-direction: column;
+    gap: $space-4;
+
+    &__scores {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 800;
+    }
+    &__you { color: var(--fl-primary); }
+    &__bot {
+        color: $minor-text-color;
+        transition: transform 0.15s $ease, color 0.15s $ease;
+        &.active { color: $error-red; transform: scale(1.15); }
+    }
+    &__flash {
+        text-align: center;
+        color: $error-red;
+        font-weight: 700;
+        animation: cmp-pop 0.2s $ease;
+    }
+}
+
+// ── Game over overlay ────────────────────────────────────────────────────────
+.cmp-over {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(3px);
+    z-index: 5;
+
+    &__card {
+        @include card;
+        position: relative;
+        text-align: center;
+        padding: $space-7 $space-6;
+        max-width: 340px;
+        width: 90%;
+        animation: cmp-pop 0.3s $ease;
+
+        h3 { color: $main-text-color; margin-bottom: $space-3; }
+    }
+    &__badge {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--fl-accent-2);
+        color: var(--fl-on-primary);
+        font-weight: 800;
+        font-size: 0.75rem;
+        padding: 4px 12px;
+        border-radius: $radius-pill;
+    }
+    &__score {
+        font-size: 3rem;
+        font-weight: 900;
+        color: var(--fl-primary);
+        line-height: 1;
+    }
+    &__sub { color: $minor-text-color; margin: $space-3 0 $space-5; font-size: 0.9rem; }
+    &__actions { display: flex; gap: $space-3; justify-content: center; flex-wrap: wrap; }
+}
+
+// ── Leaderboard modal ────────────────────────────────────────────────────────
+.cmp-leaderboard {
+    @include card;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 420px;
+    padding: $space-6;
+    max-height: 80dvh;
+    overflow-y: auto;
+
+    &__head {
+        display: flex;
+        align-items: center;
+        gap: $space-2;
+        color: var(--fl-accent-2-strong);
+        margin-bottom: $space-4;
+
+        h3 { color: $main-text-color; font-size: 1.05rem; }
+    }
+    &__empty { color: $minor-text-color; text-align: center; padding: $space-5 0; }
+    &__list { list-style: none; display: flex; flex-direction: column; gap: $space-2; margin-bottom: $space-4; }
+    &__row {
+        display: flex;
+        align-items: center;
+        gap: $space-3;
+        padding: $space-2 $space-3;
+        border-radius: $radius-sm;
+        background: $surface-2;
+
+        &.medal-gold { background: rgba(255, 196, 0, 0.16); }
+        &.medal-silver { background: rgba(160, 170, 185, 0.18); }
+        &.medal-bronze { background: rgba(205, 127, 50, 0.16); }
+    }
+    &__you {
+        text-align: center;
+        color: var(--fl-primary);
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-bottom: $space-4;
+    }
+}
+.cmp-rank { width: 24px; font-weight: 800; color: $gray-text-color; }
+.cmp-player { flex: 1; color: $main-text-color; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cmp-points { font-weight: 800; color: var(--fl-primary); }
+
+// ── Countdown intro ──────────────────────────────────────────────────────────
+.cmp-countdown {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    z-index: 6;
+    background: rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(2px);
+    border-radius: $radius-lg;
+
+    &__num {
+        font-size: 5rem;
+        font-weight: 900;
+        color: var(--fl-primary);
+        text-shadow: 0 6px 24px rgba(var(--fl-primary-rgb), 0.4);
+        animation: cmp-count 0.7s $ease;
+
+        &.go {
+            color: var(--fl-accent-2-strong);
+            animation: cmp-count-go 0.55s $ease;
+        }
+    }
+}
+
+// ── Keyframes ────────────────────────────────────────────────────────────────
+@keyframes cmp-pop {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+@keyframes cmp-score-bump {
+    0% { transform: scale(1); }
+    45% { transform: scale(1.45); color: var(--fl-accent-2-strong); }
+    100% { transform: scale(1); }
+}
+@keyframes cmp-float-up {
+    0% { transform: translateY(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translateY(-26px); opacity: 0; }
+}
+@keyframes cmp-count {
+    0% { transform: scale(0.3); opacity: 0; }
+    35% { transform: scale(1.1); opacity: 1; }
+    75% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.7); opacity: 0; }
+}
+@keyframes cmp-count-go {
+    0% { transform: scale(0.4); opacity: 0; }
+    40% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(2.2); opacity: 0; }
+}
+@keyframes cmp-twinkle {
+    from { opacity: 0.55; }
+    to { opacity: 1; }
+}
+@keyframes cmp-egg-wobble {
+    0%, 100% { margin-left: 0; }
+    50% { margin-left: 6px; }
+}
+@keyframes cmp-shard {
+    to { transform: rotate(var(--a)) translateX(46px); opacity: 0; }
+}
+@keyframes cmp-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+}
+@keyframes cmp-car-boost {
+    0% { transform: translateX(-50%) scale(1); }
+    40% { transform: translateX(-50%) scale(1.25); }
+    100% { transform: translateX(-50%) scale(1); }
+}
+@keyframes cmp-nitro {
+    0% { opacity: 0; width: 4px; }
+    50% { opacity: 1; width: 26px; }
+    100% { opacity: 0; width: 4px; }
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 600px) {
+    .cmp-quiz__prompt { font-size: 1.1rem; padding: $space-2; }
+    .cmp-quiz__options { grid-template-columns: 1fr; }
+    .cmp-picture__grid { gap: $space-2; }
+    .cmp-shell { min-height: calc(100dvh - #{$nav-height} - 12px); }
+    .cmp-over__actions { flex-direction: column; }
+    .cmp-tug__prompt { gap: $space-2; }
+}

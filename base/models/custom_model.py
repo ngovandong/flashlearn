@@ -7,8 +7,23 @@ from django.utils.translation import gettext_lazy as _
 from backend.shared.infrastructure.sqlalchemy.tables import SQLAlchemyTableMixin
 
 
+class Char32UUIDField(models.UUIDField):
+    """Keep pre-Django 5 UUID columns compatible with MariaDB 10.7+."""
+
+    def db_type(self, connection):
+        if connection.vendor == "mysql":
+            return "char(32)"
+        return super().db_type(connection)
+
+    def get_db_prep_value(self, value, connection, prepared=False):
+        value = super().get_db_prep_value(value, connection, prepared)
+        if isinstance(value, uuid.UUID):
+            return value.hex
+        return value
+
+
 class UUIDModel(SQLAlchemyTableMixin, models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True, db_index=True)
+    id = Char32UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True, db_index=True)
 
     class Meta:
         abstract = True

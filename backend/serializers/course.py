@@ -15,6 +15,7 @@ class _LessonProgressField(serializers.Serializer):
                 "attempts": 0,
                 "last_result": {},
                 "highlights": [],
+                "last_dictation": {},
             }
         return {
             "status": progress.status,
@@ -23,6 +24,7 @@ class _LessonProgressField(serializers.Serializer):
             "passed_at": progress.passed_at,
             "last_result": progress.last_result or {},
             "highlights": progress.highlights or [],
+            "last_dictation": progress.last_dictation or {},
         }
 
 

@@ -37,7 +37,7 @@ const closePopup = (event) => {
   }
 };
 
-function openIcon(apiRequest, hasDefaultDeck, left, top, term) {
+function openIcon(apiRequest, left, top, term) {
   const handleCloseClick = () => {
     closePopup();
   };
@@ -50,7 +50,6 @@ function openIcon(apiRequest, hasDefaultDeck, left, top, term) {
           request={apiRequest}
           left={left}
           top={top}
-          hasDefaultDeck={hasDefaultDeck}
           onClose={handleCloseClick}
         />
       );
@@ -118,7 +117,7 @@ document.addEventListener("mouseup", function (event) {
         },
       });
 
-      openIcon(apiRequest, Boolean(response.default_deck), left, top, term);
+      openIcon(apiRequest, left, top, term);
     });
   }
 });

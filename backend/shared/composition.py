@@ -1,23 +1,36 @@
 """Composition root — wire concrete infrastructure into application services."""
 
+from backend.assistant.application.services import AssistantService
+from backend.competition.application.services import CompetitionService
+from backend.competition.infrastructure.repository import CompetitionRepository
 from backend.course.application.course_service import CourseService
 from backend.course.infrastructure.repository import CourseRepository
 from backend.deck.application.services import DeckService
 from backend.deck.infrastructure.repository import DeckRepository
+from backend.grammar.application.grammar_service import GrammarService
+from backend.grammar.application.ingest import GrammarIngestService
+from backend.grammar.application.services import GrammarCoachService
+from backend.grammar.infrastructure.pdf import extract_pages as extract_pdf_pages
+from backend.grammar.infrastructure.repository import GrammarRepository
 from backend.learning.application.context_api import LearningContextApi
 from backend.learning.application.services import LearningService
 from backend.learning.infrastructure.cache import learning_progress_cache
 from backend.learning.infrastructure.repository import LearningRepository
+from backend.listening.application.listening_service import ListeningService
+from backend.listening.infrastructure.repository import ListeningRepository
 from backend.reminders.application.services import ReminderService
 from backend.reminders.infrastructure.repository import ReminderRepository
+from backend.revise.application.services import ReviseService
+from backend.revise.infrastructure.repository import ReviseRepository
 from backend.shared.infrastructure.ai import (
     AzureSpeechProvider,
-    AzureTextToSpeechProvider,
+    build_tts_provider,
     default_ai_provider,
 )
 from backend.shared.infrastructure.cache import default_cache
 from backend.shared.infrastructure.cloudinary import default_audio_storage, default_image_storage
 from backend.shared.infrastructure.google_oauth import default_oauth_client
+from backend.shared.infrastructure.translate import default_translator
 from backend.speaking.application.services import SpeakingCoachService
 from backend.speaking.application.speaking_service import SpeakingService
 from backend.speaking.infrastructure.repository import SpeakingRepository
@@ -28,6 +41,9 @@ from backend.term.infrastructure.repository import TermRepository
 from backend.user.application.context_api import UserContextApi
 from backend.user.application.services import AuthService, UserService
 from backend.user.infrastructure.repository import UserRepository
+from backend.writing.application.services import WritingCoachService
+from backend.writing.application.writing_service import WritingService
+from backend.writing.infrastructure.repository import WritingRepository
 
 term_context = TermContextApi(TermRepository)
 user_context = UserContextApi(UserRepository, default_cache)
@@ -66,15 +82,63 @@ speaking_service = SpeakingService(
     repo=SpeakingRepository,
     audio_storage=default_audio_storage,
 )
-# Azure TTS gives each course dialogue character a fixed neural voice matching
-# their gender; only wired when credentials are present.
-_azure_tts = AzureTextToSpeechProvider()
+# Course dialogue audio: each character gets a fixed gender-matched voice. The TTS
+# provider (azure / elevenlabs / kokoro) is chosen at generation time via the
+# injected factory (`generate_course_audio --tts`), so each is built on demand.
 course_service = CourseService(
     repo=CourseRepository,
     speaking_service=speaking_service,
     ai=default_ai_provider,
-    tts=_azure_tts if _azure_tts.is_configured else None,
+    tts_factory=build_tts_provider,
     image_storage=default_image_storage,
     audio_storage=default_audio_storage,
 )
+# Listening (dictation): cloned listen-and-type exercises. Sentence audio is
+# mirrored to our CDN by collect_listening_audio; the Speaking Coach TTS pipeline
+# is the fallback when a sentence has no source recording.
+listening_service = ListeningService(
+    repo=ListeningRepository,
+    speaking_service=speaking_service,
+    audio_storage=default_audio_storage,
+    image_storage=default_image_storage,
+    # Per-sentence translation: free Google endpoint first, AI provider as backup.
+    translator=default_translator,
+    ai=default_ai_provider,
+)
 reminder_service = ReminderService(repo=ReminderRepository)
+# Revise: a mixed, priority-ordered review session that pulls the learner's
+# past mistakes across vocab, grammar, listening and speaking. It writes vocab
+# results back through the learning service and grades spoken answers with the
+# Speaking Coach's pronunciation analysis.
+revise_service = ReviseService(
+    repo=ReviseRepository,
+    learning_service=learning_service,
+    speaking_service=speaking_service,
+)
+# Writing Coach: chat practice + IELTS-style free-form assessment. Text-only AI,
+# so it just needs the default provider (no audio/TTS/pronunciation deps).
+writing_coach_service = WritingCoachService(ai=default_ai_provider)
+writing_service = WritingService(coach=writing_coach_service, repo=WritingRepository)
+# Grammar (Essential Grammar in Use): textbook units with server-graded exercises
+# and per-unit/per-exercise progress. The coach adds the text-only AI "explain"
+# option (explain a rule / why an answer is wrong).
+grammar_service = GrammarService(repo=GrammarRepository)
+grammar_coach_service = GrammarCoachService(ai=default_ai_provider)
+# PDF → structured book ingestion for `import_grammar_book`: extracts page text
+# (pypdf) and uses the coach's text AI to convert it into units, then upserts.
+grammar_ingest_service = GrammarIngestService(
+    coach=grammar_coach_service,
+    grammar_service=grammar_service,
+    extract_pages=extract_pdf_pages,
+)
+# Dragon assistant: the general English-learning chat behind the floating buddy.
+# Stateless (client sends history) and text-only, so it just needs the default
+# AI provider — no repository, no persistence.
+assistant_service = AssistantService(ai=default_ai_provider)
+# Competition mini-games: serves a term pool for building games client-side and
+# persists per-deck leaderboard scores. Pure fun — never touches spaced
+# repetition, so it only needs the deck view guard.
+competition_service = CompetitionService(
+    repo=CompetitionRepository,
+    deck_service=deck_service,
+)

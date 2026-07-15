@@ -1,28 +1,37 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
-/node_modules
-/.pnp
+node_modules
+.pnp
 .pnp.js
 
-# testing
-/coverage
+# builds
+build
+dist
+coverage
 
-# production
-/build
-
-# misc
-.DS_Store
+# env
 .env
-.env.vercel
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
+.env.vercel
 
+# logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# expo / react native
+apps/mobile/.expo
+apps/mobile/android
+apps/mobile/ios
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# misc
+.DS_Store
+
+# graphify local artifacts
 graphify-out/cost.json
 graphify-out/cache/

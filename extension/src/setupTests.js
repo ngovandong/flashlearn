@@ -3,18 +3,18 @@ import "@testing-library/jest-dom";
 global.chrome = {
   storage: {
     sync: {
-      get: jest.fn(() => Promise.resolve({})),
-      set: jest.fn(() => Promise.resolve()),
+      get: vi.fn(() => Promise.resolve({})),
+      set: vi.fn(() => Promise.resolve()),
     },
     onChanged: {
-      addListener: jest.fn(),
+      addListener: vi.fn(),
     },
   },
   runtime: {
-    getURL: jest.fn((path) => `chrome-extension://test/${path}`),
-    sendMessage: jest.fn(),
+    getURL: vi.fn((path) => `chrome-extension://test/${path}`),
+    sendMessage: vi.fn(),
     onMessage: {
-      addListener: jest.fn(),
+      addListener: vi.fn(),
     },
   },
 };

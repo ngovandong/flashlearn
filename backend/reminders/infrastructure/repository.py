@@ -14,9 +14,12 @@ from backend.models import (
     Course,
     CourseLesson,
     Deck,
+    GrammarUnit,
     SpeakingConversation,
     UserCourseLessonProgress,
+    UserGrammarUnitProgress,
     UserLearningProgress,
+    WritingSession,
 )
 
 
@@ -26,6 +29,12 @@ class ReminderRepository:
     def latest_conversation(user):
         """The user's most recently generated conversation, or ``None``."""
         return SpeakingConversation.objects.filter(user=user).order_by("-created_at").first()
+
+    # ── Writing ───────────────────────────────────────────────────────────
+    @staticmethod
+    def latest_writing_session(user):
+        """The user's most recently created writing session, or ``None``."""
+        return WritingSession.objects.filter(user=user).order_by("-created_at").first()
 
     # ── Course ────────────────────────────────────────────────────────────
     @staticmethod
@@ -65,6 +74,20 @@ class ReminderRepository:
                 status=UserCourseLessonProgress.STATUS_PASSED,
             ).values_list("lesson_key", flat=True)
         )
+
+    # ── Grammar ───────────────────────────────────────────────────────────
+    @staticmethod
+    def latest_grammar_unit(user):
+        """``{key, title, status}`` of the user's most recently touched grammar
+        unit, or ``None``. Progress is keyed on the unit's stable ``unit_key``,
+        so the title is resolved by looking the unit up by key."""
+        progress = UserGrammarUnitProgress.objects.filter(user=user).order_by("-updated_at").first()
+        if progress is None:
+            return None
+        unit = GrammarUnit.objects.filter(key=progress.unit_key).first()
+        if unit is None:
+            return None
+        return {"key": unit.key, "title": unit.title, "status": progress.status}
 
     # ── Decks ─────────────────────────────────────────────────────────────
     @staticmethod

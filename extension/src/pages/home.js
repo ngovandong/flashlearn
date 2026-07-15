@@ -5,7 +5,7 @@ import { getFirstError } from "../util/errorHandler";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, selectToken, selectUser } from "../store";
 
-const FRONTEND_URL = process.env.REACT_APP_BASE_FRONTEND_URL;
+const FRONTEND_URL = import.meta.env.VITE_BASE_FRONTEND_URL;
 
 const LANGUAGES = [
   { code: "vi", name: "Vietnamese (Tiếng Việt)" },

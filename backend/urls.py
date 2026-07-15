@@ -3,29 +3,39 @@ from django.urls import include, path, re_path
 from rest_framework import routers
 
 from .views import (
+    AssistantViewSet,
+    CompetitionViewSet,
     CourseViewSet,
     DeckViewSet,
-    FolderViewSet,
     GetImagesUrlView,
+    GrammarViewSet,
     LearningViewSet,
+    ListeningViewSet,
     ReminderViewSet,
+    ReviseViewSet,
     RoleViewSet,
     SpeakingViewSet,
     TermViewSet,
     TranslateView,
     UserViewSet,
+    WritingViewSet,
 )
 
 router = routers.DefaultRouter()
 router.register(r"decks", DeckViewSet, basename="deck")
 router.register(r"terms", TermViewSet, basename="term")
 router.register(r"users", UserViewSet, basename="user")
-router.register(r"folders", FolderViewSet, basename="folder")
 router.register(r"roles", RoleViewSet, basename="role")
 router.register(r"learnings", LearningViewSet, basename="learning")
 router.register(r"speaking", SpeakingViewSet, basename="speaking")
+router.register(r"writing", WritingViewSet, basename="writing")
 router.register(r"courses", CourseViewSet, basename="course")
+router.register(r"listening", ListeningViewSet, basename="listening")
+router.register(r"grammar", GrammarViewSet, basename="grammar")
 router.register(r"reminders", ReminderViewSet, basename="reminder")
+router.register(r"revise", ReviseViewSet, basename="revise")
+router.register(r"assistant", AssistantViewSet, basename="assistant")
+router.register(r"competition", CompetitionViewSet, basename="competition")
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

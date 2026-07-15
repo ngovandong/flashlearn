@@ -105,6 +105,10 @@ class UserCourseLessonProgress(DateTimeUUIDModel):
     # User-noted words/phrases re-highlighted on revisit: [{"text", "note"}, ...].
     # Per-user (lives on progress) because lesson content is shared across users.
     highlights = models.JSONField(default=list, blank=True)
+    # The most recent listen-and-type (dictation) attempt, replayed when the user
+    # revisits a lesson: {"score", "lines": [{"target", "typed", "correct", "total"}],
+    # "at"}. Separate from role-play — it never changes the lesson's pass status.
+    last_dictation = models.JSONField(default=dict, blank=True)
 
     class Meta:
         ordering = ["-updated_at"]

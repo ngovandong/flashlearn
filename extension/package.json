@@ -2,44 +2,31 @@
   "name": "flashlearn-extension",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "dependencies": {
-    "@craco/craco": "^7.1.0",
-    "@reduxjs/toolkit": "^1.9.5",
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.4.0",
-    "jwt-decode": "^3.1.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-redux": "^8.0.5",
-    "react-scripts": "5.0.1",
-    "redux": "^4.2.1",
-    "styled-components": "^5.3.10",
-    "web-vitals": "^2.1.4"
+    "@reduxjs/toolkit": "^2.12.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "axios": "^1.18.1",
+    "jwt-decode": "^4.0.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-redux": "^9.3.0",
+    "redux": "^5.0.1",
+    "styled-components": "^6.4.3",
+    "web-vitals": "^5.3.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "INLINE_RUNTIME_CHUNK=false craco build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "vite",
+    "build": "vite build",
+    "test": "vitest run"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.7.1",
+    "@vitejs/plugin-react": "^6.0.3",
+    "jsdom": "^29.1.1",
+    "vite": "^8.1.4",
+    "vitest": "^4.1.10"
   }
 }

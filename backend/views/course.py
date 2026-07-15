@@ -100,6 +100,25 @@ class CourseViewSet(viewsets.ViewSet):
         )
 
     @action(detail=False, methods=["POST"])
+    def dictation(self, request, *args, **kwargs):
+        """Save a listen-and-type (dictation) attempt so it replays on revisit.
+
+        Body: ``{lesson_id, score, lines: [{target, typed, correct, total}]}``.
+        The typed text is scored client-side (a word-level diff); this only
+        persists the breakdown. Returns ``{"dictation": {score, lines, at}}``.
+        """
+        lesson_id = request.data.get("lesson_id")
+        if not lesson_id:
+            return Response({"errors": "Missing lesson."}, status=status.HTTP_400_BAD_REQUEST)
+        dictation = course_service.save_dictation(
+            request.user,
+            lesson_id,
+            score=request.data.get("score"),
+            lines=request.data.get("lines"),
+        )
+        return Response({"dictation": dictation}, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=["POST"])
     def highlight(self, request, *args, **kwargs):
         """Add, update or remove a per-user noted word/phrase on a lesson."""
         lesson_id = request.data.get("lesson_id")

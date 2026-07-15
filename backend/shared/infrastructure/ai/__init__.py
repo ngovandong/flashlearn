@@ -10,33 +10,66 @@ next. Add a provider by creating a sibling module and registering it in
 
 import os
 
+from .azure_openai import AzureOpenAIProvider
 from .azure_speech import AzureSpeechProvider
 from .azure_tts import AzureTextToSpeechProvider
 from .base import AiProviderError
 from .elevenlabs import ElevenLabsProvider
 from .failover import FailoverAiProvider
 from .gemini import GeminiProvider
+from .kokoro_tts import KokoroTtsProvider
+from .lmstudio import LMStudioProvider
 from .openrouter import OpenRouterProvider
 
 __all__ = [
     "AiProviderError",
     "GeminiProvider",
     "OpenRouterProvider",
+    "LMStudioProvider",
+    "AzureOpenAIProvider",
     "ElevenLabsProvider",
     "AzureSpeechProvider",
     "AzureTextToSpeechProvider",
+    "KokoroTtsProvider",
     "FailoverAiProvider",
     "get_ai_provider",
     "build_named_provider",
+    "build_tts_provider",
+    "TTS_PROVIDER_NAMES",
     "default_ai_provider",
 ]
 
 _BUILDERS = {
     "gemini": GeminiProvider,
     "openrouter": OpenRouterProvider,
+    "lmstudio": LMStudioProvider,
+    "azure_openai": AzureOpenAIProvider,
+    "azure": AzureOpenAIProvider,
     "elevenlabs": ElevenLabsProvider,
     "azure_speech": AzureSpeechProvider,
 }
+
+# Text-to-speech providers selectable by name (e.g. `generate_course_audio --tts`).
+_TTS_BUILDERS = {
+    "azure": AzureTextToSpeechProvider,
+    "elevenlabs": ElevenLabsProvider,
+    "kokoro": KokoroTtsProvider,
+}
+TTS_PROVIDER_NAMES = tuple(_TTS_BUILDERS)
+_TTS_ALIASES = {"azure_tts": "azure", "azuretts": "azure", "11labs": "elevenlabs"}
+
+
+def build_tts_provider(name: str, **kwargs):
+    """Build a TTS provider by name (``azure`` | ``elevenlabs`` | ``kokoro``).
+
+    Each returned provider exposes ``is_configured`` and
+    ``synthesize(text, voice) -> {"audio": base64, "mime_type": str}``.
+    """
+    key = _TTS_ALIASES.get((name or "").strip().lower(), (name or "").strip().lower())
+    try:
+        return _TTS_BUILDERS[key](**kwargs)
+    except KeyError:
+        raise ValueError(f"Unknown TTS provider: {name!r}. Choose from: {', '.join(TTS_PROVIDER_NAMES)}")
 
 
 def _build(name: str, **kwargs):

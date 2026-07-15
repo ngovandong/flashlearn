@@ -1,6 +1,6 @@
 ---
 description: All new/updated frontend UI must stay responsive and not break the mobile layout
-globs: frontend/src/**
+globs: frontend/apps/web/src/**
 alwaysApply: false
 ---
 
@@ -13,7 +13,7 @@ overlapping elements. Mentally verify at ~375px wide before finishing.
 
 ## Where responsive rules live
 
-- **Global, cross-page overrides** → `frontend/src/styles/sass/base/_media_queries.scss`.
+- **Global, cross-page overrides** → `frontend/apps/web/src/styles/sass/base/_media_queries.scss`.
 - **Component-local overrides** → a nested `@media` block inside that
   component's own SCSS partial (this is the common pattern in
   `components/home/*.scss`).

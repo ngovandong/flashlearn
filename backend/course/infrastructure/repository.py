@@ -166,6 +166,19 @@ class CourseRepository:
         return progress
 
     @staticmethod
+    def save_dictation(user, lesson, *, dictation):
+        """Store the latest listen-and-type attempt verbatim (per user, per lesson).
+
+        Kept separate from ``record_attempt`` because dictation never changes the
+        lesson's pass status or best role-play score — it's a listening drill whose
+        result is only replayed for later revision.
+        """
+        progress, _ = UserCourseLessonProgress.objects.get_or_create(user=user, lesson_key=lesson.key)
+        progress.last_dictation = dictation
+        progress.save(update_fields=["last_dictation", "updated_at"])
+        return progress
+
+    @staticmethod
     def set_highlight(user, lesson, *, text, note="", remove=False):
         """Add, update or remove a noted word/phrase on a lesson (per user)."""
         progress, _ = UserCourseLessonProgress.objects.get_or_create(user=user, lesson_key=lesson.key)

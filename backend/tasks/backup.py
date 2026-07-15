@@ -72,13 +72,50 @@ def _get_drive_service():
 
 BACKUP_RETENTION_DAYS = 15
 
-# MySQL 8.4+ collations are not recognized by MySQL 8.0 (our local/docker target).
-_COLLATION_REPLACEMENTS = {
-    "utf8mb3_uca1400_ai_ci": "utf8mb3_general_ci",
-    "utf8mb4_uca1400_ai_ci": "utf8mb4_unicode_ci",
-    "utf8mb4_uca1400_as_ci": "utf8mb4_unicode_ci",
-    "utf8mb4_uca1400_as_cs": "utf8mb4_unicode_ci",
-}
+# Backups move between MySQL 8.0 (our macOS/docker target) and MariaDB (the
+# Armbian server), so a dump from either engine must restore cleanly on the
+# other. Each engine's mysqldump emits its own native charset/collation — MySQL
+# 8.0 -> utf8mb4 / utf8mb4_0900_ai_ci, MariaDB 11.5+ -> *_uca1400_*, and legacy
+# tables still carry utf8 / utf8mb3 (utf8mb3_general_ci). Restoring verbatim
+# leaves the schema with a MIX of charsets/collations; a later Django migration
+# that adds a cross-table FK then fails with error 3780 ("Referencing column ...
+# incompatible") because the new column's charset/collation (the target DB's
+# default) differs from the restored referenced column (e.g. a new utf8mb4
+# user_id pointing at a restored utf8mb3 backend_user.id).
+#
+# Normalising every charset to utf8mb4 and every collation to the target below —
+# a pair BOTH engines support — keeps restored tables and freshly-migrated tables
+# aligned in both directions. utf8mb4_bin is preserved: JSON columns rely on
+# binary comparison, it exists on both engines, and such columns are never FK
+# targets.
+_TARGET_COLLATION = "utf8mb4_unicode_ci"
+
+# Any known utf8/utf8mb3/utf8mb4 collation token. utf8mb4_bin is matched so it can
+# be explicitly preserved (see _unify_collation); everything else collapses to the
+# target collation.
+_COLLATION_RE = re.compile(
+    r"\butf8(?:mb3|mb4)?_(?:general_ci|unicode_ci|uca1400_[a-z0-9_]+|0900_ai_ci|bin)\b",
+    re.IGNORECASE,
+)
+
+
+def _unify_collation(match: "re.Match[str]") -> str:
+    return "utf8mb4_bin" if match.group(0).lower().endswith("_bin") else _TARGET_COLLATION
+
+
+def _unify_charset_collation(sql: str) -> str:
+    sql = _COLLATION_RE.sub(_unify_collation, sql)
+    # Bare charset tokens -> utf8mb4: utf8mb3 and the legacy `utf8` alias. `\butf8\b`
+    # cannot match inside `utf8mb4`/`utf8mb3` (no word boundary before `mb`).
+    sql = re.sub(r"\butf8mb3\b", "utf8mb4", sql, flags=re.IGNORECASE)
+    sql = re.sub(r"\butf8\b", "utf8mb4", sql, flags=re.IGNORECASE)
+    # Pin an explicit collation wherever only a charset is given. Without this, a
+    # column/table that merely says `CHARSET=utf8mb4` inherits each engine's own
+    # utf8mb4 default collation (MySQL: utf8mb4_0900_ai_ci, MariaDB: uca1400),
+    # re-introducing the mismatch we just removed.
+    sql = re.sub(r"(CHARSET=utf8mb4)(?!\s+COLLATE)", rf"\1 COLLATE={_TARGET_COLLATION}", sql, flags=re.IGNORECASE)
+    sql = re.sub(r"(CHARACTER SET utf8mb4)(?!\s+COLLATE)", rf"\1 COLLATE {_TARGET_COLLATION}", sql, flags=re.IGNORECASE)
+    return sql
 
 
 # MariaDB allows literal DEFAULTs on TEXT/BLOB/JSON columns (e.g. `longtext ...
@@ -106,10 +143,30 @@ def _strip_text_column_defaults(sql: str) -> str:
     return "".join(lines)
 
 
+# MariaDB renders Django JSONField columns as `longtext ... CHECK (json_valid(col))`
+# where the check is *inline and unnamed*. On import MySQL 8.0 auto-names each
+# unnamed check `<table>_chk_1, _chk_2, ...`, which collides with the explicitly
+# named `<table>_chk_1` that Django emits for a PositiveIntegerField (`>= 0`),
+# raising error 3822 "Duplicate check constraint name". Named table-level
+# json_valid constraints (`CONSTRAINT `x` CHECK (json_valid(...))`) already have
+# unique names and are fine — only the inline unnamed ones clash, so strip those.
+# The column stays a plain longtext, which is what MySQL uses for JSONField anyway.
+_INLINE_JSON_CHECK_RE = re.compile(r"\s+CHECK \(json_valid\(`[^`]+`\)\)")
+
+
+def _strip_inline_json_checks(sql: str) -> str:
+    lines = sql.splitlines(keepends=True)
+    for i, line in enumerate(lines):
+        if line.lstrip().startswith("CONSTRAINT"):
+            continue
+        lines[i] = _INLINE_JSON_CHECK_RE.sub("", line)
+    return "".join(lines)
+
+
 def _normalize_sql_dump(sql: str) -> str:
-    for old, new in _COLLATION_REPLACEMENTS.items():
-        sql = sql.replace(old, new)
+    sql = _unify_charset_collation(sql)
     sql = _strip_text_column_defaults(sql)
+    sql = _strip_inline_json_checks(sql)
     return sql
 
 
@@ -263,7 +320,13 @@ def _reset_database(db):
     schema makes every referenced table consistent with the dump.
     """
     name = db["NAME"]
-    reset_sql = f"DROP DATABASE IF EXISTS `{name}`; CREATE DATABASE `{name}`;"
+    # Create the DB with the same charset/collation the dump is normalised to
+    # (see _unify_charset_collation). New tables added by migrations *after* the
+    # restore inherit this default, so their FK columns match the restored tables
+    # instead of falling back to the engine's own utf8mb4 default (error 3780).
+    reset_sql = (
+        f"DROP DATABASE IF EXISTS `{name}`; CREATE DATABASE `{name}` CHARACTER SET utf8mb4 COLLATE {_TARGET_COLLATION};"
+    )
     result = subprocess.run(  # nosec B603
         _mysql_base_cmd(db, include_db_name=False),
         input=reset_sql,

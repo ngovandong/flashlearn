@@ -8,14 +8,17 @@ thin transport layer.
 
 import base64
 import logging
+import time
+
+from django.utils import timezone
 
 from backend.course.domain.progress import (
     COURSE_PASS_THRESHOLD,
     is_passing,
     role_play_score,
 )
-from backend.course.domain.voices import DEFAULT_VOICE
 from backend.course.domain.voices import assign_voices as assign_character_voices
+from backend.course.domain.voices import default_voice, sample_voices
 from backend.course.infrastructure.repository import CourseRepository
 from backend.shared.application.exceptions import NotFoundError, ValidationError
 from backend.shared.infrastructure.ai import AiProviderError
@@ -55,16 +58,17 @@ class CourseService:
         repo=CourseRepository,
         speaking_service=None,
         ai=None,
-        tts=None,
+        tts_factory=None,
         image_storage=None,
         audio_storage=None,
     ):
         self._repo = repo
         # The Speaking Coach service supplies pronunciation analysis for role-play.
         self._speaking = speaking_service
-        # ``ai`` classifies character gender; ``tts`` (Azure) synthesizes audio.
+        # ``ai`` classifies character gender; ``tts_factory(name)`` builds the
+        # chosen TTS provider (azure / elevenlabs / kokoro) to synthesize audio.
         self._ai = ai
-        self._tts = tts
+        self._tts_factory = tts_factory
         # ``image_storage`` mirrors source character/background art to our CDN;
         # ``audio_storage`` hosts generated dialogue audio so it doesn't bloat the DB.
         self._image_storage = image_storage
@@ -208,6 +212,39 @@ class CourseService:
         lesson = self.get_lesson(lesson_id)
         return self._repo.set_highlight(user, lesson, text=text, note=note, remove=remove)
 
+    # ── Listen & type (dictation) ─────────────────────────────────────────
+    def save_dictation(self, user, lesson_id, *, score, lines):
+        """Persist a listen-and-type attempt so it can be replayed on revisit.
+
+        The frontend evaluates the typed text against the transcript (a word-level
+        diff for instant, intuitive feedback); here we only clamp the score and
+        store the breakdown verbatim. Dictation never affects the lesson's pass
+        status — it's a listening drill.
+
+        ``lines`` is ``[{"target", "typed", "correct", "total"}]`` — one per
+        transcript line. Returns the saved ``{score, lines, at}`` dictation dict.
+        """
+        lesson = self.get_lesson(lesson_id)
+        try:
+            score = max(0, min(100, int(round(float(score)))))
+        except (TypeError, ValueError):
+            raise ValidationError("Invalid dictation score.")
+        clean_lines = [
+            {
+                "target": str(line.get("target") or ""),
+                "typed": str(line.get("typed") or ""),
+                "correct": int(line.get("correct") or 0),
+                "total": int(line.get("total") or 0),
+            }
+            for line in (lines or [])
+            if isinstance(line, dict)
+        ]
+        if not clean_lines:
+            raise ValidationError("Nothing to save — the dictation has no lines.")
+        dictation = {"score": score, "lines": clean_lines, "at": timezone.now().isoformat()}
+        self._repo.save_dictation(user, lesson, dictation=dictation)
+        return dictation
+
     # ── Import (crawler) ──────────────────────────────────────────────────
     def import_course(self, *, slug, defaults):
         return self._repo.upsert_course(slug, defaults)
@@ -289,24 +326,101 @@ class CourseService:
             logger.warning("Cloudinary mirror failed for %s", source_url)
             return source_url
 
-    # ── Character voices + Azure TTS audio generation ─────────────────────
-    def generate_course_audio(self, course, *, regenerate=False, on_progress=None):
-        """Assign each character a voice, then synthesize every line via Azure TTS.
+    # ── Character voices + TTS audio generation ───────────────────────────
+    def _build_tts(self, provider):
+        """Build (and validate) the chosen TTS provider via the injected factory."""
+        if self._tts_factory is None:
+            raise AiProviderError("No TTS factory is configured.")
+        tts = self._tts_factory(provider)
+        if not getattr(tts, "is_configured", True):
+            raise AiProviderError(f"TTS provider {provider!r} is not available (missing credentials or not installed).")
+        return tts
 
-        Returns counts: ``{voices, made, skipped, failed, clips}``. Audio is cached
-        in the shared SpeakingAudioClip table keyed by ``(voice, line text)``, so
-        reruns are cheap unless ``regenerate`` is set.
+    def preview_tts(self, text, provider_names):
+        """Audition each provider on ``text`` with a sample male + female voice.
+
+        Returns one entry per attempted ``(provider, gender)`` with the generated
+        audio and wall-clock synthesis time, so the audio-preview command can play
+        the clip and report how fast each provider is::
+
+            [{provider, gender, voice, ok, seconds, audio, mime_type, error}]
         """
-        if self._tts is None:
-            raise AiProviderError("Azure TTS is not configured (AZURE_SPEECH_KEY / AZURE_SPEECH_REGION).")
+        if self._tts_factory is None:
+            raise AiProviderError("No TTS factory is configured.")
+        factory = self._tts_factory
+        results = []
+        for name in provider_names:
+            try:
+                tts = factory(name)
+            except ValueError as exc:
+                results.append({"provider": name, "ok": False, "error": str(exc)})
+                continue
+            if not getattr(tts, "is_configured", True):
+                results.append(
+                    {"provider": name, "ok": False, "error": "not available (missing credentials or not installed)"}
+                )
+                continue
+            for gender, voice in sample_voices(name).items():
+                start = time.perf_counter()
+                try:
+                    out = tts.synthesize(text, voice)
+                    results.append(
+                        {
+                            "provider": name,
+                            "gender": gender,
+                            "voice": voice,
+                            "ok": True,
+                            "seconds": time.perf_counter() - start,
+                            "audio": out["audio"],
+                            "mime_type": out["mime_type"],
+                        }
+                    )
+                except Exception as exc:  # noqa: BLE001 — report per-voice failure, keep going
+                    results.append({"provider": name, "gender": gender, "voice": voice, "ok": False, "error": str(exc)})
+        return results
 
-        voice_map = self.assign_course_voices(course)
+    def generate_course_audio(self, course, *, provider="azure", regenerate=False, on_progress=None):
+        """Assign each character a voice, then synthesize every line via ``provider``.
+
+        ``provider`` is one of ``azure`` | ``elevenlabs`` | ``kokoro``. Returns
+        counts: ``{voices, made, skipped, failed, clips}``. Audio is cached in the
+        shared SpeakingAudioClip table keyed by ``(voice, line text)``, so reruns
+        are cheap unless ``regenerate`` is set.
+        """
+        tts = self._build_tts(provider)
+        voice_map = self.assign_course_voices(course, provider=provider)
+        lessons = list(self._repo.lessons_for_course(course))
+        return self._synthesize_lessons(
+            tts, lessons, voice_map, provider, regenerate=regenerate, on_progress=on_progress
+        )
+
+    def generate_lesson_audio(self, lesson_id, *, provider="azure", regenerate=False, on_progress=None):
+        """Synthesize audio for a single lesson (by id) via ``provider``.
+
+        Character→voice assignment is still computed course-wide so a character
+        sounds the same across lessons, but only this lesson's voices are stamped
+        and only its lines are synthesized — sibling lessons keep their existing
+        voices/clips. Returns the same ``{voices, made, skipped, failed, clips}``.
+        """
+        tts = self._build_tts(provider)
+        lesson = self._repo.get_lesson(lesson_id)
+        if lesson is None:
+            raise NotFoundError(f"Lesson not found: {lesson_id}")
+        voice_map = self._course_voice_map(lesson.section.course, provider)
+        self._stamp_lesson_voices(lesson, voice_map)
+        return self._synthesize_lessons(
+            tts, [lesson], voice_map, provider, regenerate=regenerate, on_progress=on_progress
+        )
+
+    def _synthesize_lessons(self, tts, lessons, voice_map, provider, *, regenerate=False, on_progress=None):
+        """Synthesize + cache every distinct ``(voice, line text)`` across ``lessons``."""
+        fallback_voice = default_voice(provider)
         made = skipped = failed = 0
         seen: set[tuple[str, str]] = set()
-        for lesson in self._repo.lessons_for_course(course):
+        for lesson in lessons:
             for line in lesson.lines or []:
                 text = (line.get("text") or "").strip()
-                voice = (line.get("voice") or "").strip() or voice_map.get(line.get("speaker")) or DEFAULT_VOICE
+                voice = (line.get("voice") or "").strip() or voice_map.get(line.get("speaker")) or fallback_voice
                 if not text:
                     continue
                 key = (voice, text)
@@ -318,8 +432,9 @@ class CourseService:
                     skipped += 1
                     continue
                 try:
-                    result = self._tts.synthesize(text, voice)
-                    audio_url = self._upload_clip_audio(voice, text_hash, result["audio"])
+                    result = tts.synthesize(text, voice)
+                    # Re-uploads bust the CDN cache so a regenerated clip isn't served stale.
+                    audio_url = self._upload_clip_audio(voice, text_hash, result["audio"], invalidate=regenerate)
                     self._repo.save_clip(
                         voice=voice,
                         text_hash=text_hash,
@@ -338,13 +453,15 @@ class CourseService:
                         on_progress(f"FAILED {voice}: {text[:48]} — {exc}")
         return {"voices": len(voice_map), "made": made, "skipped": skipped, "failed": failed, "clips": len(seen)}
 
-    def _upload_clip_audio(self, voice, text_hash, audio_b64):
+    def _upload_clip_audio(self, voice, text_hash, audio_b64, *, invalidate=False):
         """Upload base64 audio bytes to the audio store; return the URL (or "")."""
         if self._audio_storage is None or not audio_b64:
             return ""
         try:
             data = base64.b64decode(audio_b64)
-            return self._audio_storage.upload_audio(data, public_id=audio_clip_public_id(voice, text_hash))
+            return self._audio_storage.upload_audio(
+                data, public_id=audio_clip_public_id(voice, text_hash), invalidate=invalidate
+            )
         except Exception:
             logger.exception("Course audio upload failed for clip (%s); keeping inline base64", voice)
             return ""
@@ -355,33 +472,46 @@ class CourseService:
         reuse from the shared SpeakingAudioClip cache."""
         return self._repo.referenced_clip_keys()
 
-    def assign_course_voices(self, course):
-        """Classify every character's gender and stamp a voice onto lines/characters.
+    def assign_course_voices(self, course, provider="azure"):
+        """Classify every character's gender and stamp a ``provider`` voice onto
+        every lesson's lines/characters.
 
         Returns the ``{character_name: voice}`` map. Lessons are saved only when a
-        voice actually changes, so reruns are stable and idempotent.
+        voice actually changes, so reruns are stable and idempotent. Switching
+        providers restamps the voices (and naturally separates the audio cache,
+        which is keyed by voice id).
         """
+        voice_map = self._course_voice_map(course, provider)
+        if not voice_map:
+            return {}
+        for lesson in self._repo.lessons_for_course(course):
+            self._stamp_lesson_voices(lesson, voice_map)
+        return voice_map
+
+    def _course_voice_map(self, course, provider="azure"):
+        """``{character_name: voice}`` for the whole course (classify + assign, no save)."""
         names = self._collect_character_names(course)
         if not names:
             return {}
         genders = self._classify_genders(names)
-        voice_map = assign_character_voices(genders)
+        return assign_character_voices(genders, provider)
 
-        for lesson in self._repo.lessons_for_course(course):
-            changed = False
-            for character in lesson.characters or []:
-                voice = voice_map.get(character.get("name"))
-                if voice and character.get("voice") != voice:
-                    character["voice"] = voice
-                    changed = True
-            for line in lesson.lines or []:
-                voice = voice_map.get(line.get("speaker"))
-                if voice and line.get("voice") != voice:
-                    line["voice"] = voice
-                    changed = True
-            if changed:
-                self._repo.save_lesson_content(lesson)
-        return voice_map
+    def _stamp_lesson_voices(self, lesson, voice_map):
+        """Stamp the mapped voice onto one lesson's characters/lines; save if changed."""
+        changed = False
+        for character in lesson.characters or []:
+            voice = voice_map.get(character.get("name"))
+            if voice and character.get("voice") != voice:
+                character["voice"] = voice
+                changed = True
+        for line in lesson.lines or []:
+            voice = voice_map.get(line.get("speaker"))
+            if voice and line.get("voice") != voice:
+                line["voice"] = voice
+                changed = True
+        if changed:
+            self._repo.save_lesson_content(lesson)
+        return changed
 
     def _collect_character_names(self, course):
         names: set[str] = set()

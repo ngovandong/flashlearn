@@ -63,6 +63,6 @@ repos:
       - id: eslint
         name: eslint
         language: system
-        entry: bash -c 'cd frontend && npx eslint --fix src/'
-        files: '^frontend/src/.*\.(js|jsx)$'
+        entry: bash -c 'cd frontend/apps/web && npx eslint --fix src/'
+        files: '^frontend/apps/web/src/.*\.(js|jsx)$'
         pass_filenames: false
