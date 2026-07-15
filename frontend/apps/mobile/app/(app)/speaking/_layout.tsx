@@ -13,7 +13,7 @@ export default function SpeakingLayout() {
     >
       <Stack.Screen name="index" options={{ title: "Speaking coach" }} />
       <Stack.Screen name="[id]" options={{ title: "Conversation" }} />
-      <Stack.Screen name="history" options={{ title: "History" }} />
+      <Stack.Screen name="history" options={{ headerShown: false }} />
     </Stack>
   );
 }

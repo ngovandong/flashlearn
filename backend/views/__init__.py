@@ -1,3 +1,5 @@
+from .assistant import AssistantViewSet
+from .competition import CompetitionViewSet
 from .course import CourseViewSet
 from .crawler import GetImagesUrlView
 from .deck import DeckViewSet

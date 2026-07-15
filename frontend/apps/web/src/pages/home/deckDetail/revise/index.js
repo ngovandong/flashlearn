@@ -1,6 +1,6 @@
 import { IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { learningService } from "@api-services/learningService";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -14,9 +14,8 @@ import { useReviseTerms } from "@hooks/useReviseTerms";
 import { useStudySounds } from "@hooks/useStudySounds";
 import { useSwipeGesture } from "@hooks/useSwipeGesture";
 
-let timeoutId;
-
 function Revise() {
+  const timeoutRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [currentState, setCurrentState] = useState({
@@ -77,8 +76,8 @@ function Revise() {
   });
 
   const speakTermWhenAnswer = () => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
     speak(currentQuestion.answer);
   };
@@ -127,14 +126,14 @@ function Revise() {
   useEffect(() => {
     if (currentQuestion) {
       const timeout = currentQuestion.type === QUESTION_TYPES.FILL ? 12000 : 5000;
-      timeoutId = setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         speak(currentQuestion.answer);
       }, timeout);
     }
 
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
     };
   }, [currentQuestion]);

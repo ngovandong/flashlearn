@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { FlatList, View } from "react-native";
-import { List, Text, useTheme } from "react-native-paper";
+import React, { useEffect, useState } from "react";
+import { FlatList, ScrollView, StyleSheet, View } from "react-native";
+import { Chip, List, Text, useTheme } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import type { GrammarUnitSummary } from "@flashlearn/core";
@@ -10,6 +10,11 @@ import { LoadingView } from "@/components/LoadingView";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
 
+interface GrammarBook {
+  slug: string;
+  title: string;
+}
+
 export default function GrammarScreen() {
   const theme = useTheme();
   const router = useRouter();
@@ -17,8 +22,15 @@ export default function GrammarScreen() {
 
   const booksQuery = useQuery({
     queryKey: queryKeys.grammar.books,
-    queryFn: async () => unwrap<{ books: { slug: string; title: string }[] }>(await grammarApi.getBooks()),
+    queryFn: async () => unwrap<{ books: GrammarBook[] }>(await grammarApi.getBooks()),
   });
+
+  const books = booksQuery.data?.books ?? [];
+
+  // Default to the first book so the picker always reflects the loaded catalog.
+  useEffect(() => {
+    if (!bookSlug && books.length) setBookSlug(books[0].slug);
+  }, [books, bookSlug]);
 
   const catalogQuery = useQuery({
     queryKey: queryKeys.grammar.catalog(bookSlug),
@@ -41,15 +53,36 @@ export default function GrammarScreen() {
     }
   }
 
+  const activeBook = books.find((b) => b.slug === bookSlug);
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <FlatList
         data={units}
         keyExtractor={(item) => item.key}
         ListHeaderComponent={
-          <View style={{ padding: 16 }}>
-            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              Essential Grammar in Use — pick a unit
+          <View style={styles.header}>
+            {books.length > 1 ? (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.bookRow}
+              >
+                {books.map((book) => (
+                  <Chip
+                    key={book.slug}
+                    selected={book.slug === bookSlug}
+                    showSelectedCheck={false}
+                    onPress={() => setBookSlug(book.slug)}
+                    style={styles.bookChip}
+                  >
+                    {book.title}
+                  </Chip>
+                ))}
+              </ScrollView>
+            ) : null}
+            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: books.length > 1 ? 12 : 0 }}>
+              {activeBook?.title ? `${activeBook.title} — pick a unit` : "Pick a unit"}
             </Text>
           </View>
         }
@@ -65,3 +98,9 @@ export default function GrammarScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  header: { padding: 16 },
+  bookRow: { gap: 8, paddingRight: 8 },
+  bookChip: { marginRight: 0 },
+});

@@ -8,8 +8,8 @@ def cleanup_learning_cache():
     Evict stale learning-progress cache entries.
     Runs every hour.
     """
-    from ..services.cache import RESOURCE, CacheService
+    from backend.learning.infrastructure.cache import RESOURCE, cache_factory
 
-    cache = CacheService.factory(RESOURCE.LEARNING_PROGRESS)
+    cache = cache_factory(RESOURCE.LEARNING_PROGRESS)
     cache.clear_all()
     logger.info("Learning progress cache cleared")

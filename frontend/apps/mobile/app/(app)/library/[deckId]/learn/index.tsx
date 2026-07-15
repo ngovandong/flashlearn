@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Button, IconButton, Text, useTheme } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
@@ -20,6 +20,7 @@ export default function LearnScreen() {
   const [page, setPage] = useState(1);
   const [index, setIndex] = useState(0);
   const [terms, setTerms] = useState<Term[]>([]);
+  const [revealed, setRevealed] = useState(false);
 
   const deckQuery = useQuery({
     queryKey: queryKeys.decks.detail(deckId!),
@@ -51,6 +52,7 @@ export default function LearnScreen() {
 
   const next = async (remember: boolean) => {
     await markKnown(remember);
+    setRevealed(false);
     if (index + 1 >= terms.length && terms.length < total) {
       setPage((p) => p + 1);
     }
@@ -75,9 +77,16 @@ export default function LearnScreen() {
         <IconButton icon="volume-up" onPress={() => speakText(current.name ?? "")} />
       </View>
 
-      <View style={styles.cardWrap}>
-        <TermCard name={current.name} meaning={current.meaning} image={current.image} />
-      </View>
+      <Pressable style={styles.cardWrap} onPress={() => setRevealed((r) => !r)}>
+        {revealed ? (
+          <TermCard name={current.name} meaning={current.meaning} image={current.image} />
+        ) : (
+          <TermCard name={current.name} />
+        )}
+        <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant, textAlign: "center", marginTop: 16 }}>
+          {revealed ? "Tap to hide" : "Tap to reveal meaning"}
+        </Text>
+      </Pressable>
 
       <View style={styles.actions}>
         <Button mode="outlined" onPress={() => next(false)} style={styles.btn}>

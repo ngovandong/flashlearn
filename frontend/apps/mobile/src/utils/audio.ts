@@ -33,11 +33,18 @@ export async function speakText(text: string, language = "en-US"): Promise<void>
   });
 }
 
-export async function playAudioUrl(url: string): Promise<PlaybackResult> {
+export async function playAudioUrl(url: string, rate = 1): Promise<PlaybackResult> {
   try {
     releaseActivePlayer();
     const player = createAudioPlayer(url);
     activePlayer = player;
+    if (rate !== 1) {
+      try {
+        player.setPlaybackRate(rate);
+      } catch {
+        /* rate control unsupported on this platform — play at normal speed */
+      }
+    }
     await new Promise<void>((resolve, reject) => {
       const subscription = player.addListener("playbackStatusUpdate", (status) => {
         if (status.didJustFinish) {

@@ -53,6 +53,9 @@ export default function DeckDetailScreen() {
         <Button mode="contained-tonal" icon="sports-esports" onPress={() => router.push(`/library/${deckId}/revise/quick-revise`)} disabled={total < 4}>
           Quick revise game
         </Button>
+        <Button mode="contained-tonal" icon="emoji-events" onPress={() => router.push(`/library/${deckId}/competition`)} disabled={total < 4}>
+          Competition
+        </Button>
         {canEdit ? (
           <Button mode="outlined" icon="edit" onPress={() => router.push(`/library/${deckId}/edit`)}>
             Edit deck

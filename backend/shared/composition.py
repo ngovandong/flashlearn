@@ -1,5 +1,8 @@
 """Composition root — wire concrete infrastructure into application services."""
 
+from backend.assistant.application.services import AssistantService
+from backend.competition.application.services import CompetitionService
+from backend.competition.infrastructure.repository import CompetitionRepository
 from backend.course.application.course_service import CourseService
 from backend.course.infrastructure.repository import CourseRepository
 from backend.deck.application.services import DeckService
@@ -127,4 +130,15 @@ grammar_ingest_service = GrammarIngestService(
     coach=grammar_coach_service,
     grammar_service=grammar_service,
     extract_pages=extract_pdf_pages,
+)
+# Dragon assistant: the general English-learning chat behind the floating buddy.
+# Stateless (client sends history) and text-only, so it just needs the default
+# AI provider — no repository, no persistence.
+assistant_service = AssistantService(ai=default_ai_provider)
+# Competition mini-games: serves a term pool for building games client-side and
+# persists per-deck leaderboard scores. Pure fun — never touches spaced
+# repetition, so it only needs the deck view guard.
+competition_service = CompetitionService(
+    repo=CompetitionRepository,
+    deck_service=deck_service,
 )

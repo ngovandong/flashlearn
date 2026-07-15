@@ -49,6 +49,12 @@ const QuickRevise = lazyWithRetry(() =>
 const NumberTest = lazyWithRetry(() =>
   import("@pages/home/deckDetail/numberTest")
 );
+const Competition = lazyWithRetry(() =>
+  import("@pages/home/deckDetail/competition")
+);
+const CompetitionGame = lazyWithRetry(() =>
+  import("@pages/home/deckDetail/competition/gamePage")
+);
 const Listening = lazyWithRetry(() => import("@pages/home/listening"));
 const ListenAndType = lazyWithRetry(() =>
   import("@pages/home/listening/listenAndType")
@@ -168,6 +174,8 @@ function App() {
               <Route path="revise" element={<Revise />} />
               <Route path="quick-revise" element={<QuickRevise />} />
               <Route path="number-test" element={<NumberTest />} />
+              <Route path="competition" element={<Competition />} />
+              <Route path="competition/:gameKey" element={<CompetitionGame />} />
             </Route>
             <Route path="invite" element={<Invite />} />
             <Route path="settings" element={<UserSettings />} />

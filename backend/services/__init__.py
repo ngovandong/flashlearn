@@ -1,5 +1,7 @@
 """Service layer entry point — prefer composition singletons for new code."""
 
+from backend.assistant.application.services import AssistantService
+from backend.competition.application.services import CompetitionService
 from backend.deck.application.services import DeckService
 from backend.learning.application.services import LearningService
 from backend.learning.infrastructure.cache import learning_progress_cache
@@ -7,7 +9,9 @@ from backend.role.application.services import RoleService
 from backend.services.image import url_to_base64
 from backend.services.mail import MailService
 from backend.shared.composition import (
+    assistant_service,
     auth_service,
+    competition_service,
     course_service,
     deck_service,
     grammar_coach_service,
@@ -35,7 +39,9 @@ from backend.writing.application.services import WritingCoachService
 from backend.writing.application.writing_service import WritingService
 
 __all__ = [
+    "AssistantService",
     "AuthService",
+    "CompetitionService",
     "DeckService",
     "LearningService",
     "MailService",
@@ -47,7 +53,9 @@ __all__ = [
     "UserService",
     "WritingCoachService",
     "WritingService",
+    "assistant_service",
     "auth_service",
+    "competition_service",
     "course_service",
     "deck_service",
     "grammar_coach_service",

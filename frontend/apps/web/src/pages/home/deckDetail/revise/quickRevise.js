@@ -34,11 +34,14 @@ function QuickRevise()
     const { deckID } = useParams();
     const token = useSelector(selectToken);
 
-    const correctSound = new Audio(`${import.meta.env.BASE_URL}sound/true.mp3`);
-    const incorrectSound = new Audio(`${import.meta.env.BASE_URL}sound/false.mp3`);
-    const finishSound = new Audio(
-        `${import.meta.env.BASE_URL}sound/congratulation.mp3`
-    );
+    const correctSound = useRef(null);
+    const incorrectSound = useRef(null);
+    const finishSound = useRef(null);
+    if (correctSound.current === null) {
+        correctSound.current = new Audio(`${import.meta.env.BASE_URL}sound/true.mp3`);
+        incorrectSound.current = new Audio(`${import.meta.env.BASE_URL}sound/false.mp3`);
+        finishSound.current = new Audio(`${import.meta.env.BASE_URL}sound/congratulation.mp3`);
+    }
 
     useEffect(() =>
     {
@@ -76,12 +79,12 @@ function QuickRevise()
                     setScore((prev) => prev + 1);
                 }
             } else if (data.type === "finished") {
-                finishSound.play();
+                finishSound.current.play();
                 setShowConfetti(true);
                 setTimeout(() => navigate(-1), 3000); // Go back after 3s
             } else if (data.type === "game_over") {
                 if (data.reason === 'wrong_answer') {
-                    incorrectSound.play();
+                    incorrectSound.current.play();
                 }
                 setGameOverState({
                     isOpen: true,
@@ -131,7 +134,7 @@ function QuickRevise()
 
     const handleCorrect = () =>
     {
-        correctSound.play();
+        correctSound.current.play();
         speakTerm();
         ws.current.send(JSON.stringify({ action: "answer", answer: question.answer }));
         // Quiz/Fill component handles visual feedback, we wait for next question from WS
@@ -139,7 +142,7 @@ function QuickRevise()
 
     const handleIncorrect = () =>
     {
-        incorrectSound.play();
+        incorrectSound.current.play();
         speakTerm();
         // Send wrong answer or just trigger game over on server
         // We can send a wrong string

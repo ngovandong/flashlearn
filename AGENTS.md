@@ -55,8 +55,9 @@ bounded contexts (`deck/`, `term/`, `speaking/`, …). All new/updated backend c
 respect the layers — never regress to fat views that hit the ORM directly.
 - **Views** (`backend/views/**`) are thin: parse the request, call an application-service
   singleton, serialize, map errors to status codes. No business logic, no ORM.
-- **Application** (`<context>/application/services.py`) holds the use case + rules with
-  constructor-injected dependencies. **Infrastructure** (`<context>/infrastructure/repository.py`)
+- **Application** (`<context>/application/` — often `services.py`, sometimes
+ `<feature>_service.py`) holds the use case + rules with
+ constructor-injected dependencies. **Infrastructure** (`<context>/infrastructure/repository.py`)
   is the *only* place ORM access is allowed. **Ports** (`shared/application/ports.py`)
   abstract external I/O; cross-context reads go through `context_api.py`.
 - Wire every service in `shared/composition.py` and expose it via `backend/services/__init__.py`.

@@ -110,6 +110,12 @@ export const TOURS = [
         body: "Short on time? A fast-paced round to test yourself in just a few minutes.",
       },
       {
+        id: "deck.competition",
+        selector: '[data-tour="deck-competition"]',
+        title: "Competition",
+        body: "Turn revision into arcade mini-games — race bots, blast falling words, and climb the leaderboards.",
+      },
+      {
         id: "deck.edit-btn",
         selector: '[data-tour="deck-edit-btn"]',
         title: "Edit your deck",
@@ -195,6 +201,19 @@ export const TOURS = [
         selector: ".learn-container",
         title: "Answer quickly",
         body: "Choose the right answer to score a point. One wrong answer or a timeout ends the run.",
+      },
+    ],
+  },
+  {
+    id: "deck-competition",
+    label: "Competition",
+    match: (p) => /^\/deck\/[^/]+\/competition$/.test(p),
+    steps: [
+      {
+        id: "competition.games",
+        selector: '[data-tour="competition-games"]',
+        title: "Pick a mini-game",
+        body: "Each card is a game built from this deck's words. Locked cards tell you what data the deck still needs (like images or synonyms). Tap a game to play.",
       },
     ],
   },

@@ -1,6 +1,12 @@
 # Flashlearn Rust API
 
-High-performance replacement for the Django REST + Channels endpoints (`/api/*` and WebSocket `/ws/quick-revise/`), using **Axum**, **sqlx** (MySQL), **Redis**, and optional **Elasticsearch**.
+High-performance **partial** re-implementation of the Django REST + Channels API, using **Axum**, **sqlx** (MySQL), **Redis**, and optional **Elasticsearch**.
+
+**Ported route groups:** `users`, `decks`, `terms`, `roles`, `learnings`,
+`images`, `translate`, and the `/ws/quick-revise/` WebSocket. The AI/learning
+feature contexts that exist in Django (`speaking`, `writing`, `courses`,
+`listening`, `grammar`, `reminders`, `revise`) are **not** ported — route those
+to the Django backend. See "Limitations / follow-ups" below.
 
 ## Layout (DDD-style)
 
@@ -55,7 +61,7 @@ docker build -t flashlearn-rust .
 docker run --env-file .env -p 8005:8005 flashlearn-rust
 ```
 
-Use the same MySQL/Redis/Elasticsearch as the Python stack (see repo `docker-compose.yml`); point `DATABASE_URL` / `REDIS_*` / `ELASTIC_SEARCH_*` at those services.
+Use the same MySQL/Redis as the Python stack (see repo `docker-compose.yml`); point `DATABASE_URL` / `REDIS_*` at those services. Elasticsearch is **not** part of the compose file — run it externally (or leave it unset) and point `ELASTIC_SEARCH_*` at it; search falls back to SQL when it is unavailable.
 
 ## Redis note (Django → Rust)
 
@@ -63,6 +69,12 @@ Django may store pickled objects in Redis for `user_{id}` keys. This server writ
 
 ## Limitations / follow-ups
 
+- **Feature contexts not ported:** `speaking`, `writing`, `courses`, `listening`,
+  `grammar`, `reminders`, and `revise` have no Rust routes — keep those on Django.
+- **Folders API is stale:** the Rust backend still exposes `/api/folders/*` against
+  `backend_folder`, but Django **deleted** the `Folder` model (migration
+  `0058_delete_folder`). Those routes (and the `migrate_tests` folder cases) should
+  be removed or treated as dead.
 - **Multipart bulk term APIs** (`add_terms`, `update_terms`) are not fully ported; extend with `multipart` parsing if you rely on form-style uploads.
 - **Google login / `init`**: OAuth exchange is stubbed; complete `user_get_or_create` like `UserService` in Python.
 - **Cloudinary**: term `create` accepts a URL string; full multipart upload to Cloudinary can be added in `terms` routes.

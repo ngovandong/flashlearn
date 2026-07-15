@@ -11,7 +11,7 @@ rules, reminder metadata, and theme definitions as the web app.
 - **Library** — deck list (mine / shared / public), create deck, deck detail, edit terms, image search & translation, deck sharing (roles)
 - **Study** — learn mode, deck revise (quiz + fill), mixed revise session, realtime quick-revise WebSocket game
 - **Practice hub** — entry points for courses, listening, grammar, speaking, and writing
-- **Courses** — catalog, course detail, lesson audio playback
+- **Courses** — catalog, course detail, lesson audio playback, and Live Role-play scoring
 - **Listening** — dictation exercises and number-listening drill
 - **Grammar** — unit catalog and auto-graded exercises
 - **Speaking coach** — generate conversations, line-by-line TTS, microphone capture & pronunciation analysis
@@ -22,10 +22,11 @@ Web-only concepts (Dragon onboarding tours, drag-to-position) are intentionally 
 
 ## Tech stack
 
-- Expo SDK 51 and React Native 0.74
-- React 18 and TypeScript (strict mode)
-- Expo Router for file-based routes and tabs
-- React Native Paper for Material Design components and theming
+- Expo SDK 57 and React Native 0.86
+- React 19 and TypeScript (strict mode)
+- Expo Router 57 for file-based routes and tabs
+- React Native Paper 5 for Material Design components and theming
+- React Native Reanimated 4 + Gesture Handler for animations and gestures
 - Redux Toolkit for authentication/client state
 - TanStack Query for server state
 - Axios through the shared `@flashlearn/api` client
@@ -84,7 +85,7 @@ apps/mobile/
 
 ## Prerequisites
 
-- Node.js 18 or newer
+- Node.js 20.19+ (22+ recommended, matching the Vite 8 monorepo)
 - npm
 - a running FlashLearn Django API
 - Xcode with an iOS Simulator, Android Studio with an emulator, or a compatible

@@ -1,18 +1,21 @@
 import React, { useRef, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { Button, Text, useTheme } from "react-native-paper";
-import { useLocalSearchParams } from "expo-router";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { Button, IconButton, Text, useTheme } from "react-native-paper";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { SpeakingConversation, SpeakingLine } from "@flashlearn/core";
 import { speakingApi } from "@/api/services";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
 import { AudioRecorder, playSpeechClip, speakText } from "@/utils/audio";
+import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
 
 export default function SpeakingConversationScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const theme = useTheme();
+  const router = useRouter();
+  const qc = useQueryClient();
   const [lineIndex, setLineIndex] = useState(0);
   const [analysis, setAnalysis] = useState<Record<string, unknown> | null>(null);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
@@ -21,9 +24,25 @@ export default function SpeakingConversationScreen() {
   const audioCache = useRef(new Map<string, { audio_url?: string; audio?: string; mime_type?: string }>());
 
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["speaking", id],
+    queryKey: queryKeys.speaking.detail(id!),
     queryFn: async () => unwrap<SpeakingConversation>(await speakingApi.getConversation(id!)),
     enabled: !!id,
+  });
+
+  const starMutation = useMutation({
+    mutationFn: (starred: boolean) => speakingApi.setStar(id!, starred),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.speaking.detail(id!) });
+      qc.invalidateQueries({ queryKey: queryKeys.speaking.history });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => speakingApi.deleteConversation(id!),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.speaking.history });
+      router.back();
+    },
   });
 
   const analyzeMutation = useMutation({
@@ -81,9 +100,17 @@ export default function SpeakingConversationScreen() {
 
   return (
     <ScrollView contentContainerStyle={[styles.pad, { backgroundColor: theme.colors.background }]}>
-      <Text variant="headlineSmall" style={{ color: theme.colors.onBackground }}>
-        {data.topic}
-      </Text>
+      <View style={styles.titleRow}>
+        <Text variant="headlineSmall" style={{ color: theme.colors.onBackground, flex: 1 }}>
+          {data.topic}
+        </Text>
+        <IconButton
+          icon={(data as { starred?: boolean }).starred ? "star" : "star-outline"}
+          iconColor={(data as { starred?: boolean }).starred ? "#f5a623" : theme.colors.onSurfaceVariant}
+          onPress={() => starMutation.mutate(!(data as { starred?: boolean }).starred)}
+        />
+        <IconButton icon="delete-outline" onPress={() => deleteMutation.mutate()} />
+      </View>
       <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant, marginTop: 16 }}>
         Line {lineIndex + 1} / {lines.length}
       </Text>
@@ -145,6 +172,7 @@ export default function SpeakingConversationScreen() {
 
 const styles = StyleSheet.create({
   pad: { padding: 16 },
+  titleRow: { flexDirection: "row", alignItems: "center" },
   row: { flexDirection: "row", gap: 10, marginTop: 16 },
   analysis: { marginTop: 16, padding: 12, borderRadius: 10 },
 });

@@ -1,3 +1,8 @@
+from .competition import (
+    CompetitionPoolSerializer,
+    LeaderboardSerializer,
+    SubmitScoreSerializer,
+)
 from .course import (
     CourseDetailSerializer,
     CourseLessonSerializer,

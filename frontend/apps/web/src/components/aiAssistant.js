@@ -26,6 +26,7 @@ import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import MyLocationRoundedIcon from "@mui/icons-material/MyLocationRounded";
 import DragonAvatar from "./dragonAvatar";
 import { useTour } from "./tourProvider";
+import { assistantService } from "@api-services/assistantService";
 
 const ASSISTANT_NAME = "Dragon";
 
@@ -85,8 +86,9 @@ function writeHiddenUntil(ts) {
 }
 
 const WELCOME_TEXT =
-  `Hi, I'm ${ASSISTANT_NAME} — your FlashLearn study buddy! 🐉 ` +
-  `I can help you create decks, learn, revise, and more. ` +
+  `Hi, I'm ${ASSISTANT_NAME} — your English study buddy! 🐉 ` +
+  `Ask me anything: a word's meaning, grammar, example sentences, pronunciation, ` +
+  `or a translation. I can also point you to the best way to practice. ` +
   `Want a quick tour, or pick a starter below?`;
 
 let messageId = 0;
@@ -95,20 +97,17 @@ const nextId = () => {
   return messageId;
 };
 
-/**
- * Placeholder reply generator.
- *
- * TODO(ai-infra): wire this to the real AI backend. The assistant should be able
- * to call FlashLearn webpage functions (create/clone deck, start learn/revise/
- * quick-revise, number listening, open settings) on the user's behalf.
- */
-async function requestAiReply() {
-  await new Promise((resolve) => setTimeout(resolve, 700));
-  return (
-    "I'm still learning to chat! 🐲 My smart replies are coming soon. " +
-    "Meanwhile, tap “Show me the guide” and I'll walk you through everything FlashLearn can do."
-  );
-}
+const ERROR_REPLY =
+  "Sorry, I couldn't reach my brain just now. 🐲 Please try again in a moment — " +
+  "or tap “Show me the guide” and I'll walk you through FlashLearn.";
+
+// Send the recent transcript so Dragon has conversation context. Only the plain
+// role/text pairs matter to the backend; the trailing turn is sent separately as
+// the new message.
+const toHistory = (messages) =>
+  messages
+    .filter((m) => m.text)
+    .map((m) => ({ role: m.role, text: m.text }));
 
 function MessageBubble({ role, children }) {
   const isUser = role === "user";
@@ -137,6 +136,8 @@ function MessageBubble({ role, children }) {
           lineHeight: 1.45,
           color: isUser ? "var(--fl-on-primary)" : "var(--fl-text)",
           background: isUser ? "var(--fl-primary)" : "var(--fl-surface-2)",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
         }}
       >
         {children}
@@ -307,12 +308,47 @@ function AiAssistant() {
   const send = async (override) => {
     const text = (typeof override === "string" ? override : input).trim();
     if (!text || typing) return;
+    // Snapshot the transcript before appending so history reflects the turns that
+    // preceded this message (the new message is sent separately).
+    const history = toHistory(messages);
     setMessages((prev) => [...prev, { id: nextId(), role: "user", text }]);
     setInput("");
     setTyping(true);
-    const reply = await requestAiReply(text);
-    setTyping(false);
-    setMessages((prev) => [...prev, { id: nextId(), role: "assistant", text: reply }]);
+    try {
+      const { data } = await assistantService.chat({
+        message: text,
+        history,
+        page: location.pathname,
+      });
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: nextId(),
+          role: "assistant",
+          text: data?.reply || ERROR_REPLY,
+          actions: Array.isArray(data?.actions) ? data.actions : [],
+          suggestions: Array.isArray(data?.suggestions) ? data.suggestions : [],
+        },
+      ]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { id: nextId(), role: "assistant", text: ERROR_REPLY },
+      ]);
+    } finally {
+      setTyping(false);
+    }
+  };
+
+  // Run an action button returned by Dragon: open a page or launch a page tour.
+  const runAction = (action) => {
+    if (!action) return;
+    setOpen(false);
+    if (action.type === "navigate" && action.route) {
+      navigate(action.route);
+    } else if (action.type === "tour" && action.tour_id) {
+      startTour(action.tour_id, { all: true });
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -442,6 +478,77 @@ function AiAssistant() {
               {messages.map((m) => (
                 <Box key={m.id} sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
                   <MessageBubble role={m.role}>{m.text}</MessageBubble>
+                  {(m.actions?.length > 0 || m.suggestions?.length > 0) && (
+                    <Box
+                      sx={{
+                        pl: 4.25,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.85,
+                      }}
+                    >
+                      {m.actions?.map((action, i) => (
+                        <Box
+                          key={`${m.id}-a-${i}`}
+                          role="button"
+                          onClick={() => runAction(action)}
+                          sx={{
+                            alignSelf: "flex-start",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 0.75,
+                            px: 1.5,
+                            py: 0.85,
+                            cursor: "pointer",
+                            borderRadius: "0.7rem",
+                            fontSize: "0.82rem",
+                            fontWeight: 700,
+                            color: "var(--fl-on-primary)",
+                            background: "var(--fl-gradient)",
+                            transition: "transform 0.15s ease, filter 0.15s ease",
+                            "&:hover": { filter: "brightness(1.05)", transform: "translateY(-1px)" },
+                          }}
+                        >
+                          <AutoAwesomeRoundedIcon sx={{ fontSize: "1rem" }} />
+                          {action.label}
+                        </Box>
+                      ))}
+                      {m.suggestions?.length > 0 && (
+                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
+                          {m.suggestions.map((s, i) => (
+                            <Box
+                              key={`${m.id}-s-${i}`}
+                              role="button"
+                              onClick={() => send(s)}
+                              sx={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                px: 1.25,
+                                py: 0.6,
+                                cursor: "pointer",
+                                borderRadius: "0.9rem",
+                                fontSize: "0.78rem",
+                                fontWeight: 600,
+                                lineHeight: 1.3,
+                                color: "var(--fl-text)",
+                                backgroundColor: "var(--fl-surface-2)",
+                                border: "1px solid var(--fl-border)",
+                                transition: "all 0.15s ease",
+                                "&:hover": {
+                                  color: "var(--fl-primary)",
+                                  borderColor: "var(--fl-primary)",
+                                  backgroundColor: "rgba(var(--fl-primary-rgb), 0.08)",
+                                  transform: "translateY(-1px)",
+                                },
+                              }}
+                            >
+                              {s}
+                            </Box>
+                          ))}
+                        </Box>
+                      )}
+                    </Box>
+                  )}
                   {m.showSuggestions && (
                     <Box
                       sx={{

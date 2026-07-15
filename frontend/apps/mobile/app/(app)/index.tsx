@@ -5,8 +5,9 @@ import { useRouter } from "expo-router";
 import { mapReminderRoute, REMINDER_META, type Reminder } from "@flashlearn/core";
 import { useAppSelector } from "@/store/hooks";
 import { selectUser } from "@/store/authSlice";
-import { useReminders } from "@/features/home/hooks";
+import { useLatestDecks, useReminders } from "@/features/home/hooks";
 import { StreakCard } from "@/components/StreakCard";
+import { DeckCard } from "@/components/DeckCard";
 import { ReminderList } from "@/components/ReminderList";
 import { ChatPanel } from "@/features/assistant/ChatPanel";
 
@@ -15,6 +16,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const user = useAppSelector(selectUser);
   const { data: reminders } = useReminders();
+  const { data: latestDecks } = useLatestDecks();
   const [snack, setSnack] = useState<string | null>(null);
 
   const greetingName = user?.name || user?.first_name || "there";
@@ -42,6 +44,23 @@ export default function HomeScreen() {
           Jump back in
         </Text>
         <ReminderList reminders={reminders ?? []} onPress={onReminderPress} />
+
+        {latestDecks && latestDecks.length > 0 ? (
+          <>
+            <Text variant="titleMedium" style={{ color: theme.colors.onBackground, marginTop: 8 }}>
+              Recent decks
+            </Text>
+            <View style={{ gap: 10 }}>
+              {latestDecks.slice(0, 4).map((deck) => (
+                <DeckCard
+                  key={deck.id}
+                  deck={deck}
+                  onPress={() => router.push(`/library/${deck.id}`)}
+                />
+              ))}
+            </View>
+          </>
+        ) : null}
 
         <Text variant="titleMedium" style={{ color: theme.colors.onBackground, marginTop: 8 }}>
           Ask Dragon

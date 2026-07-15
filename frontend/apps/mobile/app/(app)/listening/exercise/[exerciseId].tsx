@@ -38,6 +38,7 @@ export default function ListeningExerciseScreen() {
   const [noteDraft, setNoteDraft] = useState("");
   const [translationDraft, setTranslationDraft] = useState("");
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
+  const [revealed, setRevealed] = useState(false);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.listening.exercise(exerciseId!),
@@ -122,6 +123,8 @@ export default function ListeningExerciseScreen() {
     );
     setLines(nextLines);
     setTyped("");
+    setRevealed(false);
+    setTranslationDraft("");
     saveProgressMutation.mutate(nextLines);
 
     if (index + 1 >= sentences.length) {
@@ -188,9 +191,14 @@ export default function ListeningExerciseScreen() {
       ) : null}
 
       {current?.audio_url ? (
-        <Button mode="contained-tonal" icon="volume-up" onPress={() => playAudioUrl(current.audio_url!)} style={{ marginTop: 12 }}>
-          Play
-        </Button>
+        <View style={styles.row}>
+          <Button mode="contained-tonal" icon="volume-high" onPress={() => playAudioUrl(current.audio_url!)}>
+            Play
+          </Button>
+          <Button mode="outlined" icon="turtle" onPress={() => playAudioUrl(current.audio_url!, 0.6)}>
+            Slow
+          </Button>
+        </View>
       ) : null}
 
       {current?.hint ? (
@@ -212,10 +220,24 @@ export default function ListeningExerciseScreen() {
         <Button mode="contained" onPress={checkLine} disabled={!typed.trim()}>
           Check
         </Button>
+        <Button mode="outlined" icon={revealed ? "eye-off" : "eye"} onPress={() => setRevealed((r) => !r)}>
+          {revealed ? "Hide" : "Reveal"}
+        </Button>
         <Button mode="outlined" onPress={() => current?.text && translateMutation.mutate(current.text)} loading={translateMutation.isPending}>
           Translate
         </Button>
       </View>
+
+      {revealed && current?.text ? (
+        <View style={[styles.reveal, { backgroundColor: theme.colors.surfaceVariant }]}>
+          <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+            Answer
+          </Text>
+          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, marginTop: 2 }}>
+            {current.text}
+          </Text>
+        </View>
+      ) : null}
 
       {translationDraft || currentMeta?.translation ? (
         <Text style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}>
@@ -274,4 +296,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 12 },
   chips: { flexDirection: "row", flexWrap: "wrap", marginTop: 8 },
   noteBox: { marginTop: 16, padding: 12, borderWidth: 1, borderRadius: 10 },
+  reveal: { marginTop: 12, padding: 12, borderRadius: 10 },
 });

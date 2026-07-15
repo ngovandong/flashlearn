@@ -18,6 +18,8 @@ export default function LibraryLayout() {
       <Stack.Screen name="[deckId]/learn/index" options={{ title: "Learn" }} />
       <Stack.Screen name="[deckId]/revise/index" options={{ title: "Revise" }} />
       <Stack.Screen name="[deckId]/revise/quick-revise" options={{ title: "Quick revise" }} />
+      <Stack.Screen name="[deckId]/competition/index" options={{ title: "Competition" }} />
+      <Stack.Screen name="[deckId]/competition/[gameKey]" options={{ title: "Play" }} />
       <Stack.Screen name="[deckId]/share" options={{ title: "Share deck" }} />
     </Stack>
   );

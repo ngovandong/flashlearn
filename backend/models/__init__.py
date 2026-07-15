@@ -1,4 +1,5 @@
 from .ai_cache import AiResponseCache
+from .competition import CompetitionScore
 from .course import (
     Course,
     CourseLesson,

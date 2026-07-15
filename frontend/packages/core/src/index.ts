@@ -15,3 +15,4 @@ export * from "./quickRevise";
 export * from "./dictation";
 export * from "./reminderRoutes";
 export * from "./audioClip";
+export * from "./games";

@@ -1,16 +1,16 @@
-# Graph Report - flashlearn  (2026-07-14)
+# Graph Report - flashlearn  (2026-07-15)
 
 ## Corpus Check
-- 681 files · ~246,448 words
+- 735 files · ~264,703 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3226 nodes · 3857 edges · 666 communities (444 shown, 222 thin omitted)
-- Extraction: 83% EXTRACTED · 17% INFERRED · 0% AMBIGUOUS · INFERRED: 674 edges (avg confidence: 0.5)
+- 3623 nodes · 4297 edges · 700 communities (460 shown, 240 thin omitted)
+- Extraction: 86% EXTRACTED · 14% INFERRED · 0% AMBIGUOUS · INFERRED: 623 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `bae9600b`
+- Built from commit: `55c384d5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -42,6 +42,7 @@
 - [[_COMMUNITY_Community 24|Community 24]]
 - [[_COMMUNITY_Community 25|Community 25]]
 - [[_COMMUNITY_Community 26|Community 26]]
+- [[_COMMUNITY_Community 27|Community 27]]
 - [[_COMMUNITY_Community 28|Community 28]]
 - [[_COMMUNITY_Community 29|Community 29]]
 - [[_COMMUNITY_Community 30|Community 30]]
@@ -105,39 +106,39 @@
 - [[_COMMUNITY_Community 89|Community 89]]
 - [[_COMMUNITY_Community 90|Community 90]]
 - [[_COMMUNITY_Community 91|Community 91]]
+- [[_COMMUNITY_Community 92|Community 92]]
 - [[_COMMUNITY_Community 93|Community 93]]
 - [[_COMMUNITY_Community 95|Community 95]]
-- [[_COMMUNITY_Community 96|Community 96]]
 - [[_COMMUNITY_Community 97|Community 97]]
 - [[_COMMUNITY_Community 98|Community 98]]
-- [[_COMMUNITY_Community 99|Community 99]]
 - [[_COMMUNITY_Community 100|Community 100]]
 - [[_COMMUNITY_Community 101|Community 101]]
 - [[_COMMUNITY_Community 102|Community 102]]
 - [[_COMMUNITY_Community 103|Community 103]]
 - [[_COMMUNITY_Community 104|Community 104]]
+- [[_COMMUNITY_Community 105|Community 105]]
+- [[_COMMUNITY_Community 106|Community 106]]
 - [[_COMMUNITY_Community 107|Community 107]]
 - [[_COMMUNITY_Community 108|Community 108]]
-- [[_COMMUNITY_Community 109|Community 109]]
-- [[_COMMUNITY_Community 110|Community 110]]
 - [[_COMMUNITY_Community 111|Community 111]]
 - [[_COMMUNITY_Community 112|Community 112]]
+- [[_COMMUNITY_Community 113|Community 113]]
 - [[_COMMUNITY_Community 114|Community 114]]
-- [[_COMMUNITY_Community 117|Community 117]]
+- [[_COMMUNITY_Community 115|Community 115]]
+- [[_COMMUNITY_Community 116|Community 116]]
 - [[_COMMUNITY_Community 118|Community 118]]
-- [[_COMMUNITY_Community 119|Community 119]]
-- [[_COMMUNITY_Community 120|Community 120]]
 - [[_COMMUNITY_Community 121|Community 121]]
+- [[_COMMUNITY_Community 122|Community 122]]
 - [[_COMMUNITY_Community 123|Community 123]]
+- [[_COMMUNITY_Community 124|Community 124]]
 - [[_COMMUNITY_Community 125|Community 125]]
+- [[_COMMUNITY_Community 126|Community 126]]
+- [[_COMMUNITY_Community 127|Community 127]]
 - [[_COMMUNITY_Community 128|Community 128]]
-- [[_COMMUNITY_Community 129|Community 129]]
 - [[_COMMUNITY_Community 130|Community 130]]
-- [[_COMMUNITY_Community 132|Community 132]]
 - [[_COMMUNITY_Community 133|Community 133]]
 - [[_COMMUNITY_Community 134|Community 134]]
 - [[_COMMUNITY_Community 135|Community 135]]
-- [[_COMMUNITY_Community 136|Community 136]]
 - [[_COMMUNITY_Community 137|Community 137]]
 - [[_COMMUNITY_Community 138|Community 138]]
 - [[_COMMUNITY_Community 139|Community 139]]
@@ -147,67 +148,80 @@
 - [[_COMMUNITY_Community 143|Community 143]]
 - [[_COMMUNITY_Community 144|Community 144]]
 - [[_COMMUNITY_Community 145|Community 145]]
+- [[_COMMUNITY_Community 146|Community 146]]
+- [[_COMMUNITY_Community 147|Community 147]]
 - [[_COMMUNITY_Community 148|Community 148]]
+- [[_COMMUNITY_Community 149|Community 149]]
+- [[_COMMUNITY_Community 150|Community 150]]
 - [[_COMMUNITY_Community 151|Community 151]]
 - [[_COMMUNITY_Community 152|Community 152]]
-- [[_COMMUNITY_Community 154|Community 154]]
-- [[_COMMUNITY_Community 164|Community 164]]
-- [[_COMMUNITY_Community 165|Community 165]]
-- [[_COMMUNITY_Community 168|Community 168]]
-- [[_COMMUNITY_Community 172|Community 172]]
-- [[_COMMUNITY_Community 175|Community 175]]
-- [[_COMMUNITY_Community 176|Community 176]]
+- [[_COMMUNITY_Community 153|Community 153]]
+- [[_COMMUNITY_Community 156|Community 156]]
+- [[_COMMUNITY_Community 158|Community 158]]
+- [[_COMMUNITY_Community 160|Community 160]]
+- [[_COMMUNITY_Community 161|Community 161]]
+- [[_COMMUNITY_Community 163|Community 163]]
+- [[_COMMUNITY_Community 173|Community 173]]
+- [[_COMMUNITY_Community 174|Community 174]]
 - [[_COMMUNITY_Community 177|Community 177]]
+- [[_COMMUNITY_Community 180|Community 180]]
+- [[_COMMUNITY_Community 181|Community 181]]
 - [[_COMMUNITY_Community 184|Community 184]]
+- [[_COMMUNITY_Community 185|Community 185]]
+- [[_COMMUNITY_Community 186|Community 186]]
+- [[_COMMUNITY_Community 187|Community 187]]
 - [[_COMMUNITY_Community 188|Community 188]]
 - [[_COMMUNITY_Community 189|Community 189]]
-- [[_COMMUNITY_Community 190|Community 190]]
 - [[_COMMUNITY_Community 191|Community 191]]
-- [[_COMMUNITY_Community 192|Community 192]]
-- [[_COMMUNITY_Community 193|Community 193]]
-- [[_COMMUNITY_Community 196|Community 196]]
+- [[_COMMUNITY_Community 194|Community 194]]
+- [[_COMMUNITY_Community 195|Community 195]]
+- [[_COMMUNITY_Community 197|Community 197]]
 - [[_COMMUNITY_Community 198|Community 198]]
 - [[_COMMUNITY_Community 199|Community 199]]
 - [[_COMMUNITY_Community 200|Community 200]]
-- [[_COMMUNITY_Community 203|Community 203]]
-- [[_COMMUNITY_Community 204|Community 204]]
+- [[_COMMUNITY_Community 201|Community 201]]
+- [[_COMMUNITY_Community 205|Community 205]]
 - [[_COMMUNITY_Community 206|Community 206]]
+- [[_COMMUNITY_Community 207|Community 207]]
+- [[_COMMUNITY_Community 208|Community 208]]
+- [[_COMMUNITY_Community 209|Community 209]]
+- [[_COMMUNITY_Community 210|Community 210]]
+- [[_COMMUNITY_Community 213|Community 213]]
+- [[_COMMUNITY_Community 215|Community 215]]
+- [[_COMMUNITY_Community 216|Community 216]]
+- [[_COMMUNITY_Community 217|Community 217]]
+- [[_COMMUNITY_Community 220|Community 220]]
+- [[_COMMUNITY_Community 221|Community 221]]
+- [[_COMMUNITY_Community 223|Community 223]]
+- [[_COMMUNITY_Community 236|Community 236]]
+- [[_COMMUNITY_Community 241|Community 241]]
+- [[_COMMUNITY_Community 277|Community 277]]
+- [[_COMMUNITY_Community 278|Community 278]]
+- [[_COMMUNITY_Community 279|Community 279]]
+- [[_COMMUNITY_Community 280|Community 280]]
+- [[_COMMUNITY_Community 281|Community 281]]
+- [[_COMMUNITY_Community 283|Community 283]]
+- [[_COMMUNITY_Community 284|Community 284]]
+- [[_COMMUNITY_Community 285|Community 285]]
+- [[_COMMUNITY_Community 286|Community 286]]
+- [[_COMMUNITY_Community 289|Community 289]]
+- [[_COMMUNITY_Community 300|Community 300]]
+- [[_COMMUNITY_Community 306|Community 306]]
 - [[_COMMUNITY_Community 308|Community 308]]
 - [[_COMMUNITY_Community 309|Community 309]]
-- [[_COMMUNITY_Community 310|Community 310]]
 - [[_COMMUNITY_Community 311|Community 311]]
 - [[_COMMUNITY_Community 312|Community 312]]
 - [[_COMMUNITY_Community 313|Community 313]]
 - [[_COMMUNITY_Community 314|Community 314]]
-- [[_COMMUNITY_Community 315|Community 315]]
-- [[_COMMUNITY_Community 316|Community 316]]
-- [[_COMMUNITY_Community 317|Community 317]]
-- [[_COMMUNITY_Community 318|Community 318]]
-- [[_COMMUNITY_Community 319|Community 319]]
 - [[_COMMUNITY_Community 320|Community 320]]
 - [[_COMMUNITY_Community 321|Community 321]]
 - [[_COMMUNITY_Community 322|Community 322]]
-- [[_COMMUNITY_Community 323|Community 323]]
 - [[_COMMUNITY_Community 324|Community 324]]
-- [[_COMMUNITY_Community 325|Community 325]]
-- [[_COMMUNITY_Community 326|Community 326]]
 - [[_COMMUNITY_Community 327|Community 327]]
-- [[_COMMUNITY_Community 328|Community 328]]
-- [[_COMMUNITY_Community 329|Community 329]]
-- [[_COMMUNITY_Community 330|Community 330]]
-- [[_COMMUNITY_Community 331|Community 331]]
-- [[_COMMUNITY_Community 332|Community 332]]
-- [[_COMMUNITY_Community 333|Community 333]]
 - [[_COMMUNITY_Community 334|Community 334]]
 - [[_COMMUNITY_Community 335|Community 335]]
 - [[_COMMUNITY_Community 336|Community 336]]
 - [[_COMMUNITY_Community 337|Community 337]]
-- [[_COMMUNITY_Community 338|Community 338]]
-- [[_COMMUNITY_Community 339|Community 339]]
-- [[_COMMUNITY_Community 340|Community 340]]
-- [[_COMMUNITY_Community 341|Community 341]]
-- [[_COMMUNITY_Community 342|Community 342]]
-- [[_COMMUNITY_Community 343|Community 343]]
 - [[_COMMUNITY_Community 344|Community 344]]
 - [[_COMMUNITY_Community 345|Community 345]]
 - [[_COMMUNITY_Community 346|Community 346]]
@@ -223,57 +237,93 @@
 - [[_COMMUNITY_Community 356|Community 356]]
 - [[_COMMUNITY_Community 357|Community 357]]
 - [[_COMMUNITY_Community 358|Community 358]]
+- [[_COMMUNITY_Community 359|Community 359]]
 - [[_COMMUNITY_Community 360|Community 360]]
+- [[_COMMUNITY_Community 361|Community 361]]
 - [[_COMMUNITY_Community 362|Community 362]]
+- [[_COMMUNITY_Community 363|Community 363]]
+- [[_COMMUNITY_Community 364|Community 364]]
 - [[_COMMUNITY_Community 365|Community 365]]
-- [[_COMMUNITY_Community 435|Community 435]]
-- [[_COMMUNITY_Community 438|Community 438]]
-- [[_COMMUNITY_Community 439|Community 439]]
-- [[_COMMUNITY_Community 440|Community 440]]
-- [[_COMMUNITY_Community 441|Community 441]]
+- [[_COMMUNITY_Community 366|Community 366]]
+- [[_COMMUNITY_Community 367|Community 367]]
+- [[_COMMUNITY_Community 368|Community 368]]
+- [[_COMMUNITY_Community 369|Community 369]]
+- [[_COMMUNITY_Community 370|Community 370]]
+- [[_COMMUNITY_Community 371|Community 371]]
+- [[_COMMUNITY_Community 372|Community 372]]
+- [[_COMMUNITY_Community 373|Community 373]]
+- [[_COMMUNITY_Community 374|Community 374]]
+- [[_COMMUNITY_Community 375|Community 375]]
+- [[_COMMUNITY_Community 376|Community 376]]
+- [[_COMMUNITY_Community 377|Community 377]]
+- [[_COMMUNITY_Community 378|Community 378]]
+- [[_COMMUNITY_Community 379|Community 379]]
+- [[_COMMUNITY_Community 380|Community 380]]
+- [[_COMMUNITY_Community 381|Community 381]]
+- [[_COMMUNITY_Community 382|Community 382]]
+- [[_COMMUNITY_Community 383|Community 383]]
+- [[_COMMUNITY_Community 384|Community 384]]
+- [[_COMMUNITY_Community 385|Community 385]]
+- [[_COMMUNITY_Community 386|Community 386]]
+- [[_COMMUNITY_Community 387|Community 387]]
+- [[_COMMUNITY_Community 388|Community 388]]
+- [[_COMMUNITY_Community 389|Community 389]]
+- [[_COMMUNITY_Community 390|Community 390]]
+- [[_COMMUNITY_Community 391|Community 391]]
+- [[_COMMUNITY_Community 392|Community 392]]
+- [[_COMMUNITY_Community 393|Community 393]]
+- [[_COMMUNITY_Community 394|Community 394]]
+- [[_COMMUNITY_Community 395|Community 395]]
+- [[_COMMUNITY_Community 397|Community 397]]
+- [[_COMMUNITY_Community 399|Community 399]]
+- [[_COMMUNITY_Community 402|Community 402]]
+- [[_COMMUNITY_Community 411|Community 411]]
+- [[_COMMUNITY_Community 412|Community 412]]
 - [[_COMMUNITY_Community 442|Community 442]]
 - [[_COMMUNITY_Community 443|Community 443]]
-- [[_COMMUNITY_Community 444|Community 444]]
-- [[_COMMUNITY_Community 445|Community 445]]
-- [[_COMMUNITY_Community 446|Community 446]]
-- [[_COMMUNITY_Community 447|Community 447]]
-- [[_COMMUNITY_Community 448|Community 448]]
-- [[_COMMUNITY_Community 449|Community 449]]
 - [[_COMMUNITY_Community 450|Community 450]]
-- [[_COMMUNITY_Community 451|Community 451]]
-- [[_COMMUNITY_Community 452|Community 452]]
-- [[_COMMUNITY_Community 453|Community 453]]
+- [[_COMMUNITY_Community 456|Community 456]]
+- [[_COMMUNITY_Community 458|Community 458]]
+- [[_COMMUNITY_Community 459|Community 459]]
+- [[_COMMUNITY_Community 460|Community 460]]
+- [[_COMMUNITY_Community 461|Community 461]]
 - [[_COMMUNITY_Community 462|Community 462]]
-- [[_COMMUNITY_Community 463|Community 463]]
-- [[_COMMUNITY_Community 464|Community 464]]
-- [[_COMMUNITY_Community 465|Community 465]]
-- [[_COMMUNITY_Community 466|Community 466]]
-- [[_COMMUNITY_Community 467|Community 467]]
 - [[_COMMUNITY_Community 468|Community 468]]
-- [[_COMMUNITY_Community 469|Community 469]]
-- [[_COMMUNITY_Community 470|Community 470]]
-- [[_COMMUNITY_Community 471|Community 471]]
-- [[_COMMUNITY_Community 472|Community 472]]
-- [[_COMMUNITY_Community 473|Community 473]]
+- [[_COMMUNITY_Community 476|Community 476]]
+- [[_COMMUNITY_Community 477|Community 477]]
 - [[_COMMUNITY_Community 478|Community 478]]
 - [[_COMMUNITY_Community 479|Community 479]]
-- [[_COMMUNITY_Community 480|Community 480]]
-- [[_COMMUNITY_Community 481|Community 481]]
 - [[_COMMUNITY_Community 482|Community 482]]
-- [[_COMMUNITY_Community 483|Community 483]]
-- [[_COMMUNITY_Community 484|Community 484]]
 - [[_COMMUNITY_Community 485|Community 485]]
 - [[_COMMUNITY_Community 486|Community 486]]
-- [[_COMMUNITY_Community 501|Community 501]]
-- [[_COMMUNITY_Community 502|Community 502]]
-- [[_COMMUNITY_Community 503|Community 503]]
+- [[_COMMUNITY_Community 487|Community 487]]
+- [[_COMMUNITY_Community 488|Community 488]]
+- [[_COMMUNITY_Community 489|Community 489]]
+- [[_COMMUNITY_Community 490|Community 490]]
+- [[_COMMUNITY_Community 491|Community 491]]
+- [[_COMMUNITY_Community 492|Community 492]]
+- [[_COMMUNITY_Community 493|Community 493]]
+- [[_COMMUNITY_Community 494|Community 494]]
+- [[_COMMUNITY_Community 495|Community 495]]
+- [[_COMMUNITY_Community 496|Community 496]]
+- [[_COMMUNITY_Community 497|Community 497]]
+- [[_COMMUNITY_Community 498|Community 498]]
+- [[_COMMUNITY_Community 499|Community 499]]
+- [[_COMMUNITY_Community 500|Community 500]]
+- [[_COMMUNITY_Community 509|Community 509]]
+- [[_COMMUNITY_Community 510|Community 510]]
+- [[_COMMUNITY_Community 511|Community 511]]
 - [[_COMMUNITY_Community 512|Community 512]]
 - [[_COMMUNITY_Community 513|Community 513]]
+- [[_COMMUNITY_Community 514|Community 514]]
+- [[_COMMUNITY_Community 515|Community 515]]
 - [[_COMMUNITY_Community 516|Community 516]]
 - [[_COMMUNITY_Community 517|Community 517]]
-- [[_COMMUNITY_Community 522|Community 522]]
-- [[_COMMUNITY_Community 523|Community 523]]
-- [[_COMMUNITY_Community 524|Community 524]]
+- [[_COMMUNITY_Community 518|Community 518]]
+- [[_COMMUNITY_Community 519|Community 519]]
+- [[_COMMUNITY_Community 520|Community 520]]
+- [[_COMMUNITY_Community 525|Community 525]]
+- [[_COMMUNITY_Community 526|Community 526]]
 - [[_COMMUNITY_Community 527|Community 527]]
 - [[_COMMUNITY_Community 528|Community 528]]
 - [[_COMMUNITY_Community 529|Community 529]]
@@ -281,42 +331,44 @@
 - [[_COMMUNITY_Community 531|Community 531]]
 - [[_COMMUNITY_Community 532|Community 532]]
 - [[_COMMUNITY_Community 533|Community 533]]
-- [[_COMMUNITY_Community 534|Community 534]]
-- [[_COMMUNITY_Community 535|Community 535]]
-- [[_COMMUNITY_Community 536|Community 536]]
-- [[_COMMUNITY_Community 537|Community 537]]
-- [[_COMMUNITY_Community 538|Community 538]]
-- [[_COMMUNITY_Community 539|Community 539]]
-- [[_COMMUNITY_Community 541|Community 541]]
-- [[_COMMUNITY_Community 542|Community 542]]
-- [[_COMMUNITY_Community 543|Community 543]]
-- [[_COMMUNITY_Community 544|Community 544]]
 - [[_COMMUNITY_Community 548|Community 548]]
 - [[_COMMUNITY_Community 549|Community 549]]
 - [[_COMMUNITY_Community 550|Community 550]]
-- [[_COMMUNITY_Community 551|Community 551]]
-- [[_COMMUNITY_Community 552|Community 552]]
-- [[_COMMUNITY_Community 557|Community 557]]
-- [[_COMMUNITY_Community 558|Community 558]]
 - [[_COMMUNITY_Community 559|Community 559]]
 - [[_COMMUNITY_Community 560|Community 560]]
-- [[_COMMUNITY_Community 561|Community 561]]
 - [[_COMMUNITY_Community 562|Community 562]]
 - [[_COMMUNITY_Community 563|Community 563]]
 - [[_COMMUNITY_Community 564|Community 564]]
-- [[_COMMUNITY_Community 565|Community 565]]
-- [[_COMMUNITY_Community 566|Community 566]]
-- [[_COMMUNITY_Community 567|Community 567]]
 - [[_COMMUNITY_Community 568|Community 568]]
-- [[_COMMUNITY_Community 572|Community 572]]
+- [[_COMMUNITY_Community 569|Community 569]]
+- [[_COMMUNITY_Community 570|Community 570]]
+- [[_COMMUNITY_Community 573|Community 573]]
+- [[_COMMUNITY_Community 575|Community 575]]
+- [[_COMMUNITY_Community 576|Community 576]]
+- [[_COMMUNITY_Community 577|Community 577]]
+- [[_COMMUNITY_Community 580|Community 580]]
+- [[_COMMUNITY_Community 581|Community 581]]
 - [[_COMMUNITY_Community 582|Community 582]]
 - [[_COMMUNITY_Community 583|Community 583]]
+- [[_COMMUNITY_Community 584|Community 584]]
+- [[_COMMUNITY_Community 585|Community 585]]
+- [[_COMMUNITY_Community 586|Community 586]]
+- [[_COMMUNITY_Community 587|Community 587]]
+- [[_COMMUNITY_Community 588|Community 588]]
+- [[_COMMUNITY_Community 589|Community 589]]
+- [[_COMMUNITY_Community 590|Community 590]]
+- [[_COMMUNITY_Community 591|Community 591]]
+- [[_COMMUNITY_Community 592|Community 592]]
+- [[_COMMUNITY_Community 593|Community 593]]
+- [[_COMMUNITY_Community 594|Community 594]]
+- [[_COMMUNITY_Community 595|Community 595]]
+- [[_COMMUNITY_Community 596|Community 596]]
+- [[_COMMUNITY_Community 597|Community 597]]
+- [[_COMMUNITY_Community 601|Community 601]]
+- [[_COMMUNITY_Community 602|Community 602]]
 - [[_COMMUNITY_Community 603|Community 603]]
 - [[_COMMUNITY_Community 604|Community 604]]
-- [[_COMMUNITY_Community 606|Community 606]]
-- [[_COMMUNITY_Community 607|Community 607]]
-- [[_COMMUNITY_Community 608|Community 608]]
-- [[_COMMUNITY_Community 609|Community 609]]
+- [[_COMMUNITY_Community 605|Community 605]]
 - [[_COMMUNITY_Community 610|Community 610]]
 - [[_COMMUNITY_Community 611|Community 611]]
 - [[_COMMUNITY_Community 612|Community 612]]
@@ -328,37 +380,10 @@
 - [[_COMMUNITY_Community 618|Community 618]]
 - [[_COMMUNITY_Community 619|Community 619]]
 - [[_COMMUNITY_Community 620|Community 620]]
-- [[_COMMUNITY_Community 622|Community 622]]
-- [[_COMMUNITY_Community 623|Community 623]]
-- [[_COMMUNITY_Community 624|Community 624]]
+- [[_COMMUNITY_Community 621|Community 621]]
 - [[_COMMUNITY_Community 625|Community 625]]
-- [[_COMMUNITY_Community 626|Community 626]]
-- [[_COMMUNITY_Community 627|Community 627]]
-- [[_COMMUNITY_Community 628|Community 628]]
-- [[_COMMUNITY_Community 629|Community 629]]
-- [[_COMMUNITY_Community 630|Community 630]]
-- [[_COMMUNITY_Community 631|Community 631]]
-- [[_COMMUNITY_Community 632|Community 632]]
-- [[_COMMUNITY_Community 633|Community 633]]
-- [[_COMMUNITY_Community 634|Community 634]]
 - [[_COMMUNITY_Community 635|Community 635]]
-- [[_COMMUNITY_Community 637|Community 637]]
-- [[_COMMUNITY_Community 638|Community 638]]
-- [[_COMMUNITY_Community 639|Community 639]]
-- [[_COMMUNITY_Community 640|Community 640]]
-- [[_COMMUNITY_Community 641|Community 641]]
-- [[_COMMUNITY_Community 642|Community 642]]
-- [[_COMMUNITY_Community 643|Community 643]]
-- [[_COMMUNITY_Community 644|Community 644]]
-- [[_COMMUNITY_Community 645|Community 645]]
-- [[_COMMUNITY_Community 646|Community 646]]
-- [[_COMMUNITY_Community 647|Community 647]]
-- [[_COMMUNITY_Community 648|Community 648]]
-- [[_COMMUNITY_Community 649|Community 649]]
-- [[_COMMUNITY_Community 650|Community 650]]
-- [[_COMMUNITY_Community 651|Community 651]]
-- [[_COMMUNITY_Community 653|Community 653]]
-- [[_COMMUNITY_Community 654|Community 654]]
+- [[_COMMUNITY_Community 636|Community 636]]
 - [[_COMMUNITY_Community 656|Community 656]]
 - [[_COMMUNITY_Community 657|Community 657]]
 - [[_COMMUNITY_Community 658|Community 658]]
@@ -369,79 +394,88 @@
 - [[_COMMUNITY_Community 663|Community 663]]
 - [[_COMMUNITY_Community 664|Community 664]]
 - [[_COMMUNITY_Community 665|Community 665]]
+- [[_COMMUNITY_Community 666|Community 666]]
+- [[_COMMUNITY_Community 667|Community 667]]
+- [[_COMMUNITY_Community 668|Community 668]]
+- [[_COMMUNITY_Community 669|Community 669]]
+- [[_COMMUNITY_Community 670|Community 670]]
+- [[_COMMUNITY_Community 671|Community 671]]
+- [[_COMMUNITY_Community 672|Community 672]]
+- [[_COMMUNITY_Community 673|Community 673]]
+- [[_COMMUNITY_Community 675|Community 675]]
+- [[_COMMUNITY_Community 676|Community 676]]
+- [[_COMMUNITY_Community 679|Community 679]]
+- [[_COMMUNITY_Community 688|Community 688]]
+- [[_COMMUNITY_Community 693|Community 693]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `ValidationError` - 92 edges
 2. `NotFoundError` - 75 edges
 3. `User` - 54 edges
-4. `AiProviderError` - 41 edges
-5. `CourseService` - 38 edges
-6. `Composition root — wire concrete infrastructure into application services.` - 32 edges
-7. `TermService` - 30 edges
-8. `CourseRepository` - 29 edges
-9. `DeckService` - 28 edges
-10. `ListeningService` - 27 edges
+4. `AiProviderError` - 40 edges
+5. `CourseService` - 37 edges
+6. `CourseRepository` - 28 edges
+7. `TermService` - 27 edges
+8. `ListeningService` - 26 edges
+9. `RetryingHttpProvider` - 26 edges
+10. `DeckService` - 25 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `SQLAlchemyTableMixin` --uses--> `Meta`  [INFERRED]
+  backend/shared/infrastructure/sqlalchemy/tables.py → base/models/custom_model.py
+- `SQLAlchemyTableMixin` --uses--> `Keep pre-Django 5 UUID columns compatible with MariaDB 10.7+.`  [INFERRED]
+  backend/shared/infrastructure/sqlalchemy/tables.py → base/models/custom_model.py
+- `SQLAlchemyTableMixin` --uses--> `An abstract base class implementing a fully featured User model with     admin-c`  [INFERRED]
+  backend/shared/infrastructure/sqlalchemy/tables.py → base/models/custom_model.py
+- `SQLAlchemyTableMixin` --uses--> `Return the first_name plus the last_name, with a space in between.`  [INFERRED]
+  backend/shared/infrastructure/sqlalchemy/tables.py → base/models/custom_model.py
 - `CustomTokenAuthentication` --uses--> `UserRepository`  [INFERRED]
   core/authentication.py → backend/user/infrastructure/repository.py
-- `Generate per-character dialogue audio for imported courses.  Collects every dial` --uses--> `NotFoundError`  [INFERRED]
-  backend/management/commands/generate_course_audio.py → backend/shared/application/exceptions.py
-- `ValidationError` --uses--> `Mint a fresh token pair for the browser extension.          The SPA keeps its re`  [INFERRED]
-  backend/shared/application/exceptions.py → backend/views/user.py
-- `Service layer entry point — prefer composition singletons for new code.` --uses--> `MailService`  [INFERRED]
-  backend/services/__init__.py → backend/services/mail.py
-- `Failover across multiple AI providers.  Tries each provider in order; if one fai` --uses--> `AiProviderError`  [INFERRED]
-  backend/shared/infrastructure/ai/failover.py → backend/shared/infrastructure/ai/base.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (666 total, 222 thin omitted)
+## Communities (700 total, 240 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.06
-Nodes (31): CourseService, Course orchestration service.  Coordinates the course catalog/content (:class:`C, Per-line generated clips for a lesson: ``[{voice, text, audio, mime_type}]``., Score a role-play sentence-by-sentence and update lesson progress.          ``se, Add, update or remove a per-user noted highlight on a lesson., Persist a listen-and-type attempt so it can be replayed on revisit.          The, Delete the given courses' content before a fresh re-crawl. User         role-pla, Delete a single course (cascading its sections + lessons).          User role-pl (+23 more)
+Nodes (30): CourseService, Course orchestration service.  Coordinates the course catalog/content (:class:`C, Per-line generated clips for a lesson: ``[{voice, text, audio, mime_type}]``., Score a role-play sentence-by-sentence and update lesson progress.          ``se, Add, update or remove a per-user noted highlight on a lesson., Persist a listen-and-type attempt so it can be replayed on revisit.          The, Delete the given courses' content before a fresh re-crawl. User         role-pla, Delete a single course (cascading its sections + lessons).          User role-pl (+22 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.17
-Nodes (13): can_edit(), can_view(), DeckAccessPolicy, get_user_role(), is_member(), Deck access rules — domain policy, independent of Django ORM., TermAccessPolicy, EditableDeck (+5 more)
+Cohesion: 0.12
+Nodes (14): Recommended retry delay (seconds) from a Retry-After header, if any., _env_float(), _get_redis(), GlobalAiGate, _InProcessGate, Cross-process serialization + rate limiting for AI provider calls.  The original, A per-provider gate enforcing one-at-a-time + RPM across all processes., Load the Lua scripts once; returns False if Redis is unavailable. (+6 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.09
-Nodes (18): Recommended retry delay (seconds) from a Retry-After header, if any., ElevenLabsProvider, ElevenLabs text-to-speech implementation.  ElevenLabs is the active TTS provider, TTS-port alias for :meth:`generate_speech` (``language`` is ignored —         th, Synthesize ``text`` to speech with an ElevenLabs voice id.          Returns ``{", _env_float(), _get_redis(), GlobalAiGate (+10 more)
-
-### Community 3 - "Community 3"
 Cohesion: 0.10
 Nodes (35): AiResponseCache, Persistent cache of AI provider responses keyed by ``(context, request_hash)``., Course, CourseLesson, CourseSection, Meta, A unit of a course (a freeCodeCamp "block"), e.g. "Learn Greetings at the Office, A practiceable dialogue scene within a section.      Maps to a source "dialogue" (+27 more)
 
-### Community 4 - "Community 4"
+### Community 3 - "Community 3"
+Cohesion: 0.17
+Nodes (13): can_edit(), can_view(), DeckAccessPolicy, get_user_role(), is_member(), Deck access rules — domain policy, independent of Django ORM., TermAccessPolicy, EditableDeck (+5 more)
+
+### Community 5 - "Community 5"
 Cohesion: 0.09
 Nodes (15): SpeakingRepository, _clean_active_voice(), _clean_playable_voice(), Speaking Coach orchestration service.  Coordinates the AI coach (:class:`Speakin, Run pronunciation analysis and return the raw camelCase result only.          Un, Synthesize one line (cache-first) with the selected tutor voice., Upload base64 audio bytes to the audio store; return the URL (or "")., Delete cached TTS clips nothing references any more.          The :class:`Speaki (+7 more)
 
-### Community 5 - "Community 5"
-Cohesion: 0.12
-Nodes (6): Backward-compatible re-exports., CustomTokenAuthentication, JWTAuthentication, UserRepository, AuthService, Revoke a refresh token on logout so it can't be reused for its full         30-d
-
 ### Community 6 - "Community 6"
-Cohesion: 0.11
-Nodes (8): Command, BaseCommand, Command, Command, Command, Command, Run the scheduler tick loop without installing signal handlers.      scheduler.r, _scheduler_loop()
+Cohesion: 0.18
+Nodes (10): Command, extract_js_object(), make_session(), Import DailyDictation listen-and-type exercises into our Listening models.  Each, Extract a balanced ``{...}`` object literal that follows ``marker`` in ``text``., Ordered, de-duplicated ``{slug}.{id}`` references for a topic (single page)., Parse one exercise's ``window.appGlobals`` into an upsert payload., Fetch a page, retrying rate-limits (429) and transient errors.          DailyDic (+2 more)
 
 ### Community 7 - "Community 7"
-Cohesion: 0.18
-Nodes (10): benchmark_strategies(), BingImageSearchStrategy, _fetch_batch(), _fetch_from_providers(), get_preview_images(), ImageSearchStrategy, _is_blocked(), _merge_results() (+2 more)
+Cohesion: 0.12
+Nodes (4): ReminderRepository, A shuffled list (≤ :data:`MAX_REMINDERS`) of actionable reminders.          Each, ``(course, lesson_id)`` for the next lesson to study, or ``None``.          Pick, ReminderService
 
 ### Community 8 - "Community 8"
-Cohesion: 0.06
-Nodes (13): DeckRef, ReviseTermRow, _coerce_bool(), _coerce_list(), _extract_ai_fields(), _meaning_of(), TermService, Backward-compatible re-exports. (+5 more)
+Cohesion: 0.20
+Nodes (5): BSCrawler, GetImagesUrlView, CrawlerStrategyBenchmarkTest, GoogleImageParserTest, Live network benchmark for all image providers.      Requires Playwright Chromiu
 
 ### Community 9 - "Community 9"
-Cohesion: 0.10
-Nodes (5): _clip_keys(), delete_conversations(), get_clip(), hash_text(), _prune_orphan_clips()
+Cohesion: 0.09
+Nodes (8): owned_terms(), remember_response(), WritingRepository, Writing Coach orchestration service.  Coordinates the AI coach (:class:`WritingC, The user's own terms that appear in a session's text.          Accepts either an, Append the learner's message (with feedback) plus the tutor's reply., _session_texts(), WritingService
 
 ### Community 10 - "Community 10"
-Cohesion: 0.13
-Nodes (10): Composition root — wire concrete infrastructure into application services., ReminderRepository, ReviseRepository, Writing Coach application service.  All AI prompts, rules and JSON schemas for t, A shuffled list (≤ :data:`MAX_REMINDERS`) of actionable reminders.          Each, Reseed cards from recent mistakes, then return an ordered batch.          Return, Grade one answer, update the card and return the outcome.          ``given`` is, ``(course, lesson_id)`` for the next lesson to study, or ``None``.          Pick (+2 more)
+Cohesion: 0.07
+Nodes (12): DeckRef, ReviseTermRow, _coerce_bool(), _coerce_list(), _extract_ai_fields(), _meaning_of(), TermService, _EmptyRoles (+4 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.08
@@ -452,20 +486,20 @@ Cohesion: 0.09
 Nodes (20): ListeningExerciseSerializer, ListeningExerciseSummarySerializer, ListeningTopicDetailSerializer, ListeningTopicSummarySerializer, ListeningViewSet, _progress_payload(), _public_sentence(), Add, update or remove a per-user noted word/phrase on an exercise. (+12 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.09
-Nodes (14): cache_factory(), _CacheNamespace, CacheService, _DeckTermsCache, delete(), get(), _LearningProgressCache, Backward-compatible cache re-exports. (+6 more)
-
-### Community 14 - "Community 14"
 Cohesion: 0.08
 Nodes (11): AiTextPort, AudioStoragePort, CachePort, ImageStoragePort, OAuthPort, Provider-agnostic text-to-speech port.      Implementations talk to a concrete T, Provider-agnostic machine-translation port.      Implementations return the tran, Provider-agnostic text/JSON generation port.      Implementations talk to a conc (+3 more)
+
+### Community 14 - "Community 14"
+Cohesion: 0.14
+Nodes (19): _exercise_progress_payload(), GrammarCatalogSerializer, GrammarExercisePublicSerializer, GrammarSection, GrammarUnitDetailSerializer, GrammarViewSet, _public_item(), AI "explain" option: explain a rule, or why an answer is wrong.          Body: a (+11 more)
 
 ### Community 15 - "Community 15"
 Cohesion: 0.13
 Nodes (12): AssetMirror, character_folder(), Command, humanize_block(), _lesson_key(), make_session(), Import the freeCodeCamp English-for-Developers courses into our Course models., Mirrors freeCodeCamp character/background art into our Cloudinary once.      Thr (+4 more)
 
 ### Community 16 - "Community 16"
-Cohesion: 0.11
-Nodes (17): _exercise_progress_payload(), GrammarCatalogSerializer, GrammarExercisePublicSerializer, GrammarUnitDetailSerializer, GrammarViewSet, _public_item(), AI "explain" option: explain a rule, or why an answer is wrong.          Body: a, The book with sections → units and the user's progress counts. (+9 more)
+Cohesion: 0.12
+Nodes (17): AbstractBaseUser, Char32UUIDField, CustomAbstractUser, DateTimeModel, DateTimeUUIDModel, Meta, Keep pre-Django 5 UUID columns compatible with MariaDB 10.7+., An abstract base class implementing a fully featured User model with     admin-c (+9 more)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.11
@@ -476,12 +510,12 @@ Cohesion: 0.11
 Nodes (13): add_to_default_deck(), AddDefault, AddTerms, create_term(), CreateTerm, DeckIdQ, delete_term(), get_term() (+5 more)
 
 ### Community 19 - "Community 19"
-Cohesion: 0.29
-Nodes (6): Reflect a Django model's DB table into a SQLAlchemy Core Table.      Prefer ``Mo, Class-level descriptor backing ``Model.sa_table`` and ``Model.table``., Mixin that exposes reflected SQLAlchemy Core tables on Django models., SQLAlchemyTableDescriptor, SQLAlchemyTableMixin, table_for_model()
+Cohesion: 0.20
+Nodes (6): cache_factory(), _CacheNamespace, DeckTermsCache, LearningProgressCache, RESOURCE, Enum
 
 ### Community 20 - "Community 20"
-Cohesion: 0.05
-Nodes (10): Backward-compatible re-exports., clone_deck(), clone_deck_as(), DeckRepository, _decks_with_term_count(), get_latest_decks(), get_my_decks(), get_my_others_deck() (+2 more)
+Cohesion: 0.14
+Nodes (19): accepted(), accepted_alternatives(), blank_count(), grade_blanks(), grade_choice(), grade_exercise(), grade_item(), grade_sentence() (+11 more)
 
 ### Community 21 - "Community 21"
 Cohesion: 0.20
@@ -489,115 +523,115 @@ Nodes (19): _backup_files_query(), _delete_old_backups(), _download_drive_file()
 
 ### Community 22 - "Community 22"
 Cohesion: 0.16
-Nodes (9): AsyncWebsocketConsumer, get_revise_terms(), get_user_and_deck(), QuickReviseConsumer, save_learning_progress(), calculate_base_time(), calculate_leftover(), calculate_time_limit() (+1 more)
-
-### Community 23 - "Community 23"
-Cohesion: 0.14
-Nodes (19): accepted(), accepted_alternatives(), blank_count(), grade_blanks(), grade_choice(), grade_exercise(), grade_item(), grade_sentence() (+11 more)
-
-### Community 24 - "Community 24"
-Cohesion: 0.16
 Nodes (14): _clean_exercises(), _clean_explanation(), _clean_items(), dedupe_unit_slugs(), GrammarIngestService, merge_payloads(), Grammar PDF ingestion service.  Turns a grammar ebook (PDF) into the structured, Group AI-produced units into ordered sections with clean slugs/keys. (+6 more)
 
-### Community 25 - "Community 25"
+### Community 23 - "Community 23"
+Cohesion: 0.08
+Nodes (20): _clean_lines(), ListeningService, _looks_hosted(), Listening (dictation) orchestration service.  Coordinates the dictation catalog/, Persist a listen-and-type attempt and update completion state.          The fron, Auto-save the per-sentence answers checked so far.          Unlike :meth:`submit, Clear the saved per-sentence answers so the exercise starts fresh., Add, update or remove a per-user noted highlight on an exercise. (+12 more)
+
+### Community 24 - "Community 24"
 Cohesion: 0.11
 Nodes (4): Load a saved session by id so it can be opened by URL., Delete a single session., Writing Coach: AI chat practice, free-form draft assessment and history.      Th, WritingViewSet
 
-### Community 26 - "Community 26"
-Cohesion: 0.11
+### Community 25 - "Community 25"
+Cohesion: 0.12
 Nodes (4): Load a saved conversation by id so it can be opened by URL., Speaking Coach: AI dialogue generation, pronunciation analysis and history., Delete a single conversation (and its now-orphaned audio clips)., SpeakingViewSet
 
-### Community 28 - "Community 28"
+### Community 26 - "Community 26"
 Cohesion: 0.14
 Nodes (6): blankClass(), Exercise(), initGiven(), replayGiven(), Rewrite(), scoreTone()
 
-### Community 29 - "Community 29"
+### Community 27 - "Community 27"
 Cohesion: 0.18
 Nodes (12): _apply_to_name(), _chunks(), _as_str(), _as_str_list(), _normalize(), Application service that turns a bare term into Oxford-dictionary-style data.  I, Return generated term fields. Raises on provider/validation failure., Enrich several term names in a single AI request.          Returns a mapping of (+4 more)
 
-### Community 30 - "Community 30"
+### Community 28 - "Community 28"
 Cohesion: 0.05
 Nodes (18): APITestCase, GoogleOAuthClient, BodyLogoutContractTest, BodyRefreshRotationContractTest, EmailLoginBodyContractTest, GoogleAudienceValidationTest, GoogleInitBodyContractTest, Contract tests for the endpoints the native (Expo) app depends on.  The mobile c (+10 more)
 
-### Community 31 - "Community 31"
+### Community 29 - "Community 29"
 Cohesion: 0.26
 Nodes (13): buildPalette(), clamp(), clamp01(), darken(), harmonize(), hexToRgb(), hslToHex(), lighten() (+5 more)
 
-### Community 34 - "Community 34"
+### Community 32 - "Community 32"
 Cohesion: 0.12
 Nodes (7): CloudinaryAudioStorage, CloudinaryImageStorage, Upload raw SVG markup to Cloudinary at a deterministic ``public_id``.          `, Fetch ``source_url`` into Cloudinary at a deterministic ``public_id``., Stores TTS audio bytes on Cloudinary so they don't bloat the database.      Uplo, Fetch ``source_url`` into Cloudinary as raw audio, returning the hosted URL., Delete a previously uploaded raw audio asset. Returns True when removed.
 
-### Community 36 - "Community 36"
+### Community 35 - "Community 35"
 Cohesion: 0.16
 Nodes (4): SQLAlchemyDeckQueryTest, SQLAlchemyLearningQueryTest, SQLAlchemyTablePropertyTest, TransactionTestCase
 
-### Community 38 - "Community 38"
+### Community 37 - "Community 37"
 Cohesion: 0.21
 Nodes (7): avatarStyle(), backgroundUrl(), base64ToBytes(), clipBytes(), CoursePanel(), initials(), StageFigure()
 
-### Community 39 - "Community 39"
+### Community 38 - "Community 38"
 Cohesion: 0.22
 Nodes (7): base64ToBytes(), clipBytes(), decodeClip(), errorMessage(), isPcmMime(), pcm16ToAudioBuffer(), sampleRateFromMime()
 
-### Community 40 - "Community 40"
+### Community 39 - "Community 39"
 Cohesion: 0.21
 Nodes (7): CourseDetailSerializer, CourseLessonSerializer, CourseSectionSerializer, CourseSummarySerializer, _LessonProgressField, The requesting user's progress for a lesson, pulled from serializer context., Catalog row: a course plus the user's passed/total lesson counts.
+
+### Community 40 - "Community 40"
+Cohesion: 0.17
+Nodes (4): delete_folder(), FolderBody, update_folder(), UpdateFolder
 
 ### Community 41 - "Community 41"
 Cohesion: 0.15
 Nodes (3): CreateLp, DeckIdP, PriorityBody
 
-### Community 42 - "Community 42"
-Cohesion: 0.17
-Nodes (4): delete_folder(), FolderBody, update_folder(), UpdateFolder
+### Community 43 - "Community 43"
+Cohesion: 0.05
+Nodes (22): AI_LIST_FIELDS, AI_STRING_FIELDS, AssistantAction, AssistantApi, AssistantReply, AuthApi, CompetitionApi, CourseApi (+14 more)
 
 ### Community 44 - "Community 44"
-Cohesion: 0.29
-Nodes (7): AudioRecorder, playAudioUrl(), playBase64Audio(), playPreparedBytes(), playSpeechClip(), releaseActivePlayer(), speakText()
+Cohesion: 0.23
+Nodes (3): Manager, Returns the terms for the given deck.         When user is given, total_revision, TermManager
 
 ### Community 45 - "Community 45"
 Cohesion: 0.17
 Nodes (9): clamp_score(), interleave(), is_mastered(), priority(), Revise scheduling rules (pure — no Django, no I/O).  The Revise session is a lig, Coerce an arbitrary score into an integer percentage in ``[0, 100]``., A card leaves the rotation after a short run of correct answers., Scheduling score for a card — higher is shown sooner.      Never-missed-again ca (+1 more)
 
 ### Community 46 - "Community 46"
-Cohesion: 0.23
-Nodes (3): Manager, Returns the terms for the given deck.         When user is given, total_revision, TermManager
-
-### Community 47 - "Community 47"
 Cohesion: 0.20
 Nodes (7): AccessClaims, InviteClaims, issue_token_pair(), new_jti(), now_ts(), RefreshClaims, TokenPair
 
-### Community 49 - "Community 49"
-Cohesion: 0.22
-Nodes (3): AiAssistant(), clamp(), nextId()
+### Community 48 - "Community 48"
+Cohesion: 0.08
+Nodes (18): AssistantService, CompetitionService, The conversational brain for the Dragon floating assistant.      Stateless: ever, Dragon's reply to one learner message.          ``history`` is the recent transc, Keep only whitelisted, well-formed actions (drop hallucinations)., _str(), _strings(), Any (+10 more)
 
-### Community 51 - "Community 51"
+### Community 50 - "Community 50"
 Cohesion: 0.38
 Nodes (8): decodeBase64(), encodeWavFromPcm16(), extensionForMime(), isPcmMime(), normalizeBase64(), prepareSpeechClip(), sampleRateFromMime(), writeAscii()
 
-### Community 54 - "Community 54"
-Cohesion: 0.24
-Nodes (4): MailService, send_template_mail(), SendMailThread, Thread
-
-### Community 55 - "Community 55"
+### Community 53 - "Community 53"
 Cohesion: 0.42
 Nodes (7): buildVariants(), checkAnswer(), expandOptional(), levenshtein(), normalizeAnswer(), stripDiacritics(), toleranceFor()
 
-### Community 56 - "Community 56"
+### Community 54 - "Community 54"
+Cohesion: 0.08
+Nodes (18): AnimatedText, Props, styles, GameProps, GameSound, GAME_COMPONENTS, BOTS, COLUMNS (+10 more)
+
+### Community 55 - "Community 55"
 Cohesion: 0.31
 Nodes (4): getDoneSteps(), isStepDone(), markStepDone(), remainingSteps()
 
-### Community 57 - "Community 57"
+### Community 56 - "Community 56"
 Cohesion: 0.31
 Nodes (8): assign_voices(), default_voice(), _pools(), Character voice assignment for course dialogues.  Each dialogue character is giv, The fallback voice for ``provider`` (used when a line has no speaker)., A representative ``{"female", "male"}`` voice pair for ``provider``,     used to, Map ``{character_name: gender}`` → ``{character_name: voice}`` for ``provider``., sample_voices()
 
-### Community 58 - "Community 58"
+### Community 57 - "Community 57"
 Cohesion: 0.22
 Nodes (7): DeckDocument, Django, Index, Document, Django, Index, TermDocument
 
-### Community 59 - "Community 59"
+### Community 58 - "Community 58"
 Cohesion: 0.47
 Nodes (8): bearer_headers(), delete_both(), DualResponse, get_json_both(), post_json_both(), post_json_pair(), put_json_both(), request_json()
+
+### Community 60 - "Community 60"
+Cohesion: 0.09
+Nodes (19): courseApi, deckApi, grammarApi, imageApi, reminderApi, reviseApi, roleApi, speakingApi (+11 more)
 
 ### Community 61 - "Community 61"
 Cohesion: 0.36
@@ -671,281 +705,365 @@ Nodes (4): normalize_response(), strip_recursive(), strips_root_and_array_item_i
 Cohesion: 0.33
 Nodes (3): OnlyName, ProgressTerm, ReviseTermsPayload
 
-### Community 90 - "Community 90"
+### Community 91 - "Community 91"
 Cohesion: 0.40
 Nodes (3): BaseEmailBackend, EmailBackend, SMTP backend that uses certifi's CA bundle.      Needed on macOS/environments wh
 
-### Community 91 - "Community 91"
-Cohesion: 0.70
-Nodes (4): hasDomMarker(), isChromiumBrowser(), isExtensionInstalled(), probeWebAccessibleResource()
-
-### Community 95 - "Community 95"
-Cohesion: 0.60
-Nodes (3): LineAnalysis(), scoreLevel(), wpmStatus()
-
-### Community 97 - "Community 97"
-Cohesion: 0.40
-Nodes (4): backfill_keys(), Migration, Add the lesson natural key and decouple progress from the lesson FK.      Progre, Stamp every lesson with a stable global key and re-key existing progress.      k
-
-### Community 99 - "Community 99"
-Cohesion: 0.50
-Nodes (4): _pending_lines(), prewarm_speaking_audio(), Return up to ``max_lines`` distinct ``(voice, text, text_hash)`` conversation, Pre-generate Speaking Coach TTS clips for conversation lines lacking a cache.
-
-### Community 100 - "Community 100"
-Cohesion: 0.40
-Nodes (3): Pure rules for course lesson progression (no Django, no I/O)., Overall Live Role-play score: the average of the three sub-scores., role_play_score()
-
-### Community 101 - "Community 101"
-Cohesion: 0.50
-Nodes (4): cover_svg(), Hand-authored SVG cover art for the listening (dictation) topics.  Pure presenta, Return SVG markup for a topic cover matching the course cover system., _wrap()
-
-### Community 102 - "Community 102"
-Cohesion: 0.40
-Nodes (3): GoogleTranslateProvider, Free machine-translation adapter.  Wraps Google's public (unauthenticated) trans, Best-effort translation via Google's free ``gtx`` endpoint.
-
-### Community 108 - "Community 108"
-Cohesion: 0.60
-Nodes (3): authenticate(), AuthUser, user_to_json_value()
-
-### Community 109 - "Community 109"
-Cohesion: 0.60
-Nodes (3): build_cors(), create_router(), serve()
-
-### Community 110 - "Community 110"
-Cohesion: 0.40
-Nodes (3): AppConfig, BackendConfig, BaseConfig
-
-### Community 117 - "Community 117"
-Cohesion: 0.83
-Nodes (3): escapeRegExp(), highlightMainWord(), sanitizeExampleHtml()
-
-### Community 118 - "Community 118"
-Cohesion: 0.83
-Nodes (3): generateFillQuestions(), generateQuestions(), generateQuizQuestions()
-
-### Community 129 - "Community 129"
-Cohesion: 0.83
-Nodes (3): isSequenceValue(), NumberTest(), spellNumber()
-
-### Community 134 - "Community 134"
-Cohesion: 0.50
-Nodes (3): Migration, Backfill existing conversations (created before the voice picker) with the     d, set_default_voice()
-
-### Community 136 - "Community 136"
-Cohesion: 0.67
-Nodes (3): dispatch(), _has_active_worker(), Enqueue func if an RQ worker is running on queue_name, otherwise call it directl
-
-### Community 137 - "Community 137"
-Cohesion: 0.83
-Nodes (3): _build_url(), get_connection(), get_engine()
-
-### Community 139 - "Community 139"
-Cohesion: 0.83
-Nodes (3): clear_db_env(), database_url_from_env_builds_from_db_vars(), database_url_from_env_uses_database_url_when_set()
-
-### Community 323 - "Community 323"
-Cohesion: 0.08
-Nodes (20): _clean_lines(), ListeningService, _looks_hosted(), Listening (dictation) orchestration service.  Coordinates the dictation catalog/, Persist a listen-and-type attempt and update completion state.          The fron, Auto-save the per-sentence answers checked so far.          Unlike :meth:`submit, Clear the saved per-sentence answers so the exercise starts fresh., Add, update or remove a per-user noted highlight on an exercise. (+12 more)
-
-### Community 603 - "Community 603"
-Cohesion: 0.05
-Nodes (7): clip_hash(), get_exercise(), get_progress(), record_attempt(), set_highlight(), upsert_exercise(), upsert_section()
-
-### Community 604 - "Community 604"
+### Community 92 - "Community 92"
 Cohesion: 0.10
 Nodes (14): _exercise_broken_items(), GrammarService, _normalize_item_text(), Grammar feature orchestration service.  Coordinates the book/section/unit/exerci, Grade a submitted attempt server-side, persist it and roll up the unit., Reset a user's practice results for one unit (highlights are kept).          Ret, Upsert a whole book from a structured dict; returns import counts.          The, Wipe all grammar content before a fresh import. User progress survives         ( (+6 more)
 
-### Community 606 - "Community 606"
-Cohesion: 0.12
-Nodes (17): AiProviderError, _loads_object(), Shared HTTP/retry plumbing for AI providers.  Concrete providers (Gemini, DeepSe, POST ``payload`` and return the decoded JSON body, retrying transient errors., POST ``payload`` and return the raw response body (e.g. audio), with retries., Pace consecutive requests to stay under a per-minute quota., Sleep before a retry, honoring a server-specified delay when present., Raised when an AI provider call fails or returns unusable output. (+9 more)
+### Community 93 - "Community 93"
+Cohesion: 0.70
+Nodes (4): hasDomMarker(), isChromiumBrowser(), isExtensionInstalled(), probeWebAccessibleResource()
 
-### Community 607 - "Community 607"
+### Community 97 - "Community 97"
+Cohesion: 0.60
+Nodes (3): LineAnalysis(), scoreLevel(), wpmStatus()
+
+### Community 100 - "Community 100"
+Cohesion: 0.40
+Nodes (3): AppConfig, BackendConfig, BaseConfig
+
+### Community 101 - "Community 101"
+Cohesion: 0.40
+Nodes (4): backfill_keys(), Migration, Add the lesson natural key and decouple progress from the lesson FK.      Progre, Stamp every lesson with a stable global key and re-key existing progress.      k
+
+### Community 103 - "Community 103"
+Cohesion: 0.50
+Nodes (4): _pending_lines(), prewarm_speaking_audio(), Return up to ``max_lines`` distinct ``(voice, text, text_hash)`` conversation, Pre-generate Speaking Coach TTS clips for conversation lines lacking a cache.
+
+### Community 104 - "Community 104"
+Cohesion: 0.40
+Nodes (3): Pure rules for course lesson progression (no Django, no I/O)., Overall Live Role-play score: the average of the three sub-scores., role_play_score()
+
+### Community 105 - "Community 105"
+Cohesion: 0.50
+Nodes (4): cover_svg(), Hand-authored SVG cover art for the listening (dictation) topics.  Pure presenta, Return SVG markup for a topic cover matching the course cover system., _wrap()
+
+### Community 106 - "Community 106"
+Cohesion: 0.40
+Nodes (3): GoogleTranslateProvider, Free machine-translation adapter.  Wraps Google's public (unauthenticated) trans, Best-effort translation via Google's free ``gtx`` endpoint.
+
+### Community 112 - "Community 112"
+Cohesion: 0.60
+Nodes (3): authenticate(), AuthUser, user_to_json_value()
+
+### Community 113 - "Community 113"
+Cohesion: 0.60
+Nodes (3): build_cors(), create_router(), serve()
+
+### Community 121 - "Community 121"
+Cohesion: 0.83
+Nodes (3): escapeRegExp(), highlightMainWord(), sanitizeExampleHtml()
+
+### Community 122 - "Community 122"
+Cohesion: 0.83
+Nodes (3): generateFillQuestions(), generateQuestions(), generateQuizQuestions()
+
+### Community 123 - "Community 123"
+Cohesion: 0.07
+Nodes (26): ✨ AI flow 1 — Term enrichment, 🗣️ AI flow 2 — The Speaking Coach, ⏰ Background jobs & cron, 🧩 Chrome extension, 📚 Courses, Listening, Grammar, Writing & mixed Revise, 🗂️ Data model (ER diagram), 🚢 Deployment, 🐉 FlashLearn — Architecture & System Guide (+18 more)
+
+### Community 125 - "Community 125"
+Cohesion: 0.11
+Nodes (13): ORM access for competition scores. The only place competition rows are read or w, CompetitionScore, Meta, A player's best score for one competition mini-game on one deck.      Competitio, CompetitionPoolSerializer, LeaderboardEntrySerializer, LeaderboardSerializer, Meta (+5 more)
+
+### Community 126 - "Community 126"
+Cohesion: 0.06
+Nodes (27): Competition, CompetitionGame, Course, CreateDeck, DeckDetail, DeckPage, EditDeck, Grammar (+19 more)
+
+### Community 127 - "Community 127"
+Cohesion: 0.13
+Nodes (12): learningApi, styles, styles, styles, AudioRecorder, playAudioUrl(), PlaybackResult, playBase64Audio() (+4 more)
+
+### Community 134 - "Community 134"
+Cohesion: 0.83
+Nodes (3): isSequenceValue(), NumberTest(), spellNumber()
+
+### Community 137 - "Community 137"
+Cohesion: 0.13
+Nodes (15): Exception, ConflictError, DomainError, PermissionDeniedError, Base class for domain/application errors., ValidationError, Mixed "Revise" session: past mistakes across every feature, hardest first., Build a fresh session (answer-free cards ready to play).          Body (optional (+7 more)
+
+### Community 138 - "Community 138"
+Cohesion: 0.10
+Nodes (5): _clip_keys(), delete_conversations(), get_clip(), hash_text(), _prune_orphan_clips()
+
+### Community 141 - "Community 141"
+Cohesion: 0.50
+Nodes (3): Migration, Backfill existing conversations (created before the voice picker) with the     d, set_default_voice()
+
+### Community 143 - "Community 143"
+Cohesion: 0.67
+Nodes (3): dispatch(), _has_active_worker(), Enqueue func if an RQ worker is running on queue_name, otherwise call it directl
+
+### Community 144 - "Community 144"
+Cohesion: 0.83
+Nodes (3): _build_url(), get_connection(), get_engine()
+
+### Community 145 - "Community 145"
+Cohesion: 0.09
+Nodes (20): Architecture, Auth, Building & Pushing Images to Docker Hub, Commands, Django App Structure, Django Backend, Docker, Environment Variables (+12 more)
+
+### Community 147 - "Community 147"
+Cohesion: 0.83
+Nodes (3): clear_db_env(), database_url_from_env_builds_from_db_vars(), database_url_from_env_uses_database_url_when_set()
+
+### Community 180 - "Community 180"
+Cohesion: 0.10
+Nodes (6): clip_hash(), get_exercise(), get_progress(), record_attempt(), set_highlight(), upsert_exercise()
+
+### Community 184 - "Community 184"
 Cohesion: 0.13
 Nodes (13): active_account(), clear_refresh_cookie(), google_login(), init(), login(), logout(), Store the refresh token in an HttpOnly cookie so JS (incl. XSS) can't read     i, One token pair for a fresh session. Returns (refresh_token, body) where     body (+5 more)
 
-### Community 608 - "Community 608"
+### Community 185 - "Community 185"
 Cohesion: 0.12
 Nodes (12): _band(), _format_history(), _normalize_draft_feedback(), _normalize_message_feedback(), _normalize_support(), AI operations for the Writing Coach feature.      Depends only on a text/JSON-ca, The tutor's next conversational turn given the running ``history``., Correction feedback for one learner chat message. (+4 more)
 
-### Community 609 - "Community 609"
-Cohesion: 0.13
-Nodes (6): WritingRepository, Writing Coach orchestration service.  Coordinates the AI coach (:class:`WritingC, The user's own terms that appear in a session's text.          Accepts either an, Append the learner's message (with feedback) plus the tutor's reply., _session_texts(), WritingService
+### Community 186 - "Community 186"
+Cohesion: 0.14
+Nodes (12): competitionApi, CompetitionGameScreen(), GAME_ICONS, isGameUnlocked(), REQUIREMENT_FLAG, REQUIREMENT_REASON, requirementReason(), styles (+4 more)
 
-### Community 610 - "Community 610"
+### Community 187 - "Community 187"
+Cohesion: 0.13
+Nodes (8): clone_deck(), clone_deck_as(), DeckRepository, _decks_with_term_count(), get_latest_decks(), get_my_decks(), get_my_others_deck(), Clone preset starter decks for a new user.          ``deck_specs`` is an iterabl
+
+### Community 188 - "Community 188"
 Cohesion: 0.11
 Nodes (10): GrammarCoachService, AI operations for the Grammar feature (the new AI Assistant option)., Explain a grammar rule, or why a learner's answer was wrong.          Any subset, Rewrite one unit's explanation + exercises for the web.          Given a unit di, Write one exercise-only practice lesson reviewing ``topics``.          Returns `, Convert raw extracted text from consecutive PDF pages into units.          Retur, Reconstruct readable units from noisy OCR of consecutive pages.          Unlike, Attach the unit's answer-key answers to its reconstructed items.          ``exer (+2 more)
 
-### Community 611 - "Community 611"
+### Community 194 - "Community 194"
+Cohesion: 0.15
+Nodes (12): add_user_to_deck(), adjust_priority(), get_by_id(), LearningRepository, record_correct(), record_incorrect(), record_quick_revise_answer(), RoleRepository (+4 more)
+
+### Community 195 - "Community 195"
 Cohesion: 0.11
 Nodes (6): DeckViewSet, FlexibleViewSet, RoleViewSet, SearchViewSet, TermViewSet, UserViewSet
 
-### Community 612 - "Community 612"
+### Community 197 - "Community 197"
 Cohesion: 0.14
 Nodes (11): ABC, CursorPagination, build(), DeckSearchQuery, TermSearchQuery, LatestlCursorPagination, Generate Oxford-style fields for a term without persisting them., Mint a fresh token pair for the browser extension.          The SPA keeps its re (+3 more)
 
-### Community 613 - "Community 613"
-Cohesion: 0.16
-Nodes (3): Backward-compatible re-exports., LearningService, Apply a correct/incorrect vocabulary result from a revise session.          Get-
-
-### Community 614 - "Community 614"
+### Community 198 - "Community 198"
 Cohesion: 0.14
 Nodes (8): Deck, default_background_path(), UserLearningProgress, Meta, UserDeckRole, Meta, Term, UUIDModel
 
-### Community 615 - "Community 615"
+### Community 199 - "Community 199"
 Cohesion: 0.24
 Nodes (13): DeckDetailSerializer, DeckSerializer, Meta, MyDeckSerializer, CreateLearningProgressSerializer, LearningStreakSerializer, Meta, ProgressSerializer (+5 more)
 
-### Community 616 - "Community 616"
-Cohesion: 0.18
-Nodes (13): Exception, ConflictError, DomainError, NotFoundError, PermissionDeniedError, Base class for domain/application errors., Mixed "Revise" session: past mistakes across every feature, hardest first., Build a fresh session (answer-free cards ready to play).          Body (optional (+5 more)
+### Community 200 - "Community 200"
+Cohesion: 0.16
+Nodes (11): AzureTextToSpeechProvider, Azure AI Speech — Text-to-Speech (REST synthesis API).  Synthesizes speech from, Azure Speech text-to-speech over the REST synthesis API., Synthesize ``text`` in ``voice``; return ``{"audio": base64, "mime_type"}``., _voice_lang(), AiProviderError, _loads_object(), Shared HTTP/retry plumbing for AI providers.  Concrete providers (Gemini, DeepSe (+3 more)
 
-### Community 617 - "Community 617"
-Cohesion: 0.18
-Nodes (10): Command, extract_js_object(), make_session(), Import DailyDictation listen-and-type exercises into our Listening models.  Each, Extract a balanced ``{...}`` object literal that follows ``marker`` in ``text``., Ordered, de-duplicated ``{slug}.{id}`` references for a topic (single page)., Parse one exercise's ``window.appGlobals`` into an upsert payload., Fetch a page, retrying rate-limits (429) and transient errors.          DailyDic (+2 more)
-
-### Community 618 - "Community 618"
+### Community 236 - "Community 236"
 Cohesion: 0.18
 Nodes (11): CourseViewSet, Save a listen-and-type (dictation) attempt so it replays on revisit.          Bo, Add, update or remove a per-user noted word/phrase on a lesson., Structured English courses: catalog, content and Live Role-play scoring.      Th, Distinct course levels for the catalog's level filter: ``{"levels": [...]}``., Per-line generated character clips: ``{"lines": [{voice, text, audio, mime_type}, Score a Live Role-play recording sentence-by-sentence and update progress., PageNumberPagination (+3 more)
 
-### Community 619 - "Community 619"
+### Community 241 - "Community 241"
+Cohesion: 0.15
+Nodes (11): POST ``payload`` and return the decoded JSON body, retrying transient errors., POST ``payload`` and return the raw response body (e.g. audio), with retries., Pace consecutive requests to stay under a per-minute quota., Sleep before a retry, honoring a server-specified delay when present., Base class providing throttling + retry/backoff around a POST request., POST ``payload`` and return the raw 200 response, retrying transient errors., _retry_delay(), RetryingHttpProvider (+3 more)
+
+### Community 277 - "Community 277"
+Cohesion: 0.13
+Nodes (6): AiAssistant(), clamp(), HIDE_OPTIONS, nextId(), getTourForPath(), TOURS
+
+### Community 278 - "Community 278"
+Cohesion: 0.13
+Nodes (5): CustomTokenAuthentication, JWTAuthentication, UserRepository, AuthService, Revoke a refresh token on logout so it can't be reused for its full         30-d
+
+### Community 279 - "Community 279"
 Cohesion: 0.12
 Nodes (4): LearningContextApi, Public API for user-related operations from other contexts., TermContextApi, UserContextApi
 
-### Community 620 - "Community 620"
-Cohesion: 0.17
-Nodes (10): FailoverAiProvider, Failover across multiple AI providers.  Tries each provider in order; if one fai, _build(), build_named_provider(), build_tts_provider(), get_ai_provider(), _provider_chain(), Service layer entry point — prefer composition singletons for new code. (+2 more)
+### Community 281 - "Community 281"
+Cohesion: 0.21
+Nodes (5): ReviseRepository, Writing Coach application service.  All AI prompts, rules and JSON schemas for t, Reseed cards from recent mistakes, then return an ordered batch.          Return, Grade one answer, update the card and return the outcome.          ``given`` is, ReviseService
 
-### Community 622 - "Community 622"
-Cohesion: 0.17
-Nodes (4): clone_starter_decks_for_user(), create_default_deck_for_user(), UserService, Backward-compatible re-exports.
-
-### Community 623 - "Community 623"
+### Community 283 - "Community 283"
 Cohesion: 0.27
 Nodes (14): _assessment(), audio_clip_public_id(), _int(), _join_ipa(), _map_azure_analysis(), _normalize_analysis(), _normalize_conversation(), Deterministic Cloudinary id for a cached clip, so re-uploads overwrite the     s (+6 more)
 
-### Community 625 - "Community 625"
-Cohesion: 0.23
-Nodes (8): adjust_priority(), LearningRepository, record_correct(), record_incorrect(), record_quick_revise_answer(), save(), toggle_skip(), touch_learned()
+### Community 285 - "Community 285"
+Cohesion: 0.16
+Nodes (9): BotAnswer, BOT_PROFILES, BotProfile, Difficulty, GAME_KEYS, GameKey, GameMeta, GameRequirement (+1 more)
 
-### Community 626 - "Community 626"
+### Community 286 - "Community 286"
+Cohesion: 0.19
+Nodes (9): FailoverAiProvider, Failover across multiple AI providers.  Tries each provider in order; if one fai, _build(), build_named_provider(), build_tts_provider(), get_ai_provider(), _provider_chain(), Build a TTS provider by name (``azure`` | ``elevenlabs`` | ``kokoro``).      Eac (+1 more)
+
+### Community 289 - "Community 289"
+Cohesion: 0.19
+Nodes (11): blankExample(), buildSentenceQuestions(), buildSynAntQuestions(), escapeRegExp(), ImageOption, ImageQuestion, McqQuestion, pickOne() (+3 more)
+
+### Community 300 - "Community 300"
+Cohesion: 0.14
+Nodes (13): API URL by target, Authentication model, Common issues, Development setup, Environment variables, Features, FlashLearn Mobile, Known limitations (+5 more)
+
+### Community 306 - "Community 306"
+Cohesion: 0.21
+Nodes (9): assistantApi, HomeScreen(), styles, ChatPanel(), Message, nextId(), styles, useLatestDecks() (+1 more)
+
+### Community 308 - "Community 308"
 Cohesion: 0.21
 Nodes (7): _clamp_severity(), _distractor_meanings(), Persistence for the Writing Coach feature.  All Django ORM access for writing se, speaking_candidates(), _text_ref(), upsert_card(), vocab_candidates()
 
-### Community 627 - "Community 627"
+### Community 309 - "Community 309"
 Cohesion: 0.21
 Nodes (4): DeckAccessPolicyTest, _Role, _Roles, _User
 
-### Community 628 - "Community 628"
+### Community 311 - "Community 311"
+Cohesion: 0.21
+Nodes (3): clone_starter_decks_for_user(), create_default_deck_for_user(), UserService
+
+### Community 312 - "Community 312"
 Cohesion: 0.18
 Nodes (5): is_elevenlabs_voice(), AI operations for the Speaking Coach feature.      ``ai`` handles text/JSON gene, Add friendly coaching text (struggles, mouth tips, summary) in place.          A, Generate tutor speech for ``text``, routing to the voice's provider.          El, SpeakingCoachService
 
-### Community 629 - "Community 629"
-Cohesion: 0.20
-Nodes (9): AbstractBaseUser, CustomAbstractUser, DateTimeModel, DateTimeUUIDModel, Meta, An abstract base class implementing a fully featured User model with     admin-c, Return the first_name plus the last_name, with a space in between., UUIDModel (+1 more)
-
-### Community 630 - "Community 630"
+### Community 313 - "Community 313"
 Cohesion: 0.17
-Nodes (9): Meta, A generated Speaking Coach dialogue saved to a user's practice history., Persistent cache of Gemini TTS audio for a ``(voice, text)`` pair.      Shared a, A pronunciation analysis result saved to a user's practice history., SpeakingAnalysis, SpeakingAnalysisSerializer, SpeakingAudioClip, SpeakingConversation (+1 more)
+Nodes (5): BaseCommand, Command, Command, Command, Command
 
-### Community 631 - "Community 631"
+### Community 314 - "Community 314"
 Cohesion: 0.21
 Nodes (6): GeminiProvider, _parse(), _parse_audio(), Google Gemini implementation of :class:`AiTextPort`.  Uses the Generative Langua, Synthesize ``text`` to speech with a Gemini prebuilt voice.          Returns ``{, _resolve_verify()
 
-### Community 632 - "Community 632"
-Cohesion: 0.20
-Nodes (5): BSCrawler, GetImagesUrlView, CrawlerStrategyBenchmarkTest, GoogleImageParserTest, Live network benchmark for all image providers.      Requires Playwright Chromiu
-
-### Community 633 - "Community 633"
-Cohesion: 0.18
-Nodes (5): SimpleTestCase, ImageServiceTest, _make_jpeg_bytes(), test_optimize_large_image_reduces_size(), QuickReviseGameTest
-
-### Community 634 - "Community 634"
+### Community 320 - "Community 320"
 Cohesion: 0.24
 Nodes (6): _assessment_header(), AzureSpeechProvider, _content_type(), Azure AI Speech — Pronunciation Assessment (REST short-audio API).  Unlike the t, Azure Speech pronunciation assessment over the REST short-audio API., Return Azure's detailed pronunciation-assessment JSON for one utterance.
 
-### Community 638 - "Community 638"
-Cohesion: 0.24
-Nodes (5): AzureTextToSpeechProvider, Azure AI Speech — Text-to-Speech (REST synthesis API).  Synthesizes speech from, Azure Speech text-to-speech over the REST synthesis API., Synthesize ``text`` in ``voice``; return ``{"audio": base64, "mime_type"}``., _voice_lang()
+### Community 324 - "Community 324"
+Cohesion: 0.25
+Nodes (9): GamePool, GamePoolAvailability, GamePoolCounts, isPlayableTerm(), nonEmptyString(), nonEmptyStringArray(), termHasExample(), termHasImage() (+1 more)
 
-### Community 639 - "Community 639"
+### Community 327 - "Community 327"
+Cohesion: 0.18
+Nodes (10): Configuration, Debug, Docker, Flashlearn Rust API, Layout (DDD-style), License, Limitations / follow-ups, Prerequisites (+2 more)
+
+### Community 334 - "Community 334"
+Cohesion: 0.20
+Nodes (9): 1. Theme adherence (frontend) — `.cursor/rules/frontend-theming.mdc`, 2. Mobile responsiveness (frontend) — `.cursor/rules/responsive-mobile.mdc`, 3. Onboarding tour / user guide (frontend) — `.cursor/rules/user-guide.mdc`, 4. Backend layering (Django) — `.cursor/rules/backend-architecture.mdc`, 5. Knowledge graph — `.cursor/rules/graphify.mdc`, AGENTS.md — Universal AI agent guide for FlashLearn, Commands, architecture & setup, Project rules — always check before finishing a change (+1 more)
+
+### Community 335 - "Community 335"
+Cohesion: 0.22
+Nodes (8): writingApi, BAND_LABELS, Correction, FeedbackReport(), fmtBand(), LEVELS, styles, WritingFeedback
+
+### Community 336 - "Community 336"
+Cohesion: 0.20
+Nodes (7): Meta, Persistent cache of Gemini TTS audio for a ``(voice, text)`` pair.      Shared a, A pronunciation analysis result saved to a user's practice history., SpeakingAnalysis, SpeakingAnalysisSerializer, SpeakingAudioClip, SpeakingConversationSerializer
+
+### Community 337 - "Community 337"
+Cohesion: 0.24
+Nodes (4): MailService, send_template_mail(), SendMailThread, Thread
+
+### Community 395 - "Community 395"
 Cohesion: 0.24
 Nodes (5): _encode_wav(), KokoroTtsProvider, Kokoro-82M — local, open-source text-to-speech (offline).  Runs the Apache-2.0 `, Local Kokoro-82M synthesis with the same interface as the cloud TTS providers., Synthesize ``text`` in ``voice``; return ``{"audio": base64 wav, "mime_type"}``.
 
-### Community 641 - "Community 641"
+### Community 412 - "Community 412"
+Cohesion: 0.27
+Nodes (4): GAME_ICONS, REQUIREMENT_INFO, CompetitionGamePage(), getGameMeta()
+
+### Community 442 - "Community 442"
 Cohesion: 0.24
-Nodes (3): Char32UUIDFieldTest, Char32UUIDField, Keep pre-Django 5 UUID columns compatible with MariaDB 10.7+.
+Nodes (6): Blaster(), BlasterGame(), applyAnswer(), comboMultiplier(), ComboState, initialComboState()
 
-### Community 642 - "Community 642"
-Cohesion: 0.33
-Nodes (3): _build_exercise(), Command, Seed ten short, practical English courses (5 A2, 4 B1, 1 B2) into the DB.  Unlik
-
-### Community 643 - "Community 643"
+### Community 443 - "Community 443"
 Cohesion: 0.22
 Nodes (5): ChangePasswordSerializer, GoogleCallbackSerializer, GoogleUserSerializer, Meta, SetPasswordSerializer
 
-### Community 644 - "Community 644"
-Cohesion: 0.22
-Nodes (5): add_user_to_deck(), get_by_id(), RoleRepository, user_in_deck(), RoleService
-
-### Community 645 - "Community 645"
+### Community 450 - "Community 450"
 Cohesion: 0.22
 Nodes (7): AddUserToDeckSerializer, InviteSerializer, Input serializer for the add_user_to_deck action.      Kept separate from AddUse, Ensure that the role is valid., RemoveUserSerializer, UpdateRoleSerializer, UserDeckRoleSerializer
 
-### Community 646 - "Community 646"
+### Community 456 - "Community 456"
+Cohesion: 0.25
+Nodes (4): ElevenLabsProvider, ElevenLabs text-to-speech implementation.  ElevenLabs is the active TTS provider, TTS-port alias for :meth:`generate_speech` (``language`` is ignored —         th, Synthesize ``text`` to speech with an ElevenLabs voice id.          Returns ``{"
+
+### Community 458 - "Community 458"
 Cohesion: 0.28
 Nodes (5): LMStudioProvider, _parse(), LM Studio implementation of :class:`AiTextPort`.  LM Studio runs open-weight mod, Recursively convert a Gemini-style schema to standard JSON Schema., _to_json_schema()
 
-### Community 647 - "Community 647"
+### Community 459 - "Community 459"
+Cohesion: 0.25
+Nodes (7): Celebration(), EMOJIS, styles, { width, height }, GameOver(), Props, styles
+
+### Community 460 - "Community 460"
+Cohesion: 0.31
+Nodes (5): benchmark_strategies(), BingImageSearchStrategy, ImageSearchStrategy, OpenverseImageSearchStrategy, WikimediaImageSearchStrategy
+
+### Community 461 - "Community 461"
 Cohesion: 0.29
 Nodes (4): AzureOpenAIProvider, _parse(), Azure OpenAI implementation of :class:`AiTextPort`.  Talks to an Azure OpenAI re, RetryingHttpProvider
 
-### Community 648 - "Community 648"
+### Community 468 - "Community 468"
+Cohesion: 0.39
+Nodes (4): _fetch_batch(), _fetch_from_providers(), get_preview_images(), _merge_results()
+
+### Community 476 - "Community 476"
 Cohesion: 0.32
 Nodes (4): OpenRouterProvider, _parse(), OpenRouter implementation of :class:`AiTextPort`.  OpenRouter exposes an OpenAI-, _resolve_model()
 
-### Community 650 - "Community 650"
+### Community 477 - "Community 477"
+Cohesion: 0.38
+Nodes (4): calculate_base_time(), calculate_leftover(), calculate_time_limit(), QuickReviseGame
+
+### Community 478 - "Community 478"
 Cohesion: 0.38
 Nodes (3): Command, _process(), Mirror dictation sentence audio to our CDN (with a TTS fallback).  For every lis
 
-### Community 651 - "Community 651"
+### Community 479 - "Community 479"
 Cohesion: 0.29
 Nodes (6): AddTermsToDeckSerializer, LearningTermSerializer, OnlyNameTermSerializer, ProgressTermSerializer, ReviseTermSerializer, TermNestInDeckSerializer
 
-### Community 653 - "Community 653"
+### Community 562 - "Community 562"
+Cohesion: 0.33
+Nodes (4): SimpleTestCase, ImageServiceTest, _make_jpeg_bytes(), test_optimize_large_image_reduces_size()
+
+### Community 568 - "Community 568"
+Cohesion: 0.33
+Nodes (4): listeningApi, LineResult, SentenceMeta, styles
+
+### Community 569 - "Community 569"
 Cohesion: 0.33
 Nodes (3): Meta, UserSetting, UserSettingSerializer
 
-### Community 654 - "Community 654"
+### Community 570 - "Community 570"
 Cohesion: 0.33
 Nodes (4): Meta, A Writing Coach practice session saved to a user's history.      One unified rec, WritingSession, WritingSessionSerializer
 
-### Community 658 - "Community 658"
+### Community 593 - "Community 593"
+Cohesion: 0.53
+Nodes (3): GoogleImageSearchStrategy, _is_blocked(), _parse_images()
+
+### Community 659 - "Community 659"
 Cohesion: 0.40
 Nodes (3): Meta, Serializers for the Revise session.  A card is rendered *answer-free*: the clien, ReviseCard
 
-### Community 660 - "Community 660"
+### Community 661 - "Community 661"
 Cohesion: 0.67
 Nodes (3): make_hash(), Meta, remember()
 
 ## Knowledge Gaps
-- **129 isolated node(s):** `Migration`, `Meta`, `SKIP_REDIS`, `Migration`, `Migration` (+124 more)
+- **324 isolated node(s):** `Commands, architecture & setup`, `1. Theme adherence (frontend) — `.cursor/rules/frontend-theming.mdc``, `2. Mobile responsiveness (frontend) — `.cursor/rules/responsive-mobile.mdc``, `3. Onboarding tour / user guide (frontend) — `.cursor/rules/user-guide.mdc``, `4. Backend layering (Django) — `.cursor/rules/backend-architecture.mdc`` (+319 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **222 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **240 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DeckAccessPolicy` connect `Community 1` to `Community 614`, `Community 615`, `Community 616`, `Community 8`, `Community 618`, `Community 627`, `Community 20`, `Community 22`?**
-  _High betweenness centrality (0.058) - this node is a cross-community bridge._
-- **Why does `Composition root — wire concrete infrastructure into application services.` connect `Community 10` to `Community 608`, `Community 609`, `Community 0`, `Community 323`, `Community 4`, `Community 5`, `Community 610`, `Community 613`, `Community 8`, `Community 619`, `Community 622`, `Community 624`, `Community 625`, `Community 628`, `Community 20`, `Community 24`, `Community 604`, `Community 29`?**
-  _High betweenness centrality (0.051) - this node is a cross-community bridge._
-- **Why does `ValidationError` connect `Community 0` to `Community 642`, `Community 611`, `Community 612`, `Community 323`, `Community 5`, `Community 644`, `Community 616`, `Community 8`, `Community 10`, `Community 622`, `Community 20`, `Community 604`, `Community 30`, `Community 607`?**
-  _High betweenness centrality (0.045) - this node is a cross-community bridge._
+- **Why does `ValidationError` connect `Community 137` to `Community 0`, `Community 672`, `Community 195`, `Community 4`, `Community 197`, `Community 10`, `Community 462`, `Community 92`, `Community 278`, `Community 23`, `Community 184`, `Community 281`, `Community 28`, `Community 311`?**
+  _High betweenness centrality (0.057) - this node is a cross-community bridge._
+- **Why does `NotFoundError` connect `Community 0` to `Community 321`, `Community 137`, `Community 10`, `Community 462`, `Community 23`, `Community 280`, `Community 281`, `Community 92`?**
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
+- **Why does `DeckAccessPolicy` connect `Community 3` to `Community 4`, `Community 198`, `Community 199`, `Community 137`, `Community 10`, `Community 236`, `Community 309`?**
+  _High betweenness centrality (0.026) - this node is a cross-community bridge._
 - **Are the 90 inferred relationships involving `ValidationError` (e.g. with `CourseService` and `Course orchestration service.  Coordinates the course catalog/content (:class:`C`) actually correct?**
   _`ValidationError` has 90 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 73 inferred relationships involving `NotFoundError` (e.g. with `CourseService` and `Course orchestration service.  Coordinates the course catalog/content (:class:`C`) actually correct?**
   _`NotFoundError` has 73 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 49 inferred relationships involving `User` (e.g. with `Course` and `CourseLesson`) actually correct?**
   _`User` has 49 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 36 inferred relationships involving `AiProviderError` (e.g. with `AzureOpenAIProvider` and `Azure OpenAI implementation of :class:`AiTextPort`.  Talks to an Azure OpenAI re`) actually correct?**
-  _`AiProviderError` has 36 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 35 inferred relationships involving `AiProviderError` (e.g. with `AzureOpenAIProvider` and `Azure OpenAI implementation of :class:`AiTextPort`.  Talks to an Azure OpenAI re`) actually correct?**
+  _`AiProviderError` has 35 INFERRED edges - model-reasoned connections that need verification._

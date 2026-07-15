@@ -98,6 +98,44 @@ export function createReminderApi(client: AxiosInstance) {
 
 export type ReminderApi = ReturnType<typeof createReminderApi>;
 
+// ── Assistant (Dragon chat) ────────────────────────────────────────────────
+
+export interface AssistantAction {
+  type: "navigate" | "tour";
+  label: string;
+  route?: string;
+  tour_id?: string;
+}
+
+export interface AssistantReply {
+  reply: string;
+  actions?: AssistantAction[];
+  suggestions?: string[];
+}
+
+export function createAssistantApi(client: AxiosInstance, aiTimeout = 240000) {
+  const aiConfig: AxiosRequestConfig = { timeout: aiTimeout };
+  return {
+    chat(payload: {
+      message: string;
+      history?: { role: string; text: string }[];
+      page?: string;
+    }): Promise<any> {
+      return client.post(
+        "assistant/chat/",
+        {
+          message: payload.message,
+          history: payload.history ?? [],
+          page: payload.page ?? "",
+        },
+        aiConfig
+      );
+    },
+  };
+}
+
+export type AssistantApi = ReturnType<typeof createAssistantApi>;
+
 // ── Deck ────────────────────────────────────────────────────────────────────
 
 export function createDeckApi(client: AxiosInstance) {
@@ -310,6 +348,33 @@ export function createLearningApi(client: AxiosInstance) {
 }
 
 export type LearningApi = ReturnType<typeof createLearningApi>;
+
+// ── Competition ─────────────────────────────────────────────────────────────
+
+export function createCompetitionApi(client: AxiosInstance) {
+  return {
+    // Random sample of full-field terms for building any mini-game client-side.
+    getPool(deckId: string): Promise<any> {
+      return client.get("competition/pool/", {
+        params: { deck_id: deckId },
+      });
+    },
+    getLeaderboard(deckId: string, gameKey: string): Promise<any> {
+      return client.get("competition/leaderboard/", {
+        params: { deck_id: deckId, game_key: gameKey },
+      });
+    },
+    submitScore(deckId: string, gameKey: string, score: number): Promise<any> {
+      return client.post("competition/submit_score/", {
+        deck_id: deckId,
+        game_key: gameKey,
+        score,
+      });
+    },
+  };
+}
+
+export type CompetitionApi = ReturnType<typeof createCompetitionApi>;
 
 // ── Course ────────────────────────────────────────────────────────────────
 

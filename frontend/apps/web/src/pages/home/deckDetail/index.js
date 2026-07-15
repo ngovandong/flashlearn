@@ -120,7 +120,8 @@ function DeckDetail()
             <MenuButton
               link="competition"
               text="Competition"
-              isDisabled={true}
+              tour="deck-competition"
+              isDisabled={!deck.my_permission}
               icon={SportsEsportsIcon}
             />
           </div>

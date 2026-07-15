@@ -9,12 +9,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-FlashLearn is a flashcard study application with three components:
-- **Django backend** — primary API, auth, WebSocket game, async tasks
-- **Rust backend** — high-performance partial re-implementation of the Django API (in-progress migration)
-- **React frontend** — Material UI + Redux Toolkit SPA
+FlashLearn is a language-learning platform (flashcards, guided courses, listening
+dictation, grammar, AI speaking/writing coaches, and mixed cross-feature revision)
+with these components:
+- **Django backend** — primary API, auth, WebSocket game, async tasks, AI orchestration
+- **Rust backend** — high-performance *partial* re-implementation of the Django API
+  (opt-in, in-progress; only deck/term/user/learning/role/images/translate + the
+  quick-revise WebSocket are ported)
+- **React web frontend** — Material UI + Redux Toolkit SPA (`frontend/apps/web`)
+- **Expo React Native app** — native client (`frontend/apps/mobile`)
+- **Chrome extension** — select-text-to-save (`extension/`)
 
 Both backends share the same MySQL database. The Rust backend does not run migrations — it reads/writes the schema that Django owns.
+
+For the full architecture (bounded contexts, AI engine, diagrams) see
+[`ARCHITECTURE.md`](./ARCHITECTURE.md); this file focuses on build/run commands.
 
 ## Commands
 
@@ -31,7 +40,7 @@ uv run python manage.py migrate
 uv run python manage.py makemigrations
 
 # Tests
-python manage.py test backend.tests
+uv run python manage.py test backend.tests
 ```
 
 ### Image crawler (`POST /api/images/`)
@@ -40,9 +49,11 @@ Providers run in batches of 2: **Google + Bing**, then **Openverse + Wikimedia**
 
 Google Images requires JavaScript. The crawler tries a fast HTTP pass first, then falls back to **Playwright** (headless Chromium) when Google returns a bot block page.
 
-One-time Playwright browser install (after `uv sync`):
+The Playwright fallback is an optional dependency group. Install it and the
+browser once (`espeak-ng` is unrelated — that's for the Kokoro TTS group):
 
 ```bash
+uv sync --group crawler
 uv run playwright install chromium
 ```
 
@@ -113,7 +124,9 @@ uv run python manage.py start_worker
 uv run python manage.py rqstats
 ```
 
-Cron jobs are defined in `backend/cron.py` → `register_jobs()`.
+Cron jobs live in the `backend/cron/` package (`ai.py`, `backup.py`, `email.py`,
+`images.py`, `maintenance.py`, `speaking.py`) and are collected by
+`backend/cron/__init__.py`. Their task implementations live in `backend/tasks/*.py`.
 Add new scheduled tasks there and restart the worker to pick them up.
 
 ### Docker
@@ -162,26 +175,44 @@ Requires `.env.docker`. The selfservice compose file targets ARM64 (`platform: l
 ```
 React (3000) → Django (8005) or Rust (8005)
                     ↓
-              MySQL (3307) + Redis (6379) + Elasticsearch
+              MySQL (3306 local / 3307 via Docker) + Redis (6379) + Elasticsearch (external/optional)
 ```
 
 Nginx routes to the appropriate backend. Both backends expose the same port 8005 — they are not run simultaneously; the Rust backend is an opt-in replacement.
 
 ### Django App Structure
-- `core/` — project settings (`settings.py`), ASGI/WSGI entry, URL root
-- `backend/` — all domain logic: models, views, serializers, services, consumers, tasks
+- `core/` — project settings (`settings.py`), ASGI/WSGI entry, URL root, `authentication.py`
+- `backend/` — all domain logic (DDD bounded contexts, see below)
 - `base/` — shared base model classes
 
-**`backend/` internal layout:**
-- `models/` — User, Deck, Term, LearningProgress, UserDeckRole (OWNER/EDIT/VIEW)
-- `views/` — DRF ViewSets per resource
-- `services/` — business logic (UserService, DeckService, LearningService, AuthService, CacheService, MailService)
-- `serializers/` — DRF serializers
-- `consumers.py` — WebSocket consumer for `/ws/quick-revise/` multiplayer game
-- `tasks.py` — RQ async tasks
+**`backend/` internal layout:** the backend is organized into DDD / clean-architecture
+bounded contexts (see `.cursor/rules/backend-architecture.mdc` for the enforced rules):
+- `backend/<context>/` — one folder per bounded context (`deck`, `term`, `user`,
+  `learning`, `role`, `speaking`, `course`, `listening`, `grammar`, `writing`,
+  `revise`, `reminders`), each with `domain/` (pure rules, optional),
+  `application/` (use-case services, injected deps; often `services.py`, sometimes
+  `<feature>_service.py`), and `infrastructure/` (`repository.py` — the only place
+  ORM access is allowed).
+- `backend/shared/` — cross-cutting pieces: `application/ports.py` (Protocols),
+  `infrastructure/` (AI providers, cache, cloudinary, oauth, sqlalchemy),
+  `interfaces/` (base viewsets, pagination, exception handler), and
+  `composition.py` (the composition root that wires concrete infra into services).
+- `backend/views/` — thin DRF ViewSets per resource; call service singletons from
+  `backend/services/__init__.py`.
+- `backend/models/` — Django ORM models (schema owner).
+- `backend/serializers/` — DRF serializers.
+- `backend/consumers.py` — WebSocket consumer for `/ws/quick-revise/` multiplayer game.
+- `backend/tasks/` + `backend/cron/` — domain-grouped RQ tasks and their schedules.
 
 ### Auth
-Custom token-based auth (not standard SimpleJWT flow). Login at `POST /api/users/login` returns a token stored per-user. Google OAuth at `POST /api/users/google_login`. The `SECRET_KEY` env var is used for token signing in both Django and Rust.
+JWT auth built on `rest_framework_simplejwt` behind `core/authentication.py`
+(`CustomTokenAuthentication`). `POST /api/users/login` returns a short-lived access
+token (kept in memory by clients) plus a rotating refresh token. The web SPA stores
+the refresh token in an HttpOnly cookie; the mobile app stores it in the OS keychain
+(Expo SecureStore) and sends it in the request body. `POST /api/users/refresh/`
+rotates the session and `POST /api/users/logout/` revokes it. Google OAuth is at
+`POST /api/users/google_login`. The `SECRET_KEY` env var is used for token signing
+in both Django and Rust.
 
 ### Rust Backend Structure (`rust_backend/src/`)
 DDD-style layering:
@@ -196,28 +227,41 @@ DDD-style layering:
 
 ### Key API Routes
 ```
-/api/             → backend.urls (DRF router: decks, terms, users, folders, roles, learnings)
-/api/users/login  → custom JWT login
+/api/             → backend.urls (DRF router: decks, terms, users, roles, learnings,
+                    speaking, writing, courses, listening, grammar, reminders, revise, assistant)
+/api/users/login  → SimpleJWT login (access + rotating refresh)
+/api/users/refresh, /api/users/logout → rotate / revoke refresh session
 /api/translate/   → translation service
-/api/images/      → Cloudinary URL lookup
+/api/images/      → image crawler (Google/Bing/Openverse/Wikimedia via BSCrawler)
 /api/swagger/     → Swagger UI (DEBUG=True only)
+/ws/quick-revise/ → WebSocket multiplayer game
 ```
+Note: the `folders` resource was removed (Django migration `0058_delete_folder`).
 
 ### WebSocket
 Django Channels + Daphne handle WebSocket at `/ws/quick-revise/`. Redis is the channel layer backend.
 
 ## Environment Variables
 
-Copy `.env.sample` to `.env`. Key variables:
+Copy `.env.sample` to `.env` (see the file for the full list). Key variables:
 - `SECRET_KEY` — used by both Django and Rust for token signing
 - `DB_*` — MySQL connection (Django owns migrations)
 - `REDIS_HOST/PORT` — shared cache and channel layer
-- `CLOUDINARY_*` — image storage
-- `GOOGLE_OAUTH2_CLIENT_ID/SECRET` — Google login
+- `ELASTIC_SEARCH_HOST/PORT` — Elasticsearch DSL host (search degrades if unset)
+- `CLOUDINARY_*` — image and generated/listening audio storage
+- `GOOGLE_OAUTH2_CLIENT_ID/SECRET` — Google login (web); plus
+  `GOOGLE_OAUTH2_IOS_CLIENT_ID` / `GOOGLE_OAUTH2_ANDROID_CLIENT_ID` for mobile
+- `REFRESH_COOKIE_NAME/SECURE/SAMESITE` — SPA refresh-token cookie behavior
+- AI chain: `AI_PROVIDER`, `AI_FALLBACK_PROVIDERS` + provider keys (Gemini,
+  OpenRouter, Azure OpenAI, LM Studio)
+- Speech/TTS: `AZURE_SPEECH_*`, `ELEVENLABS_*` (Kokoro is local, no key)
+- `ABSTRACT_API_KEY` — email validation; `DRIVE_*` — Google Drive DB backups
+- `CRAWLER_GOOGLE_SKIP_PLAYWRIGHT` — disable the Playwright image-crawler fallback
 - `BASE_FRONTEND_URL` / `BASE_BACKEND_URL` — CORS and redirect targets
 
 ## Tech Stack Versions
-- Python 3.11, Django 4.2, DRF 3.15, Django Channels 4.0
+- Python 3.11, Django 5.2, DRF 3.17, Django Channels 4, SimpleJWT 5.5, SQLAlchemy 2
 - Rust edition 2021, Axum 0.7, SQLx 0.8, Tokio 1
-- React 18, Material UI v7, Redux Toolkit 2, React Router 7
-- MySQL 8.0, Redis 6
+- React 19, Material UI v9, Redux Toolkit 2, React Router 7, Vite 8, Vitest 4
+- Expo 57, React Native 0.86, Expo Router 57 (mobile)
+- MySQL 8.0, Redis 6, Elasticsearch 8

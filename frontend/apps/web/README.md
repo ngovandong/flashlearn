@@ -15,5 +15,10 @@ npm run lint -w @flashlearn/web
 The development server runs at <http://localhost:3000>. Production assets are
 written to `dist/`.
 
-Copy `.env.sample` to `.env` for local configuration. Client-visible
-environment variables use the `VITE_` prefix.
+Copy the web env template for local configuration (from the `frontend/` root):
+
+```bash
+cp apps/web/.env.sample apps/web/.env
+```
+
+Client-visible environment variables use the `VITE_` prefix.

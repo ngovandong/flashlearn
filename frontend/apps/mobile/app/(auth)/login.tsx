@@ -9,6 +9,7 @@ import {
   useTheme,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { getFirstError } from "@flashlearn/core";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -23,6 +24,7 @@ import { nativeAuthApi } from "@/auth/nativeAuthApi";
 
 export default function LoginScreen() {
   const theme = useTheme();
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const error = useAppSelector(selectError);
   const loading = useAppSelector(selectLoading);
@@ -131,6 +133,13 @@ export default function LoginScreen() {
           >
             Continue with Google
           </Button>
+
+          <View style={styles.signupRow}>
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>New to FlashLearn?</Text>
+            <Button mode="text" compact onPress={() => router.push("/signup")}>
+              Create account
+            </Button>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -147,5 +156,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginVertical: 20,
+  },
+  signupRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 16,
   },
 });

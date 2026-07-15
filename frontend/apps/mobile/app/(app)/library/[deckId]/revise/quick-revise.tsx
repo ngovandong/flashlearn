@@ -1,10 +1,15 @@
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { Button, Modal, Portal, Text, useTheme } from "react-native-paper";
+import { Button, Modal, Portal, ProgressBar, Text, useTheme } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { QuickReviseQuestion } from "@flashlearn/core";
 import { QuizQuestion } from "@/features/study/QuizQuestion";
 import { useQuickReviseWs, type WsMessage } from "@/features/quickRevise/useQuickReviseWs";
+import { speakText } from "@/utils/audio";
+
+// Sent to the server when the user picks a wrong option so it can end the game.
+// The real answer is a term name, so this sentinel can never accidentally match.
+const WRONG_ANSWER = "__flashlearn_wrong__";
 
 export default function QuickReviseScreen() {
   const { deckId } = useLocalSearchParams<{ deckId: string }>();
@@ -12,6 +17,7 @@ export default function QuickReviseScreen() {
   const router = useRouter();
   const [question, setQuestion] = useState<QuickReviseQuestion | null>(null);
   const [timer, setTimer] = useState(0);
+  const [initialTimer, setInitialTimer] = useState(0);
   const [score, setScore] = useState(0);
   const [index, setIndex] = useState(0);
   const [disabled, setDisabled] = useState(false);
@@ -22,6 +28,7 @@ export default function QuickReviseScreen() {
     if (msg.type === "new_question") {
       setQuestion(msg.question as QuickReviseQuestion);
       setTimer(msg.time_limit);
+      setInitialTimer(msg.time_limit);
       setIndex(msg.index);
       setDisabled(false);
     } else if (msg.type === "result") {
@@ -45,8 +52,15 @@ export default function QuickReviseScreen() {
   const onAnswer = (correct: boolean) => {
     if (disabled || !question?.answer) return;
     setDisabled(true);
-    sendAnswer(question.answer);
+    speakText(question.answer);
+    // The server decides win/lose from the answer we send, so a wrong pick must
+    // send a non-matching value — otherwise the game could never be lost.
+    sendAnswer(correct ? question.answer : WRONG_ANSWER);
   };
+
+  const timerRatio = initialTimer > 0 ? timer / initialTimer : 0;
+  const timerColor =
+    timer < 3 ? theme.colors.error : timer < 5 ? "#ed6c02" : theme.colors.primary;
 
   const q = question
     ? {
@@ -63,15 +77,16 @@ export default function QuickReviseScreen() {
     <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
       <View style={styles.top}>
         <Text variant="titleMedium" style={{ color: theme.colors.primary }}>
-          Score: {score}
+          🔥 {score}
         </Text>
-        <Text variant="titleMedium" style={{ color: theme.colors.onSurface }}>
+        <Text variant="titleMedium" style={{ color: timerColor }}>
           ⏱ {timer}s
         </Text>
         <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant }}>
           Q{index}
         </Text>
       </View>
+      <ProgressBar progress={timerRatio} color={timerColor} style={styles.timerBar} />
 
       {q ? <QuizQuestion question={q} onAnswer={onAnswer} disabled={disabled} /> : null}
 
@@ -113,6 +128,7 @@ export default function QuickReviseScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  top: { flexDirection: "row", justifyContent: "space-between", padding: 16 },
+  top: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 16, paddingBottom: 8 },
+  timerBar: { marginHorizontal: 16, height: 8, borderRadius: 4 },
   modal: { margin: 24, padding: 24, borderRadius: 12 },
 });
