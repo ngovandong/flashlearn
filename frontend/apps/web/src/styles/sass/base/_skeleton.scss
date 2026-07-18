@@ -1,0 +1,178 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+@keyframes fl-skeleton-pulse {
+    0%,
+    100% {
+        opacity: 0.45;
+    }
+
+    50% {
+        opacity: 0.9;
+    }
+}
+
+.fl-skeleton {
+    display: block;
+    background-color: $surface-2;
+    border-radius: $radius-sm;
+    animation: fl-skeleton-pulse 1.4s ease-in-out infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+        opacity: 0.65;
+    }
+}
+
+.fl-skeleton--pill {
+    border-radius: $radius-pill;
+}
+
+.fl-skeleton--circle {
+    border-radius: 50%;
+}
+
+.deck-card-skeleton {
+    @include card;
+    padding: 1.25rem 1.25rem 1rem;
+    height: 10rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    &__body {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        padding-top: 0.15rem;
+    }
+
+    &__thumb {
+        width: 4rem;
+        height: 4rem;
+        flex-shrink: 0;
+    }
+
+    &__footer {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-top: 1px solid $border-subtle;
+        padding-top: 0.75rem;
+    }
+
+    &__avatar {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+}
+
+.reminder-card-skeleton {
+    @include card;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 1.15rem 1.2rem;
+    pointer-events: none;
+
+    &__icon {
+        width: 3rem;
+        height: 3rem;
+        flex-shrink: 0;
+        border-radius: $radius-md;
+    }
+
+    &__body {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding-top: 0.2rem;
+    }
+}
+
+.deck-page-skeleton {
+    @include page_shell(60rem);
+
+    &__title {
+        width: min(18rem, 70%);
+        height: 2.5rem;
+        border-radius: $radius-md;
+    }
+
+    &__menu {
+        margin-top: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    &__menu-btn {
+        flex: 1 1 8rem;
+        min-width: min(100%, 8rem);
+        height: 3.25rem;
+        border-radius: $radius-md;
+    }
+
+    &__quote {
+        margin-top: 2rem;
+        height: 5.5rem;
+        border-radius: $radius-md;
+    }
+
+    &__progress {
+        margin-top: 2rem;
+        height: 12rem;
+        border-radius: $radius-md;
+    }
+}
+
+.page-shell-skeleton {
+    @include page_shell(75rem);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    &__title {
+        width: min(14rem, 60%);
+        height: 2rem;
+        margin-inline: auto;
+        border-radius: $radius-md;
+    }
+
+    &__section-title {
+        width: 10rem;
+        height: 1.25rem;
+        border-radius: $radius-sm;
+        margin-bottom: 1rem;
+    }
+}
+
+.fl-loading-spinner {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    border: 3px solid rgba(var(--fl-primary-rgb), 0.18);
+    border-top-color: var(--fl-primary);
+    animation: fl-spinner 0.7s linear infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation-duration: 1.4s;
+    }
+}
+
+@keyframes fl-spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}

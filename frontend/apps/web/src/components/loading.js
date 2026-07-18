@@ -1,37 +1,48 @@
-import { COLORS } from "@constants/colors";
-import { Backdrop } from "@mui/material";
-import { HashLoader } from "react-spinners";
+import { Backdrop, Box } from "@mui/material";
+
+function LoadingSpinner() {
+  return (
+    <Box
+      component="span"
+      className="fl-loading-spinner"
+      role="status"
+      aria-label="Loading"
+    />
+  );
+}
 
 function GlobalLoadingWrapper({ open = true }) {
+  if (!open) return null;
+
   return (
     <Backdrop
       sx={{
-        // bgcolor: "transparent",
-        bgcolor: "rgba(0,0,0,0.2)",
+        bgcolor: "rgba(0, 0, 0, 0.25)",
         zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
       open={open}
       id="loading-wrapper"
     >
-      {/* <FadeLoader color={COLORS.BLUE} /> */}
+      <LoadingSpinner />
     </Backdrop>
   );
 }
 
 function LocalLoadingWrapper({ open = true }) {
+  if (!open) return null;
+
   return (
     <Backdrop
       sx={{
-        // bgcolor: "transparent",
-        bgcolor: "rgba(0,0,0,0.05)",
+        bgcolor: "rgba(0, 0, 0, 0.12)",
         zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
       open={open}
       id="loading-wrapper"
     >
-      <HashLoader color={COLORS.BLUE} />
+      <LoadingSpinner />
     </Backdrop>
   );
 }
 
-export { LocalLoadingWrapper, GlobalLoadingWrapper };
+export { LocalLoadingWrapper, GlobalLoadingWrapper, LoadingSpinner };

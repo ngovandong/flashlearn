@@ -1,5 +1,5 @@
 import { deckService } from "@api-services/deckService";
-import { LocalLoadingWrapper } from "@components/loading";
+import { DeckPageSkeleton } from "@components/skeletons";
 import { getFirstError } from "@utils/errorHandler";
 import React, { useEffect, useState } from "react";
 import
@@ -79,10 +79,10 @@ function DeckDetail()
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deck]);
-  return (
-    <>
-      <LocalLoadingWrapper open={isLoading} />
-      {deck && (
+  return isLoading ? (
+    <DeckPageSkeleton />
+  ) : (
+    deck && (
         <div className="deck-page">
           <div className="deck-header">
             <h2>{deck.name}</h2>
@@ -175,8 +175,7 @@ function DeckDetail()
             deck={deck}
           />
         </div>
-      )}
-    </>
+    )
   );
 }
 

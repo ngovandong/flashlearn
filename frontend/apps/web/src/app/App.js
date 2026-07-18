@@ -15,7 +15,8 @@ import {
   selectUser,
   setGlobalError,
 } from "./store/authSlice";
-import { GlobalLoadingWrapper, LocalLoadingWrapper } from "@components/loading";
+import { GlobalLoadingWrapper } from "@components/loading";
+import { PageShellSkeleton } from "@components/skeletons";
 import ErrorBoundary from "@components/errorBoundary";
 import lazyWithRetry from "@utils/lazyWithRetry";
 import { Alert, Snackbar } from "@mui/material";
@@ -71,7 +72,7 @@ const ReviseMix = lazyWithRetry(() => import("@pages/home/revise"));
 const PrivacyPage = lazyWithRetry(() => import("@pages/privacy"));
 
 function RouteFallback() {
-  return <LocalLoadingWrapper open />;
+  return <PageShellSkeleton />;
 }
 
 function App() {
