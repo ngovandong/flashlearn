@@ -53,8 +53,28 @@ if _EXTRA_CA_CERTS and os.path.exists(_EXTRA_CA_CERTS):
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False") == "True"
+
+# Sentry monitoring for Django & RQ workers
+SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.rq import RqIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(),
+            RqIntegration(),
+        ],
+        send_default_pii=True,
+        enable_logs=True,
+        traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "1.0")),
+        profile_session_sample_rate=float(os.getenv("SENTRY_PROFILE_SESSION_SAMPLE_RATE", "1.0")),
+        profile_lifecycle="trace",
+        environment=os.getenv("ENVIRONMENT", "development" if DEBUG else "production"),
+    )
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
