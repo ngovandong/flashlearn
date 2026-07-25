@@ -1,5 +1,5 @@
 const UPSTREAM =
-  process.env.BACKEND_UPSTREAM || "https://flashlearnapi.ngovandong.site";
+  process.env.BACKEND_UPSTREAM || "https://flashlearnapi.dongkiemem.site";
 
 export const config = {
   matcher: ["/api/:path*"],
