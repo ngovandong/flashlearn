@@ -2,26 +2,88 @@ import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View, Pressable } from "react-native";
 import {
   Button,
-  Divider,
   SegmentedButtons,
   Switch,
   Text,
   TextInput,
   Snackbar,
-  useTheme,
 } from "react-native-paper";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PALETTES, type ThemeMode } from "@flashlearn/core";
+import {
+  CATEGORY_ORDER,
+  PALETTE_CATEGORIES,
+  type Palette,
+  type ThemeMode,
+  type ThemeSurface,
+} from "@flashlearn/core";
 import { userSettingsApi, type UserSettings } from "@/api/services";
 import { useAppTheme } from "@/theme/ThemeProvider";
 import { useAppDispatch } from "@/store/hooks";
 import { logoutUser } from "@/store/authSlice";
+import { AppCard } from "@/components/ui/AppCard";
+import { GradientSurface } from "@/components/ui/GradientSurface";
+import { useTokens, type Tokens } from "@/theme/tokens";
+import { ASSISTANT_NAME } from "@/features/assistant/constants";
+import { assistantPrefs, useAssistantPrefs } from "@/features/assistant/prefs";
+
+function formatSnooze(until: number): string {
+  const d = new Date(until);
+  const sameDay = d.toDateString() === new Date().toDateString();
+  const time = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  return sameDay ? time : `${d.toLocaleDateString([], { weekday: "short" })} ${time}`;
+}
+
+function PaletteSwatch({
+  palette,
+  selected,
+  onSelect,
+  t,
+}: {
+  palette: Palette;
+  selected: boolean;
+  onSelect: (id: string) => void;
+  t: Tokens;
+}) {
+  return (
+    <Pressable
+      onPress={() => onSelect(palette.id)}
+      style={[
+        styles.swatchItem,
+        {
+          borderRadius: t.radii.md,
+          borderColor: selected ? t.palette.primary : t.neutral.border,
+          backgroundColor: selected ? t.primaryAlpha(0.08) : "transparent",
+        },
+      ]}
+    >
+      <GradientSurface colors={palette.gradient} style={styles.chip}>
+        {selected ? (
+          <MaterialIcons name="check" size={16} color={palette.onPrimary} />
+        ) : null}
+      </GradientSurface>
+      <Text
+        numberOfLines={1}
+        style={{
+          flex: 1,
+          color: selected ? t.palette.primary : t.neutral.text,
+          fontWeight: selected ? "800" : "600",
+        }}
+      >
+        {palette.name}
+      </Text>
+    </Pressable>
+  );
+}
 
 export default function SettingsScreen() {
-  const theme = useTheme();
-  const { mode, palette, setMode, setPalette } = useAppTheme();
+  const t = useTokens();
+  const { mode, palette, surface, setMode, setPalette, setSurface } = useAppTheme();
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
+  const assistant = useAssistantPrefs();
+  const assistantSnoozed =
+    assistant.snoozeUntil != null && Date.now() < assistant.snoozeUntil;
 
   const { data: settings } = useQuery({
     queryKey: ["my-settings"],
@@ -54,84 +116,150 @@ export default function SettingsScreen() {
       reminder_email: reminderEmail,
       theme_mode: mode,
       theme_palette: palette,
+      theme_surface: surface,
     });
   };
 
   return (
-    <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text variant="titleMedium" style={{ color: theme.colors.onBackground }}>
-          Appearance
+    <View style={[styles.flex, { backgroundColor: t.neutral.bg }]}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <Text variant="headlineMedium" style={{ color: t.neutral.text, fontWeight: "800" }}>
+          Settings
         </Text>
-        <SegmentedButtons
-          value={mode}
-          onValueChange={(v) => setMode(v as ThemeMode)}
-          buttons={[
-            { value: "light", label: "Light", icon: "white-balance-sunny" },
-            { value: "dark", label: "Dark", icon: "weather-night" },
-            { value: "system", label: "System", icon: "cellphone" },
-          ]}
-        />
 
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          Color palette
-        </Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.palettes}>
-          {PALETTES.map((p) => {
-            const selected = p.id === palette;
-            return (
-              <Pressable key={p.id} onPress={() => setPalette(p.id)}>
-                <View
-                  style={[
-                    styles.swatch,
-                    {
-                      backgroundColor: p.primary,
-                      borderColor: selected ? theme.colors.onBackground : "transparent",
-                    },
-                  ]}
-                />
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-
-        <Divider style={styles.divider} />
-
-        <Text variant="titleMedium" style={{ color: theme.colors.onBackground }}>
-          Daily reminders
-        </Text>
-        <View style={styles.switchRow}>
-          <Text style={{ color: theme.colors.onSurface, flex: 1 }}>
-            Email me a daily study reminder
+        <AppCard padding={16} style={styles.card}>
+          <Text variant="titleMedium" style={[styles.cardTitle, { color: t.neutral.text }]}>
+            Appearance
           </Text>
-          <Switch value={dailyReminder} onValueChange={setDailyReminder} />
-        </View>
-        <TextInput
-          mode="outlined"
-          label="Reminder email"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={reminderEmail}
-          onChangeText={setReminderEmail}
-          disabled={!dailyReminder}
-        />
-        <Button
-          mode="contained"
-          loading={mutation.isPending}
-          onPress={save}
-          style={styles.save}
-        >
-          Save settings
-        </Button>
+          <SegmentedButtons
+            value={mode}
+            onValueChange={(v) => setMode(v as ThemeMode)}
+            buttons={[
+              { value: "light", label: "Light", icon: "white-balance-sunny" },
+              { value: "dark", label: "Dark", icon: "weather-night" },
+              { value: "system", label: "System", icon: "cellphone" },
+            ]}
+          />
 
-        <Divider style={styles.divider} />
+          <Text variant="bodySmall" style={{ color: t.neutral.textMinor, marginTop: 14 }}>
+            Surface style
+          </Text>
+          <SegmentedButtons
+            value={surface}
+            onValueChange={(v) => setSurface(v as ThemeSurface)}
+            style={{ marginTop: 6 }}
+            buttons={[
+              { value: "solid", label: "Solid", icon: "square-rounded" },
+              { value: "glass", label: "Liquid Glass", icon: "blur" },
+            ]}
+          />
 
-        <Text variant="titleMedium" style={{ color: theme.colors.onBackground }}>
-          Account
-        </Text>
-        <Button mode="outlined" icon="logout" onPress={() => dispatch(logoutUser())}>
-          Log out
-        </Button>
+          <Text variant="bodySmall" style={{ color: t.neutral.textMinor, marginTop: 14 }}>
+            Color theme
+          </Text>
+          <Text variant="bodySmall" style={{ color: t.neutral.textMuted, marginTop: 2 }}>
+            Pick an accent palette — it applies across the whole app instantly.
+          </Text>
+
+          {CATEGORY_ORDER.map((category) => (
+            <View key={category} style={styles.group}>
+              <Text style={[styles.groupTitle, { color: t.neutral.textMuted }]}>
+                {category.toUpperCase()}
+              </Text>
+              <View style={styles.grid}>
+                {(PALETTE_CATEGORIES[category] ?? []).map((p) => (
+                  <PaletteSwatch
+                    key={p.id}
+                    palette={p}
+                    selected={p.id === palette}
+                    onSelect={setPalette}
+                    t={t}
+                  />
+                ))}
+              </View>
+            </View>
+          ))}
+        </AppCard>
+
+        <AppCard padding={16} style={styles.card}>
+          <Text variant="titleMedium" style={[styles.cardTitle, { color: t.neutral.text }]}>
+            Daily reminders
+          </Text>
+          <View style={styles.switchRow}>
+            <Text style={{ color: t.neutral.text, flex: 1 }}>
+              Email me a daily study reminder
+            </Text>
+            <Switch value={dailyReminder} onValueChange={setDailyReminder} />
+          </View>
+          <TextInput
+            mode="outlined"
+            label="Reminder email"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            value={reminderEmail}
+            onChangeText={setReminderEmail}
+            disabled={!dailyReminder}
+            style={{ marginTop: 12 }}
+          />
+          <Button
+            mode="contained"
+            loading={mutation.isPending}
+            onPress={save}
+            style={styles.save}
+          >
+            Save settings
+          </Button>
+        </AppCard>
+
+        <AppCard padding={16} style={styles.card}>
+          <Text variant="titleMedium" style={[styles.cardTitle, { color: t.neutral.text }]}>
+            Study buddy
+          </Text>
+          <View style={styles.switchRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: t.neutral.text }}>Show {ASSISTANT_NAME} assistant</Text>
+              <Text variant="bodySmall" style={{ color: t.neutral.textMuted, marginTop: 2 }}>
+                Drag it anywhere; long-press it to snooze.
+              </Text>
+            </View>
+            <Switch
+              value={!assistant.hidden}
+              onValueChange={(v) => assistantPrefs.set({ hidden: !v })}
+            />
+          </View>
+
+          {!assistant.hidden && assistantSnoozed && (
+            <View style={styles.switchRow}>
+              <Text style={{ color: t.neutral.textMinor, flex: 1 }}>
+                Snoozed until {formatSnooze(assistant.snoozeUntil!)}
+              </Text>
+              <Button compact onPress={() => assistantPrefs.set({ snoozeUntil: null })}>
+                Show now
+              </Button>
+            </View>
+          )}
+
+          {!assistant.hidden && assistant.position && (
+            <Button
+              mode="text"
+              icon="restart"
+              compact
+              onPress={() => assistantPrefs.set({ position: null })}
+              style={{ alignSelf: "flex-start", marginTop: 4 }}
+            >
+              Reset position
+            </Button>
+          )}
+        </AppCard>
+
+        <AppCard padding={16} style={styles.card}>
+          <Text variant="titleMedium" style={[styles.cardTitle, { color: t.neutral.text }]}>
+            Account
+          </Text>
+          <Button mode="outlined" icon="logout" onPress={() => dispatch(logoutUser())}>
+            Log out
+          </Button>
+        </AppCard>
       </ScrollView>
 
       <Snackbar visible={!!snack} onDismiss={() => setSnack(null)} duration={2500}>
@@ -143,15 +271,38 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  content: { padding: 16, gap: 12 },
-  palettes: { gap: 12, paddingVertical: 4 },
-  swatch: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 3,
+  content: { padding: 16, gap: 14, paddingBottom: 110 },
+  card: { gap: 4 },
+  cardTitle: { fontWeight: "800", marginBottom: 10 },
+  group: { marginTop: 12 },
+  groupTitle: {
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1,
+    marginBottom: 8,
   },
-  divider: { marginVertical: 8 },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: 8,
+  },
+  swatchItem: {
+    width: "48%",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    padding: 8,
+    borderWidth: 1.5,
+  },
+  chip: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
   switchRow: { flexDirection: "row", alignItems: "center" },
-  save: { marginTop: 8 },
+  save: { marginTop: 14 },
 });

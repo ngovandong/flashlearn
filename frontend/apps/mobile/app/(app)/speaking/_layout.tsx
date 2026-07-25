@@ -6,13 +6,15 @@ export default function SpeakingLayout() {
   return (
     <Stack
       screenOptions={{
+        animation: "slide_from_right",
         headerStyle: { backgroundColor: theme.colors.surface },
         headerTitleStyle: { color: theme.colors.onSurface },
         headerTintColor: theme.colors.primary,
+        headerShadowVisible: false,
       }}
     >
-      <Stack.Screen name="index" options={{ title: "Speaking coach" }} />
-      <Stack.Screen name="[id]" options={{ title: "Conversation" }} />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="[id]" options={{ headerShown: false }} />
       <Stack.Screen name="history" options={{ headerShown: false }} />
     </Stack>
   );

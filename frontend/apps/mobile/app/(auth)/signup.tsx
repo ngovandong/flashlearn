@@ -1,13 +1,18 @@
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, View, KeyboardAvoidingView, Platform } from "react-native";
-import { Button, HelperText, Text, TextInput, useTheme } from "react-native-paper";
+import { HelperText, Text, TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { getFirstError } from "@flashlearn/core";
 import { nativeAuthApi } from "@/auth/nativeAuthApi";
+import { FadeSlideIn } from "@/components/FadeSlideIn";
+import { PressableScale } from "@/components/PressableScale";
+import { FeatureTile } from "@/components/ui/FeatureTile";
+import { GradientButton } from "@/components/ui/GradientButton";
+import { useTokens } from "@/theme/tokens";
 
 export default function SignUpScreen() {
-  const theme = useTheme();
+  const t = useTokens();
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -51,95 +56,92 @@ export default function SignUpScreen() {
 
   if (done) {
     return (
-      <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
+      <SafeAreaView style={[styles.safe, { backgroundColor: t.neutral.bg }]}>
         <View style={styles.doneWrap}>
-          <Text variant="headlineSmall" style={{ color: theme.colors.onBackground, textAlign: "center" }}>
+          <FeatureTile icon="forum" size={72} variant="solid" />
+          <Text variant="headlineSmall" style={{ color: t.neutral.text, fontWeight: "800", textAlign: "center", marginTop: 16 }}>
             Check your inbox
           </Text>
-          <Text
-            variant="bodyMedium"
-            style={{ color: theme.colors.onSurfaceVariant, textAlign: "center", marginTop: 12 }}
-          >
+          <Text variant="bodyMedium" style={{ color: t.neutral.textMinor, textAlign: "center", marginTop: 12 }}>
             We've sent a verification link to {email.trim()}. Click it to activate your account, then log in.
           </Text>
-          <Button mode="contained" onPress={() => router.replace("/login")} style={{ marginTop: 24 }}>
-            Back to log in
-          </Button>
+          <GradientButton label="Back to log in" onPress={() => router.replace("/login")} style={{ marginTop: 24, alignSelf: "stretch" }} />
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: t.neutral.bg }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.flex}
       >
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <Text variant="headlineMedium" style={{ color: theme.colors.onBackground }}>
-            Create your account
-          </Text>
-          <Text
-            variant="bodyMedium"
-            style={{ color: theme.colors.onSurfaceVariant, marginBottom: 24 }}
-          >
-            Join FlashLearn and start building your streak.
-          </Text>
+          <FadeSlideIn>
+            <View style={styles.brand}>
+              <FeatureTile icon="school" size={64} variant="solid" />
+              <Text variant="headlineMedium" style={{ color: t.neutral.text, fontWeight: "800", marginTop: 14 }}>
+                Create your account
+              </Text>
+              <Text variant="bodyMedium" style={{ color: t.neutral.textMinor, textAlign: "center", marginTop: 4 }}>
+                Join FlashLearn and start building your streak.
+              </Text>
+            </View>
+          </FadeSlideIn>
 
-          <TextInput mode="outlined" label="First name" value={firstName} onChangeText={setFirstName} style={styles.field} />
-          <TextInput mode="outlined" label="Last name" value={lastName} onChangeText={setLastName} style={styles.field} />
-          <TextInput
-            mode="outlined"
-            label="Email"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            autoComplete="email"
-            value={email}
-            onChangeText={setEmail}
-            style={styles.field}
-          />
-          <TextInput
-            mode="outlined"
-            label="Password"
-            secureTextEntry={secure}
-            autoCapitalize="none"
-            value={password}
-            onChangeText={setPassword}
-            right={<TextInput.Icon icon={secure ? "eye" : "eye-off"} onPress={() => setSecure((s) => !s)} />}
-            style={styles.field}
-          />
-          <TextInput
-            mode="outlined"
-            label="Confirm password"
-            secureTextEntry={secure}
-            autoCapitalize="none"
-            value={confirm}
-            onChangeText={setConfirm}
-            onSubmitEditing={onSubmit}
-            style={styles.field}
-          />
+          <FadeSlideIn delay={60}>
+            <View style={styles.namesRow}>
+              <TextInput mode="outlined" label="First name" value={firstName} onChangeText={setFirstName} style={styles.half} outlineStyle={{ borderRadius: t.radii.md }} />
+              <TextInput mode="outlined" label="Last name" value={lastName} onChangeText={setLastName} style={styles.half} outlineStyle={{ borderRadius: t.radii.md }} />
+            </View>
+            <TextInput
+              mode="outlined"
+              label="Email"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              autoComplete="email"
+              value={email}
+              onChangeText={setEmail}
+              style={styles.field}
+              outlineStyle={{ borderRadius: t.radii.md }}
+            />
+            <TextInput
+              mode="outlined"
+              label="Password"
+              secureTextEntry={secure}
+              autoCapitalize="none"
+              value={password}
+              onChangeText={setPassword}
+              right={<TextInput.Icon icon={secure ? "eye" : "eye-off"} onPress={() => setSecure((s) => !s)} />}
+              style={styles.field}
+              outlineStyle={{ borderRadius: t.radii.md }}
+            />
+            <TextInput
+              mode="outlined"
+              label="Confirm password"
+              secureTextEntry={secure}
+              autoCapitalize="none"
+              value={confirm}
+              onChangeText={setConfirm}
+              onSubmitEditing={onSubmit}
+              style={styles.field}
+              outlineStyle={{ borderRadius: t.radii.md }}
+            />
 
-          <HelperText type="error" visible={!!error}>
-            {error}
-          </HelperText>
+            <HelperText type="error" visible={!!error}>
+              {error}
+            </HelperText>
 
-          <Button
-            mode="contained"
-            loading={loading}
-            disabled={loading || !canSubmit}
-            onPress={onSubmit}
-            style={styles.action}
-          >
-            Sign up
-          </Button>
+            <GradientButton label="Sign up" loading={loading} disabled={loading || !canSubmit} onPress={onSubmit} />
 
-          <View style={styles.bottomRow}>
-            <Text style={{ color: theme.colors.onSurfaceVariant }}>Already have an account?</Text>
-            <Button mode="text" compact onPress={() => router.replace("/login")}>
-              Log in
-            </Button>
-          </View>
+            <View style={styles.bottomRow}>
+              <Text style={{ color: t.neutral.textMinor }}>Already have an account?</Text>
+              <PressableScale onPress={() => router.replace("/login")} hitSlop={8}>
+                <Text style={{ color: t.palette.primary, fontWeight: "800" }}>Log in</Text>
+              </PressableScale>
+            </View>
+          </FadeSlideIn>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -150,8 +152,10 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   flex: { flex: 1 },
   container: { padding: 24, justifyContent: "center", flexGrow: 1 },
-  field: { marginBottom: 12 },
-  action: { marginTop: 8, paddingVertical: 4 },
-  bottomRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", marginTop: 12 },
-  doneWrap: { flex: 1, justifyContent: "center", padding: 24 },
+  brand: { alignItems: "center", marginBottom: 24 },
+  namesRow: { flexDirection: "row", gap: 12 },
+  half: { flex: 1, marginBottom: 12, backgroundColor: "transparent" },
+  field: { marginBottom: 12, backgroundColor: "transparent" },
+  bottomRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 20 },
+  doneWrap: { flex: 1, justifyContent: "center", alignItems: "center", padding: 24 },
 });

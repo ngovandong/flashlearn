@@ -1,5 +1,5 @@
 import { deckService } from "@api-services/deckService";
-import { LocalLoadingWrapper } from "@components/loading";
+import { DeckCardSkeletonGrid } from "@components/skeletons";
 import { DECK_PAGE_SIZE } from "@constants/pageSize";
 import { getFirstError } from "@utils/errorHandler";
 import { Pagination } from "@mui/material";
@@ -63,13 +63,14 @@ function PaginatedDeckSection({
 
   return (
     <section>
-      <LocalLoadingWrapper open={isLoading && !data} />
       <div className="section-header">
         <h5>{title}</h5>
       </div>
-      <div className={`section-cards${isFetching ? " section-cards--loading" : ""}`}>
-        {!isLoading &&
-          decks.map((d) => (
+      {isLoading && !data ? (
+        <DeckCardSkeletonGrid count={4} />
+      ) : (
+        <div className={`section-cards${isFetching ? " section-cards--loading" : ""}`}>
+          {decks.map((d) => (
             <DeckCard
               key={d.id}
               id={d.id}
@@ -79,7 +80,8 @@ function PaginatedDeckSection({
               background={d.background}
             />
           ))}
-      </div>
+        </div>
+      )}
       {showPagination && (
         <div className="section-pagination">
           <Pagination

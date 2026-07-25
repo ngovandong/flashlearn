@@ -1,46 +1,52 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Card, Text, useTheme } from "react-native-paper";
+import { Text } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLearningStreak } from "@/features/home/hooks";
+import { GradientSurface } from "@/components/ui/GradientSurface";
+import { useTokens } from "@/theme/tokens";
 
 export function StreakCard() {
-  const theme = useTheme();
+  const t = useTokens();
   const { data, isLoading } = useLearningStreak();
   const streak = data?.streak ?? 0;
   const studiedToday = data?.studied_today ?? false;
 
   return (
-    <Card mode="contained" style={{ backgroundColor: theme.colors.surfaceVariant }}>
-      <Card.Content style={styles.row}>
-        <View
-          style={[styles.iconWrap, { backgroundColor: theme.colors.primary }]}
-        >
-          <MaterialIcons name="local-fire-department" size={26} color={theme.colors.onPrimary} />
+    <GradientSurface
+      style={[styles.card, { borderRadius: t.radii.lg }, t.shadowStrong]}
+    >
+      <View style={styles.row}>
+        <View style={styles.iconWrap}>
+          <MaterialIcons name="local-fire-department" size={28} color="#ffffff" />
         </View>
         <View style={styles.text}>
-          <Text variant="titleLarge" style={{ color: theme.colors.onSurface }}>
+          <Text variant="headlineSmall" style={styles.streak}>
             {isLoading ? "…" : `${streak}-day streak`}
           </Text>
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          <Text variant="bodyMedium" style={styles.sub}>
             {studiedToday
               ? "You've studied today — keep it going!"
               : "Study something today to extend your streak."}
           </Text>
         </View>
-      </Card.Content>
-    </Card>
+      </View>
+    </GradientSurface>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "center", gap: 14 },
+  card: { padding: 18, overflow: "hidden" },
+  row: { flexDirection: "row", alignItems: "center", gap: 16 },
   iconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 54,
+    height: 54,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.22)",
   },
   text: { flex: 1 },
+  streak: { color: "#ffffff", fontWeight: "800" },
+  sub: { color: "rgba(255, 255, 255, 0.9)", marginTop: 2 },
 });

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { Button, Chip, Text, TextInput, useTheme } from "react-native-paper";
+import { Text, TextInput } from "react-native-paper";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { evaluateDictation, overallDictationScore } from "@flashlearn/core";
@@ -8,9 +9,16 @@ import type { Highlight, ListeningSentence } from "@flashlearn/core";
 import { listeningApi } from "@/api/services";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
+import { FadeSlideIn } from "@/components/FadeSlideIn";
+import { PressableScale } from "@/components/PressableScale";
+import { AppCard } from "@/components/ui/AppCard";
+import { GradientButton } from "@/components/ui/GradientButton";
+import { ProgressRing } from "@/components/ui/ProgressRing";
+import { AnimatedBar } from "@/components/ui/AnimatedBar";
 import { playAudioUrl } from "@/utils/audio";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
+import { useTokens, type Tokens } from "@/theme/tokens";
 
 type LineResult = {
   position: number;
@@ -26,9 +34,44 @@ interface SentenceMeta {
   note?: string;
 }
 
+/** Small icon+label chip used for the audio / reveal / translate controls. */
+function ToolChip({
+  label,
+  icon,
+  onPress,
+  loading,
+  active,
+  t,
+}: {
+  label: string;
+  icon: string;
+  onPress: () => void;
+  loading?: boolean;
+  active?: boolean;
+  t: Tokens;
+}) {
+  return (
+    <PressableScale
+      onPress={onPress}
+      disabled={loading}
+      style={[
+        styles.toolChip,
+        {
+          backgroundColor: active ? t.primaryAlpha(0.12) : t.neutral.surface2,
+          borderRadius: t.radii.pill,
+          opacity: loading ? 0.6 : 1,
+        },
+      ]}
+    >
+      <MaterialIcons name={icon as any} size={18} color={t.palette.primary} />
+      <Text style={{ color: t.palette.primary, fontWeight: "700", fontSize: 13 }}>{label}</Text>
+    </PressableScale>
+  );
+}
+
 export default function ListeningExerciseScreen() {
   const { exerciseId } = useLocalSearchParams<{ exerciseId: string }>();
-  const theme = useTheme();
+  const t = useTokens();
   const [index, setIndex] = useState(0);
   const [typed, setTyped] = useState("");
   const [lines, setLines] = useState<LineResult[]>([]);
@@ -159,131 +202,145 @@ export default function ListeningExerciseScreen() {
   if (done) {
     const score = overallDictationScore(lines);
     return (
-      <View style={[styles.center, { backgroundColor: theme.colors.background }]}>
-        <Text variant="headlineSmall" style={{ color: theme.colors.onBackground }}>
-          Exercise complete
-        </Text>
-        <Text variant="titleLarge" style={{ color: theme.colors.primary, marginTop: 8 }}>
-          {score}%
-        </Text>
+      <View style={[styles.center, { backgroundColor: t.neutral.bg }]}>
+        <FadeSlideIn>
+          <View style={styles.doneInner}>
+            <ProgressRing value={score} size={140} strokeWidth={12} />
+            <Text variant="headlineSmall" style={{ color: t.neutral.text, fontWeight: "800", marginTop: 20 }}>
+              Exercise complete
+            </Text>
+            <Text variant="bodyMedium" style={{ color: t.neutral.textMinor, marginTop: 4 }}>
+              Great listening work!
+            </Text>
+          </View>
+        </FadeSlideIn>
       </View>
     );
   }
 
+  const progress = sentences.length ? (index + 1) / sentences.length : 0;
+
   return (
-    <ScrollView contentContainerStyle={[styles.pad, { backgroundColor: theme.colors.background }]}>
-      <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-        Sentence {index + 1} / {sentences.length}
-      </Text>
+    <ScrollView style={{ backgroundColor: t.neutral.bg }} contentContainerStyle={styles.pad} showsVerticalScrollIndicator={false}>
+      <FadeSlideIn>
+        <View style={styles.progressHead}>
+          <Text variant="labelLarge" style={{ color: t.neutral.textMinor, fontWeight: "700" }}>
+            Sentence {index + 1} of {sentences.length}
+          </Text>
+          <Text variant="labelLarge" style={{ color: t.palette.primary, fontWeight: "800" }}>
+            {Math.round(progress * 100)}%
+          </Text>
+        </View>
+        <AnimatedBar progress={progress} color={t.palette.primary} trackColor={t.neutral.surface2} style={{ marginTop: 8 }} />
+      </FadeSlideIn>
 
       {highlights.length > 0 ? (
         <View style={styles.chips}>
           {highlights.map((h) => (
-            <Chip
+            <PressableScale
               key={h.text}
               onPress={() => { setSelectedWord(h.text); setNoteDraft(h.note ?? ""); }}
-              style={{ marginRight: 6, marginBottom: 6 }}
+              style={[styles.wordChip, { backgroundColor: t.feature("spellcheck").tint, borderRadius: t.radii.pill }]}
             >
-              {h.text}
-            </Chip>
+              <Text style={{ color: t.feature("spellcheck").fg, fontWeight: "700", fontSize: 13 }}>{h.text}</Text>
+            </PressableScale>
           ))}
         </View>
       ) : null}
 
-      {current?.audio_url ? (
-        <View style={styles.row}>
-          <Button mode="contained-tonal" icon="volume-high" onPress={() => playAudioUrl(current.audio_url!)}>
-            Play
-          </Button>
-          <Button mode="outlined" icon="turtle" onPress={() => playAudioUrl(current.audio_url!, 0.6)}>
-            Slow
-          </Button>
-        </View>
-      ) : null}
+      <FadeSlideIn delay={50}>
+        <AppCard style={{ marginTop: 16 }}>
+          {current?.audio_url ? (
+            <View style={styles.toolRow}>
+              <ToolChip label="Play" icon="volume-up" onPress={() => playAudioUrl(current.audio_url!)} t={t} />
+              <ToolChip label="Slow" icon="slow-motion-video" onPress={() => playAudioUrl(current.audio_url!, 0.6)} t={t} />
+            </View>
+          ) : null}
 
-      {current?.hint ? (
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}>
-          Hint: {current.hint}
-        </Text>
-      ) : null}
+          {current?.hint ? (
+            <Text variant="bodySmall" style={{ color: t.neutral.textMinor, marginTop: 12 }}>
+              Hint: {current.hint}
+            </Text>
+          ) : null}
 
-      <TextInput
-        mode="outlined"
-        label="Type what you hear"
-        value={typed}
-        onChangeText={setTyped}
-        multiline
-        style={{ marginTop: 16 }}
-      />
+          <TextInput
+            mode="outlined"
+            label="Type what you hear"
+            value={typed}
+            onChangeText={setTyped}
+            multiline
+            outlineStyle={{ borderRadius: t.radii.md }}
+            style={[styles.input, { marginTop: 14 }]}
+          />
 
-      <View style={styles.row}>
-        <Button mode="contained" onPress={checkLine} disabled={!typed.trim()}>
-          Check
-        </Button>
-        <Button mode="outlined" icon={revealed ? "eye-off" : "eye"} onPress={() => setRevealed((r) => !r)}>
-          {revealed ? "Hide" : "Reveal"}
-        </Button>
-        <Button mode="outlined" onPress={() => current?.text && translateMutation.mutate(current.text)} loading={translateMutation.isPending}>
-          Translate
-        </Button>
-      </View>
+          <View style={styles.toolRow}>
+            <ToolChip label={revealed ? "Hide" : "Reveal"} icon={revealed ? "visibility-off" : "visibility"} onPress={() => setRevealed((r) => !r)} active={revealed} t={t} />
+            <ToolChip label="Translate" icon="translate" onPress={() => current?.text && translateMutation.mutate(current.text)} loading={translateMutation.isPending} t={t} />
+          </View>
 
-      {revealed && current?.text ? (
-        <View style={[styles.reveal, { backgroundColor: theme.colors.surfaceVariant }]}>
-          <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-            Answer
-          </Text>
-          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, marginTop: 2 }}>
-            {current.text}
-          </Text>
-        </View>
-      ) : null}
+          <GradientButton label="Check" icon="check" onPress={checkLine} disabled={!typed.trim()} style={{ marginTop: 14 }} />
 
-      {translationDraft || currentMeta?.translation ? (
-        <Text style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}>
-          Translation: {translationDraft || currentMeta?.translation}
-        </Text>
-      ) : null}
+          {revealed && current?.text ? (
+            <View style={[styles.reveal, { backgroundColor: t.neutral.surface2, borderRadius: t.radii.md }]}>
+              <Text variant="labelMedium" style={{ color: t.neutral.textMinor, fontWeight: "700" }}>
+                Answer
+              </Text>
+              <Text variant="titleMedium" style={{ color: t.neutral.text, marginTop: 2 }}>
+                {current.text}
+              </Text>
+            </View>
+          ) : null}
 
-      <TextInput
-        mode="outlined"
-        label="Sentence note"
-        value={noteDraft || currentMeta?.note || ""}
-        onChangeText={setNoteDraft}
-        multiline
-        style={{ marginTop: 12 }}
-      />
-      <Button mode="text" onPress={saveSentenceNote}>
-        Save note
-      </Button>
+          {translationDraft || currentMeta?.translation ? (
+            <Text style={{ color: t.neutral.textMinor, marginTop: 10 }}>
+              Translation: {translationDraft || currentMeta?.translation}
+            </Text>
+          ) : null}
+        </AppCard>
+      </FadeSlideIn>
 
-      {current?.explanation ? (
-        <>
-          <Text variant="titleSmall" style={{ color: theme.colors.onSurface, marginTop: 12 }}>
-            Explanation
-          </Text>
-          <Text style={{ color: theme.colors.onSurfaceVariant }}>{current.explanation}</Text>
-        </>
-      ) : null}
+      <FadeSlideIn delay={90}>
+        <AppCard style={{ marginTop: 14 }}>
+          <TextInput
+            mode="outlined"
+            label="Sentence note"
+            value={noteDraft || currentMeta?.note || ""}
+            onChangeText={setNoteDraft}
+            multiline
+            outlineStyle={{ borderRadius: t.radii.md }}
+            style={styles.input}
+          />
+          <PressableScale onPress={saveSentenceNote} hitSlop={8} style={{ alignSelf: "flex-start", marginTop: 8 }}>
+            <Text style={{ color: t.palette.primary, fontWeight: "700" }}>Save note</Text>
+          </PressableScale>
+
+          {current?.explanation ? (
+            <>
+              <Text variant="titleSmall" style={{ color: t.neutral.text, fontWeight: "700", marginTop: 12 }}>
+                Explanation
+              </Text>
+              <Text style={{ color: t.neutral.textMinor, marginTop: 2 }}>{current.explanation}</Text>
+            </>
+          ) : null}
+        </AppCard>
+      </FadeSlideIn>
 
       {selectedWord ? (
-        <View style={[styles.noteBox, { borderColor: theme.colors.outlineVariant }]}>
-          <Text variant="labelLarge" style={{ color: theme.colors.onSurface }}>
+        <AppCard style={{ marginTop: 14 }}>
+          <Text variant="labelLarge" style={{ color: t.neutral.text, fontWeight: "700" }}>
             Note for “{selectedWord}”
           </Text>
-          <TextInput mode="outlined" value={noteDraft} onChangeText={setNoteDraft} multiline style={{ marginTop: 8 }} />
-          <View style={styles.row}>
-            <Button mode="contained" onPress={saveNote} loading={highlightMutation.isPending}>
-              Save highlight
-            </Button>
-            <Button mode="text" onPress={() => setSelectedWord(null)}>
-              Cancel
-            </Button>
+          <TextInput mode="outlined" value={noteDraft} onChangeText={setNoteDraft} multiline outlineStyle={{ borderRadius: t.radii.md }} style={[styles.input, { marginTop: 8 }]} />
+          <View style={styles.toolRow}>
+            <GradientButton label="Save highlight" onPress={saveNote} loading={highlightMutation.isPending} style={{ flex: 1 }} />
+            <PressableScale onPress={() => setSelectedWord(null)} style={[styles.cancelBtn, { backgroundColor: t.neutral.surface2, borderRadius: t.radii.pill }]}>
+              <Text style={{ color: t.neutral.textMinor, fontWeight: "700" }}>Cancel</Text>
+            </PressableScale>
           </View>
-        </View>
+        </AppCard>
       ) : null}
 
-      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 12 }}>
+      <Text variant="bodySmall" style={{ color: t.neutral.textMuted, marginTop: 16, textAlign: "center" }}>
         Progress auto-saves after each checked sentence.
       </Text>
     </ScrollView>
@@ -291,10 +348,15 @@ export default function ListeningExerciseScreen() {
 }
 
 const styles = StyleSheet.create({
-  pad: { padding: 16 },
+  pad: { padding: 16, paddingBottom: 120 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
-  row: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 12 },
-  chips: { flexDirection: "row", flexWrap: "wrap", marginTop: 8 },
-  noteBox: { marginTop: 16, padding: 12, borderWidth: 1, borderRadius: 10 },
-  reveal: { marginTop: 12, padding: 12, borderRadius: 10 },
+  doneInner: { alignItems: "center" },
+  progressHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  chips: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 },
+  wordChip: { paddingHorizontal: 12, paddingVertical: 7 },
+  input: { backgroundColor: "transparent" },
+  toolRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 12, alignItems: "center" },
+  toolChip: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 10 },
+  reveal: { marginTop: 12, padding: 12 },
+  cancelBtn: { paddingHorizontal: 20, height: 52, alignItems: "center", justifyContent: "center" },
 });

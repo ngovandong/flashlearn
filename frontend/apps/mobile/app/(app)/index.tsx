@@ -1,21 +1,25 @@
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { Snackbar, Text, useTheme } from "react-native-paper";
+import { Snackbar, Text } from "react-native-paper";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { mapReminderRoute, REMINDER_META, type Reminder } from "@flashlearn/core";
 import { useAppSelector } from "@/store/hooks";
 import { selectUser } from "@/store/authSlice";
 import { useLatestDecks, useReminders } from "@/features/home/hooks";
 import { StreakCard } from "@/components/StreakCard";
 import { DeckCard } from "@/components/DeckCard";
-import { ReminderList } from "@/components/ReminderList";
-import { ChatPanel } from "@/features/assistant/ChatPanel";
+import { ReminderList, ReminderListSkeleton } from "@/components/ReminderList";
+import { FadeSlideIn } from "@/components/FadeSlideIn";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+import { motion, useTokens } from "@/theme/tokens";
 
 export default function HomeScreen() {
-  const theme = useTheme();
+  const t = useTokens();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const user = useAppSelector(selectUser);
-  const { data: reminders } = useReminders();
+  const { data: reminders, isLoading: remindersLoading } = useReminders();
   const { data: latestDecks } = useLatestDecks();
   const [snack, setSnack] = useState<string | null>(null);
 
@@ -32,40 +36,57 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text variant="headlineSmall" style={{ color: theme.colors.onBackground }}>
-          Hi, {greetingName} 👋
-        </Text>
+    <View style={[styles.flex, { backgroundColor: t.neutral.bg }]}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <FadeSlideIn>
+          <Text variant="labelLarge" style={{ color: t.palette.primary, fontWeight: "700" }}>
+            Welcome back
+          </Text>
+          <Text
+            variant="headlineMedium"
+            style={{ color: t.neutral.text, fontWeight: "800", marginTop: 2 }}
+          >
+            Hi, {greetingName} 👋
+          </Text>
+        </FadeSlideIn>
 
-        <StreakCard />
+        <FadeSlideIn delay={60} style={styles.section}>
+          <StreakCard />
+        </FadeSlideIn>
 
-        <Text variant="titleMedium" style={{ color: theme.colors.onBackground, marginTop: 8 }}>
-          Jump back in
-        </Text>
-        <ReminderList reminders={reminders ?? []} onPress={onReminderPress} />
+        <FadeSlideIn delay={120} style={styles.section}>
+          <SectionHeader title="Jump back in" subtitle="Pick up where you left off" />
+          {remindersLoading ? (
+            <ReminderListSkeleton />
+          ) : (
+            <ReminderList reminders={reminders ?? []} onPress={onReminderPress} />
+          )}
+        </FadeSlideIn>
 
         {latestDecks && latestDecks.length > 0 ? (
-          <>
-            <Text variant="titleMedium" style={{ color: theme.colors.onBackground, marginTop: 8 }}>
-              Recent decks
-            </Text>
-            <View style={{ gap: 10 }}>
-              {latestDecks.slice(0, 4).map((deck) => (
-                <DeckCard
-                  key={deck.id}
-                  deck={deck}
-                  onPress={() => router.push(`/library/${deck.id}`)}
-                />
+          <View style={styles.section}>
+            <FadeSlideIn delay={180}>
+              <SectionHeader
+                title="Recent decks"
+                action="See all"
+                onAction={() => router.push("/library")}
+              />
+            </FadeSlideIn>
+            <View style={{ gap: 12 }}>
+              {latestDecks.slice(0, 4).map((deck, i) => (
+                <FadeSlideIn key={deck.id} delay={220 + i * motion.stagger.list}>
+                  <DeckCard
+                    deck={deck}
+                    onPress={() => router.push(`/library/${deck.id}`)}
+                  />
+                </FadeSlideIn>
               ))}
             </View>
-          </>
+          </View>
         ) : null}
-
-        <Text variant="titleMedium" style={{ color: theme.colors.onBackground, marginTop: 8 }}>
-          Ask Dragon
-        </Text>
-        <ChatPanel />
       </ScrollView>
 
       <Snackbar visible={!!snack} onDismiss={() => setSnack(null)} duration={3000}>
@@ -77,5 +98,6 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  content: { padding: 16, gap: 14 },
+  content: { padding: 16, paddingBottom: 110, gap: 8 },
+  section: { gap: 12, marginTop: 8 },
 });

@@ -10,6 +10,7 @@ import {
   selectToken,
   selectUser,
 } from "@/store/authSlice";
+import { useServerThemeSync } from "@/theme/useServerThemeSync";
 
 /**
  * Startup session gate: silently restores the session from the stored refresh
@@ -24,6 +25,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const segments = useSegments();
   const router = useRouter();
   const theme = useTheme();
+
+  useServerThemeSync();
 
   useEffect(() => {
     dispatch(bootstrapSession());

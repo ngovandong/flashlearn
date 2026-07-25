@@ -12,6 +12,9 @@ $sc-low: $error-red;
     margin: 0 auto;
     padding: $space-5 $space-4 $space-8;
     color: $main-text-color;
+    // Shared by Speaking Coach, Course, Grammar and Listening shells — one calm
+    // entrance so switching between these hubs feels continuous.
+    @include page_enter;
 }
 
 /* ---------- Top bar ---------- */
@@ -2297,6 +2300,10 @@ $sc-low: $error-red;
 .sc-course-card-wrap {
     position: relative;
     display: flex;
+    // Wrapper carries the staggered entrance so the inner card keeps its hover
+    // lift (a finished transform animation would otherwise pin it).
+    @include enter_fade;
+    @include stagger;
 
     // Reveal the admin delete control on hover/focus (always visible on touch).
     &:hover .sc-course-card__delete,

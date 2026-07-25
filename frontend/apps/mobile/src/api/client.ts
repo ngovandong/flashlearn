@@ -1,16 +1,17 @@
 import { createHttpClient } from "@flashlearn/api";
 import { ENV } from "@/config/env";
-import { store } from "@/store";
-import { setToken, logout } from "@/store/authSlice";
+import { authBridge } from "@/api/authBridge";
 import { performRefresh } from "@/auth/refresh";
 
 // Native HTTP client: Bearer access token from Redux memory, body-based refresh
-// backed by SecureStore, and a hard logout when the refresh itself fails.
+// backed by SecureStore, and a hard logout when the refresh itself fails. The
+// store is reached through `authBridge` (not a direct import) to avoid a require
+// cycle back into the auth slice.
 export const request = createHttpClient({
   baseURL: ENV.apiBaseUrl,
   withCredentials: false,
-  getAccessToken: () => store.getState().auth.token?.access ?? null,
+  getAccessToken: () => authBridge.getAccessToken(),
   refresh: (bare) => performRefresh(bare),
-  onTokensRefreshed: ({ access }) => store.dispatch(setToken({ access })),
-  onAuthFailure: () => store.dispatch(logout()),
+  onTokensRefreshed: (tokens) => authBridge.onTokensRefreshed(tokens),
+  onAuthFailure: () => authBridge.onAuthFailure(),
 });

@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://flashlearnapi.ngovandong.site/api/:path*"
+      "destination": "https://flashlearnapi.dongkiemem.site/api/:path*"
     },
     {
       "source": "/(.*)",

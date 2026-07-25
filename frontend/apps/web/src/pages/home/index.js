@@ -1,4 +1,3 @@
-import { LocalLoadingWrapper } from "@components/loading";
 import { Alert, Box, Snackbar } from "@mui/material";
 import {
   useLatestDecks,
@@ -7,6 +6,7 @@ import {
 } from "@hooks/useLatestDecks";
 import React, { useMemo, useState } from "react";
 import DeckCard from "./deckCard";
+import { DeckCardSkeletonGrid, ReminderCardSkeletonGrid } from "@components/skeletons";
 import PaginatedDeckSection, { fetchPublicDecksPage } from "./paginatedDeckSection";
 import { useSelector } from "react-redux";
 import { selectUser } from "@app/store/authSlice";
@@ -40,10 +40,11 @@ function Home() {
     isLoading: decksLoading,
     error: decksError,
   } = useLatestDecks();
-  const { data: learningStreak } = useLearningStreak();
-  const { data: reminders } = useReminders();
+  const { data: learningStreak, isLoading: streakLoading } = useLearningStreak();
+  const { data: reminders, isLoading: remindersLoading } = useReminders();
 
   const queryError = decksError?.message;
+  const remindersPending = streakLoading || remindersLoading;
 
   const streakText = learningStreak ? streakCopy(learningStreak) : null;
 
@@ -55,7 +56,6 @@ function Home() {
 
   return user ? (
     <div className="home-page">
-      <LocalLoadingWrapper open={decksLoading} />
       <Snackbar
         anchorOrigin={{
           vertical: "bottom",
@@ -93,61 +93,69 @@ function Home() {
         <div className="section-header">
           <h5>Pick up where you left off</h5>
         </div>
-        <div className="reminders-grid" data-tour="reminders">
-          {streakText && (
-            <div className="reminder-card reminder-card--streak">
-              <div className="reminder-card__icon">
-                <img
-                  src="https://cdn-icons-png.flaticon.com/512/1869/1869397.png"
-                  alt="streak-calendar"
-                />
-              </div>
-              <div className="reminder-card__body">
-                <h4>{streakText.main}</h4>
-                <p>{streakText.sub}</p>
-              </div>
-            </div>
-          )}
-          {visibleReminders.map((reminder, index) => {
-            const meta = REMINDER_META[reminder.type];
-            return (
-              <Link
-                key={reminder.type}
-                to={reminder.route}
-                className={`reminder-card reminder-card--link reminder-card--${meta.tone}`}
-                style={{ animationDelay: `${index * 70}ms` }}
-              >
-                <div className="reminder-card__icon">{meta.icon}</div>
-                <div className="reminder-card__body">
-                  <h4>{meta.title}</h4>
-                  <p>{meta.description(reminder.label)}</p>
-                  <span className="reminder-card__cta">
-                    {meta.cta}
-                    <ArrowForwardRoundedIcon />
-                  </span>
+        {remindersPending ? (
+          <ReminderCardSkeletonGrid count={2} />
+        ) : (
+          <div className="reminders-grid" data-tour="reminders">
+            {streakText && (
+              <div className="reminder-card reminder-card--streak">
+                <div className="reminder-card__icon">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/1869/1869397.png"
+                    alt="streak-calendar"
+                  />
                 </div>
-              </Link>
-            );
-          })}
-        </div>
+                <div className="reminder-card__body">
+                  <h4>{streakText.main}</h4>
+                  <p>{streakText.sub}</p>
+                </div>
+              </div>
+            )}
+            {visibleReminders.map((reminder, index) => {
+              const meta = REMINDER_META[reminder.type];
+              return (
+                <Link
+                  key={reminder.type}
+                  to={reminder.route}
+                  className={`reminder-card reminder-card--link reminder-card--${meta.tone}`}
+                  style={{ animationDelay: `${index * 70}ms` }}
+                >
+                  <div className="reminder-card__icon">{meta.icon}</div>
+                  <div className="reminder-card__body">
+                    <h4>{meta.title}</h4>
+                    <p>{meta.description(reminder.label)}</p>
+                    <span className="reminder-card__cta">
+                      {meta.cta}
+                      <ArrowForwardRoundedIcon />
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </section>
-      {mydecks && mydecks.length !== 0 && (
+      {(decksLoading || (mydecks && mydecks.length !== 0)) && (
         <section>
           <div className="section-header">
             <h5>Recents</h5>
           </div>
-          <div className="section-cards">
-            {mydecks.map((d) => (
-              <DeckCard
-                key={d.id}
-                id={d.id}
-                name={d.name}
-                owner={d.owner}
-                terms={d.number_of_term}
-                background={d.background}
-              />
-            ))}
-          </div>
+          {decksLoading ? (
+            <DeckCardSkeletonGrid count={4} />
+          ) : (
+            <div className="section-cards">
+              {mydecks.map((d) => (
+                <DeckCard
+                  key={d.id}
+                  id={d.id}
+                  name={d.name}
+                  owner={d.owner}
+                  terms={d.number_of_term}
+                  background={d.background}
+                />
+              ))}
+            </div>
+          )}
         </section>
       )}
       <PaginatedDeckSection

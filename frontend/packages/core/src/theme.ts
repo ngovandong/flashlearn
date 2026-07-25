@@ -11,12 +11,48 @@
 export const THEME_STORAGE_KEY = "fl-theme";
 export const SETTING_MODE_KEY = "theme_mode";
 export const SETTING_PALETTE_KEY = "theme_palette";
+export const SETTING_SURFACE_KEY = "theme_surface";
 
 export type ThemeMode = "light" | "dark" | "system";
 
 export const MODES: ThemeMode[] = ["light", "dark", "system"];
 export const DEFAULT_MODE: ThemeMode = "system";
 export const DEFAULT_PALETTE = "indigo";
+
+/**
+ * Surface style — an axis orthogonal to mode/palette that controls the *material*
+ * of every surface. "solid" is the classic opaque look; "glass" is the
+ * translucent, blurred "Liquid Glass" material (à la iOS 26) that lets the
+ * palette-tinted backdrop refract through cards, bars and sheets.
+ */
+export type ThemeSurface = "solid" | "glass";
+
+export const SURFACES: ThemeSurface[] = ["solid", "glass"];
+export const DEFAULT_SURFACE: ThemeSurface = "solid";
+
+export interface SurfaceMeta {
+  id: ThemeSurface;
+  name: string;
+  description: string;
+}
+
+export const SURFACE_META: SurfaceMeta[] = [
+  {
+    id: "solid",
+    name: "Solid",
+    description: "Classic opaque surfaces — crisp and high-contrast.",
+  },
+  {
+    id: "glass",
+    name: "Liquid Glass",
+    description:
+      "Translucent, frosted surfaces that refract the color behind them.",
+  },
+];
+
+export function resolveSurface(surface: string | null | undefined): ThemeSurface {
+  return surface === "glass" ? "glass" : "solid";
+}
 
 export interface Rgb {
   r: number;

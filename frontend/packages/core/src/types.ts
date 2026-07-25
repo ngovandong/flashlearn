@@ -84,6 +84,14 @@ export interface LearningProgress {
   learned?: number;
   total?: number;
   percentage?: number;
+  /** Terms actively being learned (score below mastery threshold). */
+  learning?: number;
+  /** Terms mastered / completed. */
+  completed?: number;
+  /** Terms not yet started. */
+  left?: number;
+  /** Terms revised today. */
+  learned_today?: number;
 }
 
 export interface Deck {

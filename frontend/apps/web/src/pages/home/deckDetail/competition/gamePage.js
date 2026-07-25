@@ -112,7 +112,7 @@ export default function CompetitionGamePage() {
       )}
 
       {data && !started && phase === "playing" && (
-        <Countdown key={`cd-${runKey}`} onDone={() => setStarted(true)} />
+        <Countdown key={`cd-${runKey}`} sound={sound} onDone={() => setStarted(true)} />
       )}
 
       {phase === "over" && result && (

@@ -1,24 +1,23 @@
 import React, { useState } from "react";
-import { FlatList, Image, Pressable, ScrollView, StyleSheet, View } from "react-native";
-import {
-  Button,
-  Divider,
-  IconButton,
-  SegmentedButtons,
-  Switch,
-  Text,
-  TextInput,
-  useTheme,
-} from "react-native-paper";
+import { Image, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Switch, Text, TextInput } from "react-native-paper";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { DeckDetail, Term } from "@flashlearn/core";
 import { resolveImageUrl } from "@flashlearn/core";
 import { deckApi, imageApi, termApi, translateApi } from "@/api/services";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
+import { FadeSlideIn } from "@/components/FadeSlideIn";
+import { PressableScale } from "@/components/PressableScale";
+import { AppCard } from "@/components/ui/AppCard";
+import { GradientButton } from "@/components/ui/GradientButton";
+import { PillTabs } from "@/components/ui/PillTabs";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
+import { useTokens, type Tokens } from "@/theme/tokens";
 
 interface DraftTerm extends Term {
   name: string;
@@ -28,10 +27,42 @@ interface DraftTerm extends Term {
 
 const EMPTY_DRAFT: DraftTerm = { name: "", meaning: "", image: "" };
 
+/** Small outlined action chip (Translate / AI fill / Find image). */
+function ActionChip({
+  label,
+  icon,
+  onPress,
+  loading,
+  disabled,
+  t,
+}: {
+  label: string;
+  icon: string;
+  onPress: () => void;
+  loading?: boolean;
+  disabled?: boolean;
+  t: Tokens;
+}) {
+  return (
+    <PressableScale
+      onPress={onPress}
+      disabled={disabled || loading}
+      style={[
+        styles.actionChip,
+        { borderColor: t.neutral.border, borderRadius: t.radii.pill, opacity: disabled || loading ? 0.5 : 1 },
+      ]}
+    >
+      <MaterialIcons name={(loading ? "hourglass-empty" : icon) as any} size={16} color={t.palette.primary} />
+      <Text style={{ color: t.palette.primary, fontWeight: "700", fontSize: 13 }}>{label}</Text>
+    </PressableScale>
+  );
+}
+
 export default function EditDeckScreen() {
   const { deckId } = useLocalSearchParams<{ deckId: string }>();
-  const theme = useTheme();
+  const t = useTokens();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const qc = useQueryClient();
 
   const [addMode, setAddMode] = useState<"single" | "bulk">("single");
@@ -172,7 +203,7 @@ export default function EditDeckScreen() {
           meaning: line.slice(idx + sep.length).trim(),
         };
       })
-      .filter((t) => t.name);
+      .filter((tm) => tm.name);
 
   if (deckQuery.isLoading || termsQuery.isLoading) return <LoadingView />;
   if (deckQuery.isError) return <ErrorView message="Could not load deck" onRetry={() => deckQuery.refetch()} />;
@@ -181,184 +212,186 @@ export default function EditDeckScreen() {
   const parsedCount = parseBulk().length;
 
   return (
-    <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scroll}>
-        {/* Deck settings */}
-        <Pressable onPress={() => setSettingsOpen((o) => !o)} style={styles.settingsHeader}>
-          <Text variant="titleMedium" style={{ color: theme.colors.onSurface }}>
-            Deck settings
-          </Text>
-          <IconButton icon={settingsOpen ? "chevron-up" : "chevron-down"} size={20} />
-        </Pressable>
-        {settingsOpen ? (
-          <View style={styles.settingsBody}>
-            <TextInput label="Deck name" mode="outlined" value={name} onChangeText={setName} />
-            <TextInput
-              label="Description"
-              mode="outlined"
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              style={{ marginTop: 8 }}
-            />
-            <View style={styles.switchRow}>
-              <Text style={{ color: theme.colors.onSurface }}>Public deck</Text>
-              <Switch value={isPublic} onValueChange={setIsPublic} />
-            </View>
-            <Button
-              mode="contained-tonal"
-              onPress={() => saveSettingsMutation.mutate()}
-              loading={saveSettingsMutation.isPending}
-              disabled={!name.trim() || saveSettingsMutation.isPending}
-            >
-              {settingsSaved ? "Saved!" : "Save settings"}
-            </Button>
-          </View>
-        ) : null}
-
-        <Divider style={styles.divider} />
-
-        {/* Add terms */}
-        <SegmentedButtons
-          value={addMode}
-          onValueChange={(v) => setAddMode(v as "single" | "bulk")}
-          buttons={[
-            { value: "single", label: "Add one", icon: "plus" },
-            { value: "bulk", label: "Bulk add", icon: "format-list-bulleted" },
-          ]}
-        />
-
-        {addMode === "single" ? (
-          <View style={styles.form}>
-            <TextInput label="Term" mode="outlined" value={draft.name} onChangeText={(v) => setDraft((d) => ({ ...d, name: v }))} />
-            <TextInput
-              label="Meaning"
-              mode="outlined"
-              value={draft.meaning}
-              onChangeText={(v) => setDraft((d) => ({ ...d, meaning: v }))}
-              style={{ marginTop: 8 }}
-            />
-
-            {draftImageUrl ? (
-              <Image source={{ uri: draftImageUrl }} style={styles.preview} resizeMode="cover" />
+    <View style={[styles.flex, { backgroundColor: t.neutral.bg }]}>
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <FadeSlideIn>
+          <AppCard>
+            <Pressable onPress={() => setSettingsOpen((o) => !o)} style={styles.settingsHeader}>
+              <Text variant="titleMedium" style={{ color: t.neutral.text, fontWeight: "800" }}>
+                Deck settings
+              </Text>
+              <MaterialIcons
+                name={settingsOpen ? "expand-less" : "expand-more"}
+                size={24}
+                color={t.neutral.textMuted}
+              />
+            </Pressable>
+            {settingsOpen ? (
+              <View style={styles.settingsBody}>
+                <TextInput label="Deck name" mode="outlined" value={name} onChangeText={setName} outlineStyle={{ borderRadius: t.radii.md }} style={styles.input} />
+                <TextInput
+                  label="Description"
+                  mode="outlined"
+                  value={description}
+                  onChangeText={setDescription}
+                  multiline
+                  outlineStyle={{ borderRadius: t.radii.md }}
+                  style={[styles.input, { marginTop: 8 }]}
+                />
+                <View style={[styles.switchRow, { backgroundColor: t.neutral.surface2, borderRadius: t.radii.md }]}>
+                  <Text style={{ color: t.neutral.text, fontWeight: "700" }}>Public deck</Text>
+                  <Switch value={isPublic} onValueChange={setIsPublic} color={t.palette.primary} />
+                </View>
+                <GradientButton
+                  label={settingsSaved ? "Saved!" : "Save settings"}
+                  onPress={() => saveSettingsMutation.mutate()}
+                  loading={saveSettingsMutation.isPending}
+                  disabled={!name.trim() || saveSettingsMutation.isPending}
+                  style={{ marginTop: 12 }}
+                />
+              </View>
             ) : null}
+          </AppCard>
+        </FadeSlideIn>
 
-            {imageResults.length > 1 ? (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbRow}>
-                {imageResults.map((url) => {
-                  const resolved = resolveImageUrl(url);
-                  if (!resolved) return null;
-                  const selected = url === draft.image;
-                  return (
-                    <Pressable key={url} onPress={() => setDraft((d) => ({ ...d, image: url }))}>
-                      <Image
-                        source={{ uri: resolved }}
-                        style={[
-                          styles.thumb,
-                          { borderColor: selected ? theme.colors.primary : theme.colors.outlineVariant },
-                        ]}
-                      />
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-            ) : null}
-
-            <View style={styles.row}>
-              <Button mode="outlined" onPress={translate} compact icon="translate">
-                Translate
-              </Button>
-              <Button mode="outlined" onPress={aiFill} loading={aiLoading} disabled={aiLoading || !draft.name.trim()} compact icon="auto-fix">
-                {draft.ai_filled ? "AI filled" : "AI fill"}
-              </Button>
-              <Button mode="outlined" onPress={searchImage} loading={imageLoading} disabled={imageLoading || !draft.name.trim()} compact icon="image-search">
-                Find image
-              </Button>
-            </View>
-            <Button
-              mode="contained"
-              onPress={() => addMutation.mutate()}
-              loading={addMutation.isPending}
-              disabled={!draft.name.trim() || addMutation.isPending}
-              style={{ marginTop: 8 }}
-            >
-              Add term
-            </Button>
-          </View>
-        ) : (
-          <View style={styles.form}>
-            <TextInput
-              label="Paste terms"
-              mode="outlined"
-              value={bulkText}
-              onChangeText={setBulkText}
-              multiline
-              numberOfLines={6}
-              placeholder={"apple - quả táo\nrun - chạy\nhouse, ngôi nhà"}
-              style={styles.bulkInput}
-            />
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}>
-              One per line. Separate term and meaning with a dash, comma or tab.
+        <FadeSlideIn delay={60} style={{ marginTop: 16 }}>
+          <AppCard>
+            <Text variant="titleMedium" style={{ color: t.neutral.text, fontWeight: "800", marginBottom: 12 }}>
+              Add terms
             </Text>
-            <Button
-              mode="contained"
-              onPress={() => bulkMutation.mutate(parseBulk())}
-              loading={bulkMutation.isPending}
-              disabled={parsedCount === 0 || bulkMutation.isPending}
-              style={{ marginTop: 8 }}
-            >
-              {parsedCount > 0 ? `Add ${parsedCount} term${parsedCount > 1 ? "s" : ""}` : "Add terms"}
-            </Button>
-          </View>
-        )}
+            <PillTabs
+              value={addMode}
+              onChange={(v) => setAddMode(v)}
+              options={[
+                { value: "single", label: "Add one" },
+                { value: "bulk", label: "Bulk add" },
+              ]}
+            />
 
-        <Divider style={styles.divider} />
+            {addMode === "single" ? (
+              <View style={styles.form}>
+                <TextInput label="Term" mode="outlined" value={draft.name} onChangeText={(v) => setDraft((d) => ({ ...d, name: v }))} outlineStyle={{ borderRadius: t.radii.md }} style={styles.input} />
+                <TextInput
+                  label="Meaning"
+                  mode="outlined"
+                  value={draft.meaning}
+                  onChangeText={(v) => setDraft((d) => ({ ...d, meaning: v }))}
+                  outlineStyle={{ borderRadius: t.radii.md }}
+                  style={[styles.input, { marginTop: 8 }]}
+                />
 
-        <Text variant="titleMedium" style={{ color: theme.colors.onSurface, marginBottom: 8 }}>
-          Terms ({terms.length})
-        </Text>
-        {terms.map((item) => (
-          <View key={item.id} style={[styles.termRow, { borderColor: theme.colors.outlineVariant }]}>
-            <View style={{ flex: 1 }}>
-              <Text variant="titleSmall" style={{ color: theme.colors.onSurface }}>
-                {item.name}
-              </Text>
-              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                {item.meaning}
-              </Text>
-            </View>
-            <IconButton icon="delete" onPress={() => item.id && deleteMutation.mutate(item.id)} />
+                {draftImageUrl ? (
+                  <Image source={{ uri: draftImageUrl }} style={[styles.preview, { borderRadius: t.radii.md }]} resizeMode="cover" />
+                ) : null}
+
+                {imageResults.length > 1 ? (
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbRow}>
+                    {imageResults.map((url) => {
+                      const resolved = resolveImageUrl(url);
+                      if (!resolved) return null;
+                      const selected = url === draft.image;
+                      return (
+                        <Pressable key={url} onPress={() => setDraft((d) => ({ ...d, image: url }))}>
+                          <Image
+                            source={{ uri: resolved }}
+                            style={[styles.thumb, { borderColor: selected ? t.palette.primary : t.neutral.border }]}
+                          />
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+                ) : null}
+
+                <View style={styles.actionRow}>
+                  <ActionChip label="Translate" icon="translate" onPress={translate} t={t} disabled={!draft.name.trim()} />
+                  <ActionChip label={draft.ai_filled ? "AI filled" : "AI fill"} icon="auto-fix-high" onPress={aiFill} loading={aiLoading} disabled={!draft.name.trim()} t={t} />
+                  <ActionChip label="Find image" icon="image-search" onPress={searchImage} loading={imageLoading} disabled={!draft.name.trim()} t={t} />
+                </View>
+                <GradientButton
+                  label="Add term"
+                  icon="add"
+                  onPress={() => addMutation.mutate()}
+                  loading={addMutation.isPending}
+                  disabled={!draft.name.trim() || addMutation.isPending}
+                  style={{ marginTop: 12 }}
+                />
+              </View>
+            ) : (
+              <View style={styles.form}>
+                <TextInput
+                  label="Paste terms"
+                  mode="outlined"
+                  value={bulkText}
+                  onChangeText={setBulkText}
+                  multiline
+                  numberOfLines={6}
+                  placeholder={"apple - quả táo\nrun - chạy\nhouse, ngôi nhà"}
+                  outlineStyle={{ borderRadius: t.radii.md }}
+                  style={[styles.input, styles.bulkInput]}
+                />
+                <Text variant="bodySmall" style={{ color: t.neutral.textMinor, marginTop: 6 }}>
+                  One per line. Separate term and meaning with a dash, comma or tab.
+                </Text>
+                <GradientButton
+                  label={parsedCount > 0 ? `Add ${parsedCount} term${parsedCount > 1 ? "s" : ""}` : "Add terms"}
+                  onPress={() => bulkMutation.mutate(parseBulk())}
+                  loading={bulkMutation.isPending}
+                  disabled={parsedCount === 0 || bulkMutation.isPending}
+                  style={{ marginTop: 12 }}
+                />
+              </View>
+            )}
+          </AppCard>
+        </FadeSlideIn>
+
+        <FadeSlideIn delay={120} style={{ marginTop: 16 }}>
+          <Text variant="titleMedium" style={{ color: t.neutral.text, fontWeight: "800", marginBottom: 10 }}>
+            Terms ({terms.length})
+          </Text>
+          <View style={{ gap: 10 }}>
+            {terms.map((item) => (
+              <AppCard key={item.id} padding={14}>
+                <View style={styles.termRow}>
+                  <View style={{ flex: 1 }}>
+                    <Text variant="titleSmall" style={{ color: t.neutral.text, fontWeight: "700" }}>
+                      {item.name}
+                    </Text>
+                    <Text variant="bodySmall" style={{ color: t.neutral.textMinor }}>
+                      {item.meaning}
+                    </Text>
+                  </View>
+                  <PressableScale onPress={() => item.id && deleteMutation.mutate(item.id)} hitSlop={8} style={styles.deleteBtn}>
+                    <MaterialIcons name="delete-outline" size={22} color={t.neutral.textMuted} />
+                  </PressableScale>
+                </View>
+              </AppCard>
+            ))}
           </View>
-        ))}
+        </FadeSlideIn>
       </ScrollView>
 
-      <Button mode="text" onPress={() => router.back()} style={styles.done}>
-        Done
-      </Button>
+      <View style={[styles.footer, { backgroundColor: t.neutral.surface, borderTopColor: t.neutral.border, paddingBottom: insets.bottom + 72 }]}>
+        <GradientButton label="Done" icon="check" onPress={() => router.back()} />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  scroll: { padding: 16, paddingBottom: 8 },
+  scroll: { padding: 16, paddingBottom: 24 },
   settingsHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  settingsBody: { gap: 8, marginTop: 4 },
-  switchRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginVertical: 4 },
-  divider: { marginVertical: 16 },
-  form: { marginTop: 12 },
-  row: { flexDirection: "row", gap: 8, marginTop: 12, flexWrap: "wrap" },
-  preview: { width: "100%", height: 160, borderRadius: 10, marginTop: 12 },
+  settingsBody: { gap: 8, marginTop: 12 },
+  input: { backgroundColor: "transparent" },
+  switchRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, marginTop: 4 },
+  form: { marginTop: 14 },
+  actionRow: { flexDirection: "row", gap: 8, marginTop: 12, flexWrap: "wrap" },
+  actionChip: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 9, borderWidth: 1.5 },
+  preview: { width: "100%", height: 160, marginTop: 12 },
   thumbRow: { gap: 8, marginTop: 12 },
-  thumb: { width: 72, height: 72, borderRadius: 8, borderWidth: 2 },
+  thumb: { width: 72, height: 72, borderRadius: 10, borderWidth: 2 },
   bulkInput: { minHeight: 120 },
-  termRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingLeft: 12,
-    marginBottom: 8,
-  },
-  done: { margin: 16 },
+  termRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  deleteBtn: { width: 34, height: 34, alignItems: "center", justifyContent: "center" },
+  footer: { padding: 16, borderTopWidth: StyleSheet.hairlineWidth },
 });

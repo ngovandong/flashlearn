@@ -1,21 +1,29 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { Button, IconButton, ProgressBar, Text, useTheme } from "react-native-paper";
+import { Image, StyleSheet, View } from "react-native";
+import { Text } from "react-native-paper";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import { generateQuestions, QUESTION_TYPES } from "@flashlearn/core";
+import { generateQuestions, QUESTION_TYPES, resolveImageUrl } from "@flashlearn/core";
 import type { Question, Term } from "@flashlearn/core";
 import { learningApi, userSettingsApi } from "@/api/services";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
+import { FadeSlideIn } from "@/components/FadeSlideIn";
+import { PressableScale } from "@/components/PressableScale";
+import { GradientButton } from "@/components/ui/GradientButton";
+import { ProgressRing } from "@/components/ui/ProgressRing";
+import { AnimatedBar } from "@/components/ui/AnimatedBar";
 import { FillQuestion } from "@/features/study/FillQuestion";
 import { QuizQuestion } from "@/features/study/QuizQuestion";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
+import { speakText } from "@/utils/audio";
+import { useTokens } from "@/theme/tokens";
 
 export default function DeckReviseScreen() {
   const { deckId } = useLocalSearchParams<{ deckId: string }>();
-  const theme = useTheme();
+  const t = useTokens();
   const router = useRouter();
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -46,6 +54,7 @@ export default function DeckReviseScreen() {
   const onAnswer = async (correct: boolean) => {
     setDisabled(true);
     if (correct) setScore((s) => s + 1);
+    if (current?.answer) speakText(current.answer);
     const progressId = current?.progressId;
     if (progressId) {
       if (correct) await learningApi.correct(progressId);
@@ -67,31 +76,42 @@ export default function DeckReviseScreen() {
   if (!current && !done) return <LoadingView />;
 
   if (done) {
+    const pct = questions.length ? Math.round((score / questions.length) * 100) : 0;
     return (
-      <View style={[styles.center, { backgroundColor: theme.colors.background }]}>
-        <Text variant="headlineSmall" style={{ color: theme.colors.onBackground }}>
-          Round complete!
-        </Text>
-        <Text variant="titleMedium" style={{ color: theme.colors.primary, marginTop: 8 }}>
-          {score} / {questions.length} correct
-        </Text>
-        <Button mode="contained" onPress={() => router.back()} style={{ marginTop: 24 }}>
-          Back to deck
-        </Button>
+      <View style={[styles.center, { backgroundColor: t.neutral.bg }]}>
+        <FadeSlideIn>
+          <View style={styles.doneInner}>
+            <ProgressRing value={pct} size={150} strokeWidth={12} />
+            <Text variant="headlineSmall" style={{ color: t.neutral.text, fontWeight: "800", marginTop: 20 }}>
+              Round complete!
+            </Text>
+            <Text variant="titleMedium" style={{ color: t.neutral.textMinor, marginTop: 4 }}>
+              {score} / {questions.length} correct
+            </Text>
+            <GradientButton label="Back to deck" onPress={() => router.back()} style={styles.doneBtn} />
+          </View>
+        </FadeSlideIn>
       </View>
     );
   }
 
+  const imageUrl = resolveImageUrl(current?.image);
+
   return (
-    <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.flex, { backgroundColor: t.neutral.bg }]}>
       <View style={styles.header}>
-        <IconButton icon="close" onPress={() => router.back()} />
-        <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant }}>
+        <PressableScale onPress={() => router.back()} hitSlop={8} style={[styles.iconBtn, { backgroundColor: t.neutral.surface2, borderRadius: t.radii.pill }]}>
+          <MaterialIcons name="close" size={22} color={t.neutral.text} />
+        </PressableScale>
+        <Text variant="labelLarge" style={{ color: t.neutral.textMinor, fontWeight: "700" }}>
           {index + 1} / {questions.length}
         </Text>
-        <View style={{ width: 48 }} />
+        <View style={{ width: 40 }} />
       </View>
-      <ProgressBar progress={progress} style={{ marginHorizontal: 16 }} />
+      <AnimatedBar progress={progress} color={t.palette.primary} trackColor={t.neutral.surface2} style={styles.bar} />
+      {imageUrl ? (
+        <Image source={{ uri: imageUrl }} style={styles.image} resizeMode="cover" />
+      ) : null}
       {current?.type === QUESTION_TYPES.QUIZ ? (
         <QuizQuestion question={current} onAnswer={onAnswer} disabled={disabled} />
       ) : (
@@ -104,5 +124,10 @@ export default function DeckReviseScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
-  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  doneInner: { alignItems: "center" },
+  doneBtn: { marginTop: 28, minWidth: 220 },
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 8 },
+  iconBtn: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
+  bar: { marginHorizontal: 16 },
+  image: { width: "100%", height: 160, marginTop: 12 },
 });

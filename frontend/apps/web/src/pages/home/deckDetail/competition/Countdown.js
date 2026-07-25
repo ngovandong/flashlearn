@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 // A quick "3 · 2 · 1 · GO!" intro that gives every game an arcade start.
-export default function Countdown({ onDone }) {
+export default function Countdown({ onDone, sound }) {
   const [step, setStep] = useState(3);
 
   useEffect(() => {
@@ -9,8 +9,11 @@ export default function Countdown({ onDone }) {
       onDone();
       return undefined;
     }
+    sound?.unlock?.();
+    sound?.playBeep?.(step === 0);
     const id = setTimeout(() => setStep((s) => s - 1), step === 0 ? 550 : 700);
     return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, onDone]);
 
   if (step < 0) return null;

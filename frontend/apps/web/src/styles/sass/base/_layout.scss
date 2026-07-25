@@ -59,3 +59,19 @@ h5,
 h6 {
     overflow-wrap: break-word;
 }
+
+// Accessibility safety net: honor the OS "reduce motion" preference everywhere.
+// Individual entrances already opt out via the `reduced_motion` mixin, but this
+// also neutralizes infinite loops (spinners, mic rings, game feedback) and any
+// third-party animation we don't control — the standard, low-risk approach.
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+}

@@ -22,7 +22,7 @@
             max-width: 25rem;
             padding: 2.5rem;
             box-shadow: $shadow-lg;
-            animation: fade-in 0.4s $ease;
+            @include page_enter($dur-slow);
 
             h1 {
                 font-size: 2rem;

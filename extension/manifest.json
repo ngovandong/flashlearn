@@ -16,7 +16,8 @@
       "matches": [
         "http://localhost:3000/*",
         "https://flashlearn.ngovandong.site/*",
-        "https://flashlearn.vercel.app/*"
+        "https://flashlearn.vercel.app/*",
+        "https://flashlearn.dongkiemem.site/*"
       ],
       "js": ["src/chrome/loginScript.js"]
     }
@@ -31,7 +32,8 @@
       "matches": [
         "http://localhost:3000/*",
         "https://flashlearn.ngovandong.site/*",
-        "https://flashlearn.vercel.app/*"
+        "https://flashlearn.vercel.app/*",
+        "https://flashlearn.dongkiemem.site/*"
       ]
     }
   ],
@@ -52,6 +54,7 @@
     "http://localhost:3000/*",
     "https://flashlearn.ngovandong.site/*",
     "https://flashlearn.vercel.app/*",
+    "https://flashlearn.dongkiemem.site/*",
     "https://translate.google.com/*"
   ]
 }

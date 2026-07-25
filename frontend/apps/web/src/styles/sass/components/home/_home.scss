@@ -3,6 +3,7 @@
 .home-page {
     @include page_shell(75rem);
     height: 100%;
+    @include page_enter;
 
     .welcome-text {
         display: flex;
@@ -247,6 +248,8 @@
 
             .set-card {
                 @include card_interactive;
+                @include enter_fade;
+                @include stagger;
                 padding: 1.25rem 1.25rem 1rem;
                 height: 10rem;
                 display: flex;

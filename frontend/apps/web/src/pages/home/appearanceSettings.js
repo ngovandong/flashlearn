@@ -4,13 +4,42 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import { useAppTheme } from "@app/themeContext";
-import { CATEGORY_ORDER, PALETTE_CATEGORIES } from "@constants/themes";
+import {
+  CATEGORY_ORDER,
+  PALETTE_CATEGORIES,
+  SURFACE_META,
+} from "@constants/themes";
 
 const MODE_OPTIONS = [
   { id: "light", label: "Light", Icon: LightModeOutlinedIcon },
   { id: "dark", label: "Dark", Icon: DarkModeOutlinedIcon },
   { id: "system", label: "System", Icon: SettingsBrightnessOutlinedIcon },
 ];
+
+function SurfaceOption({ meta, selected, onSelect }) {
+  return (
+    <button
+      type="button"
+      className={`surface-option surface-option--${meta.id}${
+        selected ? " surface-option--active" : ""
+      }`}
+      onClick={() => onSelect(meta.id)}
+      aria-pressed={selected}
+    >
+      <span className="surface-option__preview" aria-hidden="true">
+        <span className="surface-option__pane" />
+        <span className="surface-option__pane surface-option__pane--front" />
+      </span>
+      <span className="surface-option__text">
+        <span className="surface-option__name">
+          {meta.name}
+          {selected && <CheckRoundedIcon fontSize="small" />}
+        </span>
+        <span className="surface-option__desc">{meta.description}</span>
+      </span>
+    </button>
+  );
+}
 
 function PaletteSwatch({ palette, selected, onSelect }) {
   const [from, to] = palette.gradient;
@@ -34,7 +63,8 @@ function PaletteSwatch({ palette, selected, onSelect }) {
 }
 
 function AppearanceSettings() {
-  const { mode, palette, setMode, setPalette } = useAppTheme();
+  const { mode, palette, surface, setMode, setPalette, setSurface } =
+    useAppTheme();
 
   return (
     <div className="settings-card appearance-card" data-tour="settings-appearance">
@@ -57,6 +87,26 @@ function AppearanceSettings() {
               <Icon />
               <span>{label}</span>
             </button>
+          ))}
+        </div>
+      </div>
+
+      <hr className="settings-divider" />
+
+      <div className="settings-field">
+        <label>Surface style</label>
+        <small className="appearance-hint">
+          Choose the material of cards, bars and menus. Liquid Glass turns them
+          translucent and frosted, like iOS.
+        </small>
+        <div className="surface-options">
+          {SURFACE_META.map((meta) => (
+            <SurfaceOption
+              key={meta.id}
+              meta={meta}
+              selected={surface === meta.id}
+              onSelect={setSurface}
+            />
           ))}
         </div>
       </div>

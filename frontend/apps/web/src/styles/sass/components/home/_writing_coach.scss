@@ -8,6 +8,7 @@
   display: flex;
   flex-direction: column;
   gap: $space-5;
+  @include page_enter;
 }
 
 // ── Shared atoms ────────────────────────────────────────────────────────────
@@ -928,6 +929,7 @@
   padding: $space-4;
   background-color: rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(2px);
+  @include enter_fade($dur-fast);
 }
 
 .wc-modal__card {
@@ -937,6 +939,7 @@
   max-height: 85vh;
   overflow-y: auto;
   box-shadow: $shadow-lg;
+  @include enter_pop;
 }
 
 .wc-modal__head {

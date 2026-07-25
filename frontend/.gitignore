@@ -23,6 +23,11 @@ yarn-error.log*
 apps/mobile/.expo
 apps/mobile/android
 apps/mobile/ios
+
+# expo prebuild artifacts generated at the frontend root
+/android
+/ios
+/app.json
 *.jks
 *.p8
 *.p12

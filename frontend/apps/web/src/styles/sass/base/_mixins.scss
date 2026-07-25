@@ -48,12 +48,21 @@
     gap: $gap;
 }
 
-/** Static surface card — consistent background, border, radius and shadow. */
+/**
+ * Static surface card — consistent background, border, radius and shadow.
+ *
+ * The `--fl-glass-*` vars are unset in "solid" mode, so `backdrop-filter`
+ * resolves to `none` and the shadow falls back to the flat token. In "Liquid
+ * Glass" mode (`[data-material="glass"]`) they turn every card translucent +
+ * frosted with a specular top highlight — no per-component work required.
+ */
 @mixin card {
     background-color: $surface;
     border: 1px solid $border-subtle;
     border-radius: $radius-md;
-    box-shadow: $shadow-sm;
+    box-shadow: var(--fl-card-shadow, #{$shadow-sm});
+    backdrop-filter: var(--fl-glass-backdrop, none);
+    -webkit-backdrop-filter: var(--fl-glass-backdrop, none);
 }
 
 /** Clickable card that lifts on hover instead of shifting layout. */
@@ -119,5 +128,71 @@
         transform: translateY(-3px);
         box-shadow: $shadow-lg;
         border-color: $hover-purple;
+    }
+}
+
+/* ── Motion helpers ──────────────────────────────────────────────────────────
+ * A tiny, shared vocabulary so every screen enters and reacts the same way.
+ * All motion is opt-out via `prefers-reduced-motion`. */
+
+/** Wrap motion that should be dropped for users who ask for less animation. */
+@mixin reduced_motion {
+    @media (prefers-reduced-motion: reduce) {
+        @content;
+    }
+}
+
+/**
+ * Page / section entrance — a soft fade + rise that settles with `$ease-out`.
+ * Applied to the root container of a route so navigating feels continuous.
+ */
+@mixin page_enter($dur: $dur-slow) {
+    animation: fl-fade-up $dur $ease-out both;
+
+    @include reduced_motion {
+        animation: none;
+    }
+}
+
+/**
+ * Card / tile entrance — a gentle pop (scale + fade). Use on containers that do
+ * NOT lift on hover (a finished `transform` animation would otherwise pin the
+ * element and block a `:hover` transform), e.g. modals and dialogs.
+ */
+@mixin enter_pop($dur: $dur-normal) {
+    animation: fl-scale-in $dur $ease-out both;
+
+    @include reduced_motion {
+        animation: none;
+    }
+}
+
+/**
+ * Opacity-only entrance — safe for interactive cards that lift on hover, since
+ * it never touches `transform`. Pair with `stagger` on grid/list children for a
+ * cascading reveal.
+ */
+@mixin enter_fade($dur: $dur-normal) {
+    animation: fade-in $dur $ease-out both;
+
+    @include reduced_motion {
+        animation: none;
+    }
+}
+
+/**
+ * Cascade the entrance of a grid/list's direct children. Delays are capped at
+ * `$count` so arbitrarily long lists still reveal quickly. Assumes the children
+ * already carry an entrance animation (e.g. via `enter_pop`).
+ */
+@mixin stagger($count: 10, $step: 0.05s, $base: 0.04s) {
+    @for $i from 1 through $count {
+        &:nth-child(#{$i}) {
+            animation-delay: $base + ($i - 1) * $step;
+        }
+    }
+
+    @include reduced_motion {
+        animation-delay: 0s !important;
     }
 }

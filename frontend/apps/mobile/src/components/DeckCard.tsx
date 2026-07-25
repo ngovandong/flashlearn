@@ -1,8 +1,11 @@
 import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
-import { Card, Text, useTheme } from "react-native-paper";
+import { Image, StyleSheet, View } from "react-native";
+import { Text } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
-import type { Deck } from "@flashlearn/core";
+import { resolveImageUrl, type Deck } from "@flashlearn/core";
+import { AppCard } from "@/components/ui/AppCard";
+import { AnimatedBar } from "@/components/ui/AnimatedBar";
+import { useTokens } from "@/theme/tokens";
 
 interface Props {
   deck: Deck;
@@ -10,41 +13,54 @@ interface Props {
 }
 
 export function DeckCard({ deck, onPress }: Props) {
-  const theme = useTheme();
+  const t = useTokens();
   const learned = deck.learned ?? 0;
   const total = deck.number_of_term ?? 0;
-  const pct = total ? Math.round((learned / total) * 100) : 0;
+  const ratio = total ? learned / total : 0;
+  const pct = Math.round(ratio * 100);
+  const imageUrl = resolveImageUrl(deck.background);
+  const { fg, tint } = t.feature("style");
 
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [{ opacity: pressed ? 0.85 : 1 }]}>
-      <Card mode="outlined" style={{ backgroundColor: theme.colors.surface }}>
-        <Card.Content style={styles.row}>
-          <View style={[styles.icon, { backgroundColor: theme.colors.primaryContainer }]}>
-            <MaterialIcons name="style" size={24} color={theme.colors.primary} />
+    <AppCard onPress={onPress} padding={12}>
+      <View style={styles.row}>
+        {imageUrl ? (
+          <Image source={{ uri: imageUrl }} style={styles.icon} resizeMode="cover" />
+        ) : (
+          <View style={[styles.icon, styles.iconPlaceholder, { backgroundColor: tint }]}>
+            <MaterialIcons name="style" size={24} color={fg} />
           </View>
-          <View style={styles.body}>
-            <Text variant="titleMedium" numberOfLines={1} style={{ color: theme.colors.onSurface }}>
-              {deck.name}
-            </Text>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-              {total} terms · {pct}% learned
-            </Text>
-          </View>
-          <MaterialIcons name="chevron-right" size={22} color={theme.colors.onSurfaceVariant} />
-        </Card.Content>
-      </Card>
-    </Pressable>
+        )}
+        <View style={styles.body}>
+          <Text
+            variant="titleMedium"
+            numberOfLines={1}
+            style={{ color: t.neutral.text, fontWeight: "700" }}
+          >
+            {deck.name}
+          </Text>
+          <Text variant="bodySmall" style={{ color: t.neutral.textMinor }}>
+            {total} terms · {pct}% learned
+          </Text>
+          {total > 0 ? (
+            <AnimatedBar
+              progress={ratio}
+              color={t.palette.primary}
+              trackColor={t.neutral.surface2}
+              style={styles.track}
+            />
+          ) : null}
+        </View>
+        <MaterialIcons name="chevron-right" size={22} color={t.neutral.textMuted} />
+      </View>
+    </AppCard>
   );
 }
 
 const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 12 },
-  icon: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  body: { flex: 1 },
+  icon: { width: 48, height: 48, borderRadius: 14 },
+  iconPlaceholder: { alignItems: "center", justifyContent: "center" },
+  body: { flex: 1, gap: 3 },
+  track: { marginTop: 6 },
 });

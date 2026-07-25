@@ -6,9 +6,11 @@ export default function CoursesLayout() {
   return (
     <Stack
       screenOptions={{
+        animation: "slide_from_right",
         headerStyle: { backgroundColor: theme.colors.surface },
         headerTitleStyle: { color: theme.colors.onSurface },
         headerTintColor: theme.colors.primary,
+        headerShadowVisible: false,
       }}
     >
       <Stack.Screen name="index" options={{ title: "Courses" }} />
