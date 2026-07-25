@@ -252,29 +252,38 @@ def log_ai_call(
         if error:
             span.set_data("error", error)
 
-    # 2. Structured log dictionary
-    ai_log_extra = {
-        "time": now_utc,
+    # 2. Add Sentry Breadcrumb (visible in Sentry timeline view)
+    try:
+        sentry_sdk.add_breadcrumb(
+            category="ai.call",
+            message=f"{provider} ({model}) [{req_type}]",
+            level="info" if status_code == 200 else "warning",
+            data={
+                "feature": feature,
+                "input_prompt": (input_text or "")[:1000],
+                "output_response": (output_text or error or "")[:1000],
+                "tokens": f"{prompt_tokens or 0} in / {completion_tokens or 0} out",
+                "cost_usd": cost_usd,
+                "duration_s": round(duration_s, 3),
+            },
+        )
+    except Exception:
+        pass
+
+    # 3. Flat logging extra dictionary (avoid 'log' in key names to prevent Sentry PII filter)
+    flat_extra = {
         "request_type": req_type,
-        "provider": provider,
-        "model": model,
+        "ai_provider": provider,
+        "ai_model": model,
+        "ai_feature": feature,
         "attempt": attempt,
         "is_retry": is_retry,
-        "feature": feature,
-        "user_id": user_id,
-        "estimated_cost_usd": cost_usd,
-        "input": (input_text or "")[:1000],
-        "input_size": {
-            "chars": input_chars,
-            "tokens": prompt_tokens,
-        },
-        "response_time": round(duration_s, 3),
-        "response_code": status_code,
+        "prompt": (input_text or "")[:1000],
         "response": (output_text or error or "")[:1000],
-        "output_size": {
-            "chars": output_chars,
-            "tokens": completion_tokens,
-        },
+        "prompt_tokens": prompt_tokens,
+        "completion_tokens": completion_tokens,
+        "duration_s": round(duration_s, 3),
+        "estimated_cost_usd": cost_usd,
     }
 
     if status_code == 200:
@@ -288,7 +297,7 @@ def log_ai_call(
             prompt_tokens or 0,
             completion_tokens or 0,
             cost_usd,
-            extra={"ai_log": ai_log_extra},
+            extra=flat_extra,
         )
     else:
         logger.warning(
@@ -300,5 +309,5 @@ def log_ai_call(
             duration_s,
             attempt,
             error or "Unknown error",
-            extra={"ai_log": ai_log_extra},
+            extra=flat_extra,
         )
