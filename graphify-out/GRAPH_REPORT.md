@@ -1,16 +1,16 @@
 # Graph Report - flashlearn  (2026-07-25)
 
 ## Corpus Check
-- 36086 files · ~26,691,085 words
+- 36086 files · ~26,691,134 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 29600 nodes · 38004 edges · 11945 communities (10702 shown, 1243 thin omitted)
+- 29600 nodes · 38004 edges · 11935 communities (10695 shown, 1240 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 630 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `68e5816e`
+- Built from commit: `73e44cdf`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -1685,6 +1685,7 @@
 - [[_COMMUNITY_Community 11835|Community 11835]]
 - [[_COMMUNITY_Community 11836|Community 11836]]
 - [[_COMMUNITY_Community 11837|Community 11837]]
+- [[_COMMUNITY_Community 11838|Community 11838]]
 - [[_COMMUNITY_Community 11839|Community 11839]]
 - [[_COMMUNITY_Community 11840|Community 11840]]
 - [[_COMMUNITY_Community 11841|Community 11841]]
@@ -1715,17 +1716,13 @@
 - [[_COMMUNITY_Community 11866|Community 11866]]
 - [[_COMMUNITY_Community 11867|Community 11867]]
 - [[_COMMUNITY_Community 11868|Community 11868]]
-- [[_COMMUNITY_Community 11869|Community 11869]]
-- [[_COMMUNITY_Community 11870|Community 11870]]
 - [[_COMMUNITY_Community 11871|Community 11871]]
 - [[_COMMUNITY_Community 11872|Community 11872]]
 - [[_COMMUNITY_Community 11873|Community 11873]]
 - [[_COMMUNITY_Community 11874|Community 11874]]
-- [[_COMMUNITY_Community 11875|Community 11875]]
 - [[_COMMUNITY_Community 11876|Community 11876]]
 - [[_COMMUNITY_Community 11877|Community 11877]]
 - [[_COMMUNITY_Community 11878|Community 11878]]
-- [[_COMMUNITY_Community 11879|Community 11879]]
 - [[_COMMUNITY_Community 11880|Community 11880]]
 - [[_COMMUNITY_Community 11882|Community 11882]]
 - [[_COMMUNITY_Community 11883|Community 11883]]
@@ -1744,7 +1741,6 @@
 - [[_COMMUNITY_Community 11896|Community 11896]]
 - [[_COMMUNITY_Community 11897|Community 11897]]
 - [[_COMMUNITY_Community 11898|Community 11898]]
-- [[_COMMUNITY_Community 11899|Community 11899]]
 - [[_COMMUNITY_Community 11900|Community 11900]]
 - [[_COMMUNITY_Community 11901|Community 11901]]
 - [[_COMMUNITY_Community 11902|Community 11902]]
@@ -1757,21 +1753,16 @@
 - [[_COMMUNITY_Community 11910|Community 11910]]
 - [[_COMMUNITY_Community 11911|Community 11911]]
 - [[_COMMUNITY_Community 11912|Community 11912]]
-- [[_COMMUNITY_Community 11913|Community 11913]]
 - [[_COMMUNITY_Community 11914|Community 11914]]
 - [[_COMMUNITY_Community 11915|Community 11915]]
 - [[_COMMUNITY_Community 11916|Community 11916]]
 - [[_COMMUNITY_Community 11917|Community 11917]]
-- [[_COMMUNITY_Community 11918|Community 11918]]
 - [[_COMMUNITY_Community 11919|Community 11919]]
-- [[_COMMUNITY_Community 11920|Community 11920]]
 - [[_COMMUNITY_Community 11921|Community 11921]]
 - [[_COMMUNITY_Community 11922|Community 11922]]
-- [[_COMMUNITY_Community 11923|Community 11923]]
 - [[_COMMUNITY_Community 11924|Community 11924]]
 - [[_COMMUNITY_Community 11925|Community 11925]]
 - [[_COMMUNITY_Community 11926|Community 11926]]
-- [[_COMMUNITY_Community 11927|Community 11927]]
 - [[_COMMUNITY_Community 11928|Community 11928]]
 - [[_COMMUNITY_Community 11929|Community 11929]]
 - [[_COMMUNITY_Community 11930|Community 11930]]
@@ -1817,15 +1808,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (11945 total, 1243 thin omitted)
+## Communities (11935 total, 1240 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.06
-Nodes (35): CourseService, Course orchestration service.  Coordinates the course catalog/content (:class:`C, Per-line generated clips for a lesson: ``[{voice, text, audio, mime_type}]``., Score a role-play sentence-by-sentence and update lesson progress.          ``se, Add, update or remove a per-user noted highlight on a lesson., Persist a listen-and-type attempt so it can be replayed on revisit.          The, Delete the given courses' content before a fresh re-crawl. User         role-pla, Delete a single course (cascading its sections + lessons).          User role-pl (+27 more)
+Cohesion: 0.05
+Nodes (43): CourseService, Course orchestration service.  Coordinates the course catalog/content (:class:`C, Per-line generated clips for a lesson: ``[{voice, text, audio, mime_type}]``., Score a role-play sentence-by-sentence and update lesson progress.          ``se, Add, update or remove a per-user noted highlight on a lesson., Persist a listen-and-type attempt so it can be replayed on revisit.          The, Delete the given courses' content before a fresh re-crawl. User         role-pla, Delete a single course (cascading its sections + lessons).          User role-pl (+35 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.03
-Nodes (36): folly(), folly(), folly(), from_time_t(), to_time_t(), construct(), folly(), Exception (+28 more)
+Nodes (32): folly(), folly(), folly(), from_time_t(), to_time_t(), construct(), folly(), Exception (+24 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.05
@@ -1840,16 +1831,16 @@ Cohesion: 0.06
 Nodes (17): ABC, CursorPagination, DeckViewSet, FlexibleViewSet, RoleViewSet, build(), DeckSearchQuery, TermSearchQuery (+9 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.09
-Nodes (32): Course, CourseLesson, CourseSection, Meta, A unit of a course (a freeCodeCamp "block"), e.g. "Learn Greetings at the Office, A practiceable dialogue scene within a section.      Maps to a source "dialogue", A user's progress on a single lesson.      Keyed on the lesson's stable ``lesson, A structured, multi-section language course imported from an external curriculum (+24 more)
+Cohesion: 0.08
+Nodes (43): AiResponseCache, Persistent cache of AI provider responses keyed by ``(context, request_hash)``., Course, CourseLesson, CourseSection, Meta, A unit of a course (a freeCodeCamp "block"), e.g. "Learn Greetings at the Office, A practiceable dialogue scene within a section.      Maps to a source "dialogue" (+35 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.01
 Nodes (181): GTMSessionFetcher, -activePersistedBackgroundSessions, -addPersistedBackgroundSessionToDefaults, -addPropertiesFromDictionary, -appAllowsInsecureRequests, -appendLoggedStreamData, -applicationhandleEventsForBackgroundURLSessioncompletionHandler, -applyDecoratorsAtRequestDidFinishwithDataerrorstartingAtIndexshouldReleaseCallbacks (+173 more)
 
 ### Community 7 - "Community 7"
-Cohesion: 0.06
-Nodes (25): AzureOpenAIProvider, _parse(), Azure OpenAI implementation of :class:`AiTextPort`.  Talks to an Azure OpenAI re, FailoverAiProvider, Failover across multiple AI providers.  Tries each provider in order; if one fai, GeminiProvider, _parse(), _parse_audio() (+17 more)
+Cohesion: 0.04
+Nodes (37): AzureOpenAIProvider, _parse(), Azure OpenAI implementation of :class:`AiTextPort`.  Talks to an Azure OpenAI re, AzureTextToSpeechProvider, Azure AI Speech — Text-to-Speech (REST synthesis API).  Synthesizes speech from, Azure Speech text-to-speech over the REST synthesis API., Synthesize ``text`` in ``voice``; return ``{"audio": base64, "mime_type"}``., _voice_lang() (+29 more)
 
 ### Community 8 - "Community 8"
 Cohesion: 0.15
@@ -3683,44 +3674,44 @@ Cohesion: 0.83
 Nodes (3): clear_db_env(), database_url_from_env_builds_from_db_vars(), database_url_from_env_uses_database_url_when_set()
 
 ### Community 1582 - "Community 1582"
-Cohesion: 0.05
-Nodes (19): CustomTokenAuthentication, JWTAuthentication, add_user_to_deck(), adjust_priority(), create(), create_default_deck(), get_by_id(), LearningRepository (+11 more)
+Cohesion: 0.04
+Nodes (26): CustomTokenAuthentication, JWTAuthentication, add_user_to_deck(), adjust_priority(), clone_deck(), clone_deck_as(), create(), create_default_deck() (+18 more)
 
 ### Community 11820 - "Community 11820"
 Cohesion: 0.20
 Nodes (40): allocate_node(), BOOST_CATCH(), BOOST_NOEXCEPT(), BOOST_TRY(), check_invariant_(), clear_(), construct_value(), copy_construct_from() (+32 more)
 
 ### Community 11821 - "Community 11821"
-Cohesion: 0.08
-Nodes (10): _coerce_bool(), _coerce_list(), _extract_ai_fields(), _meaning_of(), TermService, _EmptyRoles, FakeDeck, FakeTermRepository (+2 more)
+Cohesion: 0.07
+Nodes (12): DeckRef, ReviseTermRow, _coerce_bool(), _coerce_list(), _extract_ai_fields(), _meaning_of(), TermService, _EmptyRoles (+4 more)
 
 ### Community 11822 - "Community 11822"
-Cohesion: 0.08
-Nodes (20): _clean_lines(), ListeningService, _looks_hosted(), Listening (dictation) orchestration service.  Coordinates the dictation catalog/, Persist a listen-and-type attempt and update completion state.          The fron, Auto-save the per-sentence answers checked so far.          Unlike :meth:`submit, Clear the saved per-sentence answers so the exercise starts fresh., Add, update or remove a per-user noted highlight on an exercise. (+12 more)
+Cohesion: 0.05
+Nodes (22): _clean_lines(), ListeningService, _looks_hosted(), Listening (dictation) orchestration service.  Coordinates the dictation catalog/, Persist a listen-and-type attempt and update completion state.          The fron, Auto-save the per-sentence answers checked so far.          Unlike :meth:`submit, Clear the saved per-sentence answers so the exercise starts fresh., Add, update or remove a per-user noted highlight on an exercise. (+14 more)
 
 ### Community 11823 - "Community 11823"
-Cohesion: 0.08
-Nodes (16): APITestCase, ValidationError, GoogleOAuthClient, Command, Upload a cover/background image for a course to Cloudinary.  Takes a local image, BodyLogoutContractTest, BodyRefreshRotationContractTest, EmailLoginBodyContractTest (+8 more)
+Cohesion: 0.05
+Nodes (18): APITestCase, GoogleOAuthClient, BodyLogoutContractTest, BodyRefreshRotationContractTest, EmailLoginBodyContractTest, GoogleAudienceValidationTest, GoogleInitBodyContractTest, Contract tests for the endpoints the native (Expo) app depends on.  The mobile c (+10 more)
 
 ### Community 11824 - "Community 11824"
-Cohesion: 0.05
-Nodes (7): clip_hash(), get_exercise(), get_progress(), record_attempt(), set_highlight(), upsert_exercise(), upsert_section()
+Cohesion: 0.56
+Nodes (5): makeNotStarted(), makeRunning(), processGroupLeader_(), RV_NOT_STARTED(), state()
 
 ### Community 11825 - "Community 11825"
 Cohesion: 0.08
-Nodes (17): SpeakingRepository, AI operations for the Speaking Coach feature.      ``ai`` handles text/JSON gene, SpeakingCoachService, _clean_active_voice(), _clean_playable_voice(), Speaking Coach orchestration service.  Coordinates the AI coach (:class:`Speakin, Run pronunciation analysis and return the raw camelCase result only.          Un, Synthesize one line (cache-first) with the selected tutor voice. (+9 more)
+Nodes (19): SpeakingRepository, is_elevenlabs_voice(), AI operations for the Speaking Coach feature.      ``ai`` handles text/JSON gene, Generate tutor speech for ``text``, routing to the voice's provider.          El, SpeakingCoachService, _clean_active_voice(), _clean_playable_voice(), Speaking Coach orchestration service.  Coordinates the AI coach (:class:`Speakin (+11 more)
 
 ### Community 11826 - "Community 11826"
 Cohesion: 0.06
 Nodes (35): GTMSessionFetcher, -beginFetchMayDelaymayAuthorizemayDecorate, GTMSessionFetcherSessionDelegateDispatcher, -abandon, -description, -destroyDiscardTimer, -destroySessionAndTimer, -discardInterval (+27 more)
 
 ### Community 11827 - "Community 11827"
-Cohesion: 0.10
-Nodes (12): Composition root — wire concrete infrastructure into application services., CompetitionRepository, ReminderRepository, ReviseRepository, CompetitionService, Writing Coach application service.  All AI prompts, rules and JSON schemas for t, A shuffled list (≤ :data:`MAX_REMINDERS`) of actionable reminders.          Each, Reseed cards from recent mistakes, then return an ordered batch.          Return (+4 more)
+Cohesion: 0.05
+Nodes (10): Composition root — wire concrete infrastructure into application services., LearningContextApi, Public API for user-related operations from other contexts., TermContextApi, UserContextApi, ReminderRepository, CompetitionService, A shuffled list (≤ :data:`MAX_REMINDERS`) of actionable reminders.          Each (+2 more)
 
 ### Community 11829 - "Community 11829"
-Cohesion: 0.10
-Nodes (24): _assessment(), AssistantService, audio_clip_public_id(), _clean_actions(), _format_history(), _int(), is_elevenlabs_voice(), _join_ipa() (+16 more)
+Cohesion: 0.07
+Nodes (32): _assessment(), AssistantService, audio_clip_public_id(), _band(), _clean_actions(), _format_history(), _int(), _join_ipa() (+24 more)
 
 ### Community 11830 - "Community 11830"
 Cohesion: 0.07
@@ -3735,8 +3726,8 @@ Cohesion: 0.06
 Nodes (31): OIDAuthState, -accessToken, -accessTokenExpirationDate, -authStateByPresentingAuthorizationRequestexternalUserAgentcallback, -description, -didChangeState, -encodeWithCoder, -idToken (+23 more)
 
 ### Community 11833 - "Community 11833"
-Cohesion: 0.09
-Nodes (17): ElevenLabsProvider, ElevenLabs text-to-speech implementation.  ElevenLabs is the active TTS provider, TTS-port alias for :meth:`generate_speech` (``language`` is ignored —         th, Synthesize ``text`` to speech with an ElevenLabs voice id.          Returns ``{", _env_float(), _get_redis(), GlobalAiGate, _InProcessGate (+9 more)
+Cohesion: 0.11
+Nodes (15): TTS-port alias for :meth:`generate_speech` (``language`` is ignored —         th, Synthesize ``text`` to speech with an ElevenLabs voice id.          Returns ``{", _env_float(), _get_redis(), GlobalAiGate, _InProcessGate, Cross-process serialization + rate limiting for AI provider calls.  The original, A per-provider gate enforcing one-at-a-time + RPM across all processes. (+7 more)
 
 ### Community 11835 - "Community 11835"
 Cohesion: 0.27
@@ -3750,6 +3741,10 @@ Nodes (11): BSCrawler, GetImagesUrlView, SimpleTestCase, CrawlerStrategyBenchmar
 Cohesion: 0.10
 Nodes (14): _exercise_broken_items(), GrammarService, _normalize_item_text(), Grammar feature orchestration service.  Coordinates the book/section/unit/exerci, Grade a submitted attempt server-side, persist it and roll up the unit., Reset a user's practice results for one unit (highlights are kept).          Ret, Upsert a whole book from a structured dict; returns import counts.          The, Wipe all grammar content before a fresh import. User progress survives         ( (+6 more)
 
+### Community 11838 - "Community 11838"
+Cohesion: 0.03
+Nodes (7): clip_hash(), CompetitionRepository, get_progress(), Persistence for the Writing Coach feature.  All Django ORM access for writing se, record_attempt(), set_highlight(), upsert_section()
+
 ### Community 11839 - "Community 11839"
 Cohesion: 0.10
 Nodes (17): _exercise_progress_payload(), GrammarCatalogSerializer, GrammarExercisePublicSerializer, GrammarUnitDetailSerializer, GrammarViewSet, _public_item(), AI "explain" option: explain a rule, or why an answer is wrong.          Body: a, The book with sections → units and the user's progress counts. (+9 more)
@@ -3759,8 +3754,8 @@ Cohesion: 0.14
 Nodes (20): ListeningExerciseSerializer, ListeningExerciseSummarySerializer, ListeningTopicDetailSerializer, ListeningTopicSummarySerializer, ListeningViewSet, _progress_payload(), _public_sentence(), Add, update or remove a per-user noted word/phrase on an exercise. (+12 more)
 
 ### Community 11841 - "Community 11841"
-Cohesion: 0.09
-Nodes (8): owned_terms(), remember_response(), WritingRepository, Writing Coach orchestration service.  Coordinates the AI coach (:class:`WritingC, The user's own terms that appear in a session's text.          Accepts either an, Append the learner's message (with feedback) plus the tutor's reply., _session_texts(), WritingService
+Cohesion: 0.05
+Nodes (13): _clip_keys(), delete_conversations(), get_clip(), hash_text(), owned_terms(), _prune_orphan_clips(), remember_response(), WritingRepository (+5 more)
 
 ### Community 11842 - "Community 11842"
 Cohesion: 0.45
@@ -3783,8 +3778,8 @@ Cohesion: 0.10
 Nodes (14): AuthSessionStore, ErrorCode, failedToConvertAuthSessionToData, failedToConvertKeychainDataToAuthSession, failedToConvertRedirectURItoURL, failedToCreateResponseStringFromAuthSession, failedToDeletePassword, failedToDeletePasswordBecauseItemNotFound (+6 more)
 
 ### Community 11847 - "Community 11847"
-Cohesion: 0.11
-Nodes (15): CompetitionScore, Meta, A player's best score for one competition mini-game on one deck.      Competitio, DateTimeUUIDModel, Deck, default_background_path(), ListeningExercise, ListeningProgress (+7 more)
+Cohesion: 0.12
+Nodes (11): CompetitionScore, A player's best score for one competition mini-game on one deck.      Competitio, Deck, default_background_path(), Meta, UserLearningProgress, Meta, UserDeckRole (+3 more)
 
 ### Community 11848 - "Community 11848"
 Cohesion: 0.23
@@ -3811,8 +3806,8 @@ Cohesion: 0.12
 Nodes (11): CourseViewSet, Save a listen-and-type (dictation) attempt so it replays on revisit.          Bo, Add, update or remove a per-user noted word/phrase on a lesson., Structured English courses: catalog, content and Live Role-play scoring.      Th, Distinct course levels for the catalog's level filter: ``{"levels": [...]}``., Per-line generated character clips: ``{"lines": [{voice, text, audio, mime_type}, Score a Live Role-play recording sentence-by-sentence and update progress., PageNumberPagination (+3 more)
 
 ### Community 11854 - "Community 11854"
-Cohesion: 0.10
-Nodes (5): _clip_keys(), delete_conversations(), get_clip(), hash_text(), _prune_orphan_clips()
+Cohesion: 0.57
+Nodes (3): folly(), grow_capacity_by(), reserve_if_available()
 
 ### Community 11855 - "Community 11855"
 Cohesion: 0.17
@@ -3839,24 +3834,20 @@ Cohesion: 0.27
 Nodes (12): bool(), exception_wrapper(), _(), exception_ptr_ref(), exception_wrapper(), folly(), get_exception(), handle() (+4 more)
 
 ### Community 11862 - "Community 11862"
-Cohesion: 0.13
-Nodes (14): Azure AI Speech — Pronunciation Assessment (REST short-audio API).  Unlike the t, ai_feature_scope, determine_request_type(), estimate_cost_usd(), get_ai_feature(), log_ai_call(), Logging and Sentry tracing utilities for AI infrastructure calls., Context manager to tag AI calls with a feature/domain name (e.g. 'term_enrichmen (+6 more)
+Cohesion: 0.19
+Nodes (12): Azure AI Speech — Pronunciation Assessment (REST short-audio API).  Unlike the t, determine_request_type(), estimate_cost_usd(), get_ai_feature(), log_ai_call(), Logging and Sentry tracing utilities for AI infrastructure calls., Record Sentry span attributes + structured logger log for an AI call., Set the current AI feature name for the active thread/task context. (+4 more)
 
 ### Community 11863 - "Community 11863"
 Cohesion: 0.43
 Nodes (15): align(), Alloc(), allocate(), blockGoodAllocSize(), canReuseExistingBlock(), clear(), folly(), freeBlocks() (+7 more)
-
-### Community 11864 - "Community 11864"
-Cohesion: 0.13
-Nodes (8): clone_deck(), clone_deck_as(), DeckRepository, _decks_with_term_count(), get_latest_decks(), get_my_decks(), get_my_others_deck(), Clone preset starter decks for a new user.          ``deck_specs`` is an iterabl
 
 ### Community 11865 - "Community 11865"
 Cohesion: 0.11
 Nodes (10): GrammarCoachService, AI operations for the Grammar feature (the new AI Assistant option)., Explain a grammar rule, or why a learner's answer was wrong.          Any subset, Rewrite one unit's explanation + exercises for the web.          Given a unit di, Write one exercise-only practice lesson reviewing ``topics``.          Returns `, Convert raw extracted text from consecutive PDF pages into units.          Retur, Reconstruct readable units from noisy OCR of consecutive pages.          Unlike, Attach the unit's answer-key answers to its reconstructed items.          ``exer (+2 more)
 
 ### Community 11866 - "Community 11866"
-Cohesion: 0.22
-Nodes (13): DeckDetailSerializer, DeckSerializer, Meta, MyDeckSerializer, CreateLearningProgressSerializer, LearningStreakSerializer, Meta, ProgressSerializer (+5 more)
+Cohesion: 0.25
+Nodes (11): DeckDetailSerializer, DeckSerializer, Meta, MyDeckSerializer, CreateLearningProgressSerializer, LearningStreakSerializer, ProgressSerializer, UserLearningProgressSerializer (+3 more)
 
 ### Community 11867 - "Community 11867"
 Cohesion: 0.29
@@ -3865,10 +3856,6 @@ Nodes (11): check(), detail(), DtoaMode(), e(), estimateSpaceNeeded(), folly(), 
 ### Community 11868 - "Community 11868"
 Cohesion: 0.35
 Nodes (15): begin(), end(), eraseImpl(), exists(), find(), findWithoutPromotion(), folly(), getPruneHook() (+7 more)
-
-### Community 11870 - "Community 11870"
-Cohesion: 0.14
-Nodes (10): _band(), _normalize_draft_feedback(), _normalize_message_feedback(), _normalize_support(), AI operations for the Writing Coach feature.      Depends only on a text/JSON-ca, Correction feedback for one learner chat message., Vocabulary, phrases, grammar and structure hints for a free-form topic., Assess a submitted draft against IELTS Writing bands with corrections. (+2 more)
 
 ### Community 11871 - "Community 11871"
 Cohesion: 0.29
@@ -3886,10 +3873,6 @@ Nodes (9): POST ``payload`` and return the decoded JSON body, retrying transient
 Cohesion: 0.18
 Nodes (10): Command, extract_js_object(), make_session(), Import DailyDictation listen-and-type exercises into our Listening models.  Each, Extract a balanced ``{...}`` object literal that follows ``marker`` in ``text``., Ordered, de-duplicated ``{slug}.{id}`` references for a topic (single page)., Parse one exercise's ``window.appGlobals`` into an upsert payload., Fetch a page, retrying rate-limits (429) and transient errors.          DailyDic (+2 more)
 
-### Community 11875 - "Community 11875"
-Cohesion: 0.12
-Nodes (5): DeckUserManagementTest, Regression tests guarding the DDD refactor against behavior changes.  These cove, add_user_to_deck / remove_user_from_deck end-to-end.      Guards both the unknow, RoleInviteErrorPathTest, TermErrorPathTest
-
 ### Community 11876 - "Community 11876"
 Cohesion: 0.40
 Nodes (13): chunkAllocSize(), computeCapacity(), f14(), F14HashToken(), final(), folly(), if(), initializeChunks() (+5 more)
@@ -3901,10 +3884,6 @@ Nodes (16): GACAppCheckBackoffOperationFailure, -init, -initWithFinishDateerrorb
 ### Community 11878 - "Community 11878"
 Cohesion: 0.12
 Nodes (17): GTMSessionCookieStorage, -cookieAcceptPolicy, -cookieMatchingCookie, -cookies, -cookiesForURL, -deleteCookie, -getCookiesForTaskcompletionHandler, -hasCookieExpired (+9 more)
-
-### Community 11879 - "Community 11879"
-Cohesion: 0.12
-Nodes (4): LearningContextApi, Public API for user-related operations from other contexts., TermContextApi, UserContextApi
 
 ### Community 11882 - "Community 11882"
 Cohesion: 0.20
@@ -3939,8 +3918,8 @@ Cohesion: 0.46
 Nodes (9): Compare(), cont_(), data(), folly(), get_container_for_direct_mutation(), m_(), sorted_vector_map(), sorted_vector_set() (+1 more)
 
 ### Community 11890 - "Community 11890"
-Cohesion: 0.17
-Nodes (9): Meta, A generated Speaking Coach dialogue saved to a user's practice history., Persistent cache of Gemini TTS audio for a ``(voice, text)`` pair.      Shared a, A pronunciation analysis result saved to a user's practice history., SpeakingAnalysis, SpeakingAnalysisSerializer, SpeakingAudioClip, SpeakingConversation (+1 more)
+Cohesion: 0.25
+Nodes (5): Meta, Persistent cache of Gemini TTS audio for a ``(voice, text)`` pair.      Shared a, SpeakingAnalysisSerializer, SpeakingAudioClip, SpeakingConversationSerializer
 
 ### Community 11891 - "Community 11891"
 Cohesion: 0.23
@@ -3948,7 +3927,7 @@ Nodes (6): _clamp_severity(), _distractor_meanings(), speaking_candidates(), _te
 
 ### Community 11892 - "Community 11892"
 Cohesion: 0.24
-Nodes (6): CompetitionPoolSerializer, CompetitionViewSet, LeaderboardEntrySerializer, LeaderboardSerializer, Deck-scoped mini-games. Thin transport layer — the pool sampling,     scoring an, SubmitScoreSerializer
+Nodes (8): CompetitionPoolSerializer, CompetitionViewSet, LeaderboardEntrySerializer, LeaderboardSerializer, Meta, Deck-scoped mini-games. Thin transport layer — the pool sampling,     scoring an, SubmitScoreSerializer, TermSerializer
 
 ### Community 11893 - "Community 11893"
 Cohesion: 0.17
@@ -3965,10 +3944,6 @@ Nodes (7): advancePastEmpty(), catch(), equal(), folly(), increment(), nullptr()
 ### Community 11898 - "Community 11898"
 Cohesion: 0.55
 Nodes (7): data(), decltype(), detail(), inSitu(), operator(), State(), throw_()
-
-### Community 11899 - "Community 11899"
-Cohesion: 0.24
-Nodes (5): AzureTextToSpeechProvider, Azure AI Speech — Text-to-Speech (REST synthesis API).  Synthesizes speech from, Azure Speech text-to-speech over the REST synthesis API., Synthesize ``text`` in ``voice``; return ``{"audio": base64, "mime_type"}``., _voice_lang()
 
 ### Community 11900 - "Community 11900"
 Cohesion: 0.31
@@ -3995,7 +3970,7 @@ Cohesion: 0.58
 Nodes (5): e_(), emplace(), folly(), operator(), throwIfFailed()
 
 ### Community 11907 - "Community 11907"
-Cohesion: 0.29
+Cohesion: 0.25
 Nodes (5): Mixed "Revise" session: past mistakes across every feature, hardest first., Build a fresh session (answer-free cards ready to play).          Body (optional, Grade one answer and update the card.          Body: ``{card_id, given?, audio?,, ReviseCardSerializer, ReviseViewSet
 
 ### Community 11908 - "Community 11908"
@@ -4018,45 +3993,37 @@ Nodes (3): Command, _process(), Mirror dictation sentence audio to our CDN (with
 Cohesion: 0.29
 Nodes (6): AddTermsToDeckSerializer, LearningTermSerializer, OnlyNameTermSerializer, ProgressTermSerializer, ReviseTermSerializer, TermNestInDeckSerializer
 
-### Community 11913 - "Community 11913"
-Cohesion: 0.33
-Nodes (4): _parse(), LM Studio implementation of :class:`AiTextPort`.  LM Studio runs open-weight mod, Recursively convert a Gemini-style schema to standard JSON Schema., _to_json_schema()
-
 ### Community 11915 - "Community 11915"
 Cohesion: 0.29
 Nodes (4): Attribute, accessGroup, useFileBasedKeychain, KeychainAttribute
 
 ### Community 11916 - "Community 11916"
-Cohesion: 0.40
-Nodes (5): AiResponseCache, make_hash(), Meta, Persistent cache of AI provider responses keyed by ``(context, request_hash)``., remember()
+Cohesion: 0.25
+Nodes (6): make_hash(), Meta, remember(), ListeningTopic, Meta, A themed collection of dictation (listen-and-type) exercises, e.g. "Conversation
 
 ### Community 11917 - "Community 11917"
 Cohesion: 0.33
 Nodes (3): Meta, UserSetting, UserSettingSerializer
 
-### Community 11918 - "Community 11918"
-Cohesion: 0.33
-Nodes (4): Meta, A Writing Coach practice session saved to a user's history.      One unified rec, WritingSession, WritingSessionSerializer
-
 ## Knowledge Gaps
 - **1139 isolated node(s):** `SKIP_REDIS`, `-retry`, `-onQueueretry`, `-attemptsretry`, `-onQueueattemptsretry` (+1134 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **1243 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **1240 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DomainError` connect `Community 0` to `Community 1`, `Community 11907`, `Community 5`, `Community 11823`, `Community 11892`, `Community 11839`?**
+- **Why does `DomainError` connect `Community 0` to `Community 1`, `Community 11907`, `Community 5`, `Community 11892`, `Community 11839`?**
   _High betweenness centrality (0.007) - this node is a cross-community bridge._
-- **Why does `ValidationError` connect `Community 11823` to `Community 0`, `Community 4`, `Community 11850`, `Community 11883`, `Community 11821`, `Community 11822`, `Community 1582`, `Community 11856`, `Community 11858`, `Community 11827`, `Community 11837`, `Community 11902`?**
+- **Why does `ValidationError` connect `Community 0` to `Community 4`, `Community 7`, `Community 11850`, `Community 11883`, `Community 11821`, `Community 11822`, `Community 11823`, `Community 11856`, `Community 11858`, `Community 11827`, `Community 11837`, `Community 11902`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
-- **Why does `NotFoundError` connect `Community 0` to `Community 11880`, `Community 11821`, `Community 11822`, `Community 11823`, `Community 11827`, `Community 11896`, `Community 11837`, `Community 11902`?**
+- **Why does `NotFoundError` connect `Community 0` to `Community 11880`, `Community 11821`, `Community 11822`, `Community 11896`, `Community 11837`, `Community 11902`?**
   _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **Are the 92 inferred relationships involving `ValidationError` (e.g. with `QuickReviseConsumer` and `CourseService`) actually correct?**
   _`ValidationError` has 92 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `Azure AI Speech — Pronunciation Assessment (REST short-audio API).  Unlike the t`, `Azure Speech pronunciation assessment over the REST short-audio API.`, `Return Azure's detailed pronunciation-assessment JSON for one utterance.` to the rest of the system?**
+- **What connects `Logging and Sentry tracing utilities for AI infrastructure calls.`, `Context manager to tag AI calls with a feature/domain name (e.g. 'term_enrichmen`, `Set the current AI feature name for the active thread/task context.` to the rest of the system?**
   _1404 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.0579476861167002 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05049088359046283 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.027989821882951654 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.02780511811023622 - nodes in this community are weakly interconnected._
