@@ -16,6 +16,7 @@ export const queryKeys = {
   },
   courses: {
     catalog: (page: number, level: string) => ["courses", page, level] as const,
+    levels: ["courses", "levels"] as const,
     detail: (slug: string) => ["courses", slug] as const,
   },
   listening: {

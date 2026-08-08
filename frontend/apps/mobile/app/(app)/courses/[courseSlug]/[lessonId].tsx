@@ -9,14 +9,15 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { ActivityIndicator, Button, Text } from "react-native-paper";
+import { ActivityIndicator, Button, Snackbar, Text } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { courseApi } from "@/api/services";
+import { courseApi, speakingApi, termApi } from "@/api/services";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
 import { AppCard } from "@/components/ui/AppCard";
+import { PressableScale } from "@/components/PressableScale";
 import { useTokens } from "@/theme/tokens";
 import {
   AudioRecorder,
@@ -26,6 +27,14 @@ import {
   type PlaybackResult,
 } from "@/utils/audio";
 import { unwrap } from "@/utils/apiError";
+import { MarkedText, type TextMark } from "@/components/MarkedText";
+import VocabModal, { type VocabSelection, type TermMatch } from "@/components/VocabModal";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
+
+interface LessonHighlight {
+  text: string;
+  note?: string;
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────
 interface LessonLine {
@@ -65,6 +74,23 @@ interface DictationSavedLine {
   total?: number;
 }
 
+interface LessonExerciseBlank {
+  answer?: string;
+}
+
+interface LessonExerciseQuestion {
+  text?: string;
+  answers?: string[];
+}
+
+interface LessonExercise {
+  kind?: "fill_blank" | "choice" | string;
+  prompt?: string;
+  sentence?: string;
+  blanks?: LessonExerciseBlank[];
+  questions?: LessonExerciseQuestion[];
+}
+
 interface CourseLesson {
   id: string;
   title?: string;
@@ -73,11 +99,13 @@ interface CourseLesson {
   characters?: LessonCharacter[];
   has_audio?: boolean;
   background?: string;
+  exercises?: LessonExercise[];
   progress?: {
     best_score?: number;
     status?: string;
     last_result?: { score?: number; passed?: boolean; sessions?: RolePlaySession[] };
     last_dictation?: { score?: number; lines?: DictationSavedLine[]; at?: string };
+    highlights?: LessonHighlight[];
   };
 }
 
@@ -291,6 +319,7 @@ const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export default function CourseLessonScreen() {
   const { courseSlug, lessonId } = useLocalSearchParams<{ courseSlug: string; lessonId: string }>();
   const t = useTokens();
+  const tabBarHeight = useFloatingTabBarHeight();
 
   const [playbackError, setPlaybackError] = useState<string | null>(null);
   const [playingLine, setPlayingLine] = useState<string | null>(null);
@@ -313,6 +342,13 @@ export default function CourseLessonScreen() {
   const turnsRef = useRef<{ target_text: string; audio: string; mime_type: string }[]>([]);
   const recorder = useRef(new AudioRecorder());
 
+  // Per-line pronunciation practice (record + evaluate a single sentence)
+  const [lineRecordingIndex, setLineRecordingIndex] = useState<number | null>(null);
+  const [lineResults, setLineResults] = useState<
+    Record<number, { accuracyScore?: number; fluencyScore?: number; overallFeedback?: string }>
+  >({});
+  const lineRecorder = useRef(new AudioRecorder());
+
   // Listen & type (dictation)
   const [dictationOn, setDictationOn] = useState(false);
   const [dictationInputs, setDictationInputs] = useState<string[]>([]);
@@ -323,6 +359,15 @@ export default function CourseLessonScreen() {
   const dictRef = useRef(false);
   const dictLoopRef = useRef(false);
   const dictInputsRef = useRef<string[]>([]);
+
+  // Study notes & exercises (read-only)
+  const [showExercises, setShowExercises] = useState(false);
+
+  // Vocabulary lookup (tap-to-explain, highlight, save-to-deck)
+  const [highlights, setHighlights] = useState<LessonHighlight[]>([]);
+  const [selected, setSelected] = useState<VocabSelection | null>(null);
+  const [noteDraft, setNoteDraft] = useState("");
+  const [vocabSnack, setVocabSnack] = useState<string | null>(null);
 
   const courseQuery = useQuery({
     queryKey: ["course", courseSlug],
@@ -355,6 +400,16 @@ export default function CourseLessonScreen() {
   const passed = lesson?.progress?.status === "passed";
   const hasAudio = !!lesson?.has_audio;
 
+  const matchTermsQuery = useQuery({
+    queryKey: ["course", "matchTerms", lessonId, lines.length],
+    queryFn: async () =>
+      unwrap<{ matches: TermMatch[] }>(
+        await speakingApi.matchTerms({ texts: lines.map((l) => l.text || "").filter(Boolean) })
+      ),
+    enabled: !!lessonId && lines.length > 0,
+  });
+  const termMatches = matchTermsQuery.data?.matches ?? [];
+
   // Restore the last saved role-play / dictation so a revisit shows prior work.
   useEffect(() => {
     if (!lesson) return;
@@ -371,8 +426,77 @@ export default function CourseLessonScreen() {
     setDictationInputs(empty);
     setDictationResult(null);
     setDictationOn(false);
+    setHighlights(lesson.progress?.highlights ?? []);
+    setLineResults({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson?.id]);
+
+  const isHighlighted = (text: string) =>
+    highlights.some((h) => (h.text || "").toLowerCase() === (text || "").toLowerCase());
+  const findTermMatch = (text: string) =>
+    termMatches.find((m) => (m.name || "").toLowerCase() === (text || "").toLowerCase()) || null;
+
+  const highlightMutation = useMutation({
+    mutationFn: (payload: { text: string; note?: string; remove?: boolean }) =>
+      courseApi.setHighlight(lessonId!, payload),
+    onSuccess: (res) => setHighlights(unwrap<{ highlights: LessonHighlight[] }>(res).highlights ?? []),
+    onError: () => setVocabSnack("Could not update highlight."),
+  });
+
+  const saveTermMutation = useMutation({
+    mutationFn: async () => {
+      if (!selected) return;
+      return unwrap(
+        await termApi.addToDefaultDeck({
+          name: selected.text,
+          meaning: selected.fields?.find((f) => f.label === "Meaning")?.value ?? "",
+          pronunciation: selected.fields?.find((f) => f.label === "Pronunciation")?.value ?? "",
+          ai_filled: false,
+        })
+      );
+    },
+    onSuccess: () => {
+      setVocabSnack(`"${selected?.text}" saved to your default deck.`);
+      setSelected(null);
+      matchTermsQuery.refetch();
+    },
+    onError: () => setVocabSnack("Could not save term."),
+  });
+
+  const openVocab = async (rawText: string, context?: string) => {
+    const text = (rawText || "").trim();
+    if (!text || text.length < 2 || text.length > 80) return;
+    const existing = highlights.find((h) => (h.text || "").toLowerCase() === text.toLowerCase());
+    setNoteDraft(existing?.note || "");
+    setSelected({ text, context, loading: true });
+    try {
+      const explain = unwrap<{ meaning?: string; ipaExplanation?: string; mouthTip?: string }>(
+        await speakingApi.explainPhrase(text, context || "")
+      );
+      setSelected((prev) =>
+        prev && prev.text === text
+          ? {
+              ...prev,
+              loading: false,
+              fields: [
+                { label: "Meaning", value: explain.meaning || "" },
+                { label: "Pronunciation", value: explain.ipaExplanation || "" },
+                { label: "Speaking tip", value: explain.mouthTip || "" },
+              ],
+            }
+          : prev
+      );
+    } catch {
+      setSelected((prev) =>
+        prev && prev.text === text ? { ...prev, loading: false, error: "Failed to load. Tap retry." } : prev
+      );
+    }
+  };
+
+  const lineMarks = (): TextMark[] => [
+    ...highlights.map((h) => ({ text: h.text, color: t.neutral.text, tint: t.primaryAlpha(0.16) })),
+    ...termMatches.map((m) => ({ text: m.name || "", color: t.palette.primary, tint: t.primaryAlpha(0.1) })),
+  ];
 
   // Tear playback down on unmount.
   useEffect(
@@ -381,6 +505,7 @@ export default function CourseLessonScreen() {
       rpRef.current = false;
       dictRef.current = false;
       stopPlayback();
+      if (lineRecorder.current.isRecording) lineRecorder.current.cancel().catch(() => {});
     },
     []
   );
@@ -513,6 +638,45 @@ export default function CourseLessonScreen() {
     runRolePlayFrom(idx + 1, rpCharacterRef.current || rpCharacter || "");
   };
 
+  // ── Per-line pronunciation practice ────────────────────────────────────
+  const analyzeLineMutation = useMutation({
+    mutationFn: async (payload: { index: number; targetText: string; audio: string; mimeType: string }) => {
+      const res = await speakingApi.analyze({
+        targetText: payload.targetText,
+        audio: payload.audio,
+        mimeType: payload.mimeType,
+        kind: "single",
+      });
+      const data = unwrap<{ result?: { accuracyScore?: number; fluencyScore?: number; overallFeedback?: string } }>(
+        res
+      );
+      return { index: payload.index, result: data.result ?? {} };
+    },
+    onSuccess: ({ index, result }) => setLineResults((prev) => ({ ...prev, [index]: result })),
+    onError: () => setPlaybackError("Could not score that line."),
+  });
+
+  const startLineRecording = async (index: number) => {
+    try {
+      await lineRecorder.current.start();
+      setLineRecordingIndex(index);
+    } catch (e) {
+      setPlaybackError(e instanceof Error ? e.message : "Could not start recording.");
+    }
+  };
+
+  const stopLineRecording = async (index: number, text: string) => {
+    const recorded = await lineRecorder.current.stop();
+    setLineRecordingIndex(null);
+    if (!recorded || !text) return;
+    analyzeLineMutation.mutate({
+      index,
+      targetText: text,
+      audio: recorded.base64,
+      mimeType: recorded.mimeType,
+    });
+  };
+
   // ── Listen & type ─────────────────────────────────────────────────────
   const dictationFilled = dictationInputs.filter((s) => (s || "").trim()).length;
   const allDictationFilled = () =>
@@ -630,7 +794,7 @@ export default function CourseLessonScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={[styles.pad, { backgroundColor: t.neutral.bg }]}
+      contentContainerStyle={[styles.pad, { backgroundColor: t.neutral.bg, paddingBottom: tabBarHeight }]}
       keyboardShouldPersistTaps="handled"
     >
       {/* Title + pass badge */}
@@ -648,6 +812,16 @@ export default function CourseLessonScreen() {
 
       {playbackError ? (
         <Text style={{ color: t.palette.primary, marginTop: 8 }}>{playbackError}</Text>
+      ) : null}
+
+      {!dictationOn ? (
+        <View style={[styles.tip, { backgroundColor: t.primaryAlpha(0.08), borderRadius: t.radii.md }]}>
+          <MaterialCommunityIcons name="information-outline" size={16} color={t.palette.primary} />
+          <Text variant="bodySmall" style={{ color: t.neutral.textMinor, flex: 1 }}>
+            Tap any word in the dialogue for its meaning, IPA and a speaking tip — then save it as a
+            term or highlight it to revisit later.
+          </Text>
+        </View>
       ) : null}
 
       {/* Scene stage */}
@@ -909,20 +1083,65 @@ export default function CourseLessonScreen() {
                     ) : null}
                   </>
                 ) : (
-                  <Text style={{ color: t.neutral.text, marginTop: 4, lineHeight: 21 }}>{line.text}</Text>
+                  <MarkedText
+                    text={line.text || ""}
+                    marks={lineMarks()}
+                    onWordPress={(word) => openVocab(word, line.text)}
+                    style={{ color: t.neutral.text, marginTop: 4, lineHeight: 21 }}
+                  />
                 )}
 
                 {!rpActive && !dictationOn ? (
-                  <Button
-                    mode="text"
-                    compact
-                    icon={playingLine === line.text ? "stop" : "volume-high"}
-                    disabled={!hasAudio}
-                    onPress={() => (playingLine === line.text ? stopPlayback() : playLine(line))}
-                    style={styles.linePlay}
-                  >
-                    {playingLine === line.text ? "Stop" : "Listen"}
-                  </Button>
+                  <View style={styles.lineActions}>
+                    <Button
+                      mode="text"
+                      compact
+                      icon={playingLine === line.text ? "stop" : "volume-high"}
+                      disabled={!hasAudio}
+                      onPress={() => (playingLine === line.text ? stopPlayback() : playLine(line))}
+                      style={styles.linePlay}
+                    >
+                      {playingLine === line.text ? "Stop" : "Listen"}
+                    </Button>
+                    <Button
+                      mode="text"
+                      compact
+                      icon={lineRecordingIndex === i ? "stop" : "microphone-outline"}
+                      loading={analyzeLineMutation.isPending && analyzeLineMutation.variables?.index === i}
+                      disabled={
+                        !line.text ||
+                        (lineRecordingIndex != null && lineRecordingIndex !== i) ||
+                        (analyzeLineMutation.isPending && analyzeLineMutation.variables?.index !== i)
+                      }
+                      onPress={() =>
+                        lineRecordingIndex === i ? stopLineRecording(i, line.text || "") : startLineRecording(i)
+                      }
+                      style={styles.linePlay}
+                    >
+                      {lineRecordingIndex === i ? "Stop" : "Practice"}
+                    </Button>
+                  </View>
+                ) : null}
+
+                {!rpActive && !dictationOn && lineResults[i] ? (
+                  <View style={styles.lineScoreRow}>
+                    <Text
+                      style={[
+                        styles.lineScoreValue,
+                        {
+                          color:
+                            Math.round(lineResults[i].accuracyScore ?? 0) >= PASS_THRESHOLD
+                              ? "#2e9e5b"
+                              : t.palette.primary,
+                        },
+                      ]}
+                    >
+                      {Math.round(lineResults[i].accuracyScore ?? 0)}
+                    </Text>
+                    <Text style={{ color: t.neutral.textMinor, flex: 1 }} numberOfLines={2}>
+                      {lineResults[i].overallFeedback || "Accuracy score for this sentence"}
+                    </Text>
+                  </View>
                 ) : null}
 
                 {isCurrent && isMine ? (
@@ -964,6 +1183,54 @@ export default function CourseLessonScreen() {
         </AppCard>
       ) : null}
 
+      {/* Study notes & exercises (read-only) */}
+      {(lesson.exercises?.length ?? 0) > 0 && !rpActive && !dictationOn ? (
+        <AppCard style={styles.section}>
+          <PressableScale onPress={() => setShowExercises((v) => !v)} style={styles.exercisesHead}>
+            <Text style={{ color: t.neutral.text, fontWeight: "800", fontSize: 15, flex: 1 }}>
+              Study notes &amp; exercises ({lesson.exercises!.length})
+            </Text>
+            <MaterialCommunityIcons
+              name={showExercises ? "chevron-up" : "chevron-down"}
+              size={22}
+              color={t.neutral.textMinor}
+            />
+          </PressableScale>
+          {showExercises
+            ? lesson.exercises!.map((ex, i) => (
+                <View key={i} style={[styles.exerciseItem, { borderTopColor: t.neutral.border }]}>
+                  {ex.prompt ? (
+                    <Text style={{ color: t.neutral.text, fontWeight: "700" }}>{ex.prompt}</Text>
+                  ) : null}
+                  {ex.kind === "fill_blank" && ex.sentence ? (
+                    <Text style={{ color: t.neutral.textMinor, marginTop: 4 }}>
+                      {ex.sentence}
+                      {(ex.blanks?.length ?? 0) > 0 ? (
+                        <Text style={{ fontStyle: "italic" }}>
+                          {"  →  "}
+                          {ex.blanks!.map((b) => b.answer).filter(Boolean).join(", ")}
+                        </Text>
+                      ) : null}
+                    </Text>
+                  ) : null}
+                  {ex.kind === "choice"
+                    ? (ex.questions ?? []).map((q, qi) => (
+                        <View key={qi} style={{ marginTop: 6 }}>
+                          <Text style={{ color: t.neutral.text }}>{q.text}</Text>
+                          {(q.answers ?? []).map((a, ai) => (
+                            <Text key={ai} style={{ color: t.neutral.textMinor, marginLeft: 10 }}>
+                              • {a}
+                            </Text>
+                          ))}
+                        </View>
+                      ))
+                    : null}
+                </View>
+              ))
+            : null}
+        </AppCard>
+      ) : null}
+
       {/* Per-sentence role-play breakdown */}
       {sessions.length > 0 && !rpActive && !dictationOn ? (
         <AppCard style={styles.section}>
@@ -985,6 +1252,26 @@ export default function CourseLessonScreen() {
           })}
         </AppCard>
       ) : null}
+
+      <VocabModal
+        selected={selected}
+        highlighted={selected ? isHighlighted(selected.text) : false}
+        noteDraft={noteDraft}
+        onNoteChange={setNoteDraft}
+        showHighlightControls
+        onClose={() => setSelected(null)}
+        onRetry={() => selected && openVocab(selected.text, selected.context)}
+        onListen={(text) => speakText(text)}
+        onToggleHighlight={(remove) =>
+          selected && highlightMutation.mutate({ text: selected.text, note: noteDraft, remove })
+        }
+        onSaveTerm={() => saveTermMutation.mutate()}
+        saving={saveTermMutation.isPending}
+        termMatch={selected ? findTermMatch(selected.text) : null}
+      />
+      <Snackbar visible={!!vocabSnack} onDismiss={() => setVocabSnack(null)} duration={2500}>
+        {vocabSnack}
+      </Snackbar>
     </ScrollView>
   );
 }
@@ -995,6 +1282,7 @@ const styles = StyleSheet.create({
   section: { marginTop: 16 },
   titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   rowCenter: { flexDirection: "row", alignItems: "center", gap: 8 },
+  tip: { flexDirection: "row", alignItems: "flex-start", gap: 8, padding: 10, marginTop: 12 },
   badge: {
     flexDirection: "row",
     alignItems: "center",
@@ -1051,7 +1339,10 @@ const styles = StyleSheet.create({
   speakerRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   eq: { flexDirection: "row", alignItems: "center", height: 16, gap: 2 },
   eqBar: { width: 3, height: 14, borderRadius: 2 },
-  linePlay: { alignSelf: "flex-start", marginTop: 4, marginLeft: -8 },
+  lineActions: { flexDirection: "row", alignItems: "center", marginLeft: -8 },
+  linePlay: { alignSelf: "flex-start", marginTop: 4 },
+  lineScoreRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 },
+  lineScoreValue: { fontSize: 20, fontWeight: "800" },
   // Sessions
   sessionRow: {
     flexDirection: "row",
@@ -1060,4 +1351,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
+  // Exercises
+  exercisesHead: { flexDirection: "row", alignItems: "center" },
+  exerciseItem: { marginTop: 10, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth },
 });

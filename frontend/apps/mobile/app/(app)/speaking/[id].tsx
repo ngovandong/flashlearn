@@ -1,23 +1,26 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { ActivityIndicator, Text } from "react-native-paper";
+import { ActivityIndicator, Snackbar, Text } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { SpeakingConversation, SpeakingLine } from "@flashlearn/core";
-import { speakingApi } from "@/api/services";
+import type { SpeakingConversation, SpeakingLine, Highlight, Term } from "@flashlearn/core";
+import { speakingApi, termApi } from "@/api/services";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
 import { PressableScale } from "@/components/PressableScale";
+import { MarkedText, type TextMark } from "@/components/MarkedText";
+import VocabModal, { type VocabSelection, type TermMatch } from "@/components/VocabModal";
 import { AppCard } from "@/components/ui/AppCard";
 import { FeatureTile } from "@/components/ui/FeatureTile";
 import { GradientButton } from "@/components/ui/GradientButton";
 import { GradientSurface } from "@/components/ui/GradientSurface";
 import { AnimatedBar } from "@/components/ui/AnimatedBar";
 import { ProgressRing } from "@/components/ui/ProgressRing";
-import { AudioRecorder, playSpeechClip, speakText } from "@/utils/audio";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
+import { AudioRecorder, playAudioUrl, playSpeechClip, speakText, stopPlayback } from "@/utils/audio";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
 import { useTokens, type Tokens } from "@/theme/tokens";
@@ -27,8 +30,43 @@ const STAR_GOLD = "#f5a623";
 const SCORES: { key: string; label: string; color: string }[] = [
   { key: "accuracyScore", label: "Accuracy", color: "#8b5cf6" },
   { key: "fluencyScore", label: "Fluency", color: "#06b6d4" },
+  { key: "rhythmScore", label: "Rhythm", color: "#f59e0b" },
   { key: "completenessScore", label: "Complete", color: "#10b981" },
 ];
+
+interface WordAnalysis {
+  word: string;
+  status: "correct" | "incorrect" | "missing" | string;
+  accuracyScore?: number;
+  ipaTarget?: string;
+  ipaSpoken?: string;
+  userPronunciation?: string;
+  correctPronunciation?: string;
+  syllableStress?: string;
+  mouthTip?: string;
+  feedback?: string;
+}
+
+interface KeyStruggle {
+  sound?: string;
+  description?: string;
+  tip?: string;
+}
+
+interface AnalysisResult {
+  accuracyScore?: number;
+  fluencyScore?: number;
+  rhythmScore?: number;
+  completenessScore?: number;
+  wordsPerMinute?: number;
+  overallFeedback?: string;
+  accentAnalysis?: string;
+  keyStruggles?: KeyStruggle[];
+  wordAnalysis?: WordAnalysis[];
+}
+
+const wordStatusColor = (status: string) =>
+  status === "correct" ? "#10b981" : status === "incorrect" ? "#ef4444" : "#f59e0b";
 
 /** Small rounded meta chip (level / tone). */
 function MetaChip({ label, t }: { label: string; t: Tokens }) {
@@ -44,12 +82,21 @@ export default function SpeakingConversationScreen() {
   const t = useTokens();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useFloatingTabBarHeight();
   const qc = useQueryClient();
   const [lineIndex, setLineIndex] = useState(0);
-  const [analysis, setAnalysis] = useState<Record<string, unknown> | null>(null);
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [selectedWord, setSelectedWord] = useState<WordAnalysis | null>(null);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
   const [rpRecording, setRpRecording] = useState(false);
   const [playingKey, setPlayingKey] = useState<string | null>(null);
+  const [lastRecordingUri, setLastRecordingUri] = useState<string | null>(null);
+  const [playingMine, setPlayingMine] = useState(false);
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const [selected, setSelected] = useState<VocabSelection | null>(null);
+  const [noteDraft, setNoteDraft] = useState("");
+  const [savedWords, setSavedWords] = useState<Record<string, boolean>>({});
+  const [snack, setSnack] = useState<string | null>(null);
   const recorder = useRef(new AudioRecorder());
   const audioCache = useRef(new Map<string, { audio_url?: string; audio?: string; mime_type?: string }>());
 
@@ -58,6 +105,27 @@ export default function SpeakingConversationScreen() {
     queryFn: async () => unwrap<SpeakingConversation>(await speakingApi.getConversation(id!)),
     enabled: !!id,
   });
+
+  useEffect(() => {
+    if (data?.highlights) setHighlights(data.highlights);
+  }, [data?.highlights]);
+
+  const matchTermsQuery = useQuery({
+    queryKey: ["speaking", "matchTerms", id],
+    queryFn: async () => unwrap<{ matches: TermMatch[] }>(await speakingApi.matchTerms(id!)),
+    enabled: !!id,
+  });
+  const termMatches = matchTermsQuery.data?.matches ?? [];
+
+  // Stop any in-flight playback/recording when leaving the screen so the mic
+  // never stays "hot" and a stray recorder instance doesn't leak.
+  useEffect(
+    () => () => {
+      stopPlayback();
+      if (recorder.current.isRecording) recorder.current.cancel().catch(() => {});
+    },
+    []
+  );
 
   const starMutation = useMutation({
     mutationFn: (starred: boolean) => speakingApi.setStar(id!, starred),
@@ -78,9 +146,55 @@ export default function SpeakingConversationScreen() {
   const analyzeMutation = useMutation({
     mutationFn: async (payload: { targetText: string; audio: string; mimeType: string }) => {
       const res = await speakingApi.analyze({ ...payload, conversationId: id, kind: "single" });
-      return unwrap(res);
+      return unwrap<AnalysisResult>(res);
     },
-    onSuccess: (res) => setAnalysis(res as Record<string, unknown>),
+    onSuccess: (res) => {
+      setAnalysis(res);
+      const firstIssue = (res.wordAnalysis ?? []).find((w) => w.status !== "correct");
+      setSelectedWord(firstIssue ?? res.wordAnalysis?.[0] ?? null);
+    },
+  });
+
+  const highlightMutation = useMutation({
+    mutationFn: (payload: { text: string; note?: string; remove?: boolean }) =>
+      speakingApi.setHighlight(id!, payload),
+    onSuccess: (res) => setHighlights(unwrap<{ highlights: Highlight[] }>(res).highlights ?? []),
+    onError: () => setSnack("Could not update highlight."),
+  });
+
+  const saveTermMutation = useMutation({
+    mutationFn: async () => {
+      if (!selected) return;
+      const payload: Term = {
+        name: selected.text,
+        meaning: selected.fields?.find((f) => f.label === "Meaning")?.value ?? "",
+        ai_filled: false,
+      };
+      return unwrap(await termApi.addToDefaultDeck(payload));
+    },
+    onSuccess: () => {
+      setSnack(`"${selected?.text}" saved to your default deck.`);
+      setSelected(null);
+      matchTermsQuery.refetch();
+    },
+    onError: () => setSnack("Could not save term."),
+  });
+
+  const saveWordMutation = useMutation({
+    mutationFn: async (word: WordAnalysis) =>
+      unwrap(
+        await termApi.addToDefaultDeck({
+          name: word.word,
+          meaning: word.feedback || "",
+          pronunciation: word.ipaTarget || "",
+          ai_filled: false,
+        })
+      ),
+    onSuccess: (_res, word) => {
+      setSavedWords((prev) => ({ ...prev, [word.word]: true }));
+      setSnack(`"${word.word}" saved to your default deck.`);
+    },
+    onError: () => setSnack("Could not save term."),
   });
 
   const lines = data?.lines ?? [];
@@ -88,10 +202,52 @@ export default function SpeakingConversationScreen() {
   const meRole = lines[0]?.role;
   const starred = !!(data as { starred?: boolean } | undefined)?.starred;
 
+  const isHighlighted = (text: string) =>
+    highlights.some((h) => (h.text || "").toLowerCase() === (text || "").toLowerCase());
+  const findTermMatch = (text: string) =>
+    termMatches.find((m) => (m.name || "").toLowerCase() === (text || "").toLowerCase()) || null;
+
+  const openVocab = async (rawText: string, context?: string) => {
+    const text = (rawText || "").trim();
+    if (!text || text.length < 2 || text.length > 80) return;
+    const existing = highlights.find((h) => (h.text || "").toLowerCase() === text.toLowerCase());
+    setNoteDraft(existing?.note || "");
+    setSelected({ text, context, loading: true });
+    try {
+      const explain = unwrap<{ meaning?: string; ipaExplanation?: string; mouthTip?: string }>(
+        await speakingApi.explainPhrase(text, context || "")
+      );
+      setSelected((prev) =>
+        prev && prev.text === text
+          ? {
+              ...prev,
+              loading: false,
+              fields: [
+                { label: "Meaning", value: explain.meaning || "" },
+                { label: "Pronunciation", value: explain.ipaExplanation || "" },
+                { label: "Speaking tip", value: explain.mouthTip || "" },
+              ],
+            }
+          : prev
+      );
+    } catch {
+      setSelected((prev) =>
+        prev && prev.text === text ? { ...prev, loading: false, error: "Failed to load. Tap retry." } : prev
+      );
+    }
+  };
+
+  const lineMarks = (text: string): TextMark[] => [
+    ...highlights.map((h) => ({ text: h.text, color: t.neutral.text, tint: t.primaryAlpha(0.16) })),
+    ...termMatches.map((m) => ({ text: m.name || "", color: t.palette.primary, tint: t.primaryAlpha(0.1) })),
+  ];
+
   const selectLine = (index: number) => {
     setLineIndex(index);
     setAnalysis(null);
+    setSelectedWord(null);
     setPlaybackError(null);
+    setLastRecordingUri(null);
   };
 
   const playLine = async (line: SpeakingLine, key: string) => {
@@ -117,12 +273,23 @@ export default function SpeakingConversationScreen() {
     }
   };
 
+  const playMyRecording = async () => {
+    if (!lastRecordingUri) return;
+    setPlayingMine(true);
+    try {
+      await playAudioUrl(lastRecordingUri);
+    } finally {
+      setPlayingMine(false);
+    }
+  };
+
   const startRecording = async () => {
     try {
       await recorder.current.start();
       setRpRecording(true);
+      setPlaybackError(null);
     } catch (e) {
-      setPlaybackError(e instanceof Error ? e.message : "Could not record.");
+      setPlaybackError(e instanceof Error ? e.message : "Microphone access denied or unavailable.");
     }
   };
 
@@ -130,6 +297,7 @@ export default function SpeakingConversationScreen() {
     const recorded = await recorder.current.stop();
     setRpRecording(false);
     if (!recorded || !current?.text) return;
+    setLastRecordingUri(recorded.uri);
     analyzeMutation.mutate({
       targetText: current.text,
       audio: recorded.base64,
@@ -141,11 +309,12 @@ export default function SpeakingConversationScreen() {
   if (isError || !data) return <ErrorView message="Could not load conversation" onRetry={() => refetch()} />;
 
   const progress = lines.length ? (lineIndex + 1) / lines.length : 0;
+  const wordAnalysis = analysis?.wordAnalysis ?? [];
 
   return (
     <ScrollView
       style={{ backgroundColor: t.neutral.bg }}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 12, paddingBottom: tabBarHeight }]}
       showsVerticalScrollIndicator={false}
     >
       <FadeSlideIn>
@@ -156,7 +325,7 @@ export default function SpeakingConversationScreen() {
 
         <AppCard style={{ marginTop: 8 }}>
           <View style={styles.heroRow}>
-            <FeatureTile icon="forum" size={46} variant="solid" />
+            <FeatureTile icon="record-voice-over" size={46} variant="solid" />
             <View style={{ flex: 1 }}>
               <Text variant="titleLarge" style={{ color: t.neutral.text, fontWeight: "800" }}>
                 {data.topic ?? "Conversation"}
@@ -208,6 +377,13 @@ export default function SpeakingConversationScreen() {
         />
       </FadeSlideIn>
 
+      <View style={[styles.tip, { backgroundColor: t.primaryAlpha(0.08), borderRadius: t.radii.md }]}>
+        <MaterialIcons name="info-outline" size={16} color={t.palette.primary} />
+        <Text variant="bodySmall" style={{ color: t.neutral.textMinor, flex: 1 }}>
+          Tap any word for its meaning, IPA and a speaking tip. Saved words and highlights are tinted.
+        </Text>
+      </View>
+
       {playbackError ? (
         <View style={[styles.errorBox, { backgroundColor: t.alpha("#ef4444", 0.12), borderRadius: t.radii.md }]}>
           <MaterialIcons name="error-outline" size={18} color="#ef4444" />
@@ -248,7 +424,12 @@ export default function SpeakingConversationScreen() {
                     ]}
                   >
                     <GradientSurface style={[styles.bubble, { borderRadius: t.radii.lg }]}>
-                      <Text style={styles.meText}>{line.text}</Text>
+                      <MarkedText
+                        text={line.text || ""}
+                        marks={lineMarks(line.text || "")}
+                        onWordPress={(w) => openVocab(w, line.text)}
+                        style={styles.meText}
+                      />
                       <View style={styles.bubbleTools}>
                         <PressableScale
                           onPress={() => playLine(line, key)}
@@ -279,7 +460,12 @@ export default function SpeakingConversationScreen() {
                       active ? t.shadow : null,
                     ]}
                   >
-                    <Text style={{ color: t.neutral.text, fontSize: 15, lineHeight: 22 }}>{line.text}</Text>
+                    <MarkedText
+                      text={line.text || ""}
+                      marks={lineMarks(line.text || "")}
+                      onWordPress={(w) => openVocab(w, line.text)}
+                      style={{ color: t.neutral.text, fontSize: 15, lineHeight: 22 }}
+                    />
                     <View style={styles.bubbleTools}>
                       <PressableScale
                         onPress={() => playLine(line, key)}
@@ -350,25 +536,171 @@ export default function SpeakingConversationScreen() {
               Analyzing your pronunciation…
             </Text>
           ) : null}
+          {analyzeMutation.isError ? (
+            <View style={styles.analyzeError}>
+              <Text variant="bodySmall" style={{ color: "#ef4444", textAlign: "center" }}>
+                Pronunciation analysis failed.
+              </Text>
+              <PressableScale
+                onPress={stopAndAnalyze}
+                style={[styles.retryBtn, { borderColor: t.neutral.border, borderRadius: t.radii.pill }]}
+              >
+                <Text style={{ color: t.palette.primary, fontWeight: "700" }}>Retry</Text>
+              </PressableScale>
+            </View>
+          ) : null}
         </AppCard>
       </FadeSlideIn>
 
       {analysis ? (
         <FadeSlideIn delay={40}>
           <AppCard>
-            <Text variant="titleMedium" style={{ color: t.neutral.text, fontWeight: "800", marginBottom: 12 }}>
-              Pronunciation
-            </Text>
+            <View style={styles.analysisHead}>
+              <Text variant="titleMedium" style={{ color: t.neutral.text, fontWeight: "800" }}>
+                Pronunciation diagnostics
+              </Text>
+              {lastRecordingUri ? (
+                <PressableScale
+                  onPress={playMyRecording}
+                  style={[styles.pillBtnSm, { backgroundColor: t.neutral.surface2, borderRadius: t.radii.pill }]}
+                >
+                  <MaterialIcons name={playingMine ? "pause" : "mic"} size={14} color={t.neutral.text} />
+                  <Text style={{ color: t.neutral.text, fontWeight: "700", fontSize: 12 }}>
+                    {playingMine ? "Playing…" : "My recording"}
+                  </Text>
+                </PressableScale>
+              ) : null}
+            </View>
+
             <View style={styles.scoreRow}>
-              {SCORES.filter((s) => analysis[s.key] !== undefined).map((s) => (
+              {SCORES.filter((s) => analysis[s.key as keyof AnalysisResult] !== undefined).map((s) => (
                 <View key={s.key} style={styles.scoreItem}>
-                  <ProgressRing value={Number(analysis[s.key]) || 0} size={84} strokeWidth={8} color={s.color} />
+                  <ProgressRing
+                    value={Number(analysis[s.key as keyof AnalysisResult]) || 0}
+                    size={76}
+                    strokeWidth={7}
+                    color={s.color}
+                  />
                   <Text variant="labelMedium" style={{ color: t.neutral.textMinor, fontWeight: "700", marginTop: 6 }}>
                     {s.label}
                   </Text>
                 </View>
               ))}
             </View>
+
+            {analysis.wordsPerMinute ? (
+              <View style={[styles.wpmRow, { backgroundColor: t.neutral.surface2, borderRadius: t.radii.md }]}>
+                <MaterialIcons name="speed" size={16} color={t.neutral.textMinor} />
+                <Text style={{ color: t.neutral.text, fontWeight: "700" }}>
+                  {analysis.wordsPerMinute} WPM
+                </Text>
+              </View>
+            ) : null}
+
+            {analysis.accentAnalysis ? (
+              <View style={[styles.calloutWarn, { backgroundColor: t.alpha("#f59e0b", 0.12), borderRadius: t.radii.md }]}>
+                <MaterialIcons name="warning-amber" size={16} color="#f59e0b" />
+                <Text style={{ color: t.neutral.text, flex: 1 }}>{analysis.accentAnalysis}</Text>
+              </View>
+            ) : null}
+
+            {(analysis.keyStruggles ?? []).length > 0 ? (
+              <View style={{ marginTop: 14 }}>
+                <Text style={{ color: t.neutral.textMuted, fontWeight: "700", fontSize: 12 }}>
+                  KEY VOCAL CHALLENGES
+                </Text>
+                {(analysis.keyStruggles ?? []).map((s, i) => (
+                  <View key={i} style={[styles.struggle, { borderColor: t.neutral.border }]}>
+                    <Text style={{ color: t.neutral.text, fontWeight: "800" }}>{s.sound}</Text>
+                    <Text style={{ color: t.neutral.textMinor, marginTop: 2 }}>{s.description}</Text>
+                    {s.tip ? (
+                      <Text style={{ color: t.neutral.textMinor, marginTop: 4, fontStyle: "italic" }}>
+                        Tip: {s.tip}
+                      </Text>
+                    ) : null}
+                  </View>
+                ))}
+              </View>
+            ) : null}
+
+            {wordAnalysis.length > 0 ? (
+              <View style={{ marginTop: 14 }}>
+                <Text style={{ color: t.neutral.textMuted, fontWeight: "700", fontSize: 12 }}>
+                  INTERACTIVE SENTENCE MAP
+                </Text>
+                <View style={styles.wordWrap}>
+                  {wordAnalysis.map((w, i) => {
+                    const color = wordStatusColor(w.status);
+                    const isActive = selectedWord?.word === w.word;
+                    return (
+                      <PressableScale
+                        key={i}
+                        onPress={() => setSelectedWord(w)}
+                        style={[
+                          styles.wordChip,
+                          {
+                            backgroundColor: t.alpha(color, isActive ? 0.28 : 0.14),
+                            borderColor: color,
+                            borderRadius: t.radii.pill,
+                          },
+                        ]}
+                      >
+                        <Text style={{ color, fontWeight: "700" }}>{w.word}</Text>
+                      </PressableScale>
+                    );
+                  })}
+                </View>
+              </View>
+            ) : null}
+
+            {selectedWord ? (
+              <View style={[styles.wordDetail, { backgroundColor: t.neutral.surface2, borderRadius: t.radii.md }]}>
+                <View style={styles.wordDetailHead}>
+                  <Text variant="titleSmall" style={{ color: t.neutral.text, fontWeight: "800" }}>
+                    "{selectedWord.word}"
+                  </Text>
+                  <PressableScale onPress={() => speakText(selectedWord.word)} hitSlop={8}>
+                    <MaterialIcons name="volume-up" size={18} color={t.palette.primary} />
+                  </PressableScale>
+                  <View style={{ flex: 1 }} />
+                  <PressableScale
+                    onPress={() => saveWordMutation.mutate(selectedWord)}
+                    disabled={!!savedWords[selectedWord.word] || saveWordMutation.isPending}
+                    style={[styles.pillBtnSm, { backgroundColor: t.palette.primary, borderRadius: t.radii.pill }]}
+                  >
+                    <MaterialIcons name="add" size={14} color={t.palette.onPrimary} />
+                    <Text style={{ color: t.palette.onPrimary, fontWeight: "700", fontSize: 12 }}>
+                      {savedWords[selectedWord.word] ? "Saved" : "Save"}
+                    </Text>
+                  </PressableScale>
+                </View>
+                <View style={styles.wordDetailGrid}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: t.neutral.textMuted, fontWeight: "700", fontSize: 11 }}>TARGET IPA</Text>
+                    <Text style={{ color: "#10b981", fontWeight: "700" }}>{selectedWord.ipaTarget || "/--/"}</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: t.neutral.textMuted, fontWeight: "700", fontSize: 11 }}>DETECTED IPA</Text>
+                    <Text style={{ color: "#ef4444", fontWeight: "700" }}>
+                      {selectedWord.ipaSpoken || selectedWord.userPronunciation || "/--/"}
+                    </Text>
+                  </View>
+                </View>
+                {selectedWord.syllableStress ? (
+                  <Text style={{ color: t.neutral.textMinor, marginTop: 8 }}>
+                    Stress: {selectedWord.syllableStress}
+                  </Text>
+                ) : null}
+                {selectedWord.mouthTip ? (
+                  <Text style={{ color: t.neutral.textMinor, marginTop: 8, fontStyle: "italic" }}>
+                    {selectedWord.mouthTip}
+                  </Text>
+                ) : null}
+                {selectedWord.feedback ? (
+                  <Text style={{ color: t.neutral.text, marginTop: 8 }}>"{selectedWord.feedback}"</Text>
+                ) : null}
+              </View>
+            ) : null}
           </AppCard>
         </FadeSlideIn>
       ) : null}
@@ -401,6 +733,37 @@ export default function SpeakingConversationScreen() {
           <MaterialIcons name="chevron-right" size={22} color={t.neutral.text} />
         </PressableScale>
       </View>
+
+      <VocabModal
+        selected={selected}
+        highlighted={selected ? isHighlighted(selected.text) : false}
+        noteDraft={noteDraft}
+        onNoteChange={setNoteDraft}
+        showHighlightControls
+        termMatch={selected ? findTermMatch(selected.text) : null}
+        onClose={() => setSelected(null)}
+        onRetry={() => selected && openVocab(selected.text, selected.context)}
+        onListen={(text) => speakText(text)}
+        onToggleHighlight={(remove) =>
+          selected && highlightMutation.mutate({ text: selected.text, note: noteDraft, remove })
+        }
+        onSaveTerm={() => saveTermMutation.mutate()}
+        saving={saveTermMutation.isPending}
+        onRemoveTerm={async (m) => {
+          if (!m.term_id) return;
+          try {
+            await termApi.delete(m.term_id);
+            matchTermsQuery.refetch();
+            setSnack(`"${m.name}" removed from your deck.`);
+          } catch {
+            setSnack("Could not remove the term.");
+          }
+        }}
+      />
+
+      <Snackbar visible={!!snack} onDismiss={() => setSnack(null)} duration={3000}>
+        {snack}
+      </Snackbar>
     </ScrollView>
   );
 }
@@ -414,6 +777,7 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: "row", justifyContent: "flex-end", gap: 10, marginTop: 12 },
   iconBtn: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
   progressHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  tip: { flexDirection: "row", alignItems: "center", gap: 8, padding: 12 },
   errorBox: { flexDirection: "row", alignItems: "center", gap: 8, padding: 12 },
   transcript: { gap: 14 },
   bubbleWrap: { maxWidth: "88%", overflow: "hidden" },
@@ -432,8 +796,20 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     marginTop: 12,
   },
+  analyzeError: { alignItems: "center", marginTop: 10, gap: 6 },
+  retryBtn: { paddingHorizontal: 16, paddingVertical: 8, borderWidth: 1.5 },
+  analysisHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12 },
+  pillBtnSm: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 6 },
   scoreRow: { flexDirection: "row", justifyContent: "space-around", flexWrap: "wrap", gap: 12 },
   scoreItem: { alignItems: "center" },
+  wpmRow: { flexDirection: "row", alignItems: "center", gap: 8, padding: 10, marginTop: 14 },
+  calloutWarn: { flexDirection: "row", alignItems: "flex-start", gap: 8, padding: 12, marginTop: 12 },
+  struggle: { borderWidth: 1, borderRadius: 12, padding: 10, marginTop: 8 },
+  wordWrap: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 },
+  wordChip: { paddingHorizontal: 12, paddingVertical: 7, borderWidth: 1.5 },
+  wordDetail: { padding: 14, marginTop: 14 },
+  wordDetailHead: { flexDirection: "row", alignItems: "center", gap: 10 },
+  wordDetailGrid: { flexDirection: "row", gap: 16, marginTop: 10 },
   navRow: { flexDirection: "row", gap: 12 },
   navBtn: {
     flex: 1,

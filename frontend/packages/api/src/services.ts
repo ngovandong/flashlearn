@@ -337,6 +337,10 @@ export type RoleApi = ReturnType<typeof createRoleApi>;
 
 export function createLearningApi(client: AxiosInstance) {
   return {
+    /** Registers a card view (matches web's `learningService.create`), used by Learn mode to track progress. */
+    create(data: { term_id: string }): Promise<any> {
+      return client.post("learnings/", data);
+    },
     getLearningTerms(deckId: string, page: number): Promise<any> {
       return client.get("learnings/get_learning_terms/", {
         params: { deck_id: deckId, page },

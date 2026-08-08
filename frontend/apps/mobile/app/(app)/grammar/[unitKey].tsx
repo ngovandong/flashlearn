@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import { Text, TextInput } from "react-native-paper";
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Snackbar, Text, TextInput } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import type { GrammarExercise, Highlight } from "@flashlearn/core";
-import { grammarApi } from "@/api/services";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { GrammarExercise, Highlight, Term } from "@flashlearn/core";
+import { grammarApi, termApi } from "@/api/services";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
@@ -13,8 +13,10 @@ import { PressableScale } from "@/components/PressableScale";
 import { AppCard } from "@/components/ui/AppCard";
 import { FeatureTile } from "@/components/ui/FeatureTile";
 import { GradientButton } from "@/components/ui/GradientButton";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
+import { speakText } from "@/utils/audio";
 import { useTokens, type Tokens } from "@/theme/tokens";
 
 const GREEN = "#10b981";
@@ -67,6 +69,276 @@ function stripHtml(html?: string): string {
     .trim();
 }
 
+interface VocabSelection {
+  text: string;
+  loading?: boolean;
+  error?: string;
+  fields?: Partial<Term>;
+}
+
+const isWordChar = (ch: string) => /[a-z0-9']/i.test(ch || "");
+
+interface Mark {
+  start: number;
+  end: number;
+  payload: Highlight;
+}
+
+// Port of the web `grammarMarks.buildMarks` helper: find non-overlapping,
+// whole-word occurrences of each saved highlight inside a plain-text string.
+function buildMarks(text: string, highlights: Highlight[]): Mark[] {
+  const lower = text.toLowerCase();
+  const marks: Mark[] = [];
+  (highlights || []).forEach((h) => {
+    const needle = (h.text || "").toLowerCase().trim();
+    if (!needle) return;
+    let from = 0;
+    for (;;) {
+      const idx = lower.indexOf(needle, from);
+      if (idx === -1) break;
+      const end = idx + needle.length;
+      if (!isWordChar(lower[idx - 1]) && !isWordChar(lower[end])) {
+        marks.push({ start: idx, end, payload: h });
+      }
+      from = end;
+    }
+  });
+  marks.sort((a, b) => a.start - b.start || b.end - b.start - (a.end - a.start));
+  const out: Mark[] = [];
+  let lastEnd = 0;
+  for (const m of marks) {
+    if (m.start >= lastEnd) {
+      out.push(m);
+      lastEnd = m.end;
+    }
+  }
+  return out;
+}
+
+// Renders a plain-text string so every word is tappable (opens the vocab
+// lookup for that word) and any saved highlight phrase is tinted, mirroring
+// the web `renderWithHighlights` + "select text" behaviour without relying on
+// a text-selection gesture, which mobile doesn't have.
+function TappableText({
+  text,
+  highlights,
+  onWordPress,
+  style,
+  t,
+}: {
+  text: string;
+  highlights: Highlight[];
+  onWordPress: (word: string) => void;
+  style?: object;
+  t: Tokens;
+}) {
+  if (!text) return null;
+  const marks = buildMarks(text, highlights);
+  const nodes: React.ReactNode[] = [];
+  let cursor = 0;
+  let key = 0;
+
+  const pushPlain = (segment: string) => {
+    const tokens = segment.split(/(\s+)/);
+    tokens.forEach((tok) => {
+      if (!tok) return;
+      key += 1;
+      if (/^\s+$/.test(tok)) {
+        nodes.push(<Text key={key}>{tok}</Text>);
+        return;
+      }
+      const clean = tok.replace(/^[^\w']+|[^\w']+$/g, "");
+      if (clean.length >= 2) {
+        nodes.push(
+          <Text key={key} onPress={() => onWordPress(clean)} suppressHighlighting>
+            {tok}
+          </Text>
+        );
+      } else {
+        nodes.push(<Text key={key}>{tok}</Text>);
+      }
+    });
+  };
+
+  marks.forEach((m) => {
+    if (m.start > cursor) pushPlain(text.slice(cursor, m.start));
+    const segment = text.slice(m.start, m.end);
+    key += 1;
+    nodes.push(
+      <Text
+        key={key}
+        onPress={() => onWordPress(segment)}
+        suppressHighlighting
+        style={{ backgroundColor: t.feature("spellcheck").tint, color: t.feature("spellcheck").fg, fontWeight: "700" }}
+      >
+        {segment}
+      </Text>
+    );
+    cursor = m.end;
+  });
+  if (cursor < text.length) pushPlain(text.slice(cursor));
+
+  return <Text style={style}>{nodes}</Text>;
+}
+
+/** Bottom-sheet-style modal for the word/phrase tapped in grammar content.
+ * Mirrors the web `VocabPopup`: AI meaning/pronunciation, listen, highlight
+ * toggle, and save-to-default-deck. */
+function VocabModal({
+  selected,
+  isHighlighted,
+  noteDraft,
+  onNoteChange,
+  onClose,
+  onRetry,
+  onToggleHighlight,
+  onSaveTerm,
+  saving,
+  t,
+}: {
+  selected: VocabSelection | null;
+  isHighlighted: (text: string) => boolean;
+  noteDraft: string;
+  onNoteChange: (v: string) => void;
+  onClose: () => void;
+  onRetry: () => void;
+  onToggleHighlight: (remove?: boolean) => void;
+  onSaveTerm: () => void;
+  saving: boolean;
+  t: Tokens;
+}) {
+  if (!selected) return null;
+  const highlighted = isHighlighted(selected.text);
+  return (
+    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.modalBackdrop} onPress={onClose}>
+        <Pressable
+          style={[styles.modalCard, { backgroundColor: t.neutral.surface, borderRadius: t.radii.xl }]}
+          onPress={(e) => e.stopPropagation()}
+        >
+          <View style={styles.modalHead}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: t.palette.primary, fontWeight: "700", fontSize: 12 }}>VOCABULARY</Text>
+              <Text variant="titleMedium" style={{ color: t.neutral.text, fontWeight: "800", marginTop: 2 }}>
+                "{selected.text}"
+              </Text>
+            </View>
+            <PressableScale onPress={onClose} hitSlop={8}>
+              <MaterialIcons name="close" size={22} color={t.neutral.textMuted} />
+            </PressableScale>
+          </View>
+
+          <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+            {selected.loading ? (
+              <View style={styles.modalLoading}>
+                <ActivityIndicator color={t.palette.primary} />
+                <Text style={{ color: t.neutral.textMuted, marginTop: 8 }}>Looking it up…</Text>
+              </View>
+            ) : selected.error ? (
+              <View style={styles.modalLoading}>
+                <Text style={{ color: t.neutral.textMuted }}>{selected.error}</Text>
+                <PressableScale
+                  onPress={onRetry}
+                  style={[styles.retryBtn, { borderColor: t.neutral.border, borderRadius: t.radii.pill }]}
+                >
+                  <Text style={{ color: t.palette.primary, fontWeight: "700" }}>Retry</Text>
+                </PressableScale>
+              </View>
+            ) : (
+              <>
+                <Text style={{ color: t.neutral.textMuted, fontWeight: "700", fontSize: 12 }}>MEANING</Text>
+                <Text style={{ color: t.neutral.text, marginTop: 2 }}>{selected.fields?.definition || "—"}</Text>
+
+                <View style={styles.modalGrid}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: t.neutral.textMuted, fontWeight: "700", fontSize: 12 }}>PRONUNCIATION</Text>
+                    <Text style={{ color: t.neutral.text, marginTop: 2 }}>{selected.fields?.pronunciation || "/--/"}</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: t.neutral.textMuted, fontWeight: "700", fontSize: 12 }}>WORD TYPE</Text>
+                    <Text style={{ color: t.neutral.text, marginTop: 2 }}>{selected.fields?.word_type || "—"}</Text>
+                  </View>
+                </View>
+
+                {(selected.fields?.examples ?? []).length > 0 ? (
+                  <View style={{ marginTop: 12 }}>
+                    <Text style={{ color: t.neutral.textMuted, fontWeight: "700", fontSize: 12 }}>EXAMPLE</Text>
+                    <Text style={{ color: t.neutral.text, marginTop: 2 }}>{stripHtml(selected.fields?.examples?.[0])}</Text>
+                  </View>
+                ) : null}
+
+                <Text style={{ color: t.neutral.textMuted, fontWeight: "700", fontSize: 12, marginTop: 14 }}>
+                  NOTE (OPTIONAL)
+                </Text>
+                <TextInput
+                  mode="outlined"
+                  dense
+                  value={noteDraft}
+                  onChangeText={onNoteChange}
+                  placeholder="Add a quick note for this highlight…"
+                  outlineStyle={{ borderRadius: t.radii.md }}
+                  style={[styles.input, { marginTop: 6 }]}
+                />
+
+                <View style={styles.modalActionsRow}>
+                  <PressableScale
+                    onPress={() => onToggleHighlight(false)}
+                    style={[
+                      styles.pillBtn,
+                      {
+                        backgroundColor: highlighted ? t.palette.primary : t.neutral.surface2,
+                        borderRadius: t.radii.pill,
+                      },
+                    ]}
+                  >
+                    <MaterialIcons
+                      name="border-color"
+                      size={16}
+                      color={highlighted ? t.palette.onPrimary : t.neutral.text}
+                    />
+                    <Text style={{ color: highlighted ? t.palette.onPrimary : t.neutral.text, fontWeight: "700" }}>
+                      {highlighted ? "Update highlight" : "Highlight here"}
+                    </Text>
+                  </PressableScale>
+                  {highlighted ? (
+                    <PressableScale
+                      onPress={() => onToggleHighlight(true)}
+                      style={[styles.pillBtnGhost, { borderColor: t.neutral.border, borderRadius: t.radii.pill }]}
+                    >
+                      <MaterialIcons name="close" size={16} color={t.neutral.text} />
+                      <Text style={{ color: t.neutral.text, fontWeight: "700" }}>Remove</Text>
+                    </PressableScale>
+                  ) : null}
+                </View>
+
+                <View style={styles.modalActionsRow}>
+                  <PressableScale
+                    onPress={() => speakText(selected.text)}
+                    style={[styles.pillBtnGhost, { borderColor: t.neutral.border, borderRadius: t.radii.pill }]}
+                  >
+                    <MaterialIcons name="volume-up" size={16} color={t.neutral.text} />
+                    <Text style={{ color: t.neutral.text, fontWeight: "700" }}>Listen</Text>
+                  </PressableScale>
+                  <PressableScale
+                    onPress={onSaveTerm}
+                    disabled={saving}
+                    style={[styles.pillBtn, { backgroundColor: t.palette.primary, borderRadius: t.radii.pill }]}
+                  >
+                    <MaterialIcons name="add" size={16} color={t.palette.onPrimary} />
+                    <Text style={{ color: t.palette.onPrimary, fontWeight: "700" }}>
+                      {saving ? "Saving…" : "Save to deck"}
+                    </Text>
+                  </PressableScale>
+                </View>
+              </>
+            )}
+          </ScrollView>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
 /** Tappable option / token chip with result-aware coloring. */
 function TapChip({
   label,
@@ -101,9 +373,13 @@ function TapChip({
 export default function GrammarUnitScreen() {
   const { unitKey } = useLocalSearchParams<{ unitKey: string }>();
   const t = useTokens();
+  const tabBarHeight = useFloatingTabBarHeight();
+  const queryClient = useQueryClient();
   const [highlights, setHighlights] = useState<Highlight[]>([]);
-  const [selectedWord, setSelectedWord] = useState<string | null>(null);
+  const [selected, setSelected] = useState<VocabSelection | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
+  const [clearing, setClearing] = useState(false);
+  const [snack, setSnack] = useState<string | null>(null);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.grammar.unit(unitKey!),
@@ -121,27 +397,85 @@ export default function GrammarUnitScreen() {
       return unwrap<{ highlights: Highlight[] }>(res);
     },
     onSuccess: (res) => setHighlights(res.highlights ?? []),
+    onError: () => setSnack("Could not update highlight."),
   });
+
+  const saveTermMutation = useMutation({
+    mutationFn: async () => {
+      if (!selected?.fields) return;
+      const payload: Term = {
+        name: selected.text,
+        meaning: selected.fields.definition || "",
+        ...selected.fields,
+        ai_filled: true,
+      };
+      return unwrap(await termApi.addToDefaultDeck(payload));
+    },
+    onSuccess: () => {
+      setSnack(`"${selected?.text}" saved to your default deck.`);
+      setSelected(null);
+    },
+    onError: () => setSnack("Could not save term."),
+  });
+
+  const isHighlighted = (text: string) =>
+    highlights.some((h) => (h.text || "").toLowerCase() === (text || "").toLowerCase());
+
+  const openVocab = async (rawText: string) => {
+    const text = (rawText || "").trim();
+    if (!text || text.length < 2 || text.length > 80) return;
+    setNoteDraft("");
+    setSelected({ text, loading: true });
+    try {
+      const fields = unwrap<Partial<Term>>(await termApi.aiEnrich(text, ""));
+      setSelected((prev) => (prev && prev.text === text ? { ...prev, loading: false, fields } : prev));
+    } catch {
+      setSelected((prev) =>
+        prev && prev.text === text ? { ...prev, loading: false, error: "Couldn't load. Tap retry." } : prev
+      );
+    }
+  };
+
+  const toggleHighlight = (remove = false) => {
+    if (!selected?.text) return;
+    highlightMutation.mutate({ text: selected.text, note: noteDraft, remove });
+    if (remove) setSelected(null);
+  };
+
+  const handleClearResults = () => {
+    if (!unitKey || clearing) return;
+    Alert.alert("Clear results?", "This resets progress and answers for every exercise in this unit.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Clear",
+        style: "destructive",
+        onPress: async () => {
+          setClearing(true);
+          try {
+            unwrap(await grammarApi.clearUnitProgress(unitKey));
+            await queryClient.invalidateQueries({ queryKey: ["grammar"] });
+            setSnack("Lesson results cleared.");
+          } catch {
+            setSnack("Could not clear results.");
+          } finally {
+            setClearing(false);
+          }
+        },
+      },
+    ]);
+  };
 
   if (isLoading) return <LoadingView />;
   if (isError) return <ErrorView message="Could not load unit" onRetry={() => refetch()} />;
 
   const exercises = data?.exercises ?? [];
   const blocks = data?.explanation ?? [];
-  const plainExplanation = blocks
-    .map((b) => [stripHtml(b.html), ...(b.examples ?? [])].filter(Boolean).join(" "))
-    .join(" ")
-    .trim();
-
-  const saveHighlight = () => {
-    if (!selectedWord) return;
-    highlightMutation.mutate({ text: selectedWord, note: noteDraft });
-    setSelectedWord(null);
-    setNoteDraft("");
-  };
+  const hasResults = exercises.some(
+    (e: any) => e.progress?.status === "completed" || (e.progress?.best_score || 0) > 0
+  );
 
   return (
-    <ScrollView style={{ backgroundColor: t.neutral.bg }} contentContainerStyle={styles.pad} showsVerticalScrollIndicator={false}>
+    <ScrollView style={{ backgroundColor: t.neutral.bg }} contentContainerStyle={[styles.pad, { paddingBottom: tabBarHeight }]} showsVerticalScrollIndicator={false}>
       <FadeSlideIn>
         <View style={styles.brandRow}>
           <FeatureTile icon="spellcheck" size={46} variant="solid" />
@@ -154,9 +488,14 @@ export default function GrammarUnitScreen() {
       {blocks.length > 0 ? (
         <FadeSlideIn delay={50} style={{ marginTop: 16 }}>
           <AppCard>
-            <Text variant="titleMedium" style={{ color: t.neutral.text, fontWeight: "800" }}>
-              Grammar
-            </Text>
+            <View style={styles.explainHead}>
+              <Text variant="titleMedium" style={{ color: t.neutral.text, fontWeight: "800" }}>
+                Grammar
+              </Text>
+              <Text style={{ color: t.neutral.textMuted, fontSize: 12, flex: 1, textAlign: "right" }}>
+                Tap any word to look it up
+              </Text>
+            </View>
             {blocks.map((block, i) => {
               const body = stripHtml(block.html);
               return (
@@ -167,14 +506,25 @@ export default function GrammarUnitScreen() {
                     </Text>
                   ) : null}
                   {body ? (
-                    <Text variant="bodyMedium" style={{ color: t.neutral.textMinor, marginTop: 2, lineHeight: 21 }}>
-                      {body}
-                    </Text>
+                    <TappableText
+                      text={body}
+                      highlights={highlights}
+                      onWordPress={openVocab}
+                      style={{ color: t.neutral.textMinor, marginTop: 2, lineHeight: 22, fontSize: 15 }}
+                      t={t}
+                    />
                   ) : null}
                   {(block.examples ?? []).map((ex, k) => (
-                    <Text key={k} style={{ color: t.neutral.text, marginTop: 4, marginLeft: 8 }}>
-                      • {ex}
-                    </Text>
+                    <View key={k} style={{ flexDirection: "row", marginTop: 6, marginLeft: 4 }}>
+                      <Text style={{ color: t.neutral.text }}>• </Text>
+                      <TappableText
+                        text={ex}
+                        highlights={highlights}
+                        onWordPress={openVocab}
+                        style={{ color: t.neutral.text, lineHeight: 21, flex: 1 }}
+                        t={t}
+                      />
+                    </View>
                   ))}
                 </View>
               );
@@ -188,7 +538,7 @@ export default function GrammarUnitScreen() {
           {highlights.map((h) => (
             <PressableScale
               key={h.text}
-              onPress={() => { setSelectedWord(h.text); setNoteDraft(h.note ?? ""); }}
+              onPress={() => openVocab(h.text)}
               style={[styles.wordChip, { backgroundColor: t.feature("spellcheck").tint, borderRadius: t.radii.pill }]}
             >
               <Text style={{ color: t.feature("spellcheck").fg, fontWeight: "700", fontSize: 13 }}>{h.text}</Text>
@@ -204,9 +554,23 @@ export default function GrammarUnitScreen() {
       ) : null}
 
       {exercises.length > 0 ? (
-        <Text variant="titleMedium" style={{ color: t.neutral.text, fontWeight: "800", marginTop: 22 }}>
-          Practice
-        </Text>
+        <View style={styles.practiceHead}>
+          <Text variant="titleMedium" style={{ color: t.neutral.text, fontWeight: "800" }}>
+            Practice
+          </Text>
+          {hasResults ? (
+            <PressableScale
+              onPress={handleClearResults}
+              disabled={clearing}
+              style={[styles.pillBtnGhost, { borderColor: t.neutral.border, borderRadius: t.radii.pill }]}
+            >
+              <MaterialIcons name="refresh" size={16} color={t.neutral.textMinor} />
+              <Text style={{ color: t.neutral.textMinor, fontWeight: "700" }}>
+                {clearing ? "Clearing…" : "Clear results"}
+              </Text>
+            </PressableScale>
+          ) : null}
+        </View>
       ) : null}
 
       {exercises.map((exercise, i) => (
@@ -215,32 +579,22 @@ export default function GrammarUnitScreen() {
         </FadeSlideIn>
       ))}
 
-      {plainExplanation ? (
-        <PressableScale
-          onPress={() => {
-            const word = plainExplanation.split(/\s+/).find((w) => w.replace(/[^\w'-]/g, "").length > 4) ?? "";
-            const clean = word.replace(/[^\w'-]/g, "");
-            if (clean) {
-              setSelectedWord(clean);
-              setNoteDraft("");
-            }
-          }}
-          hitSlop={8}
-          style={{ alignSelf: "center", marginTop: 16 }}
-        >
-          <Text style={{ color: t.palette.primary, fontWeight: "700" }}>Highlight a word from the explanation</Text>
-        </PressableScale>
-      ) : null}
+      <VocabModal
+        selected={selected}
+        isHighlighted={isHighlighted}
+        noteDraft={noteDraft}
+        onNoteChange={setNoteDraft}
+        onClose={() => setSelected(null)}
+        onRetry={() => selected && openVocab(selected.text)}
+        onToggleHighlight={toggleHighlight}
+        onSaveTerm={() => saveTermMutation.mutate()}
+        saving={saveTermMutation.isPending}
+        t={t}
+      />
 
-      {selectedWord ? (
-        <AppCard style={{ marginTop: 14 }}>
-          <Text variant="labelLarge" style={{ color: t.neutral.text, fontWeight: "700" }}>
-            Highlight “{selectedWord}”
-          </Text>
-          <TextInput mode="outlined" value={noteDraft} onChangeText={setNoteDraft} multiline outlineStyle={{ borderRadius: t.radii.md }} style={[styles.input, { marginTop: 8 }]} />
-          <GradientButton label="Save" onPress={saveHighlight} loading={highlightMutation.isPending} style={{ marginTop: 10 }} />
-        </AppCard>
-      ) : null}
+      <Snackbar visible={!!snack} onDismiss={() => setSnack(null)} duration={3000}>
+        {snack}
+      </Snackbar>
     </ScrollView>
   );
 }
@@ -585,4 +939,31 @@ const styles = StyleSheet.create({
     minHeight: 52,
     alignItems: "center",
   },
+  explainHead: { flexDirection: "row", alignItems: "center", gap: 8 },
+  practiceHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 22 },
+  modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" },
+  modalCard: { maxHeight: "82%", padding: 20, paddingBottom: 28 },
+  modalHead: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
+  modalBody: { marginTop: 14 },
+  modalLoading: { alignItems: "center", paddingVertical: 20 },
+  modalGrid: { flexDirection: "row", gap: 16, marginTop: 12 },
+  modalActionsRow: { flexDirection: "row", gap: 10, marginTop: 14, flexWrap: "wrap" },
+  pillBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 11,
+  },
+  pillBtnGhost: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderWidth: 1.5,
+  },
+  retryBtn: { marginTop: 10, paddingHorizontal: 16, paddingVertical: 9, borderWidth: 1.5, alignSelf: "center" },
 });

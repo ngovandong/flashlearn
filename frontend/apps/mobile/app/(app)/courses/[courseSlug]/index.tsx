@@ -10,6 +10,7 @@ import { ErrorView } from "@/components/ErrorView";
 import { ScreenSkeleton } from "@/components/ScreenSkeleton";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
 import { NavCard } from "@/components/ui/NavCard";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
 import { useTokens } from "@/theme/tokens";
@@ -20,6 +21,7 @@ export default function CourseDetailScreen() {
   const { courseSlug } = useLocalSearchParams<{ courseSlug: string }>();
   const t = useTokens();
   const router = useRouter();
+  const tabBarHeight = useFloatingTabBarHeight();
 
   const { data: course, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.courses.detail(courseSlug!),
@@ -42,7 +44,7 @@ export default function CourseDetailScreen() {
       <FlatList
         data={lessons}
         keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: tabBarHeight }]}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <FadeSlideIn style={styles.header}>

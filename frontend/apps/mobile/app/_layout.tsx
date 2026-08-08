@@ -10,8 +10,11 @@ import { store } from "@/store";
 import { queryClient } from "@/query/queryClient";
 import { AppThemeProvider } from "@/theme/ThemeProvider";
 import { AuthGate } from "@/components/AuthGate";
+import { initSentry, Sentry } from "@/config/sentry";
 
-export default function RootLayout() {
+initSentry();
+
+function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ReduxProvider store={store}>
@@ -29,3 +32,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default Sentry.wrap(RootLayout);

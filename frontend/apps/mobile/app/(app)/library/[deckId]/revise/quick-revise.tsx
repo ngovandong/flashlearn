@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { Modal, Portal, Text } from "react-native-paper";
+import { Modal, Portal, Snackbar, Text } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { QuickReviseQuestion } from "@flashlearn/core";
@@ -27,6 +27,7 @@ export default function QuickReviseScreen() {
   const [disabled, setDisabled] = useState(false);
   const [gameOver, setGameOver] = useState<{ reason: string; answer?: string; finalScore?: number } | null>(null);
   const [finished, setFinished] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleMessage = (msg: WsMessage) => {
     if (msg.type === "new_question") {
@@ -42,6 +43,9 @@ export default function QuickReviseScreen() {
     } else if (msg.type === "finished") {
       setFinished(true);
       setScore(msg.score);
+    } else if (msg.type === "error") {
+      setErrorMessage(msg.message);
+      setTimeout(() => router.back(), 1500);
     }
   };
 
@@ -125,6 +129,10 @@ export default function QuickReviseScreen() {
           <GradientButton label="Done" onPress={() => router.back()} style={styles.modalBtn} />
         </Modal>
       </Portal>
+
+      <Snackbar visible={!!errorMessage} onDismiss={() => setErrorMessage(null)} duration={1500}>
+        {errorMessage}
+      </Snackbar>
     </View>
   );
 }

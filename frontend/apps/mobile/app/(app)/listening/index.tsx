@@ -12,6 +12,7 @@ import { ScreenSkeleton } from "@/components/ScreenSkeleton";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
 import { NavCard } from "@/components/ui/NavCard";
 import { PillTabs } from "@/components/ui/PillTabs";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
 import { useTokens } from "@/theme/tokens";
@@ -20,6 +21,7 @@ export default function ListeningScreen() {
   const t = useTokens();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useFloatingTabBarHeight();
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.listening.topics,
@@ -34,7 +36,7 @@ export default function ListeningScreen() {
       <FlatList
         data={data ?? []}
         keyExtractor={(item) => item.slug}
-        contentContainerStyle={[styles.list, { paddingTop: insets.top + 12 }]}
+        contentContainerStyle={[styles.list, { paddingTop: insets.top + 12, paddingBottom: tabBarHeight }]}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <FadeSlideIn style={styles.header}>

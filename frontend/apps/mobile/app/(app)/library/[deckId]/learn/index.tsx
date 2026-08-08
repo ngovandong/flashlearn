@@ -74,6 +74,14 @@ export default function LearnScreen() {
   }, [termsQuery.data, page]);
 
   const current = terms[order[pos]];
+
+  // Register the view for progress tracking (matches web's Learn page, which
+  // calls `learningService.create` every time the current card changes).
+  useEffect(() => {
+    if (current?.id) learningApi.create({ term_id: current.id });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current?.id]);
+
   const total = (deckQuery.data as { number_of_term?: number })?.number_of_term ?? terms.length;
   const isStarred = current?.id ? starred.has(current.id) : false;
 

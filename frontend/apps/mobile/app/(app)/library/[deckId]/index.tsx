@@ -1,9 +1,9 @@
-import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import { Text } from "react-native-paper";
+import React, { useState } from "react";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { Menu, Snackbar, Text } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { DeckDetail } from "@flashlearn/core";
 import { deckApi } from "@/api/services";
 import { ErrorView } from "@/components/ErrorView";
@@ -14,6 +14,7 @@ import { AppCard } from "@/components/ui/AppCard";
 import { FeatureTile } from "@/components/ui/FeatureTile";
 import { ProgressRing } from "@/components/ui/ProgressRing";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
 import { useTokens, type Tokens } from "@/theme/tokens";
@@ -79,12 +80,66 @@ function StatRow({ label, value, color, t }: { label: string; value: number; col
 export default function DeckDetailScreen() {
   const { deckId } = useLocalSearchParams<{ deckId: string }>();
   const t = useTokens();
+  const tabBarHeight = useFloatingTabBarHeight();
   const router = useRouter();
+  const qc = useQueryClient();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [snack, setSnack] = useState<string | null>(null);
 
   const { data: deck, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.decks.detail(deckId!),
     queryFn: async () => unwrap<DeckDetail>(await deckApi.retrieve(deckId!)),
     enabled: !!deckId,
+  });
+
+  const invalidateAll = () => {
+    qc.invalidateQueries({ queryKey: queryKeys.decks.detail(deckId!) });
+    qc.invalidateQueries({ queryKey: ["decks"] });
+  };
+
+  const joinMutation = useMutation({
+    mutationFn: async () => unwrap(await deckApi.joinDeck(deckId!)),
+    onSuccess: () => {
+      setSnack("Joined deck");
+      invalidateAll();
+    },
+    onError: (e: Error) => setSnack(e.message),
+  });
+
+  const cloneMutation = useMutation({
+    mutationFn: async () => unwrap<DeckDetail>(await deckApi.cloneDeck(deckId!)),
+    onSuccess: (cloned) => {
+      invalidateAll();
+      router.replace(`/library/${cloned.id}`);
+    },
+    onError: (e: Error) => setSnack(e.message),
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: async () => unwrap(await deckApi.clearLearningProgress(deckId!)),
+    onSuccess: () => {
+      setSnack("Learning progress reset");
+      invalidateAll();
+    },
+    onError: (e: Error) => setSnack(e.message),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => unwrap(await deckApi.delete(deckId!)),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["decks"] });
+      router.replace("/library");
+    },
+    onError: (e: Error) => setSnack(e.message),
+  });
+
+  const leaveMutation = useMutation({
+    mutationFn: async () => unwrap(await deckApi.leaveDeck(deckId!)),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["decks"] });
+      router.replace("/library");
+    },
+    onError: (e: Error) => setSnack(e.message),
   });
 
   if (isLoading) return <ScreenSkeleton rows={4} />;
@@ -110,7 +165,7 @@ export default function DeckDetailScreen() {
   return (
     <ScrollView
       style={{ backgroundColor: t.neutral.bg }}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight }]}
       showsVerticalScrollIndicator={false}
     >
       <FadeSlideIn>
@@ -177,7 +232,7 @@ export default function DeckDetailScreen() {
         </>
       ) : null}
 
-      {canEdit || isOwner ? (
+      {deck.my_permission ? (
         <FadeSlideIn delay={400} style={styles.secondary}>
           {canEdit ? (
             <PressableScale
@@ -201,8 +256,75 @@ export default function DeckDetailScreen() {
               </Text>
             </PressableScale>
           ) : null}
+          <Menu
+            visible={menuOpen}
+            onDismiss={() => setMenuOpen(false)}
+            anchor={
+              <PressableScale
+                style={[styles.moreBtn, { borderColor: t.neutral.border, backgroundColor: t.neutral.surface }]}
+                onPress={() => setMenuOpen(true)}
+              >
+                <MaterialIcons name="more-horiz" size={20} color={t.neutral.textMinor} />
+              </PressableScale>
+            }
+          >
+            <Menu.Item
+              leadingIcon="restart"
+              title="Reset progress"
+              onPress={() => {
+                setMenuOpen(false);
+                resetMutation.mutate();
+              }}
+            />
+            <Menu.Item
+              leadingIcon="delete-outline"
+              title={isOwner ? "Delete deck" : "Remove deck"}
+              onPress={() => {
+                setMenuOpen(false);
+                Alert.alert(
+                  isOwner ? "Delete this deck?" : "Remove this deck?",
+                  isOwner
+                    ? "This permanently deletes the deck and all of its terms. This can't be undone."
+                    : "This removes the deck from your library. You can join it again later.",
+                  [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                      text: isOwner ? "Delete" : "Remove",
+                      style: "destructive",
+                      onPress: () => (isOwner ? deleteMutation.mutate() : leaveMutation.mutate()),
+                    },
+                  ]
+                );
+              }}
+            />
+          </Menu>
         </FadeSlideIn>
-      ) : null}
+      ) : (
+        <FadeSlideIn delay={400} style={styles.secondary}>
+          <PressableScale
+            style={[styles.secondaryBtn, { borderColor: t.neutral.border, backgroundColor: t.neutral.surface }]}
+            onPress={() => joinMutation.mutate()}
+          >
+            <MaterialIcons name="add-circle-outline" size={18} color={t.palette.primary} />
+            <Text variant="labelLarge" style={{ color: t.palette.primary, fontWeight: "700" }}>
+              Join deck
+            </Text>
+          </PressableScale>
+          <PressableScale
+            style={[styles.secondaryBtn, { borderColor: t.neutral.border, backgroundColor: t.neutral.surface }]}
+            onPress={() => cloneMutation.mutate()}
+          >
+            <MaterialIcons name="content-copy" size={18} color={t.palette.primary} />
+            <Text variant="labelLarge" style={{ color: t.palette.primary, fontWeight: "700" }}>
+              Clone deck
+            </Text>
+          </PressableScale>
+        </FadeSlideIn>
+      )}
+
+      <Snackbar visible={!!snack} onDismiss={() => setSnack(null)} duration={3000}>
+        {snack}
+      </Snackbar>
     </ScrollView>
   );
 }
@@ -238,6 +360,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     height: 48,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  moreBtn: {
+    width: 48,
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 14,
     borderWidth: 1,
   },

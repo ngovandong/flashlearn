@@ -9,4 +9,12 @@ export const ENV = {
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? "",
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? "",
   },
+  cloudinary: {
+    cloudName: process.env.EXPO_PUBLIC_CLOUD_NAME ?? "",
+    uploadPreset: process.env.EXPO_PUBLIC_UPLOAD_PRESET ?? "",
+  },
+  sentry: {
+    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN ?? "",
+    environment: process.env.EXPO_PUBLIC_ENVIRONMENT ?? (__DEV__ ? "development" : "production"),
+  },
 };

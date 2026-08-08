@@ -4,6 +4,7 @@ import { Text } from "react-native-paper";
 import { BlurView } from "expo-blur";
 import { MaterialIcons } from "@expo/vector-icons";
 import type { BottomTabBarProps } from "expo-router/js-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { motion, useTokens } from "@/theme/tokens";
 
 const AnimatedIcon = Animated.createAnimatedComponent(MaterialIcons);
@@ -11,6 +12,25 @@ const AnimatedIcon = Animated.createAnimatedComponent(MaterialIcons);
 type IconName = React.ComponentProps<typeof MaterialIcons>["name"];
 
 const BAR_RADIUS = 30;
+
+/**
+ * Height of the pill itself (row vertical padding + tab vertical padding +
+ * icon + label), excluding the safe-area inset and the host's extra gap.
+ * Keep in sync with `styles.row` / `styles.tab` below.
+ */
+const BAR_CONTENT_HEIGHT = 70;
+/** Extra breathing room between scrollable content and the floating bar. */
+const CONTENT_GAP = 16;
+
+/**
+ * Total space screens should reserve at the bottom (e.g. as
+ * `contentContainerStyle.paddingBottom`) so content isn't hidden behind the
+ * floating tab bar. Mirrors `host`'s `paddingBottom: insets.bottom + 10`.
+ */
+export function useFloatingTabBarHeight() {
+  const insets = useSafeAreaInsets();
+  return insets.bottom + 10 + BAR_CONTENT_HEIGHT + CONTENT_GAP;
+}
 
 /** The primary destinations shown in the floating bar, in display order. */
 const TABS: { name: string; label: string; icon: IconName }[] = [
@@ -47,12 +67,19 @@ export function FloatingTabBar({ state, navigation, insets }: BottomTabBarProps)
           styles.bar,
           t.shadowStrong,
           {
-            backgroundColor: surface,
             borderColor: border,
+            // Re-assert after `t.shadowStrong` (elevation: 8), which would
+            // otherwise win the style-array merge and undercut this value.
+            ...Platform.select({ android: { elevation: 14 }, default: {} }),
           },
         ]}
       >
-        <View style={[styles.clip, { borderRadius: BAR_RADIUS }]}>
+        {/* Translucent fill lives on this clipped child, not on `bar`. On
+            Android, pairing `elevation` with a partially-transparent
+            backgroundColor on the same view forces an opaque compositing
+            plate for the shadow layer, which shows through as a mismatched
+            rectangle wherever child content doesn't fully cover it. */}
+        <View style={[styles.clip, { borderRadius: BAR_RADIUS, backgroundColor: surface }]}>
           {glass ? (
             <>
               <BlurView
@@ -130,7 +157,6 @@ function TabButton({ focused, label, icon, onPress }: TabButtonProps) {
       accessibilityState={{ selected: focused }}
       accessibilityLabel={label}
       style={styles.tab}
-      android_ripple={{ color: t.primaryAlpha(0.12), borderless: true, radius: 44 }}
     >
       <Animated.View
         style={[
@@ -163,6 +189,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     paddingHorizontal: 16,
     alignItems: "center",
+    zIndex: 20,
+    // Must exceed any scrollable content's elevation (cards use up to 8 via
+    // `shadowStrong`), or Android may paint that content over this pill.
+    ...Platform.select({ android: { elevation: 20 }, default: {} }),
   },
   bar: {
     width: "100%",

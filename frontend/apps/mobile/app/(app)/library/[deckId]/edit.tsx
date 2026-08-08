@@ -1,13 +1,15 @@
 import React, { useState } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { Switch, Text, TextInput } from "react-native-paper";
+import { Alert, Image, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Snackbar, Switch, Text, TextInput } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { DeckDetail, Term } from "@flashlearn/core";
 import { resolveImageUrl } from "@flashlearn/core";
 import { deckApi, imageApi, termApi, translateApi } from "@/api/services";
+import { uploadImageToCloudinary } from "@/utils/cloudinaryUpload";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
@@ -69,7 +71,9 @@ export default function EditDeckScreen() {
   const [draft, setDraft] = useState<DraftTerm>(EMPTY_DRAFT);
   const [imageResults, setImageResults] = useState<string[]>([]);
   const [imageLoading, setImageLoading] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [snack, setSnack] = useState<string | null>(null);
   const [bulkText, setBulkText] = useState("");
   const [terms, setTerms] = useState<Term[]>([]);
 
@@ -107,6 +111,8 @@ export default function EditDeckScreen() {
   const refreshDeck = () => {
     termsQuery.refetch();
     qc.invalidateQueries({ queryKey: queryKeys.decks.detail(deckId!) });
+    // Term count shown on the library cards / deck-detail hub needs a refresh too.
+    qc.invalidateQueries({ queryKey: ["decks"] });
   };
 
   const saveSettingsMutation = useMutation({
@@ -116,6 +122,7 @@ export default function EditDeckScreen() {
       setSettingsSaved(true);
       setTimeout(() => setSettingsSaved(false), 2000);
       qc.invalidateQueries({ queryKey: queryKeys.decks.detail(deckId!) });
+      qc.invalidateQueries({ queryKey: ["decks"] });
     },
   });
 
@@ -143,7 +150,23 @@ export default function EditDeckScreen() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => termApi.delete(id),
     onSuccess: refreshDeck,
+    onError: () => setSnack("Couldn't delete the term. Please try again."),
   });
+
+  const confirmDeleteTerm = (id: string, name?: string) => {
+    if (terms.length <= 4) {
+      setSnack("A deck needs at least 4 terms — add more before removing this one.");
+      return;
+    }
+    Alert.alert(
+      "Delete term?",
+      name ? `"${name}" will be permanently removed from this deck.` : "This term will be permanently removed from this deck.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: () => deleteMutation.mutate(id) },
+      ]
+    );
+  };
 
   const translate = async () => {
     if (!draft.name.trim()) return;
@@ -161,6 +184,31 @@ export default function EditDeckScreen() {
       if (urls[0]) setDraft((d) => ({ ...d, image: urls[0] }));
     } finally {
       setImageLoading(false);
+    }
+  };
+
+  const pickAndUploadImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      setSnack("Photo library access is required to upload an image.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      quality: 0.8,
+    });
+    if (result.canceled || !result.assets?.[0]) return;
+
+    const asset = result.assets[0];
+    setImageUploading(true);
+    try {
+      const url = await uploadImageToCloudinary(asset.uri);
+      setDraft((d) => ({ ...d, image: url }));
+    } catch (error) {
+      setSnack("Image upload failed. Please try again.");
+    } finally {
+      setImageUploading(false);
     }
   };
 
@@ -306,6 +354,7 @@ export default function EditDeckScreen() {
                   <ActionChip label="Translate" icon="translate" onPress={translate} t={t} disabled={!draft.name.trim()} />
                   <ActionChip label={draft.ai_filled ? "AI filled" : "AI fill"} icon="auto-fix-high" onPress={aiFill} loading={aiLoading} disabled={!draft.name.trim()} t={t} />
                   <ActionChip label="Find image" icon="image-search" onPress={searchImage} loading={imageLoading} disabled={!draft.name.trim()} t={t} />
+                  <ActionChip label="Upload photo" icon="upload" onPress={pickAndUploadImage} loading={imageUploading} disabled={imageUploading} t={t} />
                 </View>
                 <GradientButton
                   label="Add term"
@@ -360,7 +409,7 @@ export default function EditDeckScreen() {
                       {item.meaning}
                     </Text>
                   </View>
-                  <PressableScale onPress={() => item.id && deleteMutation.mutate(item.id)} hitSlop={8} style={styles.deleteBtn}>
+                  <PressableScale onPress={() => item.id && confirmDeleteTerm(item.id, item.name)} hitSlop={8} style={styles.deleteBtn}>
                     <MaterialIcons name="delete-outline" size={22} color={t.neutral.textMuted} />
                   </PressableScale>
                 </View>
@@ -373,6 +422,10 @@ export default function EditDeckScreen() {
       <View style={[styles.footer, { backgroundColor: t.neutral.surface, borderTopColor: t.neutral.border, paddingBottom: insets.bottom + 72 }]}>
         <GradientButton label="Done" icon="check" onPress={() => router.back()} />
       </View>
+
+      <Snackbar visible={!!snack} onDismiss={() => setSnack(null)} duration={3000}>
+        {snack}
+      </Snackbar>
     </View>
   );
 }

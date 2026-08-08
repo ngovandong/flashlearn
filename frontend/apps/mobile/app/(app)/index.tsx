@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Snackbar, Text } from "react-native-paper";
 import { useRouter } from "expo-router";
@@ -12,18 +12,37 @@ import { DeckCard } from "@/components/DeckCard";
 import { ReminderList, ReminderListSkeleton } from "@/components/ReminderList";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { AppCard } from "@/components/ui/AppCard";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
 import { motion, useTokens } from "@/theme/tokens";
 
 export default function HomeScreen() {
   const t = useTokens();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useFloatingTabBarHeight();
   const user = useAppSelector(selectUser);
-  const { data: reminders, isLoading: remindersLoading } = useReminders();
-  const { data: latestDecks } = useLatestDecks();
+  const {
+    data: reminders,
+    isLoading: remindersLoading,
+    error: remindersError,
+  } = useReminders();
+  const {
+    data: latestDecks,
+    isLoading: decksLoading,
+    error: decksError,
+  } = useLatestDecks();
   const [snack, setSnack] = useState<string | null>(null);
 
   const greetingName = user?.name || user?.first_name || "there";
+
+  // Surface query failures the same way the web dashboard does (an error
+  // snackbar) instead of silently showing an empty section.
+  useEffect(() => {
+    const message = (decksError as Error)?.message || (remindersError as Error)?.message;
+    if (message) setSnack(message);
+  }, [decksError, remindersError]);
 
   const onReminderPress = (reminder: Reminder) => {
     const nativePath = mapReminderRoute(reminder.route);
@@ -38,7 +57,7 @@ export default function HomeScreen() {
   return (
     <View style={[styles.flex, { backgroundColor: t.neutral.bg }]}>
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 12, paddingBottom: tabBarHeight }]}
         showsVerticalScrollIndicator={false}
       >
         <FadeSlideIn>
@@ -66,7 +85,7 @@ export default function HomeScreen() {
           )}
         </FadeSlideIn>
 
-        {latestDecks && latestDecks.length > 0 ? (
+        {decksLoading || (latestDecks && latestDecks.length > 0) ? (
           <View style={styles.section}>
             <FadeSlideIn delay={180}>
               <SectionHeader
@@ -75,16 +94,32 @@ export default function HomeScreen() {
                 onAction={() => router.push("/library")}
               />
             </FadeSlideIn>
-            <View style={{ gap: 12 }}>
-              {latestDecks.slice(0, 4).map((deck, i) => (
-                <FadeSlideIn key={deck.id} delay={220 + i * motion.stagger.list}>
-                  <DeckCard
-                    deck={deck}
-                    onPress={() => router.push(`/library/${deck.id}`)}
-                  />
-                </FadeSlideIn>
-              ))}
-            </View>
+            {decksLoading ? (
+              <View style={{ gap: 12 }}>
+                {[0, 1].map((i) => (
+                  <AppCard key={i}>
+                    <View style={styles.deckSkeletonRow}>
+                      <Skeleton width={48} height={48} radius={14} />
+                      <View style={{ flex: 1, gap: 6 }}>
+                        <Skeleton width="60%" height={16} />
+                        <Skeleton width="40%" height={12} />
+                      </View>
+                    </View>
+                  </AppCard>
+                ))}
+              </View>
+            ) : (
+              <View style={{ gap: 12 }}>
+                {(latestDecks ?? []).slice(0, 4).map((deck, i) => (
+                  <FadeSlideIn key={deck.id} delay={220 + i * motion.stagger.list}>
+                    <DeckCard
+                      deck={deck}
+                      onPress={() => router.push(`/library/${deck.id}`)}
+                    />
+                  </FadeSlideIn>
+                ))}
+              </View>
+            )}
           </View>
         ) : null}
       </ScrollView>
@@ -100,4 +135,5 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { padding: 16, paddingBottom: 110, gap: 8 },
   section: { gap: 12, marginTop: 8 },
+  deckSkeletonRow: { flexDirection: "row", alignItems: "center", gap: 12 },
 });

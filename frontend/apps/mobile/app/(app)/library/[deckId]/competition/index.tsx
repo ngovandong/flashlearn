@@ -8,6 +8,7 @@ import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
 import { AppCard } from "@/components/ui/AppCard";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
 import { competitionApi } from "@/api/services";
 import { unwrap } from "@/utils/apiError";
 import { useCompetitionPool } from "@/features/competition/useCompetitionPool";
@@ -25,6 +26,7 @@ import { useTokens } from "@/theme/tokens";
 export default function CompetitionHub() {
   const { deckId } = useLocalSearchParams<{ deckId: string }>();
   const t = useTokens();
+  const tabBarHeight = useFloatingTabBarHeight();
   const router = useRouter();
   const { data, isLoading, isError, refetch } = useCompetitionPool(deckId!);
   const [board, setBoard] = useState<{
@@ -54,7 +56,7 @@ export default function CompetitionHub() {
   return (
     <ScrollView
       style={{ backgroundColor: t.neutral.bg }}
-      contentContainerStyle={styles.pad}
+      contentContainerStyle={[styles.pad, { paddingBottom: tabBarHeight }]}
       showsVerticalScrollIndicator={false}
     >
       <Text variant="bodyMedium" style={{ color: t.neutral.textMinor, marginBottom: 14 }}>
