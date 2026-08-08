@@ -15,6 +15,7 @@ import {
 } from "@/store/authSlice";
 import { useGoogleSignIn } from "@/auth/googleAuth";
 import { nativeAuthApi } from "@/auth/nativeAuthApi";
+import { Sentry } from "@/config/sentry";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
 import { PressableScale } from "@/components/PressableScale";
 import { FeatureTile } from "@/components/ui/FeatureTile";
@@ -45,6 +46,7 @@ export default function LoginScreen() {
       const result = await googleSignIn();
       if (result.status === "cancelled") return;
       if (result.status === "error") {
+        Sentry.captureMessage(`Google sign-in failed: ${result.message}`);
         dispatch(setError(result.message));
         return;
       }
@@ -52,8 +54,13 @@ export default function LoginScreen() {
       if (!res?.error && res?.data) {
         dispatch(setToken(res.data));
       } else {
-        dispatch(setError(getFirstError(res?.error) || "Google login failed."));
+        const message = getFirstError(res?.error) || "Google login failed.";
+        Sentry.captureMessage(`Google init failed: ${message}`, { tags: { authContext: "google-init" } });
+        dispatch(setError(message));
       }
+    } catch (error) {
+      Sentry.captureException(error, { tags: { authContext: "google-login" } });
+      dispatch(setError("Google login failed."));
     } finally {
       setGoogleLoading(false);
     }

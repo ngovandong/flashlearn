@@ -10,6 +10,9 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import "./styles/sass/index.scss";
 import { AppThemeProvider } from "./app/themeContext";
 import { applyTheme, readStoredTheme } from "./utils/themeController";
+import { initSentry, Sentry } from "./config/sentry";
+
+initSentry();
 
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -32,15 +35,17 @@ applyTheme(storedTheme.mode, storedTheme.palette, storedTheme.surface);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <Provider store={store}>
-    <QueryClientProvider client={queryClient}>
-      <AppThemeProvider>
-        <GoogleOAuthProvider clientId={clientId}>
-          <App />
-        </GoogleOAuthProvider>
-      </AppThemeProvider>
-    </QueryClientProvider>
-  </Provider>
+  <Sentry.ErrorBoundary fallback={<p>Something went wrong. Please reload the page.</p>}>
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <AppThemeProvider>
+          <GoogleOAuthProvider clientId={clientId}>
+            <App />
+          </GoogleOAuthProvider>
+        </AppThemeProvider>
+      </QueryClientProvider>
+    </Provider>
+  </Sentry.ErrorBoundary>
 );
 
 // If you want to start measuring performance in your app, pass a function

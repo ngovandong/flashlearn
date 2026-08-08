@@ -1,16 +1,16 @@
-# Graph Report - flashlearn  (2026-07-25)
+# Graph Report - flashlearn  (2026-08-08)
 
 ## Corpus Check
-- 36086 files · ~26,691,134 words
+- 36223 files · ~26,847,958 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 29600 nodes · 38004 edges · 11935 communities (10695 shown, 1240 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 630 edges (avg confidence: 0.5)
+- 29856 nodes · 38425 edges · 11918 communities (10678 shown, 1240 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 631 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `73e44cdf`
+- Built from commit: `2cf673ef`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -108,6 +108,7 @@
 - [[_COMMUNITY_Community 92|Community 92]]
 - [[_COMMUNITY_Community 93|Community 93]]
 - [[_COMMUNITY_Community 94|Community 94]]
+- [[_COMMUNITY_Community 95|Community 95]]
 - [[_COMMUNITY_Community 96|Community 96]]
 - [[_COMMUNITY_Community 97|Community 97]]
 - [[_COMMUNITY_Community 98|Community 98]]
@@ -1007,6 +1008,7 @@
 - [[_COMMUNITY_Community 994|Community 994]]
 - [[_COMMUNITY_Community 995|Community 995]]
 - [[_COMMUNITY_Community 996|Community 996]]
+- [[_COMMUNITY_Community 997|Community 997]]
 - [[_COMMUNITY_Community 998|Community 998]]
 - [[_COMMUNITY_Community 999|Community 999]]
 - [[_COMMUNITY_Community 1000|Community 1000]]
@@ -1363,6 +1365,7 @@
 - [[_COMMUNITY_Community 1355|Community 1355]]
 - [[_COMMUNITY_Community 1356|Community 1356]]
 - [[_COMMUNITY_Community 1357|Community 1357]]
+- [[_COMMUNITY_Community 1358|Community 1358]]
 - [[_COMMUNITY_Community 1359|Community 1359]]
 - [[_COMMUNITY_Community 1360|Community 1360]]
 - [[_COMMUNITY_Community 1361|Community 1361]]
@@ -1416,6 +1419,7 @@
 - [[_COMMUNITY_Community 1421|Community 1421]]
 - [[_COMMUNITY_Community 1422|Community 1422]]
 - [[_COMMUNITY_Community 1424|Community 1424]]
+- [[_COMMUNITY_Community 1425|Community 1425]]
 - [[_COMMUNITY_Community 1426|Community 1426]]
 - [[_COMMUNITY_Community 1427|Community 1427]]
 - [[_COMMUNITY_Community 1428|Community 1428]]
@@ -1480,6 +1484,9 @@
 - [[_COMMUNITY_Community 1512|Community 1512]]
 - [[_COMMUNITY_Community 1513|Community 1513]]
 - [[_COMMUNITY_Community 1514|Community 1514]]
+- [[_COMMUNITY_Community 1516|Community 1516]]
+- [[_COMMUNITY_Community 1517|Community 1517]]
+- [[_COMMUNITY_Community 1518|Community 1518]]
 - [[_COMMUNITY_Community 1520|Community 1520]]
 - [[_COMMUNITY_Community 1522|Community 1522]]
 - [[_COMMUNITY_Community 1523|Community 1523]]
@@ -1522,6 +1529,16 @@
 - [[_COMMUNITY_Community 1581|Community 1581]]
 - [[_COMMUNITY_Community 1582|Community 1582]]
 - [[_COMMUNITY_Community 1584|Community 1584]]
+- [[_COMMUNITY_Community 1665|Community 1665]]
+- [[_COMMUNITY_Community 1669|Community 1669]]
+- [[_COMMUNITY_Community 1670|Community 1670]]
+- [[_COMMUNITY_Community 1672|Community 1672]]
+- [[_COMMUNITY_Community 1675|Community 1675]]
+- [[_COMMUNITY_Community 1677|Community 1677]]
+- [[_COMMUNITY_Community 1680|Community 1680]]
+- [[_COMMUNITY_Community 1682|Community 1682]]
+- [[_COMMUNITY_Community 1684|Community 1684]]
+- [[_COMMUNITY_Community 1685|Community 1685]]
 - [[_COMMUNITY_Community 1687|Community 1687]]
 - [[_COMMUNITY_Community 1924|Community 1924]]
 - [[_COMMUNITY_Community 1925|Community 1925]]
@@ -1672,12 +1689,10 @@
 - [[_COMMUNITY_Community 11821|Community 11821]]
 - [[_COMMUNITY_Community 11822|Community 11822]]
 - [[_COMMUNITY_Community 11823|Community 11823]]
-- [[_COMMUNITY_Community 11824|Community 11824]]
 - [[_COMMUNITY_Community 11825|Community 11825]]
 - [[_COMMUNITY_Community 11826|Community 11826]]
 - [[_COMMUNITY_Community 11827|Community 11827]]
 - [[_COMMUNITY_Community 11828|Community 11828]]
-- [[_COMMUNITY_Community 11829|Community 11829]]
 - [[_COMMUNITY_Community 11830|Community 11830]]
 - [[_COMMUNITY_Community 11831|Community 11831]]
 - [[_COMMUNITY_Community 11832|Community 11832]]
@@ -1685,7 +1700,6 @@
 - [[_COMMUNITY_Community 11835|Community 11835]]
 - [[_COMMUNITY_Community 11836|Community 11836]]
 - [[_COMMUNITY_Community 11837|Community 11837]]
-- [[_COMMUNITY_Community 11838|Community 11838]]
 - [[_COMMUNITY_Community 11839|Community 11839]]
 - [[_COMMUNITY_Community 11840|Community 11840]]
 - [[_COMMUNITY_Community 11841|Community 11841]]
@@ -1701,7 +1715,6 @@
 - [[_COMMUNITY_Community 11851|Community 11851]]
 - [[_COMMUNITY_Community 11852|Community 11852]]
 - [[_COMMUNITY_Community 11853|Community 11853]]
-- [[_COMMUNITY_Community 11854|Community 11854]]
 - [[_COMMUNITY_Community 11855|Community 11855]]
 - [[_COMMUNITY_Community 11856|Community 11856]]
 - [[_COMMUNITY_Community 11857|Community 11857]]
@@ -1747,7 +1760,6 @@
 - [[_COMMUNITY_Community 11903|Community 11903]]
 - [[_COMMUNITY_Community 11904|Community 11904]]
 - [[_COMMUNITY_Community 11906|Community 11906]]
-- [[_COMMUNITY_Community 11907|Community 11907]]
 - [[_COMMUNITY_Community 11908|Community 11908]]
 - [[_COMMUNITY_Community 11909|Community 11909]]
 - [[_COMMUNITY_Community 11910|Community 11910]]
@@ -1791,7 +1803,7 @@
 7. `GTMSessionFetcherService` - 61 edges
 8. `User` - 57 edges
 9. `GIDSignIn` - 55 edges
-10. `facebook()` - 45 edges
+10. `useFloatingTabBarHeight()` - 45 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `SQLAlchemyTableMixin` --uses--> `Meta`  [INFERRED]
@@ -1808,15 +1820,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (11935 total, 1240 thin omitted)
+## Communities (11918 total, 1240 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
-Nodes (43): CourseService, Course orchestration service.  Coordinates the course catalog/content (:class:`C, Per-line generated clips for a lesson: ``[{voice, text, audio, mime_type}]``., Score a role-play sentence-by-sentence and update lesson progress.          ``se, Add, update or remove a per-user noted highlight on a lesson., Persist a listen-and-type attempt so it can be replayed on revisit.          The, Delete the given courses' content before a fresh re-crawl. User         role-pla, Delete a single course (cascading its sections + lessons).          User role-pl (+35 more)
+Nodes (47): CourseService, Course orchestration service.  Coordinates the course catalog/content (:class:`C, Per-line generated clips for a lesson: ``[{voice, text, audio, mime_type}]``., Score a role-play sentence-by-sentence and update lesson progress.          ``se, Add, update or remove a per-user noted highlight on a lesson., Persist a listen-and-type attempt so it can be replayed on revisit.          The, Delete the given courses' content before a fresh re-crawl. User         role-pla, Delete a single course (cascading its sections + lessons).          User role-pl (+39 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.03
-Nodes (32): folly(), folly(), folly(), from_time_t(), to_time_t(), construct(), folly(), Exception (+24 more)
+Nodes (34): folly(), folly(), folly(), from_time_t(), to_time_t(), construct(), folly(), Exception (+26 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.05
@@ -2034,8 +2046,8 @@ Cohesion: 0.48
 Nodes (18): RCTCATransform3DFromTransformMatrix(), RCTCGPointFromPoint(), RCTCGRectFromRect(), RCTCGSizeFromSize(), RCTCreateCGColorRefFromSharedColor(), RCTEdgeInsetsFromUIEdgeInsets(), RCTFloatFromCGFloat(), RCTHighResTimeStampFromSeconds() (+10 more)
 
 ### Community 59 - "Community 59"
-Cohesion: 0.09
-Nodes (12): allDictationFilled(), beginRolePlay(), checkDictation(), diffLine(), enterDictation(), evaluateDictation(), finishRolePlay(), hydrateDictation() (+4 more)
+Cohesion: 0.06
+Nodes (39): CompetitionHub(), styles, CoursesScreen(), styles, CourseDetailScreen(), styles, ActionDef, DeckDetailScreen() (+31 more)
 
 ### Community 60 - "Community 60"
 Cohesion: 0.07
@@ -2181,6 +2193,10 @@ Nodes (16): call(), const_pow(), fill_array_int(), fill_array_int_impl(), fill_a
 Cohesion: 0.21
 Nodes (8): detail(), fallback(), folly(), FOLLY_ASSUME_FBVECTOR_COMPATIBLE_1(), size(), traits_detail(), traits_detail_IsEqualityComparable(), traits_detail_IsLessThanComparable()
 
+### Community 95 - "Community 95"
+Cohesion: 0.05
+Nodes (10): clip_hash(), _clip_keys(), delete_conversations(), get_clip(), get_progress(), hash_text(), _prune_orphan_clips(), record_attempt() (+2 more)
+
 ### Community 96 - "Community 96"
 Cohesion: 0.16
 Nodes (14): _clean_exercises(), _clean_explanation(), _clean_items(), dedupe_unit_slugs(), GrammarIngestService, merge_payloads(), Grammar PDF ingestion service.  Turns a grammar ebook (PDF) into the structured, Group AI-produced units into ordered sections with clean slugs/keys. (+6 more)
@@ -2242,7 +2258,7 @@ Cohesion: 0.11
 Nodes (4): Load a saved session by id so it can be opened by URL., Delete a single session., Writing Coach: AI chat practice, free-form draft assessment and history.      Th, WritingViewSet
 
 ### Community 133 - "Community 133"
-Cohesion: 0.11
+Cohesion: 0.12
 Nodes (4): Load a saved conversation by id so it can be opened by URL., Speaking Coach: AI dialogue generation, pronunciation analysis and history., Delete a single conversation (and its now-orphaned audio clips)., SpeakingViewSet
 
 ### Community 134 - "Community 134"
@@ -2567,8 +2583,8 @@ Cohesion: 0.15
 Nodes (12): GIDMDMPasscodeCache, -applicationDidEnterBackground, -dealloc, -hasKeychain, -hasLocalAuthentication, -info, -init, -obtainKeychainInfo (+4 more)
 
 ### Community 239 - "Community 239"
-Cohesion: 0.28
-Nodes (8): AudioRecorder, playAudioUrl(), playBase64Audio(), playPreparedBytes(), playSpeechClip(), releaseActivePlayer(), speakText(), stopPlayback()
+Cohesion: 0.04
+Nodes (45): dependencies, axios, expo, expo-audio, expo-auth-session, expo-blur, expo-build-properties, expo-constants (+37 more)
 
 ### Community 240 - "Community 240"
 Cohesion: 0.15
@@ -2890,8 +2906,8 @@ Cohesion: 0.38
 Nodes (8): decodeBase64(), encodeWavFromPcm16(), extensionForMime(), isPcmMime(), normalizeBase64(), prepareSpeechClip(), sampleRateFromMime(), writeAscii()
 
 ### Community 854 - "Community 854"
-Cohesion: 0.24
-Nodes (3): initGiven(), initOrder(), reset()
+Cohesion: 0.05
+Nodes (22): AI_LIST_FIELDS, AI_STRING_FIELDS, AssistantAction, AssistantApi, AssistantReply, AuthApi, CompetitionApi, CourseApi (+14 more)
 
 ### Community 855 - "Community 855"
 Cohesion: 0.20
@@ -3397,6 +3413,10 @@ Nodes (3): folly(), FOLLY_GFLAGS_NAMESPACE(), gflags()
 Cohesion: 0.57
 Nodes (6): arrayBufferToBase64(), blobsToWav(), blobToWav(), decodeToMono16k(), encodeWav(), wavResult()
 
+### Community 997 - "Community 997"
+Cohesion: 0.07
+Nodes (29): buildRanges(), MarkedText(), Range, TextMark, styles, TermMatch, VocabField, VocabSelection (+21 more)
+
 ### Community 998 - "Community 998"
 Cohesion: 0.29
 Nodes (6): GACAppCheckStorage, -getToken, -initWithTokenKeyaccessGroup, -initWithTokenKeykeychainStorageaccessGroup, -setToken, -storeToken
@@ -3504,6 +3524,18 @@ Nodes (4): hasDomMarker(), isChromiumBrowser(), isExtensionInstalled(), probeWeb
 ### Community 1355 - "Community 1355"
 Cohesion: 0.60
 Nodes (3): LineAnalysis(), scoreLevel(), wpmStatus()
+
+### Community 1356 - "Community 1356"
+Cohesion: 0.10
+Nodes (21): ExerciseProgress, LineResult, ListeningExerciseScreen(), scoreColor(), SentenceMeta, styles, formatAnswer(), KIND_ICON (+13 more)
+
+### Community 1357 - "Community 1357"
+Cohesion: 0.08
+Nodes (21): AudioClipLine, avatarColor(), backgroundUrl(), CourseLesson, CourseLessonScreen(), DictationSavedLine, diffLine(), DiffToken (+13 more)
+
+### Community 1358 - "Community 1358"
+Cohesion: 0.07
+Nodes (26): backgroundColor, backgroundImage, foregroundImage, adaptiveIcon, package, permissions, projectId, typedRoutes (+18 more)
 
 ### Community 1359 - "Community 1359"
 Cohesion: 0.40
@@ -3637,6 +3669,10 @@ Nodes (3): isSequenceValue(), NumberTest(), spellNumber()
 Cohesion: 0.83
 Nodes (3): ensure(), noise(), tone()
 
+### Community 1425 - "Community 1425"
+Cohesion: 0.09
+Nodes (15): buildMarks(), ExerciseItem, ExplanationBlock, GradeResult, GrammarUnitScreen(), ItemResult, ItemViewProps, Mark (+7 more)
+
 ### Community 1426 - "Community 1426"
 Cohesion: 0.50
 Nodes (3): GACAppAttestAttestationResponse, -initWithArtifacttoken, -initWithResponseDatarequestDateerror
@@ -3673,17 +3709,61 @@ Nodes (3): _build_url(), get_connection(), get_engine()
 Cohesion: 0.83
 Nodes (3): clear_db_env(), database_url_from_env_builds_from_db_vars(), database_url_from_env_uses_database_url_when_set()
 
+### Community 1516 - "Community 1516"
+Cohesion: 0.15
+Nodes (8): styles, ENV, initSentry(), DraftTerm, EMPTY_DRAFT, styles, queryClient, uploadImageToCloudinary()
+
+### Community 1517 - "Community 1517"
+Cohesion: 0.11
+Nodes (17): API URL by target, Authentication model, Build, Building a release APK locally, Common issues, Development setup, Environment variables, Features (+9 more)
+
+### Community 1518 - "Community 1518"
+Cohesion: 0.19
+Nodes (12): DIGIT_WORDS, GameState, HistoryItem, isSequenceValue(), Mode, MODES, NumberListeningScreen(), NumValue (+4 more)
+
 ### Community 1582 - "Community 1582"
 Cohesion: 0.04
 Nodes (26): CustomTokenAuthentication, JWTAuthentication, add_user_to_deck(), adjust_priority(), clone_deck(), clone_deck_as(), create(), create_default_deck() (+18 more)
+
+### Community 1669 - "Community 1669"
+Cohesion: 0.18
+Nodes (10): jest, moduleNameMapper, preset, testPathIgnorePatterns, transformIgnorePatterns, main, ^@/(.*)$, name (+2 more)
+
+### Community 1670 - "Community 1670"
+Cohesion: 0.22
+Nodes (9): devDependencies, @babel/core, expo-doctor, jest, jest-expo, @react-native/jest-preset, @types/jest, @types/react (+1 more)
+
+### Community 1672 - "Community 1672"
+Cohesion: 0.32
+Nodes (6): HomeScreen(), styles, Props, ReminderList(), ReminderListSkeleton(), styles
+
+### Community 1675 - "Community 1675"
+Cohesion: 0.25
+Nodes (8): scripts, android, doctor, ios, start, test, typecheck, web
+
+### Community 1677 - "Community 1677"
+Cohesion: 0.57
+Nodes (3): ExecutorBlockingGuard(), folly(), reset()
+
+### Community 1680 - "Community 1680"
+Cohesion: 0.57
+Nodes (3): folly(), hasSpaceOrCntrlSymbols(), toLowerAscii()
+
+### Community 1682 - "Community 1682"
+Cohesion: 0.50
+Nodes (3): formatSnooze(), SettingsScreen(), styles
+
+### Community 1684 - "Community 1684"
+Cohesion: 0.50
+Nodes (3): identityOrder(), shuffledOrder(), styles
 
 ### Community 11820 - "Community 11820"
 Cohesion: 0.20
 Nodes (40): allocate_node(), BOOST_CATCH(), BOOST_NOEXCEPT(), BOOST_TRY(), check_invariant_(), clear_(), construct_value(), copy_construct_from() (+32 more)
 
 ### Community 11821 - "Community 11821"
-Cohesion: 0.07
-Nodes (12): DeckRef, ReviseTermRow, _coerce_bool(), _coerce_list(), _extract_ai_fields(), _meaning_of(), TermService, _EmptyRoles (+4 more)
+Cohesion: 0.14
+Nodes (7): DeckRef, ReviseTermRow, _coerce_bool(), _coerce_list(), _extract_ai_fields(), _meaning_of(), TermService
 
 ### Community 11822 - "Community 11822"
 Cohesion: 0.05
@@ -3693,25 +3773,17 @@ Nodes (22): _clean_lines(), ListeningService, _looks_hosted(), Listening (dictat
 Cohesion: 0.05
 Nodes (18): APITestCase, GoogleOAuthClient, BodyLogoutContractTest, BodyRefreshRotationContractTest, EmailLoginBodyContractTest, GoogleAudienceValidationTest, GoogleInitBodyContractTest, Contract tests for the endpoints the native (Expo) app depends on.  The mobile c (+10 more)
 
-### Community 11824 - "Community 11824"
-Cohesion: 0.56
-Nodes (5): makeNotStarted(), makeRunning(), processGroupLeader_(), RV_NOT_STARTED(), state()
-
 ### Community 11825 - "Community 11825"
-Cohesion: 0.08
-Nodes (19): SpeakingRepository, is_elevenlabs_voice(), AI operations for the Speaking Coach feature.      ``ai`` handles text/JSON gene, Generate tutor speech for ``text``, routing to the voice's provider.          El, SpeakingCoachService, _clean_active_voice(), _clean_playable_voice(), Speaking Coach orchestration service.  Coordinates the AI coach (:class:`Speakin (+11 more)
+Cohesion: 0.05
+Nodes (41): SpeakingRepository, _assessment(), AssistantService, audio_clip_public_id(), _clean_actions(), _format_history(), _int(), is_elevenlabs_voice() (+33 more)
 
 ### Community 11826 - "Community 11826"
 Cohesion: 0.06
 Nodes (35): GTMSessionFetcher, -beginFetchMayDelaymayAuthorizemayDecorate, GTMSessionFetcherSessionDelegateDispatcher, -abandon, -description, -destroyDiscardTimer, -destroySessionAndTimer, -discardInterval (+27 more)
 
 ### Community 11827 - "Community 11827"
-Cohesion: 0.05
-Nodes (10): Composition root — wire concrete infrastructure into application services., LearningContextApi, Public API for user-related operations from other contexts., TermContextApi, UserContextApi, ReminderRepository, CompetitionService, A shuffled list (≤ :data:`MAX_REMINDERS`) of actionable reminders.          Each (+2 more)
-
-### Community 11829 - "Community 11829"
-Cohesion: 0.07
-Nodes (32): _assessment(), AssistantService, audio_clip_public_id(), _band(), _clean_actions(), _format_history(), _int(), _join_ipa() (+24 more)
+Cohesion: 0.04
+Nodes (17): Composition root — wire concrete infrastructure into application services., LearningContextApi, Public API for user-related operations from other contexts., TermContextApi, UserContextApi, CompetitionRepository, Persistence for the Writing Coach feature.  All Django ORM access for writing se, ReminderRepository (+9 more)
 
 ### Community 11830 - "Community 11830"
 Cohesion: 0.07
@@ -3741,10 +3813,6 @@ Nodes (11): BSCrawler, GetImagesUrlView, SimpleTestCase, CrawlerStrategyBenchmar
 Cohesion: 0.10
 Nodes (14): _exercise_broken_items(), GrammarService, _normalize_item_text(), Grammar feature orchestration service.  Coordinates the book/section/unit/exerci, Grade a submitted attempt server-side, persist it and roll up the unit., Reset a user's practice results for one unit (highlights are kept).          Ret, Upsert a whole book from a structured dict; returns import counts.          The, Wipe all grammar content before a fresh import. User progress survives         ( (+6 more)
 
-### Community 11838 - "Community 11838"
-Cohesion: 0.03
-Nodes (7): clip_hash(), CompetitionRepository, get_progress(), Persistence for the Writing Coach feature.  All Django ORM access for writing se, record_attempt(), set_highlight(), upsert_section()
-
 ### Community 11839 - "Community 11839"
 Cohesion: 0.10
 Nodes (17): _exercise_progress_payload(), GrammarCatalogSerializer, GrammarExercisePublicSerializer, GrammarUnitDetailSerializer, GrammarViewSet, _public_item(), AI "explain" option: explain a rule, or why an answer is wrong.          Body: a, The book with sections → units and the user's progress counts. (+9 more)
@@ -3754,8 +3822,8 @@ Cohesion: 0.14
 Nodes (20): ListeningExerciseSerializer, ListeningExerciseSummarySerializer, ListeningTopicDetailSerializer, ListeningTopicSummarySerializer, ListeningViewSet, _progress_payload(), _public_sentence(), Add, update or remove a per-user noted word/phrase on an exercise. (+12 more)
 
 ### Community 11841 - "Community 11841"
-Cohesion: 0.05
-Nodes (13): _clip_keys(), delete_conversations(), get_clip(), hash_text(), owned_terms(), _prune_orphan_clips(), remember_response(), WritingRepository (+5 more)
+Cohesion: 0.06
+Nodes (18): owned_terms(), remember_response(), WritingRepository, _band(), _normalize_draft_feedback(), _normalize_message_feedback(), _normalize_support(), AI operations for the Writing Coach feature.      Depends only on a text/JSON-ca (+10 more)
 
 ### Community 11842 - "Community 11842"
 Cohesion: 0.45
@@ -3804,10 +3872,6 @@ Nodes (12): benchmark_strategies(), BingImageSearchStrategy, _fetch_batch(), _fe
 ### Community 11853 - "Community 11853"
 Cohesion: 0.12
 Nodes (11): CourseViewSet, Save a listen-and-type (dictation) attempt so it replays on revisit.          Bo, Add, update or remove a per-user noted word/phrase on a lesson., Structured English courses: catalog, content and Live Role-play scoring.      Th, Distinct course levels for the catalog's level filter: ``{"levels": [...]}``., Per-line generated character clips: ``{"lines": [{voice, text, audio, mime_type}, Score a Live Role-play recording sentence-by-sentence and update progress., PageNumberPagination (+3 more)
-
-### Community 11854 - "Community 11854"
-Cohesion: 0.57
-Nodes (3): folly(), grow_capacity_by(), reserve_if_available()
 
 ### Community 11855 - "Community 11855"
 Cohesion: 0.17
@@ -3969,10 +4033,6 @@ Nodes (7): AddUserToDeckSerializer, InviteSerializer, Input serializer for the a
 Cohesion: 0.58
 Nodes (5): e_(), emplace(), folly(), operator(), throwIfFailed()
 
-### Community 11907 - "Community 11907"
-Cohesion: 0.25
-Nodes (5): Mixed "Revise" session: past mistakes across every feature, hardest first., Build a fresh session (answer-free cards ready to play).          Body (optional, Grade one answer and update the card.          Body: ``{card_id, given?, audio?,, ReviseCardSerializer, ReviseViewSet
-
 ### Community 11908 - "Community 11908"
 Cohesion: 0.32
 Nodes (3): AssetMirror, character_folder(), Mirrors freeCodeCamp character/background art into our Cloudinary once.      Thr
@@ -4006,24 +4066,24 @@ Cohesion: 0.33
 Nodes (3): Meta, UserSetting, UserSettingSerializer
 
 ## Knowledge Gaps
-- **1139 isolated node(s):** `SKIP_REDIS`, `-retry`, `-onQueueretry`, `-attemptsretry`, `-onQueueattemptsretry` (+1134 more)
+- **1354 isolated node(s):** `Features`, `Tech stack`, `Navigation`, `Project structure`, `Prerequisites` (+1349 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **1240 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DomainError` connect `Community 0` to `Community 1`, `Community 11907`, `Community 5`, `Community 11892`, `Community 11839`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
-- **Why does `ValidationError` connect `Community 0` to `Community 4`, `Community 7`, `Community 11850`, `Community 11883`, `Community 11821`, `Community 11822`, `Community 11823`, `Community 11856`, `Community 11858`, `Community 11827`, `Community 11837`, `Community 11902`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
-- **Why does `NotFoundError` connect `Community 0` to `Community 11880`, `Community 11821`, `Community 11822`, `Community 11896`, `Community 11837`, `Community 11902`?**
-  _High betweenness centrality (0.002) - this node is a cross-community bridge._
+- **Why does `DomainError` connect `Community 0` to `Community 1`, `Community 11892`, `Community 5`, `Community 11839`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `ValidationError` connect `Community 0` to `Community 1665`, `Community 4`, `Community 7`, `Community 11850`, `Community 11883`, `Community 11821`, `Community 11822`, `Community 11823`, `Community 11856`, `Community 11858`, `Community 11827`, `Community 11837`, `Community 11902`?**
+  _High betweenness centrality (0.003) - this node is a cross-community bridge._
+- **Why does `NotFoundError` connect `Community 0` to `Community 1665`, `Community 11880`, `Community 11821`, `Community 11822`, `Community 11827`, `Community 11896`, `Community 11837`, `Community 11902`?**
+  _High betweenness centrality (0.001) - this node is a cross-community bridge._
 - **Are the 92 inferred relationships involving `ValidationError` (e.g. with `QuickReviseConsumer` and `CourseService`) actually correct?**
   _`ValidationError` has 92 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `Logging and Sentry tracing utilities for AI infrastructure calls.`, `Context manager to tag AI calls with a feature/domain name (e.g. 'term_enrichmen`, `Set the current AI feature name for the active thread/task context.` to the rest of the system?**
-  _1404 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `Features`, `Tech stack`, `Navigation` to the rest of the system?**
+  _1619 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.05049088359046283 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.04649694929518199 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.02780511811023622 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.027906976744186046 - nodes in this community are weakly interconnected._

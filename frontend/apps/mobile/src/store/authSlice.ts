@@ -1,6 +1,7 @@
 import { createAuthSlice } from "@flashlearn/auth";
 import { nativeAuthApi } from "@/auth/nativeAuthApi";
 import { secureStorage } from "@/auth/secureStore";
+import { Sentry } from "@/config/sentry";
 
 // Native session: access token in Redux memory, refresh token in SecureStore.
 // Clearing the local credential on logout is best-effort and never blocks the
@@ -9,6 +10,9 @@ const authSlice = createAuthSlice({
   authApi: nativeAuthApi,
   onLogout: () => {
     secureStorage.clear().catch(() => {});
+  },
+  onError: (error, context) => {
+    Sentry.captureException(error, { tags: { authContext: context } });
   },
 });
 

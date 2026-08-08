@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { Platform } from "react-native";
 import Constants from "expo-constants";
 import * as Google from "expo-auth-session/providers/google";
 import type { AuthSessionResult } from "expo-auth-session";
@@ -7,9 +8,11 @@ import { ENV } from "@/config/env";
 type GoogleSigninModule = typeof import("@react-native-google-signin/google-signin");
 
 // The Google Sign-In native module is compiled into a dev/production build but
-// is absent from Expo Go — importing it there throws at load time. In Expo Go we
-// therefore fall back to the browser-based expo-auth-session flow.
+// is absent from Expo Go — importing it there throws at load time. Same story on
+// web: the native module has no web implementation. In both cases we fall back
+// to the browser-based expo-auth-session flow.
 const isExpoGo = Constants.appOwnership === "expo";
+const usesBrowserFlow = isExpoGo || Platform.OS === "web";
 
 /** Whether Google sign-in can run at all (needs the web client id). */
 export const isGoogleAuthConfigured = Boolean(ENV.google.webClientId);
@@ -58,8 +61,14 @@ async function signInWithNativePopup(): Promise<GoogleSignInResult> {
     }
     return { status: "cancelled" };
   } catch (error) {
-    if (isErrorWithCode(error) && error.code === statusCodes.IN_PROGRESS) {
-      return { status: "cancelled" };
+    if (isErrorWithCode(error)) {
+      if (error.code === statusCodes.IN_PROGRESS || error.code === statusCodes.SIGN_IN_CANCELLED) {
+        return { status: "cancelled" };
+      }
+      // Surface the native error code (e.g. DEVELOPER_ERROR/10 from a SHA-1 /
+      // package-name mismatch on the Android OAuth client) instead of a bare
+      // generic message — it's the only signal we get to diagnose config issues.
+      return { status: "error", message: `Google login failed (code ${error.code}).` };
     }
     return { status: "error", message: "Google login failed." };
   }
@@ -114,11 +123,11 @@ export function useGoogleSignIn(): {
   });
 
   const signIn = useCallback(async (): Promise<GoogleSignInResult> => {
-    if (isExpoGo) {
+    if (usesBrowserFlow) {
       return resultFromAuthSession(await promptAsync());
     }
     return signInWithNativePopup();
   }, [promptAsync]);
 
-  return { signIn, ready: isExpoGo ? Boolean(request) : true };
+  return { signIn, ready: usesBrowserFlow ? Boolean(request) : true };
 }

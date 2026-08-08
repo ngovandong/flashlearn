@@ -6,6 +6,7 @@ import authService from "@api-services/authService";
 import { getFirstError } from "@utils/errorHandler";
 import { toast } from "react-toastify";
 import { sendTokenToExtension } from "@utils/extensionLogin";
+import { Sentry } from "../config/sentry";
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 function CustomPopupGoogleLoginBT() {
@@ -30,6 +31,7 @@ function CustomPopupGoogleLoginBT() {
       .initUser(id_token)
       .then(handleUserInit)
       .catch((err) => {
+        Sentry.captureException(err, { tags: { authContext: "google-one-tap" } });
         toast.error(getFirstError(err) || "Google login failed.");
       });
   };
@@ -52,7 +54,11 @@ function CustomPopupGoogleLoginBT() {
   };
   useGoogleOneTapLogin({
     onSuccess: onPopupSuccess,
-    onError: () => {
+    onError: (err) => {
+      Sentry.captureMessage("Google One Tap failed", {
+        tags: { authContext: "google-one-tap" },
+        extra: { err },
+      });
       dispatch(setError("Google login failed."));
     },
   });
