@@ -10,6 +10,10 @@ export function initSentry(): void {
     environment: ENV.sentry.environment,
     tracesSampleRate: 1.0,
     sendDefaultPii: true,
+    enableLogs: true,
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1,
+    integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
   });
 }
 

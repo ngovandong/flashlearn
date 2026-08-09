@@ -45,11 +45,28 @@
         {
           "ios": {
             "extraPods": [
-              { "name": "GoogleUtilities/Environment", "modular_headers": true },
-              { "name": "GoogleUtilities/UserDefaults", "modular_headers": true },
-              { "name": "RecaptchaInterop", "modular_headers": true }
+              {
+                "name": "GoogleUtilities/Environment",
+                "modular_headers": true
+              },
+              {
+                "name": "GoogleUtilities/UserDefaults",
+                "modular_headers": true
+              },
+              {
+                "name": "RecaptchaInterop",
+                "modular_headers": true
+              }
             ]
           }
+        }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "flashlearn-mobile",
+          "organization": "flashlearn-sentry"
         }
       ]
     ],
