@@ -11,7 +11,9 @@
         "EXPO_PUBLIC_API_BASE_URL": "https://flashlearnapi.dongkiemem.site/api/",
         "EXPO_PUBLIC_WS_BASE_URL": "ws://flashlearnapi.dongkiemem.site/ws",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "144984580713-ug77456t6abko60ultrb888go6b5pso5.apps.googleusercontent.com",
-        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "144984580713-h20b05oha7rr5if9tn6kr48damjc99hf.apps.googleusercontent.com"
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "144984580713-h20b05oha7rr5if9tn6kr48damjc99hf.apps.googleusercontent.com",
+        "EXPO_PUBLIC_SENTRY_DSN": "https://ed95ee26c8a6fa5d413991985218b364@o4511795919323136.ingest.us.sentry.io/4511875330736128",
+        "EXPO_PUBLIC_ENVIRONMENT": "development"
       }
     },
     "preview": {
@@ -23,7 +25,9 @@
         "EXPO_PUBLIC_API_BASE_URL": "https://flashlearnapi.dongkiemem.site/api/",
         "EXPO_PUBLIC_WS_BASE_URL": "ws://flashlearnapi.dongkiemem.site/ws",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "144984580713-ug77456t6abko60ultrb888go6b5pso5.apps.googleusercontent.com",
-        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "144984580713-h20b05oha7rr5if9tn6kr48damjc99hf.apps.googleusercontent.com"
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "144984580713-h20b05oha7rr5if9tn6kr48damjc99hf.apps.googleusercontent.com",
+        "EXPO_PUBLIC_SENTRY_DSN": "https://ed95ee26c8a6fa5d413991985218b364@o4511795919323136.ingest.us.sentry.io/4511875330736128",
+        "EXPO_PUBLIC_ENVIRONMENT": "preview"
       }
     },
     "production": {
@@ -32,7 +36,9 @@
         "EXPO_PUBLIC_API_BASE_URL": "https://flashlearnapi.dongkiemem.site/api/",
         "EXPO_PUBLIC_WS_BASE_URL": "ws://flashlearnapi.dongkiemem.site/ws",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "144984580713-ug77456t6abko60ultrb888go6b5pso5.apps.googleusercontent.com",
-        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "144984580713-h20b05oha7rr5if9tn6kr48damjc99hf.apps.googleusercontent.com"
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "144984580713-h20b05oha7rr5if9tn6kr48damjc99hf.apps.googleusercontent.com",
+        "EXPO_PUBLIC_SENTRY_DSN": "https://ed95ee26c8a6fa5d413991985218b364@o4511795919323136.ingest.us.sentry.io/4511875330736128",
+        "EXPO_PUBLIC_ENVIRONMENT": "production"
       }
     }
   },

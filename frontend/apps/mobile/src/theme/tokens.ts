@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Easing, type EasingFunction, type ViewStyle } from "react-native";
-import { getPalette, NEUTRALS, rgbTriplet, type Neutral, type Palette } from "@flashlearn/core";
+import { getPalette, hexToRgb, NEUTRALS, rgbTriplet, type Neutral, type Palette } from "@flashlearn/core";
 import { useAppTheme } from "@/theme/ThemeProvider";
 
 /**
@@ -106,6 +106,13 @@ export interface Tokens {
   feature: (iconKey: string) => FeatureColor;
   /** Generic rgba from a hex. */
   alpha: (hex: string, a: number) => string;
+  /**
+   * Opaque blend of `hex` into the current surface color. Use this (not
+   * `alpha`) for the background of an elevated/shadowed card — Android's
+   * `elevation` shadow renders a dark halo behind translucent (rgba)
+   * backgrounds, so tinted elevated surfaces need a solid color instead.
+   */
+  tintSurface: (hex: string, amount: number) => string;
 }
 
 function makeShadow(mode: "light" | "dark", strong: boolean): ViewStyle {
@@ -148,6 +155,16 @@ export function useTokens(): Tokens {
 
     const alpha = (hex: string, a: number) => `rgba(${rgbTriplet(hex)}, ${a})`;
 
+    const tintSurface = (hex: string, amount: number) => {
+      const base = hexToRgb(neutral.surface);
+      const accent = hexToRgb(hex);
+      const mix = (a: number, b: number) => Math.round(a + (b - a) * amount);
+      const r = mix(base.r, accent.r);
+      const g = mix(base.g, accent.g);
+      const b = mix(base.b, accent.b);
+      return `#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+    };
+
     const feature = (iconKey: string): FeatureColor => {
       const fg = FEATURE_HUES[iconKey] ?? palette.primary ?? DEFAULT_HUE;
       return {
@@ -169,6 +186,7 @@ export function useTokens(): Tokens {
       primaryAlpha: (a: number) => `rgba(${primaryRgb}, ${a})`,
       feature,
       alpha,
+      tintSurface,
     };
   }, [paletteId, resolvedMode, surface]);
 }

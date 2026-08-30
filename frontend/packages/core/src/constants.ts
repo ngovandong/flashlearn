@@ -14,5 +14,7 @@ export const QUESTION_TYPES: Record<"QUIZ" | "FILL", QuestionType> = {
 export const LEARNING_TERM_PAGE_SIZE = 20;
 export const DECK_PAGE_SIZE = 20;
 export const COURSE_PAGE_SIZE = 10;
+// Terms per page in the deck editor — must match TermPageNumberPagination.
+export const TERM_EDIT_PAGE_SIZE = 25;
 
 export const IMAGE_SEARCH_COUNT = 10;

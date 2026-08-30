@@ -1,5 +1,5 @@
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import { getFirstError } from "@flashlearn/core";
+import { getFirstError, TERM_EDIT_PAGE_SIZE } from "@flashlearn/core";
 import type {
   AuthUser,
   CourseDetail,
@@ -269,6 +269,23 @@ export function createTermApi(client: AxiosInstance, aiTimeout = 240000) {
       if (cursor) params.cursor = cursor;
       return client.get("terms/", { params });
     },
+    /** Numbered page of a deck's terms, optionally filtered by text and re-sorted. */
+    browseTerms(
+      deckId: string,
+      {
+        q = "",
+        sort = "newest",
+        page = 1,
+        pageSize = TERM_EDIT_PAGE_SIZE,
+      }: { q?: string; sort?: string; page?: number; pageSize?: number } = {}
+    ): Promise<any> {
+      return client.get("terms/browse/", {
+        params: { deck_id: deckId, q, sort, page, page_size: pageSize },
+      });
+    },
+    bulkDelete(deckId: string, ids: string[]): Promise<any> {
+      return client.post("terms/bulk_delete/", { deck_id: deckId, ids });
+    },
     addTermsToDeck(deckId: string, terms: Term[]): Promise<any> {
       const formData = new FormData();
       formData.append("deck_id", deckId);
@@ -337,6 +354,10 @@ export type RoleApi = ReturnType<typeof createRoleApi>;
 
 export function createLearningApi(client: AxiosInstance) {
   return {
+    /** Registers a card view (matches web's `learningService.create`), used by Learn mode to track progress. */
+    create(data: { term_id: string }): Promise<any> {
+      return client.post("learnings/", data);
+    },
     getLearningTerms(deckId: string, page: number): Promise<any> {
       return client.get("learnings/get_learning_terms/", {
         params: { deck_id: deckId, page },

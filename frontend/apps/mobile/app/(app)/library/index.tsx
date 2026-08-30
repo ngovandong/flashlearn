@@ -12,6 +12,7 @@ import { ErrorView } from "@/components/ErrorView";
 import { ScreenSkeleton } from "@/components/ScreenSkeleton";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
 import { PillTabs } from "@/components/ui/PillTabs";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
 import { unwrap } from "@/utils/apiError";
 import { motion, useTokens } from "@/theme/tokens";
 
@@ -31,6 +32,7 @@ export default function LibraryScreen() {
   const t = useTokens();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useFloatingTabBarHeight();
   const [tab, setTab] = useState<Tab>("mine");
 
   const query = useInfiniteQuery({
@@ -69,7 +71,7 @@ export default function LibraryScreen() {
         key={tab}
         data={decks}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: tabBarHeight }]}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={query.isRefetching} onRefresh={() => query.refetch()} />}
         ListEmptyComponent={<EmptyState message="No decks here yet." />}
@@ -93,7 +95,11 @@ export default function LibraryScreen() {
       <FAB
         icon="plus"
         color={t.palette.onPrimary}
-        style={[styles.fab, { backgroundColor: t.palette.primary }, t.shadowStrong]}
+        style={[
+          styles.fab,
+          { backgroundColor: t.palette.primary, bottom: tabBarHeight },
+          t.shadowStrong,
+        ]}
         onPress={() => router.push("/library/create")}
         label="New deck"
       />

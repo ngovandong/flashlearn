@@ -1,9 +1,10 @@
+import uuid
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from django.test import SimpleTestCase
 
-from backend.shared.application.exceptions import NotFoundError, ValidationError
+from backend.shared.application.exceptions import NotFoundError, PermissionDeniedError, ValidationError
 
 
 class FakeTermRepository:
@@ -43,6 +44,14 @@ class FakeTermRepository:
 
     def update_term(self, term_id, **fields):
         return None
+
+    def browse_in_deck(self, deck_id, query="", ordering="-created_at"):
+        self.browsed = (deck_id, query, ordering)
+        return []
+
+    def bulk_delete(self, deck_id, term_ids):
+        self.deleted = (deck_id, list(term_ids))
+        return len(term_ids)
 
 
 class FakeDeck:
@@ -97,3 +106,28 @@ class TermServiceUnitTest(SimpleTestCase):
         deck = FakeDeck()
         self.service.add_terms(deck, deck.owner, [{"name": "one", "meaning": "", "image": ""}])
         self.assertEqual(len(self.repo.bulk_created), 1)
+
+    def test_browse_terms_trims_query_and_maps_sort(self):
+        self.service.browse_terms("deck-1", "  apple ", "az")
+        self.assertEqual(self.repo.browsed, ("deck-1", "apple", "name"))
+
+    def test_browse_terms_falls_back_to_newest_for_unknown_sort(self):
+        self.service.browse_terms("deck-1", "", "nonsense")
+        self.assertEqual(self.repo.browsed, ("deck-1", "", "-created_at"))
+
+    def test_delete_terms_drops_malformed_ids(self):
+        deck = FakeDeck()
+        valid = "3f2504e0-4f89-11d3-9a0c-0305e82c3301"
+        deleted = self.service.delete_terms(deck, deck.owner, [valid, "not-a-uuid", None])
+        self.assertEqual(deleted, 1)
+        self.assertEqual(self.repo.deleted, ("deck-1", [uuid.UUID(valid)]))
+
+    def test_delete_terms_requires_at_least_one_id(self):
+        deck = FakeDeck()
+        with self.assertRaises(ValidationError):
+            self.service.delete_terms(deck, deck.owner, [])
+
+    def test_delete_terms_rejects_non_editor(self):
+        deck = FakeDeck()
+        with self.assertRaises(PermissionDeniedError):
+            self.service.delete_terms(deck, FakeUser(), ["3f2504e0-4f89-11d3-9a0c-0305e82c3301"])

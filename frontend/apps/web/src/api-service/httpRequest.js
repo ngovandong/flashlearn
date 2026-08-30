@@ -2,6 +2,7 @@ import axios from "axios";
 import { createHttpClient } from "@flashlearn/api";
 import store from "@app/store";
 import { setToken, logout } from "@app/store/authSlice";
+import { Sentry } from "../config/sentry";
 
 // Preserve the previous global axios defaults — crawlerService talks to an
 // external URL through the raw axios instance and relied on these.
@@ -29,4 +30,8 @@ export const request = createHttpClient({
   },
   onTokensRefreshed: ({ access }) => store.dispatch(setToken({ access })),
   onAuthFailure: () => store.dispatch(logout()),
+  // Site-wide: any network error, 5xx, or failed token refresh from ANY API
+  // call (not just auth) lands in Sentry, regardless of whether the caller
+  // uses react-query, a Redux thunk, or a plain await.
+  onError: (error, context) => Sentry.captureException(error, { tags: context }),
 });

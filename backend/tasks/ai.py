@@ -128,8 +128,8 @@ def fill_terms_with_ai(
             chunk_error = str(exc)
         else:
             chunk_error = None
-            for name in chunk:
-                data = results.get(name.strip().lower())
+            for idx, name in enumerate(chunk):
+                data = results.get(idx)
                 if not data:
                     failed_names += 1
                     continue

@@ -65,9 +65,11 @@ _SYSTEM_PROMPT = (
 
 _BATCH_SYSTEM_PROMPT = (
     "You are a bilingual lexicographer that enriches flashcard terms with data "
-    "similar to the Oxford Learner's Dictionary. You are given a list of terms and must "
-    "return a JSON object with a 'terms' array containing exactly one entry per input term. "
-    "Echo each input term verbatim in the entry's 'term' field. Follow these rules for each term:\n" + _RULES
+    "similar to the Oxford Learner's Dictionary. You are given a numbered list of terms and must "
+    "return a JSON object with a 'terms' array containing exactly one entry per input term, in any "
+    "order. Each entry's 'index' field must be the 0-based number of the input term it answers "
+    "(e.g. the term prefixed '0.' gets index 0). Echo each input term verbatim in the entry's 'term' "
+    "field. Follow these rules for each term:\n" + _RULES
 )
 
 # Per-entry schema shared by single and batch enrichment.
@@ -89,8 +91,12 @@ BATCH_SCHEMA: dict[str, Any] = {
             "type": "ARRAY",
             "items": {
                 "type": "OBJECT",
-                "properties": {"term": {"type": "STRING"}, **_ENTRY_PROPERTIES},
-                "required": ["term", *_ENTRY_PROPERTIES.keys()],
+                "properties": {
+                    "index": {"type": "INTEGER"},
+                    "term": {"type": "STRING"},
+                    **_ENTRY_PROPERTIES,
+                },
+                "required": ["index", "term", *_ENTRY_PROPERTIES.keys()],
             },
         }
     },
@@ -132,28 +138,34 @@ class TermEnrichmentService:
         raw = self._ai.generate_json(_SYSTEM_PROMPT, user_prompt, ENRICHMENT_SCHEMA)
         return self._normalize(raw)
 
-    def enrich_many(self, names: list[str]) -> dict[str, dict[str, Any]]:
+    def enrich_many(self, names: list[str]) -> dict[int, dict[str, Any]]:
         """Enrich several term names in a single AI request.
 
-        Returns a mapping of lowercased name -> normalized fields. Names the
-        provider omits are simply absent from the result (caller decides what to
-        do). Grouping by name (callers should pass unique names) keeps token
-        usage low when the same word appears in many decks.
+        Returns a mapping of input position (0-based index into ``names``) ->
+        normalized fields, keyed positionally rather than by matching the AI's
+        echoed term text. The AI sometimes normalizes punctuation/casing when
+        echoing a term back (e.g. dropping a trailing "."), which broke a prior
+        string-matching approach and caused terms to be silently re-queued
+        forever. Names the provider omits are simply absent from the result
+        (caller decides what to do). Grouping by name (callers should pass
+        unique names) keeps token usage low when the same word appears in many
+        decks.
         """
         cleaned = [n.strip() for n in names if n and n.strip()]
         if not cleaned:
             return {}
 
-        user_prompt = "Enrich each of the following terms:\n" + "\n".join(f"- {n}" for n in cleaned)
+        user_prompt = "Enrich each of the following terms:\n" + "\n".join(f"{i}. {n}" for i, n in enumerate(cleaned))
         raw = self._ai.generate_json(_BATCH_SYSTEM_PROMPT, user_prompt, BATCH_SCHEMA)
 
-        out: dict[str, dict[str, Any]] = {}
+        out: dict[int, dict[str, Any]] = {}
         for item in raw.get("terms", []) or []:
             if not isinstance(item, dict):
                 continue
-            term = _as_str(item.get("term"))
-            if term:
-                out[term.lower()] = self._normalize(item)
+            index = item.get("index")
+            if not isinstance(index, int) or not (0 <= index < len(cleaned)):
+                continue
+            out[index] = self._normalize(item)
         return out
 
     @staticmethod

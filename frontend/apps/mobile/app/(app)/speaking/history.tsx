@@ -11,6 +11,7 @@ import { LoadingView } from "@/components/LoadingView";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
 import { AppCard } from "@/components/ui/AppCard";
 import { FeatureTile } from "@/components/ui/FeatureTile";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
 import { useTokens } from "@/theme/tokens";
@@ -26,6 +27,7 @@ interface Conversation {
 
 export default function SpeakingHistoryScreen() {
   const t = useTokens();
+  const tabBarHeight = useFloatingTabBarHeight();
   const router = useRouter();
   const qc = useQueryClient();
   const [selectMode, setSelectMode] = useState(false);
@@ -101,7 +103,7 @@ export default function SpeakingHistoryScreen() {
       <FlatList
         data={conversations}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: tabBarHeight }]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={<EmptyState message="No conversations yet." />}
         renderItem={({ item, index }) => {

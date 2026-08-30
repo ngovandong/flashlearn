@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.pagination import CursorPagination
 from rest_framework.response import Response
 
+from backend.shared.interfaces.pagination import TermPageNumberPagination
 from backend.shared.interfaces.viewsets import FlexibleViewSet, SearchViewSet
 from backend.term.infrastructure.search import TermSearchQuery
 
@@ -28,7 +29,11 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
     document_class = TermDocument
 
     permission_classes = (permissions.IsAuthenticated, EditableTerm)
-    serializer_map = {"add_terms": AddTermsToDeckSerializer, "list": TermNestInDeckSerializer}
+    serializer_map = {
+        "add_terms": AddTermsToDeckSerializer,
+        "list": TermNestInDeckSerializer,
+        "browse": TermNestInDeckSerializer,
+    }
 
     def generate_q_expression(self, query, **kwargs):
         return TermSearchQuery.build(query, kwargs.get("deck_id"))
@@ -56,6 +61,50 @@ class TermViewSet(viewsets.ModelViewSet, FlexibleViewSet, SearchViewSet):
         deck_service.assert_can_view(request.user, deck_id)
         results = self.get_search_results(query, deck_id=deck_id)
         return Response(results)
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter("deck_id", openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Filter by deck"),
+            openapi.Parameter("q", openapi.IN_QUERY, type=openapi.TYPE_STRING, description="Filter by name / meaning"),
+            openapi.Parameter(
+                "sort", openapi.IN_QUERY, type=openapi.TYPE_STRING, description="newest | oldest | az | za"
+            ),
+            openapi.Parameter("page", openapi.IN_QUERY, type=openapi.TYPE_INTEGER, description="Page number"),
+            openapi.Parameter("page_size", openapi.IN_QUERY, type=openapi.TYPE_INTEGER, description="Terms per page"),
+        ]
+    )
+    @action(detail=False, methods=["GET"])
+    def browse(self, request, *args, **kwargs):
+        """Numbered, searchable, sortable page of a deck's terms — powers the deck editor."""
+        deck_id = request.query_params.get("deck_id", "")
+        deck_service.assert_can_view(request.user, deck_id)
+        queryset = term_service.browse_terms(
+            deck_id,
+            request.query_params.get("q", ""),
+            request.query_params.get("sort", "newest"),
+        )
+        paginator = TermPageNumberPagination()
+        page = paginator.paginate_queryset(queryset, request, view=self)
+        serializer = self.get_serializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["deck_id", "ids"],
+            properties={
+                "deck_id": openapi.Schema(type=openapi.TYPE_STRING),
+                "ids": openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)),
+            },
+        )
+    )
+    @action(detail=False, methods=["POST"])
+    def bulk_delete(self, request, *args, **kwargs):
+        deck_id = request.data.get("deck_id")
+        deck = deck_service.get_deck_by_id(deck_id)
+        deleted = term_service.delete_terms(deck, request.user, request.data.get("ids"))
+        term_service.invalidate_learning_cache(deck_id, request.user.id)
+        return Response({"deleted": deleted})
 
     @swagger_auto_schema(
         manual_parameters=[

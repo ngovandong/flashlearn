@@ -14,6 +14,7 @@ from typing import Any
 
 import requests
 
+from .logging_utils import extract_prompt_from_payload, extract_response_meta, log_ai_call
 from .rate_limit import GlobalAiGate
 
 logger = logging.getLogger(__name__)
@@ -64,7 +65,11 @@ class RetryingHttpProvider:
         however they need (JSON for text models, raw bytes for audio/TTS).
         """
         last_error: AiProviderError | None = None
+        model_name = str(getattr(self, "_model", getattr(self, "_tts_model", self.label)))
+        prompt_text = extract_prompt_from_payload(payload)
+
         for attempt in range(self._max_retries + 1):
+            start_time = time.monotonic()
             try:
                 # Gate each attempt: only one provider request runs at a time
                 # across all processes, and never more than the per-minute quota.
@@ -80,15 +85,59 @@ class RetryingHttpProvider:
                         verify=self._verify,
                     )
             except requests.RequestException as exc:
-                # Network errors / timeouts are usually transient — retry.
+                duration_s = time.monotonic() - start_time
                 last_error = AiProviderError(f"{self.label} request failed: {exc}")
+                log_ai_call(
+                    provider=self.label,
+                    model=model_name,
+                    input_text=prompt_text,
+                    output_text="",
+                    duration_s=duration_s,
+                    status_code=0,
+                    attempt=attempt + 1,
+                    error=str(exc),
+                )
                 if attempt < self._max_retries:
                     self._backoff(attempt)
                     continue
                 raise last_error from exc
 
+            duration_s = time.monotonic() - start_time
+
             if response.status_code == 200:
+                output_text = ""
+                prompt_tokens = None
+                completion_tokens = None
+                try:
+                    body_json = response.json()
+                    output_text, prompt_tokens, completion_tokens = extract_response_meta(body_json)
+                except Exception:
+                    output_text = f"[Binary response: {len(response.content)} bytes]"
+
+                log_ai_call(
+                    provider=self.label,
+                    model=model_name,
+                    input_text=prompt_text,
+                    output_text=output_text,
+                    duration_s=duration_s,
+                    status_code=200,
+                    prompt_tokens=prompt_tokens,
+                    completion_tokens=completion_tokens,
+                    attempt=attempt + 1,
+                )
                 return response
+
+            err_msg = f"{self.label} status {response.status_code}: {response.text[:300]}"
+            log_ai_call(
+                provider=self.label,
+                model=model_name,
+                input_text=prompt_text,
+                output_text="",
+                duration_s=duration_s,
+                status_code=response.status_code,
+                attempt=attempt + 1,
+                error=err_msg,
+            )
 
             if response.status_code == _RATE_LIMIT_STATUS:
                 # Don't retry rate limits in-process — give way to other

@@ -2,6 +2,10 @@ import { shuffleArray } from "./array";
 import { QUESTION_TYPES } from "./constants";
 import type { Question, Term } from "./types";
 
+// A multiple-choice question needs at least one wrong option to be worth
+// answering. Tiny decks (a single term) simply get typing questions instead.
+const MIN_DISTRACTORS = 1;
+
 export function generateQuizQuestions(
   reviseTerms: Term[],
   allTerms: Term[]
@@ -9,19 +13,25 @@ export function generateQuizQuestions(
   // Shuffle terms array
   reviseTerms = shuffleArray(reviseTerms);
 
-  // Create questions array
-  const questions = reviseTerms.map((term) => {
-    // Get three random terms (excluding current term)
-    const randomTerms = allTerms
+  const questions: Question[] = [];
+  for (const term of reviseTerms) {
+    // Get up to three random terms (excluding current term)
+    const options = allTerms
       .filter((t) => t.id !== term.id && t.name !== term.name)
       .sort(() => Math.random() - 0.5)
-      .slice(0, 3);
+      .slice(0, 3)
+      .map((t) => t.name as string);
 
-    // Get options array (with current term as correct answer)
-    const options = randomTerms.map((t) => t.name as string);
-    options.splice(Math.floor(Math.random() * 4), 0, term.name as string);
+    if (options.length < MIN_DISTRACTORS) continue;
 
-    return {
+    // Drop the correct answer in at a random position
+    options.splice(
+      Math.floor(Math.random() * (options.length + 1)),
+      0,
+      term.name as string
+    );
+
+    questions.push({
       type: QUESTION_TYPES.QUIZ,
       id: term.id,
       image: term.image,
@@ -29,8 +39,8 @@ export function generateQuizQuestions(
       options,
       answer: term.name,
       progressId: term.learning_progress_id,
-    };
-  });
+    });
+  }
 
   return questions;
 }

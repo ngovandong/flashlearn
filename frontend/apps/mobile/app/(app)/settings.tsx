@@ -23,6 +23,7 @@ import { useAppDispatch } from "@/store/hooks";
 import { logoutUser } from "@/store/authSlice";
 import { AppCard } from "@/components/ui/AppCard";
 import { GradientSurface } from "@/components/ui/GradientSurface";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
 import { useTokens, type Tokens } from "@/theme/tokens";
 import { ASSISTANT_NAME } from "@/features/assistant/constants";
 import { assistantPrefs, useAssistantPrefs } from "@/features/assistant/prefs";
@@ -78,6 +79,7 @@ function PaletteSwatch({
 
 export default function SettingsScreen() {
   const t = useTokens();
+  const tabBarHeight = useFloatingTabBarHeight();
   const { mode, palette, surface, setMode, setPalette, setSurface } = useAppTheme();
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
@@ -85,7 +87,11 @@ export default function SettingsScreen() {
   const assistantSnoozed =
     assistant.snoozeUntil != null && Date.now() < assistant.snoozeUntil;
 
-  const { data: settings } = useQuery({
+  const {
+    data: settings,
+    isLoading: settingsLoading,
+    isError: settingsError,
+  } = useQuery({
     queryKey: ["my-settings"],
     queryFn: () => userSettingsApi.getSettings(),
   });
@@ -101,6 +107,10 @@ export default function SettingsScreen() {
     }
   }, [settings]);
 
+  useEffect(() => {
+    if (settingsError) setSnack("Couldn't load settings");
+  }, [settingsError]);
+
   const mutation = useMutation({
     mutationFn: (data: Partial<UserSettings>) => userSettingsApi.updateSettings(data),
     onSuccess: (updated) => {
@@ -114,15 +124,40 @@ export default function SettingsScreen() {
     mutation.mutate({
       daily_reminder: dailyReminder,
       reminder_email: reminderEmail,
-      theme_mode: mode,
-      theme_palette: palette,
-      theme_surface: surface,
     });
+  };
+
+  // Mirrors web's themeContext `persist`: appearance changes apply instantly
+  // to the UI (via useAppTheme/AsyncStorage) and are pushed to the server in
+  // the background, independent of the reminders "Save settings" button, so
+  // the choice follows the user across devices even if they never tap Save.
+  const persistTheme = (data: Partial<UserSettings>) => {
+    userSettingsApi.updateSettings(data).catch(() => {});
+  };
+
+  const handleMode = (v: ThemeMode) => {
+    setMode(v);
+    persistTheme({ theme_mode: v });
+  };
+
+  const handleSurface = (v: ThemeSurface) => {
+    setSurface(v);
+    persistTheme({ theme_surface: v });
+  };
+
+  const handlePalette = (id: string) => {
+    setPalette(id);
+    persistTheme({ theme_palette: id });
+  };
+
+  const handleLogout = () => {
+    queryClient.clear();
+    dispatch(logoutUser());
   };
 
   return (
     <View style={[styles.flex, { backgroundColor: t.neutral.bg }]}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight }]} showsVerticalScrollIndicator={false}>
         <Text variant="headlineMedium" style={{ color: t.neutral.text, fontWeight: "800" }}>
           Settings
         </Text>
@@ -133,7 +168,7 @@ export default function SettingsScreen() {
           </Text>
           <SegmentedButtons
             value={mode}
-            onValueChange={(v) => setMode(v as ThemeMode)}
+            onValueChange={(v) => handleMode(v as ThemeMode)}
             buttons={[
               { value: "light", label: "Light", icon: "white-balance-sunny" },
               { value: "dark", label: "Dark", icon: "weather-night" },
@@ -146,7 +181,7 @@ export default function SettingsScreen() {
           </Text>
           <SegmentedButtons
             value={surface}
-            onValueChange={(v) => setSurface(v as ThemeSurface)}
+            onValueChange={(v) => handleSurface(v as ThemeSurface)}
             style={{ marginTop: 6 }}
             buttons={[
               { value: "solid", label: "Solid", icon: "square-rounded" },
@@ -172,7 +207,7 @@ export default function SettingsScreen() {
                     key={p.id}
                     palette={p}
                     selected={p.id === palette}
-                    onSelect={setPalette}
+                    onSelect={handlePalette}
                     t={t}
                   />
                 ))}
@@ -204,6 +239,7 @@ export default function SettingsScreen() {
           <Button
             mode="contained"
             loading={mutation.isPending}
+            disabled={settingsLoading}
             onPress={save}
             style={styles.save}
           >
@@ -256,7 +292,7 @@ export default function SettingsScreen() {
           <Text variant="titleMedium" style={[styles.cardTitle, { color: t.neutral.text }]}>
             Account
           </Text>
-          <Button mode="outlined" icon="logout" onPress={() => dispatch(logoutUser())}>
+          <Button mode="outlined" icon="logout" onPress={handleLogout}>
             Log out
           </Button>
         </AppCard>

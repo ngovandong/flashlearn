@@ -7,6 +7,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
 import { AppCard } from "@/components/ui/AppCard";
 import { FeatureTile } from "@/components/ui/FeatureTile";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
 import { useTokens } from "@/theme/tokens";
 
 const ITEMS = [
@@ -22,11 +23,12 @@ export default function PracticeHubScreen() {
   const t = useTokens();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useFloatingTabBarHeight();
 
   return (
     <ScrollView
       style={{ backgroundColor: t.neutral.bg }}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 12, paddingBottom: tabBarHeight }]}
       showsVerticalScrollIndicator={false}
     >
       <FadeSlideIn>

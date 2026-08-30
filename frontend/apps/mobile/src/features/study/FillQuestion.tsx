@@ -24,6 +24,13 @@ export function FillQuestion({ question, onAnswer, disabled }: Props) {
     onAnswer(r.isCorrect);
   };
 
+  const giveUp = () => {
+    if (disabled || submitted) return;
+    setResult({ isCorrect: false, status: "incorrect", distance: Infinity });
+    setSubmitted(true);
+    onAnswer(false);
+  };
+
   const diff = submitted && result && !result.isCorrect ? diffAnswer(value, question.answer) : null;
 
   return (
@@ -43,9 +50,14 @@ export function FillQuestion({ question, onAnswer, disabled }: Props) {
         autoCorrect={false}
       />
       {!submitted ? (
-        <Button mode="contained" onPress={submit} disabled={disabled || !value.trim()}>
-          Check
-        </Button>
+        <View style={styles.actions}>
+          <Button mode="contained" onPress={submit} disabled={disabled || !value.trim()} style={styles.actionBtn}>
+            Check
+          </Button>
+          <Button mode="outlined" onPress={giveUp} disabled={disabled} style={styles.actionBtn}>
+            I Don't Know
+          </Button>
+        </View>
       ) : null}
       {submitted && result ? (
         <Text
@@ -72,4 +84,6 @@ export function FillQuestion({ question, onAnswer, disabled }: Props) {
 
 const styles = StyleSheet.create({
   wrap: { gap: 16, padding: 16 },
+  actions: { gap: 10 },
+  actionBtn: { alignSelf: "stretch" },
 });

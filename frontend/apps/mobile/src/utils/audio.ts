@@ -8,8 +8,15 @@ import {
   type AudioRecorder as NativeAudioRecorder,
 } from "expo-audio";
 import * as Speech from "expo-speech";
+import { Platform } from "react-native";
 import { EncodingType, File, Paths } from "expo-file-system";
 import { prepareSpeechClip, encodeBase64, type SpeechClipInput } from "@flashlearn/core";
+
+// RecordingPresets.HIGH_QUALITY records an MPEG-4/AAC container on iOS &
+// Android ('.m4a') but WebM/Opus in the browser — "audio/m4a" isn't a MIME
+// type the Gemini audio-understanding API recognizes, so it silently fails
+// to decode the bytes and reports back that no speech was heard.
+const RECORDING_MIME_TYPE = Platform.OS === "web" ? "audio/webm" : "audio/mp4";
 
 export type PlaybackResult = { ok: true } | { ok: false; error: string };
 
@@ -172,7 +179,7 @@ export class AudioRecorder {
     this.recording = null;
     if (!uri) return null;
     const base64 = await new File(uri).base64();
-    return { uri, base64, mimeType: "audio/m4a" };
+    return { uri, base64, mimeType: RECORDING_MIME_TYPE };
   }
 
   async cancel(): Promise<void> {

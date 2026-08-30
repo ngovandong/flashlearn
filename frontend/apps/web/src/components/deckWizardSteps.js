@@ -8,14 +8,13 @@ const STEPS = [
 ];
 
 /**
- * Shared progress header for the deck create/edit flow.
+ * Progress header for the new-deck flow.
  *
  * Creating terms needs a deck id (created in step 1), so the flow is inherently
  * two steps — this stepper makes that feel like one seamless journey. Pass the
- * active step index; earlier steps render as completed. `onStepClick` is
- * optional (used on the edit page to jump back to details).
+ * active step index; earlier steps render as completed.
  */
-function DeckWizardSteps({ active = 0, onStepClick }) {
+function DeckWizardSteps({ active = 0 }) {
   return (
     <Box
       sx={{
@@ -28,17 +27,13 @@ function DeckWizardSteps({ active = 0, onStepClick }) {
     >
       {STEPS.map((step, i) => {
         const state = i < active ? "done" : i === active ? "active" : "todo";
-        const clickable = typeof onStepClick === "function" && i < active;
         return (
           <React.Fragment key={step.label}>
             <Box
-              role={clickable ? "button" : undefined}
-              onClick={clickable ? () => onStepClick(i) : undefined}
               sx={{
                 display: "flex",
                 alignItems: "center",
                 gap: 1.25,
-                cursor: clickable ? "pointer" : "default",
                 opacity: state === "todo" ? 0.65 : 1,
                 transition: "opacity 0.2s ease",
               }}

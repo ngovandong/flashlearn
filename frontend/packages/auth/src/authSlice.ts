@@ -41,6 +41,14 @@ export interface AuthSliceDeps {
   onLoginSuccess?: (data: LoginPayload) => void;
   /** Runs when the local session is cleared (web: googleLogout; native: wipe store). */
   onLogout?: () => void;
+  /**
+   * Runs whenever a login attempt (password or the platform's Google flow)
+   * throws or comes back as an API error, so the platform can report it (e.g.
+   * to Sentry). Not called for `bootstrapSession`/`logoutUser` — those swallow
+   * failures by design (no session yet / best-effort revoke), which is expected
+   * and would otherwise spam error reporting on every logged-out app launch.
+   */
+  onError?: (error: unknown, context: "login" | "get-user") => void;
 }
 
 const initialState: AuthState = {
@@ -58,23 +66,33 @@ const initialState: AuthState = {
  * and native share the same state machine and thunks.
  */
 export function createAuthSlice(deps: AuthSliceDeps) {
-  const { authApi, onLoginSuccess, onLogout } = deps;
+  const { authApi, onLoginSuccess, onLogout, onError } = deps;
 
   const login = createAsyncThunk(
     "auth/login",
     async (user: { email: string; password: string }) => {
       const { email, password } = user;
-      const res = await authApi.login(email, password);
-      if (!res.error) {
-        if (res.data) onLoginSuccess?.(res.data);
-        return res.data as LoginPayload; // { access, user }
+      try {
+        const res = await authApi.login(email, password);
+        if (!res.error) {
+          if (res.data) onLoginSuccess?.(res.data);
+          return res.data as LoginPayload; // { access, user }
+        }
+        throw new Error(getFirstError(res.error));
+      } catch (error) {
+        onError?.(error, "login");
+        throw error;
       }
-      throw new Error(getFirstError(res.error));
     }
   );
 
   const getUser = createAsyncThunk("auth/getUser", async () => {
-    return authApi.getUser();
+    try {
+      return await authApi.getUser();
+    } catch (error) {
+      onError?.(error, "get-user");
+      throw error;
+    }
   });
 
   // Re-establish the session on app load. On web this uses the HttpOnly refresh

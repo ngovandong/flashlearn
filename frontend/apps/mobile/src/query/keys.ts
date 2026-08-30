@@ -9,6 +9,9 @@ export const queryKeys = {
   },
   terms: {
     byDeck: (deckId: string, page: number) => ["terms", deckId, page] as const,
+    browse: (deckId: string, query: string, sort: string, page: number) =>
+      ["terms", deckId, "browse", query, sort, page] as const,
+    total: (deckId: string) => ["terms", deckId, "total"] as const,
   },
   learning: {
     reviseTerms: (deckId: string) => ["learning", "revise", deckId] as const,
@@ -16,6 +19,7 @@ export const queryKeys = {
   },
   courses: {
     catalog: (page: number, level: string) => ["courses", page, level] as const,
+    levels: ["courses", "levels"] as const,
     detail: (slug: string) => ["courses", slug] as const,
   },
   listening: {

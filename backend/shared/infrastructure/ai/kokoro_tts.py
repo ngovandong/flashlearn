@@ -19,9 +19,11 @@ import importlib.util
 import io
 import logging
 import os
+import time
 import wave
 
 from .base import AiProviderError
+from .logging_utils import log_ai_call
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +61,7 @@ class KokoroTtsProvider:
         if not voice:
             raise AiProviderError("Kokoro requires a voice name (e.g. af_heart, am_michael)")
 
+        start_time = time.monotonic()
         lang = (language or "").strip() or (voice[0] if voice[0].isalpha() else self._default_lang)
         pipeline = self._ensure_pipeline(lang)
 
@@ -71,9 +74,31 @@ class KokoroTtsProvider:
             arr = audio.detach().cpu().numpy() if hasattr(audio, "detach") else np.asarray(audio)
             chunks.append(arr.astype(np.float32))
         if not chunks:
+            duration_s = time.monotonic() - start_time
+            log_ai_call(
+                provider=self.label,
+                model=voice,
+                input_text=text,
+                output_text="",
+                duration_s=duration_s,
+                status_code=500,
+                error=f"Kokoro produced no audio for voice {voice!r}",
+            )
             raise AiProviderError(f"Kokoro produced no audio for voice {voice!r}")
         samples = np.concatenate(chunks)
-        return {"audio": self._encode_wav(samples), "mime_type": "audio/wav"}
+        encoded_audio = self._encode_wav(samples)
+        duration_s = time.monotonic() - start_time
+
+        log_ai_call(
+            provider=self.label,
+            model=voice,
+            input_text=text,
+            output_text=f"[Kokoro WAV generated: {len(encoded_audio)} chars]",
+            duration_s=duration_s,
+            status_code=200,
+        )
+
+        return {"audio": encoded_audio, "mime_type": "audio/wav"}
 
     def _ensure_pipeline(self, lang_code: str):
         if self._pipeline_cls is None:

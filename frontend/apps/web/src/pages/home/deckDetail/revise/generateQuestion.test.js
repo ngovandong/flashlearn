@@ -51,6 +51,24 @@ describe("generateQuestion", () => {
     });
   });
 
+  test("a one-term deck falls back to typing questions", () => {
+    const only = [makeReviseTerms()[0]];
+    expect(generateQuizQuestions(only, only)).toHaveLength(0);
+
+    const questions = generateQuestions(only, only);
+    expect(questions).toHaveLength(1);
+    expect(questions[0].type).toBe(QUESTION_TYPES.FILL);
+  });
+
+  test("a two-term deck still builds a real choice", () => {
+    const terms = makeReviseTerms();
+    const questions = generateQuizQuestions(terms, terms);
+    questions.forEach((q) => {
+      expect(q.options).toHaveLength(2);
+      expect(q.options).toContain(q.answer);
+    });
+  });
+
   test("generateQuestions merges quiz and fill types", () => {
     const reviseTerms = makeReviseTerms();
     const questions = generateQuestions(reviseTerms, makeAllTerms());

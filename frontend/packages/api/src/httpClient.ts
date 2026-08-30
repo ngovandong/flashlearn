@@ -29,6 +29,14 @@ export interface HttpClientConfig {
   onAuthFailure?: () => void;
   /** Endpoints that must never trigger a refresh (would recurse). */
   authEndpointPattern?: RegExp;
+  /**
+   * Reports unexpected request failures site/app-wide (e.g. to Sentry): network
+   * errors, 5xx responses, a failed token refresh, and anything with no
+   * response at all. Deliberately NOT called for ordinary 4xx responses — those
+   * are expected validation/auth failures the caller already surfaces to the
+   * user, and reporting every one would drown real bugs in noise.
+   */
+  onError?: (error: unknown, context: { url?: string; status?: number }) => void;
 }
 
 interface QueuedRequest {
@@ -91,7 +99,10 @@ export function createHttpClient(config: HttpClientConfig): AxiosInstance {
   request.interceptors.response.use(
     (res: AxiosResponse) => res,
     async (error: AxiosError) => {
+      const url = (error.config as InternalAxiosRequestConfig)?.url;
+
       if (error.code === "ERR_NETWORK") {
+        config.onError?.(error, { url });
         return { error: "Network error. Please check your connection." };
       }
       const originalRequest = error.config as InternalAxiosRequestConfig;
@@ -107,7 +118,8 @@ export function createHttpClient(config: HttpClientConfig): AxiosInstance {
             originalRequest.headers["Authorization"] = `Bearer ${tokens.access}`;
             processQueue(null, tokens.access);
             return bare(originalRequest);
-          } catch {
+          } catch (refreshError) {
+            config.onError?.(refreshError, { url, status: 401 });
             config.onAuthFailure?.();
             processQueue("Logout Error", null);
           } finally {
@@ -119,7 +131,13 @@ export function createHttpClient(config: HttpClientConfig): AxiosInstance {
           });
         }
       } else if (error.response?.data) {
+        const status = error.response.status;
+        if (status >= 500) {
+          config.onError?.(error, { url, status });
+        }
         return { error: error.response.data };
+      } else {
+        config.onError?.(error, { url, status: error.response?.status });
       }
       return error;
     }

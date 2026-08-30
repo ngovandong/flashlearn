@@ -1,18 +1,23 @@
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { Divider, Text, TextInput } from "react-native-paper";
+import { Divider, Snackbar, Text, TextInput } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type { WritingSession } from "@flashlearn/core";
-import { writingApi } from "@/api/services";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Highlight, Term, WritingSession } from "@flashlearn/core";
+import { termApi, writingApi } from "@/api/services";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
 import { PressableScale } from "@/components/PressableScale";
+import { MarkedText, type TextMark } from "@/components/MarkedText";
+import VocabModal, { type VocabSelection } from "@/components/VocabModal";
 import { AppCard } from "@/components/ui/AppCard";
 import { GradientButton } from "@/components/ui/GradientButton";
 import { NavCard } from "@/components/ui/NavCard";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
+import { speakText } from "@/utils/audio";
+import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
 import { useTokens, type Tokens } from "@/theme/tokens";
 
@@ -38,6 +43,7 @@ const MODE_CARDS = [
 ];
 const SUCCESS_GREEN = "#2e7d32";
 const WARN_ORANGE = "#ed6c02";
+const ERROR_RED = "#d32f2f";
 
 const BAND_LABELS: Record<string, string> = {
   taskResponse: "Task Response",
@@ -63,6 +69,10 @@ interface WritingFeedback {
   improvedVersion?: string;
 }
 
+function stripHtml(html?: string): string {
+  return (html || "").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim();
+}
+
 const fmtBand = (n?: number) => {
   const v = Number(n) || 0;
   return Number.isInteger(v) ? `${v}` : v.toFixed(1);
@@ -72,18 +82,28 @@ export default function WritingScreen() {
   const t = useTokens();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useFloatingTabBarHeight();
+  const qc = useQueryClient();
   const [mode, setMode] = useState<"chat" | "free">("chat");
   const [topic, setTopic] = useState("");
   const [level, setLevel] = useState("B1");
   const [draft, setDraft] = useState("");
-  const [feedback, setFeedback] = useState<WritingFeedback | null>(null);
+  const [session, setSession] = useState<WritingSession | null>(null);
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
+  const [activeCorrection, setActiveCorrection] = useState<Correction | null>(null);
+  const [selected, setSelected] = useState<VocabSelection | null>(null);
+  const [noteDraft, setNoteDraft] = useState("");
+  const [snack, setSnack] = useState<string | null>(null);
 
   const startChatMutation = useMutation({
     mutationFn: async () => {
       const res = await writingApi.startChat({ topic, level, tone: "casual" });
       return unwrap<{ id: string }>(res);
     },
-    onSuccess: (data) => router.push(`/writing/${data.id}`),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: queryKeys.writing.history });
+      if (data?.id) router.push(`/writing/${data.id}`);
+    },
   });
 
   const submitDraftMutation = useMutation({
@@ -91,11 +111,39 @@ export default function WritingScreen() {
       const res = await writingApi.submitDraft({ topic, draft, level, tone: "casual" });
       return unwrap<WritingSession>(res);
     },
-    onSuccess: (session) => setFeedback((session.feedback as WritingFeedback) ?? {}),
+    onSuccess: (s) => {
+      setSession(s);
+      setHighlights(s.highlights ?? []);
+      qc.invalidateQueries({ queryKey: queryKeys.writing.history });
+    },
+  });
+
+  const highlightMutation = useMutation({
+    mutationFn: (payload: { text: string; note?: string; remove?: boolean }) =>
+      writingApi.setHighlight(session!.id, payload),
+    onSuccess: (res) => setHighlights(unwrap<{ highlights: Highlight[] }>(res).highlights ?? []),
+    onError: () => setSnack("Could not update highlight."),
+  });
+
+  const saveTermMutation = useMutation({
+    mutationFn: async () => {
+      if (!selected) return;
+      const payload: Term = {
+        name: selected.text,
+        meaning: selected.fields?.find((f) => f.label === "Meaning")?.value ?? "",
+        ai_filled: true,
+      };
+      return unwrap(await termApi.addToDefaultDeck(payload));
+    },
+    onSuccess: () => {
+      setSnack(`"${selected?.text}" saved to your default deck.`);
+      setSelected(null);
+    },
+    onError: () => setSnack("Could not save term."),
   });
 
   const historyQuery = useQuery({
-    queryKey: ["writing", "history"],
+    queryKey: queryKeys.writing.history,
     queryFn: async () => unwrap<{ sessions: { id: string; topic?: string }[] }>(await writingApi.getHistory()),
   });
 
@@ -110,6 +158,7 @@ export default function WritingScreen() {
     : FALLBACK_TOPICS;
 
   const history = (historyQuery.data?.sessions ?? []).slice(0, 5);
+  const feedback = (session?.feedback as WritingFeedback | undefined) ?? null;
 
   const canStart = topic.trim().length > 0;
   const primaryBusy = startChatMutation.isPending || submitDraftMutation.isPending;
@@ -119,10 +168,55 @@ export default function WritingScreen() {
     else if (draft.trim()) submitDraftMutation.mutate();
   };
 
+  const isHighlighted = (text: string) =>
+    highlights.some((h) => (h.text || "").toLowerCase() === (text || "").toLowerCase());
+
+  const openVocab = async (rawText: string, context?: string) => {
+    const text = (rawText || "").trim();
+    if (!text || text.length < 2 || text.length > 80) return;
+    const existing = highlights.find((h) => (h.text || "").toLowerCase() === text.toLowerCase());
+    setNoteDraft(existing?.note || "");
+    setSelected({ text, context, loading: true });
+    try {
+      const [enrich, explain] = await Promise.all([
+        unwrap<Partial<Term>>(await termApi.aiEnrich(text, "")),
+        unwrap<{ meaning?: string; examples?: string[] }>(await writingApi.explainPhrase(text, context || "")),
+      ]);
+      setSelected((prev) =>
+        prev && prev.text === text
+          ? {
+              ...prev,
+              loading: false,
+              fields: [
+                { label: "Meaning", value: explain.meaning || enrich.definition || "" },
+                { label: "Pronunciation", value: enrich.pronunciation || "" },
+                { label: "Word type", value: enrich.word_type || "" },
+                { label: "Example", value: stripHtml(explain.examples?.[0] || enrich.examples?.[0]) },
+              ],
+            }
+          : prev
+      );
+    } catch {
+      setSelected((prev) =>
+        prev && prev.text === text ? { ...prev, loading: false, error: "Failed to load. Tap retry." } : prev
+      );
+    }
+  };
+
+  const draftMarks: TextMark[] = [
+    ...(feedback?.corrections ?? []).map((c) => ({
+      text: c.text || "",
+      color: t.mode === "dark" ? "#f87171" : ERROR_RED,
+      tint: t.alpha(ERROR_RED, 0.14),
+      onPress: () => setActiveCorrection(c),
+    })),
+    ...highlights.map((h) => ({ text: h.text, color: t.neutral.text, tint: t.primaryAlpha(0.16) })),
+  ];
+
   return (
     <ScrollView
       style={{ backgroundColor: t.neutral.bg }}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 12, paddingBottom: tabBarHeight }]}
       showsVerticalScrollIndicator={false}
     >
       <FadeSlideIn>
@@ -243,7 +337,7 @@ export default function WritingScreen() {
           <View style={[styles.tip, { backgroundColor: t.primaryAlpha(0.08), borderRadius: t.radii.md }]}>
             <MaterialIcons name="highlight-alt" size={16} color={t.palette.primary} />
             <Text variant="bodySmall" style={{ color: t.neutral.textMinor, flex: 1 }}>
-              Tip: select any word or phrase later to see its meaning and save it to a deck.
+              Tip: tap any word later to see its meaning and save it to a deck.
             </Text>
           </View>
 
@@ -254,12 +348,29 @@ export default function WritingScreen() {
             disabled={!canStart || (mode === "free" && !draft.trim())}
             style={{ marginTop: 14 }}
           />
+          {submitDraftMutation.isError ? (
+            <Text variant="bodySmall" style={{ color: ERROR_RED, marginTop: 8, textAlign: "center" }}>
+              Could not assess your writing. Please try again.
+            </Text>
+          ) : null}
+          {startChatMutation.isError ? (
+            <Text variant="bodySmall" style={{ color: ERROR_RED, marginTop: 8, textAlign: "center" }}>
+              Could not start the chat. Please try again.
+            </Text>
+          ) : null}
         </AppCard>
       </FadeSlideIn>
 
-      {mode === "free" && feedback ? (
+      {mode === "free" && feedback && session ? (
         <FadeSlideIn delay={80}>
-          <FeedbackReport feedback={feedback} t={t} />
+          <FeedbackReport
+            feedback={feedback}
+            draft={session.draft || draft}
+            draftMarks={draftMarks}
+            activeCorrection={activeCorrection}
+            onWordPress={(w) => openVocab(w)}
+            t={t}
+          />
         </FadeSlideIn>
       ) : null}
 
@@ -278,11 +389,45 @@ export default function WritingScreen() {
           </View>
         </FadeSlideIn>
       ) : null}
+
+      <VocabModal
+        selected={selected}
+        highlighted={selected ? isHighlighted(selected.text) : false}
+        noteDraft={noteDraft}
+        onNoteChange={setNoteDraft}
+        showHighlightControls={!!session?.id}
+        onClose={() => setSelected(null)}
+        onRetry={() => selected && openVocab(selected.text, selected.context)}
+        onListen={(text) => speakText(text)}
+        onToggleHighlight={(remove) =>
+          selected && highlightMutation.mutate({ text: selected.text, note: noteDraft, remove })
+        }
+        onSaveTerm={() => saveTermMutation.mutate()}
+        saving={saveTermMutation.isPending}
+      />
+
+      <Snackbar visible={!!snack} onDismiss={() => setSnack(null)} duration={3000}>
+        {snack}
+      </Snackbar>
     </ScrollView>
   );
 }
 
-function FeedbackReport({ feedback, t }: { feedback: WritingFeedback; t: Tokens }) {
+function FeedbackReport({
+  feedback,
+  draft,
+  draftMarks,
+  activeCorrection,
+  onWordPress,
+  t,
+}: {
+  feedback: WritingFeedback;
+  draft: string;
+  draftMarks: TextMark[];
+  activeCorrection: Correction | null;
+  onWordPress: (word: string) => void;
+  t: Tokens;
+}) {
   const bands = feedback.bands ?? {};
   const strengths = feedback.strengths ?? [];
   const improvements = feedback.improvements ?? [];
@@ -290,6 +435,35 @@ function FeedbackReport({ feedback, t }: { feedback: WritingFeedback; t: Tokens 
 
   return (
     <AppCard padding={16}>
+      {draft ? (
+        <>
+          <Text variant="labelLarge" style={{ color: t.neutral.text }}>
+            Your draft
+          </Text>
+          <MarkedText
+            text={draft}
+            marks={draftMarks}
+            onWordPress={onWordPress}
+            style={{ color: t.neutral.textMinor, marginTop: 6, lineHeight: 22 }}
+          />
+          {activeCorrection ? (
+            <View style={[styles.correctionBox, { backgroundColor: t.neutral.surface2, borderRadius: t.radii.md }]}>
+              <Text>
+                <Text style={{ color: ERROR_RED, textDecorationLine: "line-through" }}>
+                  {activeCorrection.text}
+                </Text>
+                <Text style={{ color: t.neutral.textMinor }}>{"  →  "}</Text>
+                <Text style={{ color: SUCCESS_GREEN, fontWeight: "700" }}>{activeCorrection.suggestion}</Text>
+              </Text>
+              {activeCorrection.issue ? (
+                <Text style={{ color: t.neutral.textMinor, marginTop: 4 }}>{activeCorrection.issue}</Text>
+              ) : null}
+            </View>
+          ) : null}
+          <Divider style={styles.reportDivider} />
+        </>
+      ) : null}
+
       <View>
         <Text variant="labelMedium" style={{ color: t.neutral.textMinor }}>
           Overall band
@@ -321,9 +495,11 @@ function FeedbackReport({ feedback, t }: { feedback: WritingFeedback; t: Tokens 
           <Text variant="labelLarge" style={{ color: t.neutral.text }}>
             Examiner summary
           </Text>
-          <Text variant="bodyMedium" style={{ color: t.neutral.textMinor, marginTop: 4 }}>
-            {feedback.summary}
-          </Text>
+          <MarkedText
+            text={feedback.summary}
+            onWordPress={onWordPress}
+            style={{ color: t.neutral.textMinor, marginTop: 4 }}
+          />
         </>
       ) : null}
 
@@ -362,7 +538,7 @@ function FeedbackReport({ feedback, t }: { feedback: WritingFeedback; t: Tokens 
           {corrections.map((c, i) => (
             <View key={i} style={styles.correction}>
               <Text variant="bodyMedium">
-                <Text style={{ color: t.mode === "dark" ? "#f87171" : "#d32f2f", textDecorationLine: "line-through" }}>
+                <Text style={{ color: t.mode === "dark" ? "#f87171" : ERROR_RED, textDecorationLine: "line-through" }}>
                   {c.text}
                 </Text>
                 <Text style={{ color: t.neutral.textMinor }}>{"  →  "}</Text>
@@ -384,9 +560,11 @@ function FeedbackReport({ feedback, t }: { feedback: WritingFeedback; t: Tokens 
           <Text variant="labelLarge" style={{ color: t.neutral.text }}>
             Model rewrite
           </Text>
-          <Text variant="bodyMedium" style={{ color: t.neutral.textMinor, marginTop: 4, fontStyle: "italic" }}>
-            {feedback.improvedVersion}
-          </Text>
+          <MarkedText
+            text={feedback.improvedVersion}
+            onWordPress={onWordPress}
+            style={{ color: t.neutral.textMinor, marginTop: 4, fontStyle: "italic" }}
+          />
         </>
       ) : null}
     </AppCard>
@@ -417,4 +595,5 @@ const styles = StyleSheet.create({
   bandCard: { flexGrow: 1, flexBasis: "22%", minWidth: 70, borderRadius: 10, paddingVertical: 10, alignItems: "center" },
   reportDivider: { marginVertical: 12 },
   correction: { marginTop: 8 },
+  correctionBox: { padding: 12, marginTop: 10 },
 });

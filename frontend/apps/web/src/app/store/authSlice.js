@@ -2,6 +2,7 @@ import { googleLogout } from "@react-oauth/google";
 import { createAuthSlice } from "@flashlearn/auth";
 import authService from "@api-services/authService";
 import { sendTokenToExtension } from "@utils/extensionLogin";
+import { Sentry } from "../../config/sentry";
 
 // Auth model: the refresh token lives in an HttpOnly cookie (set by the backend,
 // unreadable by JS). The frontend only ever holds the short-lived ACCESS token
@@ -12,6 +13,9 @@ const authSlice = createAuthSlice({
   authApi: authService,
   onLoginSuccess: (data) => sendTokenToExtension(data),
   onLogout: () => googleLogout(),
+  onError: (error, context) => {
+    Sentry.captureException(error, { tags: { authContext: context } });
+  },
 });
 
 export const { login, getUser, bootstrapSession, logoutUser } = authSlice.thunks;

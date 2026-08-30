@@ -2,18 +2,21 @@ import React, { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Switch, Text, TextInput } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deckApi } from "@/api/services";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
 import { AppCard } from "@/components/ui/AppCard";
 import { FeatureTile } from "@/components/ui/FeatureTile";
 import { GradientButton } from "@/components/ui/GradientButton";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
 import { unwrap } from "@/utils/apiError";
 import { useTokens } from "@/theme/tokens";
 
 export default function CreateDeckScreen() {
   const t = useTokens();
+  const tabBarHeight = useFloatingTabBarHeight();
   const router = useRouter();
+  const qc = useQueryClient();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isPublic, setIsPublic] = useState(false);
@@ -25,13 +28,15 @@ export default function CreateDeckScreen() {
       return unwrap(res);
     },
     onSuccess: (deck) => {
+      // Refresh the library lists ("Mine" tab) so the new deck shows up immediately.
+      qc.invalidateQueries({ queryKey: ["decks"] });
       router.replace(`/library/${deck.id}/edit`);
     },
     onError: (e: Error) => setError(e.message),
   });
 
   return (
-    <ScrollView style={{ backgroundColor: t.neutral.bg }} contentContainerStyle={styles.pad}>
+    <ScrollView style={{ backgroundColor: t.neutral.bg }} contentContainerStyle={[styles.pad, { paddingBottom: tabBarHeight }]}>
       <FadeSlideIn>
         <View style={styles.brandRow}>
           <FeatureTile icon="style" size={46} variant="solid" />

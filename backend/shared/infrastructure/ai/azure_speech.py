@@ -22,6 +22,7 @@ import time
 import requests
 
 from .base import AiProviderError
+from .logging_utils import log_ai_call
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +89,7 @@ class AzureSpeechProvider:
             "Pronunciation-Assessment": self._assessment_header(reference_text),
         }
 
-        body = self._post(url, params=params, headers=headers, data=audio_bytes)
+        body = self._post(url, params=params, headers=headers, data=audio_bytes, reference_text=reference_text)
         status = body.get("RecognitionStatus")
         if status not in ("Success", 0) or not body.get("NBest"):
             raise AiProviderError(f"Azure Speech returned no usable result (RecognitionStatus={status!r})")
@@ -115,23 +116,58 @@ class AzureSpeechProvider:
         }
         return base64.b64encode(json.dumps(params).encode("utf-8")).decode("ascii")
 
-    def _post(self, url: str, *, params: dict, headers: dict, data: bytes) -> dict:
+    def _post(self, url: str, *, params: dict, headers: dict, data: bytes, reference_text: str = "") -> dict:
         last_error: AiProviderError | None = None
+        input_desc = f"Ref: {reference_text} | Audio bytes: {len(data)}"
         for attempt in range(self._max_retries + 1):
+            start_time = time.monotonic()
             try:
                 response = requests.post(url, params=params, headers=headers, data=data, timeout=self._timeout)
             except requests.RequestException as exc:
+                duration_s = time.monotonic() - start_time
                 last_error = AiProviderError(f"{self.label} request failed: {exc}")
+                log_ai_call(
+                    provider=self.label,
+                    model="PronunciationAssessment",
+                    input_text=input_desc,
+                    output_text="",
+                    duration_s=duration_s,
+                    status_code=0,
+                    error=str(exc),
+                )
                 if attempt < self._max_retries:
                     time.sleep(min(2**attempt + random.uniform(0, 1), 10))
                     continue
                 raise last_error from exc
 
+            duration_s = time.monotonic() - start_time
+
             if response.status_code == 200:
                 try:
-                    return response.json()
+                    res_json = response.json()
+                    status = res_json.get("RecognitionStatus", "Success")
+                    log_ai_call(
+                        provider=self.label,
+                        model="PronunciationAssessment",
+                        input_text=input_desc,
+                        output_text=f"RecognitionStatus: {status}",
+                        duration_s=duration_s,
+                        status_code=200,
+                    )
+                    return res_json
                 except ValueError as exc:
                     raise AiProviderError(f"{self.label} returned non-JSON body: {exc}") from exc
+
+            err_msg = f"{self.label} returned status {response.status_code}: {response.text[:300]}"
+            log_ai_call(
+                provider=self.label,
+                model="PronunciationAssessment",
+                input_text=input_desc,
+                output_text="",
+                duration_s=duration_s,
+                status_code=response.status_code,
+                error=err_msg,
+            )
 
             if response.status_code in _RETRY_STATUSES and attempt < self._max_retries:
                 time.sleep(min(2**attempt + random.uniform(0, 1), 10))

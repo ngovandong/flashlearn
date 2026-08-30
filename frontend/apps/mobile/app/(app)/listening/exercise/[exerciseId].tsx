@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Text, TextInput } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { evaluateDictation, overallDictationScore } from "@flashlearn/core";
+import { evaluateDictation, overallDictationScore, tokenDisplay } from "@flashlearn/core";
 import type { Highlight, ListeningSentence } from "@flashlearn/core";
 import { listeningApi } from "@/api/services";
 import { ErrorView } from "@/components/ErrorView";
@@ -14,8 +14,8 @@ import { PressableScale } from "@/components/PressableScale";
 import { AppCard } from "@/components/ui/AppCard";
 import { GradientButton } from "@/components/ui/GradientButton";
 import { ProgressRing } from "@/components/ui/ProgressRing";
-import { AnimatedBar } from "@/components/ui/AnimatedBar";
-import { playAudioUrl } from "@/utils/audio";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
+import { playAudioUrl, speakText, stopPlayback } from "@/utils/audio";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
 import { useTokens, type Tokens } from "@/theme/tokens";
@@ -34,6 +34,13 @@ interface SentenceMeta {
   note?: string;
 }
 
+interface ExerciseProgress {
+  highlights?: Highlight[];
+  sentence_meta?: Record<string, SentenceMeta>;
+  best_score?: number;
+  last_result?: { lines?: LineResult[] };
+}
+
 /** Small icon+label chip used for the audio / reveal / translate controls. */
 function ToolChip({
   label,
@@ -41,6 +48,7 @@ function ToolChip({
   onPress,
   loading,
   active,
+  disabled,
   t,
 }: {
   label: string;
@@ -48,18 +56,19 @@ function ToolChip({
   onPress: () => void;
   loading?: boolean;
   active?: boolean;
+  disabled?: boolean;
   t: Tokens;
 }) {
   return (
     <PressableScale
       onPress={onPress}
-      disabled={loading}
+      disabled={loading || disabled}
       style={[
         styles.toolChip,
         {
           backgroundColor: active ? t.primaryAlpha(0.12) : t.neutral.surface2,
           borderRadius: t.radii.pill,
-          opacity: loading ? 0.6 : 1,
+          opacity: loading || disabled ? 0.5 : 1,
         },
       ]}
     >
@@ -69,19 +78,30 @@ function ToolChip({
   );
 }
 
+function scoreColor(score: number): string {
+  if (score === 100) return "#22c55e";
+  if (score >= 50) return "#f59e0b";
+  return "#ef4444";
+}
+
 export default function ListeningExerciseScreen() {
   const { exerciseId } = useLocalSearchParams<{ exerciseId: string }>();
   const t = useTokens();
+  const tabBarHeight = useFloatingTabBarHeight();
   const [index, setIndex] = useState(0);
-  const [typed, setTyped] = useState("");
-  const [lines, setLines] = useState<LineResult[]>([]);
-  const [done, setDone] = useState(false);
+  const [inputs, setInputs] = useState<string[]>([]);
+  const [results, setResults] = useState<(LineResult | null)[]>([]);
+  const [revealed, setRevealed] = useState<boolean[]>([]);
+  const [bestScore, setBestScore] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const [playbackError, setPlaybackError] = useState<string | null>(null);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [sentenceMeta, setSentenceMeta] = useState<Record<string, SentenceMeta>>({});
   const [noteDraft, setNoteDraft] = useState("");
   const [translationDraft, setTranslationDraft] = useState("");
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
-  const [revealed, setRevealed] = useState(false);
+
+  const initializedFor = useRef<string | null>(null);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.listening.exercise(exerciseId!),
@@ -89,25 +109,46 @@ export default function ListeningExerciseScreen() {
       unwrap<{
         sentences: ListeningSentence[];
         title?: string;
-        progress?: {
-          highlights?: Highlight[];
-          sentence_meta?: Record<string, SentenceMeta>;
-          last_result?: { lines?: LineResult[] };
-        };
+        progress?: ExerciseProgress;
       }>(await listeningApi.getExercise(exerciseId!)),
     enabled: !!exerciseId,
   });
 
+  const sentences = useMemo(() => data?.sentences ?? [], [data]);
+
+  // Initialize per-sentence state once per exercise, replaying any saved attempt.
   useEffect(() => {
-    if (!data?.progress) return;
-    setHighlights(data.progress.highlights ?? []);
-    setSentenceMeta(data.progress.sentence_meta ?? {});
-    const saved = data.progress.last_result?.lines;
-    if (saved?.length) {
-      setLines(saved);
-      setIndex(Math.min(saved.length, (data.sentences?.length ?? 1) - 1));
+    if (!data || !exerciseId || initializedFor.current === exerciseId) return;
+    initializedFor.current = exerciseId;
+    const list = sentences;
+    setHighlights(data.progress?.highlights ?? []);
+    setSentenceMeta(data.progress?.sentence_meta ?? {});
+    setBestScore(data.progress?.best_score ?? 0);
+
+    const prior = data.progress?.last_result?.lines;
+    if (Array.isArray(prior) && prior.length) {
+      const byPos = new Map(prior.map((l) => [l.position, l]));
+      setInputs(list.map((s) => byPos.get(s.position)?.typed || ""));
+      setResults(list.map((s) => byPos.get(s.position) ?? null));
+      setRevealed(list.map((s) => byPos.has(s.position)));
+    } else {
+      setInputs(list.map(() => ""));
+      setResults(list.map(() => null));
+      setRevealed(list.map(() => false));
     }
-  }, [data]);
+    setIndex(0);
+    setFinished(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, exerciseId]);
+
+  // Stop any playing clip on unmount.
+  useEffect(() => () => stopPlayback(), []);
+
+  const current = sentences[index];
+  const posKey = current ? String(current.position) : "";
+  const currentMeta = posKey ? sentenceMeta[posKey] : undefined;
+  const currentResult = results[index] ?? null;
+  const isRevealed = !!revealed[index];
 
   const saveProgressMutation = useMutation({
     mutationFn: (payload: LineResult[]) =>
@@ -116,7 +157,13 @@ export default function ListeningExerciseScreen() {
 
   const submitMutation = useMutation({
     mutationFn: async (payload: { score: number; lines: LineResult[] }) =>
-      listeningApi.submit({ exerciseId: exerciseId!, ...payload }),
+      unwrap<{ progress?: { best_score?: number } }>(
+        await listeningApi.submit({ exerciseId: exerciseId!, ...payload })
+      ),
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: async () => listeningApi.resetProgress(exerciseId!),
   });
 
   const highlightMutation = useMutation({
@@ -145,37 +192,118 @@ export default function ListeningExerciseScreen() {
     },
   });
 
-  const sentences = data?.sentences ?? [];
-  const current = sentences[index];
-  const posKey = current ? String(current.position) : "";
-  const currentMeta = posKey ? sentenceMeta[posKey] : undefined;
+  const setInput = (i: number, value: string) =>
+    setInputs((prev) => {
+      const next = [...prev];
+      next[i] = value;
+      return next;
+    });
 
-  const checkLine = () => {
-    if (!current) return;
-    const evalResult = evaluateDictation(current.tokens ?? [], typed);
-    const line: LineResult = {
-      position: current.position,
-      target: current.text ?? "",
-      typed,
+  const persistProgress = (resultsArr: (LineResult | null)[], revealedArr: boolean[]) => {
+    const partial = sentences
+      .map((s, i) => ({ s, i }))
+      .filter(({ i }) => revealedArr[i])
+      .map(({ s, i }) => resultsArr[i] ?? { position: s.position, target: s.text ?? "", typed: "", correct: 0, total: s.tokens?.length ?? 0, tokens_correct: [] });
+    saveProgressMutation.mutate(partial);
+  };
+
+  const evalCurrent = (): LineResult => {
+    const evalResult = evaluateDictation(current?.tokens ?? [], inputs[index] || "");
+    return {
+      position: current?.position ?? index,
+      target: current?.text ?? "",
+      typed: inputs[index] || "",
       correct: evalResult.correct,
       total: evalResult.total,
       tokens_correct: evalResult.tokensCorrect,
     };
-    const nextLines = [...lines.filter((l) => l.position !== line.position), line].sort(
-      (a, b) => a.position - b.position
-    );
-    setLines(nextLines);
-    setTyped("");
-    setRevealed(false);
-    setTranslationDraft("");
-    saveProgressMutation.mutate(nextLines);
+  };
 
-    if (index + 1 >= sentences.length) {
-      const score = overallDictationScore(nextLines);
-      submitMutation.mutate({ score, lines: nextLines });
-      setDone(true);
-    } else {
-      setIndex((i) => i + 1);
+  const checkLine = () => {
+    if (!current) return;
+    const line = evalCurrent();
+    const nextResults = [...results];
+    nextResults[index] = line;
+    const nextRevealed = [...revealed];
+    nextRevealed[index] = true;
+    setResults(nextResults);
+    setRevealed(nextRevealed);
+    persistProgress(nextResults, nextRevealed);
+  };
+
+  const revealLine = () => {
+    if (!current) return;
+    const nextResults = [...results];
+    if (!nextResults[index]) nextResults[index] = evalCurrent();
+    const nextRevealed = [...revealed];
+    nextRevealed[index] = true;
+    setResults(nextResults);
+    setRevealed(nextRevealed);
+    persistProgress(nextResults, nextRevealed);
+  };
+
+  const restartLine = () => {
+    stopPlayback();
+    setInput(index, "");
+    const nextResults = [...results];
+    nextResults[index] = null;
+    const nextRevealed = [...revealed];
+    nextRevealed[index] = false;
+    setResults(nextResults);
+    setRevealed(nextRevealed);
+    persistProgress(nextResults, nextRevealed);
+  };
+
+  const goTo = (i: number) => {
+    if (i < 0 || i >= sentences.length) return;
+    stopPlayback();
+    setIndex(i);
+  };
+
+  const finish = async () => {
+    stopPlayback();
+    const finalResults = sentences.map((s, i) => results[i] ?? {
+      position: s.position,
+      target: s.text ?? "",
+      typed: inputs[i] || "",
+      correct: 0,
+      total: s.tokens?.length ?? 0,
+      tokens_correct: [],
+    });
+    setResults(finalResults);
+    setRevealed(sentences.map(() => true));
+    setFinished(true);
+    const score = overallDictationScore(finalResults);
+    try {
+      const res = await submitMutation.mutateAsync({ score, lines: finalResults });
+      setBestScore((b) => Math.max(b, res.progress?.best_score ?? score));
+    } catch {
+      /* score still shown locally even if the save failed */
+    }
+  };
+
+  const restartAll = async () => {
+    stopPlayback();
+    setInputs(sentences.map(() => ""));
+    setResults(sentences.map(() => null));
+    setRevealed(sentences.map(() => false));
+    setFinished(false);
+    setIndex(0);
+    resetMutation.mutate();
+  };
+
+  const playSentence = async (rate = 1) => {
+    if (!current) return;
+    setPlaybackError(null);
+    if (!current.audio_url) {
+      await speakText(current.text ?? "");
+      return;
+    }
+    const res = await playAudioUrl(current.audio_url, rate);
+    if (!res.ok) {
+      // Fall back to on-device speech so the learner isn't stuck without audio.
+      await speakText(current.text ?? "");
+      setPlaybackError("Couldn't stream this clip — using device speech instead.");
     }
   };
 
@@ -199,10 +327,10 @@ export default function ListeningExerciseScreen() {
   if (isLoading) return <LoadingView />;
   if (isError) return <ErrorView message="Could not load exercise" onRetry={() => refetch()} />;
 
-  if (done) {
-    const score = overallDictationScore(lines);
+  if (finished) {
+    const score = overallDictationScore(results.filter((r): r is LineResult => !!r));
     return (
-      <View style={[styles.center, { backgroundColor: t.neutral.bg }]}>
+      <ScrollView style={{ backgroundColor: t.neutral.bg }} contentContainerStyle={styles.center}>
         <FadeSlideIn>
           <View style={styles.doneInner}>
             <ProgressRing value={score} size={140} strokeWidth={12} />
@@ -210,28 +338,64 @@ export default function ListeningExerciseScreen() {
               Exercise complete
             </Text>
             <Text variant="bodyMedium" style={{ color: t.neutral.textMinor, marginTop: 4 }}>
-              Great listening work!
+              {revealed.filter(Boolean).length} / {sentences.length} sentences · best {bestScore}%
             </Text>
+            <View style={styles.doneActions}>
+              <GradientButton label="Practice again" icon="replay" onPress={restartAll} style={{ flex: 1 }} />
+            </View>
           </View>
         </FadeSlideIn>
-      </View>
+      </ScrollView>
     );
   }
 
   const progress = sentences.length ? (index + 1) / sentences.length : 0;
 
   return (
-    <ScrollView style={{ backgroundColor: t.neutral.bg }} contentContainerStyle={styles.pad} showsVerticalScrollIndicator={false}>
+    <ScrollView style={{ backgroundColor: t.neutral.bg }} contentContainerStyle={[styles.pad, { paddingBottom: tabBarHeight }]} showsVerticalScrollIndicator={false}>
       <FadeSlideIn>
         <View style={styles.progressHead}>
           <Text variant="labelLarge" style={{ color: t.neutral.textMinor, fontWeight: "700" }}>
             Sentence {index + 1} of {sentences.length}
           </Text>
-          <Text variant="labelLarge" style={{ color: t.palette.primary, fontWeight: "800" }}>
-            {Math.round(progress * 100)}%
-          </Text>
+          <View style={styles.rowCenter}>
+            {bestScore > 0 ? (
+              <View style={styles.rowCenter}>
+                <MaterialIcons name="emoji-events" size={16} color={t.palette.primary} />
+                <Text style={{ color: t.palette.primary, fontWeight: "800" }}>{bestScore}%</Text>
+              </View>
+            ) : null}
+            <PressableScale onPress={restartAll} hitSlop={8}>
+              <MaterialIcons name="restart-alt" size={20} color={t.neutral.textMinor} />
+            </PressableScale>
+          </View>
         </View>
-        <AnimatedBar progress={progress} color={t.palette.primary} trackColor={t.neutral.surface2} style={{ marginTop: 8 }} />
+
+        {/* Per-sentence progress dots */}
+        <View style={styles.dots}>
+          {sentences.map((s, i) => {
+            const done = revealed[i];
+            const score = results[i]?.total ? Math.round(((results[i]?.correct ?? 0) / (results[i]!.total || 1)) * 100) : null;
+            const dotColor = done
+              ? scoreColor(score ?? 0)
+              : i === index
+                ? t.palette.primary
+                : t.neutral.surface2;
+            return (
+              <PressableScale key={s.position ?? i} onPress={() => goTo(i)} hitSlop={4}>
+                <View
+                  style={[
+                    styles.dot,
+                    {
+                      backgroundColor: dotColor,
+                      borderColor: i === index ? t.palette.primary : "transparent",
+                    },
+                  ]}
+                />
+              </PressableScale>
+            );
+          })}
+        </View>
       </FadeSlideIn>
 
       {highlights.length > 0 ? (
@@ -248,14 +412,17 @@ export default function ListeningExerciseScreen() {
         </View>
       ) : null}
 
+      {playbackError ? (
+        <Text style={{ color: t.palette.primary, marginTop: 10 }}>{playbackError}</Text>
+      ) : null}
+
       <FadeSlideIn delay={50}>
         <AppCard style={{ marginTop: 16 }}>
-          {current?.audio_url ? (
-            <View style={styles.toolRow}>
-              <ToolChip label="Play" icon="volume-up" onPress={() => playAudioUrl(current.audio_url!)} t={t} />
-              <ToolChip label="Slow" icon="slow-motion-video" onPress={() => playAudioUrl(current.audio_url!, 0.6)} t={t} />
-            </View>
-          ) : null}
+          <View style={styles.toolRow}>
+            <ToolChip label="Play" icon="volume-up" onPress={() => playSentence(1)} t={t} />
+            <ToolChip label="Slow" icon="slow-motion-video" onPress={() => playSentence(0.6)} t={t} />
+            <ToolChip label="Restart" icon="replay" onPress={restartLine} t={t} />
+          </View>
 
           {current?.hint ? (
             <Text variant="bodySmall" style={{ color: t.neutral.textMinor, marginTop: 12 }}>
@@ -266,36 +433,100 @@ export default function ListeningExerciseScreen() {
           <TextInput
             mode="outlined"
             label="Type what you hear"
-            value={typed}
-            onChangeText={setTyped}
+            value={inputs[index] || ""}
+            onChangeText={(v) => setInput(index, v)}
+            editable={!isRevealed}
             multiline
             outlineStyle={{ borderRadius: t.radii.md }}
             style={[styles.input, { marginTop: 14 }]}
           />
 
           <View style={styles.toolRow}>
-            <ToolChip label={revealed ? "Hide" : "Reveal"} icon={revealed ? "visibility-off" : "visibility"} onPress={() => setRevealed((r) => !r)} active={revealed} t={t} />
             <ToolChip label="Translate" icon="translate" onPress={() => current?.text && translateMutation.mutate(current.text)} loading={translateMutation.isPending} t={t} />
           </View>
 
-          <GradientButton label="Check" icon="check" onPress={checkLine} disabled={!typed.trim()} style={{ marginTop: 14 }} />
-
-          {revealed && current?.text ? (
-            <View style={[styles.reveal, { backgroundColor: t.neutral.surface2, borderRadius: t.radii.md }]}>
-              <Text variant="labelMedium" style={{ color: t.neutral.textMinor, fontWeight: "700" }}>
-                Answer
-              </Text>
-              <Text variant="titleMedium" style={{ color: t.neutral.text, marginTop: 2 }}>
-                {current.text}
-              </Text>
+          {!isRevealed ? (
+            <View style={styles.actionsRow}>
+              <ToolChip label="Reveal" icon="visibility" onPress={revealLine} t={t} />
+              <GradientButton
+                label="Check"
+                icon="check"
+                onPress={checkLine}
+                disabled={!(inputs[index] || "").trim()}
+                style={{ flex: 1 }}
+              />
             </View>
-          ) : null}
+          ) : (
+            <View style={{ marginTop: 14 }}>
+              <View
+                style={[
+                  styles.scoreBadge,
+                  { backgroundColor: t.alpha(scoreColor(currentResult?.total ? Math.round((currentResult.correct / currentResult.total) * 100) : 0), 0.12) },
+                ]}
+              >
+                <MaterialIcons
+                  name={currentResult?.total && currentResult.correct === currentResult.total ? "check-circle" : "info"}
+                  size={18}
+                  color={scoreColor(currentResult?.total ? Math.round((currentResult.correct / currentResult.total) * 100) : 0)}
+                />
+                <Text style={{ color: scoreColor(currentResult?.total ? Math.round((currentResult.correct / currentResult.total) * 100) : 0), fontWeight: "800" }}>
+                  {currentResult ? `${currentResult.correct}/${currentResult.total} words · ${currentResult.total ? Math.round((currentResult.correct / currentResult.total) * 100) : 0}%` : ""}
+                </Text>
+              </View>
+
+              <Text variant="labelMedium" style={{ color: t.neutral.textMinor, fontWeight: "700", marginTop: 12 }}>
+                Correct answer
+              </Text>
+              <Text style={{ marginTop: 4, lineHeight: 24 }}>
+                {(current?.tokens ?? []).map((tok, i) => {
+                  const disp = tokenDisplay(tok);
+                  const ok = currentResult?.tokens_correct ? currentResult.tokens_correct[i] : true;
+                  return (
+                    <Text
+                      key={i}
+                      style={{
+                        color: ok ? t.neutral.text : "#ef4444",
+                        fontWeight: ok ? "400" : "700",
+                        textDecorationLine: ok ? "none" : "underline",
+                      }}
+                    >
+                      {disp}{" "}
+                    </Text>
+                  );
+                })}
+              </Text>
+
+              {(inputs[index] || "").trim() ? (
+                <>
+                  <Text variant="labelMedium" style={{ color: t.neutral.textMinor, fontWeight: "700", marginTop: 10 }}>
+                    You typed
+                  </Text>
+                  <Text style={{ color: t.neutral.textMinor, marginTop: 2 }}>{inputs[index]}</Text>
+                </>
+              ) : null}
+
+              {current?.explanation ? (
+                <Text style={{ color: t.neutral.textMinor, marginTop: 10 }}>{current.explanation}</Text>
+              ) : null}
+            </View>
+          )}
 
           {translationDraft || currentMeta?.translation ? (
             <Text style={{ color: t.neutral.textMinor, marginTop: 10 }}>
               Translation: {translationDraft || currentMeta?.translation}
             </Text>
           ) : null}
+
+          <View style={styles.navRow}>
+            <ToolChip label="Prev" icon="chevron-left" onPress={() => goTo(index - 1)} disabled={index === 0} t={t} />
+            {isRevealed ? (
+              index < sentences.length - 1 ? (
+                <GradientButton label="Next" icon="chevron-right" onPress={() => goTo(index + 1)} style={{ flex: 1 }} />
+              ) : (
+                <GradientButton label="Finish" icon="emoji-events" onPress={finish} style={{ flex: 1 }} />
+              )
+            ) : null}
+          </View>
         </AppCard>
       </FadeSlideIn>
 
@@ -313,15 +544,6 @@ export default function ListeningExerciseScreen() {
           <PressableScale onPress={saveSentenceNote} hitSlop={8} style={{ alignSelf: "flex-start", marginTop: 8 }}>
             <Text style={{ color: t.palette.primary, fontWeight: "700" }}>Save note</Text>
           </PressableScale>
-
-          {current?.explanation ? (
-            <>
-              <Text variant="titleSmall" style={{ color: t.neutral.text, fontWeight: "700", marginTop: 12 }}>
-                Explanation
-              </Text>
-              <Text style={{ color: t.neutral.textMinor, marginTop: 2 }}>{current.explanation}</Text>
-            </>
-          ) : null}
         </AppCard>
       </FadeSlideIn>
 
@@ -349,14 +571,20 @@ export default function ListeningExerciseScreen() {
 
 const styles = StyleSheet.create({
   pad: { padding: 16, paddingBottom: 120 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
-  doneInner: { alignItems: "center" },
+  center: { flexGrow: 1, alignItems: "center", justifyContent: "center", padding: 24 },
+  doneInner: { alignItems: "center", width: "100%" },
+  doneActions: { flexDirection: "row", gap: 10, marginTop: 24, width: "100%" },
   progressHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  rowCenter: { flexDirection: "row", alignItems: "center", gap: 10 },
+  dots: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 },
+  dot: { width: 10, height: 10, borderRadius: 5, borderWidth: 2 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 },
   wordChip: { paddingHorizontal: 12, paddingVertical: 7 },
   input: { backgroundColor: "transparent" },
   toolRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 12, alignItems: "center" },
+  actionsRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 14, alignItems: "center" },
+  navRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 14, alignItems: "center" },
   toolChip: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 10 },
-  reveal: { marginTop: 12, padding: 12 },
+  scoreBadge: { flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
   cancelBtn: { paddingHorizontal: 20, height: 52, alignItems: "center", justifyContent: "center" },
 });

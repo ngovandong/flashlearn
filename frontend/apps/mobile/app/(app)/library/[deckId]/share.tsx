@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Alert, Share, ScrollView, StyleSheet, View } from "react-native";
 import { Text, TextInput } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
@@ -14,6 +14,7 @@ import { AppCard } from "@/components/ui/AppCard";
 import { FeatureTile } from "@/components/ui/FeatureTile";
 import { GradientButton } from "@/components/ui/GradientButton";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
 import { useTokens, type Tokens } from "@/theme/tokens";
@@ -37,9 +38,12 @@ function RolePill({ label, active, onPress, t }: { label: string; active: boolea
 export default function ShareDeckScreen() {
   const { deckId } = useLocalSearchParams<{ deckId: string }>();
   const t = useTokens();
+  const tabBarHeight = useFloatingTabBarHeight();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"E" | "V">("V");
   const [message, setMessage] = useState<string | null>(null);
+  const [linkRole, setLinkRole] = useState<"E" | "V">("V");
+  const [linkLoading, setLinkLoading] = useState(false);
 
   const deckQuery = useQuery({
     queryKey: queryKeys.decks.detail(deckId!),
@@ -65,14 +69,56 @@ export default function ShareDeckScreen() {
     onSuccess: () => deckQuery.refetch(),
   });
 
+  const confirmRemove = (userEmail: string) => {
+    Alert.alert("Remove this member?", `${userEmail} will lose access to this deck.`, [
+      { text: "Cancel", style: "cancel" },
+      { text: "Remove", style: "destructive", onPress: () => removeMutation.mutate(userEmail) },
+    ]);
+  };
+
+  const getInviteLink = async () => {
+    setLinkLoading(true);
+    try {
+      const url = unwrap<string>(await deckApi.getInviteUrl(deckId!, linkRole));
+      await Share.share({ message: url });
+    } catch (e) {
+      setMessage((e as Error).message);
+    } finally {
+      setLinkLoading(false);
+    }
+  };
+
   if (deckQuery.isLoading) return <LoadingView />;
   if (deckQuery.isError || !deckQuery.data) return <ErrorView message="Could not load deck" onRetry={() => deckQuery.refetch()} />;
 
   const deck = deckQuery.data;
 
   return (
-    <ScrollView style={{ backgroundColor: t.neutral.bg }} contentContainerStyle={styles.pad}>
+    <ScrollView style={{ backgroundColor: t.neutral.bg }} contentContainerStyle={[styles.pad, { paddingBottom: tabBarHeight }]}>
       <FadeSlideIn>
+        <AppCard>
+          <Text variant="titleMedium" style={{ color: t.neutral.text, fontWeight: "800" }}>
+            Share invite link
+          </Text>
+          <Text variant="bodySmall" style={{ color: t.neutral.textMinor, marginTop: 4 }}>
+            Anyone with the link can join with this permission.
+          </Text>
+          <View style={[styles.row, { marginTop: 12 }]}>
+            <RolePill label="View only" active={linkRole === "V"} onPress={() => setLinkRole("V")} t={t} />
+            <RolePill label="Can edit" active={linkRole === "E"} onPress={() => setLinkRole("E")} t={t} />
+          </View>
+          <GradientButton
+            label="Get invite link"
+            icon="link"
+            onPress={getInviteLink}
+            loading={linkLoading}
+            disabled={linkLoading}
+            style={{ marginTop: 16 }}
+          />
+        </AppCard>
+      </FadeSlideIn>
+
+      <FadeSlideIn delay={40} style={{ marginTop: 16 }}>
         <AppCard>
           <Text variant="titleMedium" style={{ color: t.neutral.text, fontWeight: "800" }}>
             Invite by email
@@ -124,7 +170,7 @@ export default function ShareDeckScreen() {
                   </Text>
                 </View>
                 {ur.role !== "O" ? (
-                  <PressableScale onPress={() => removeMutation.mutate(ur.user.email)} hitSlop={8} style={styles.removeBtn}>
+                  <PressableScale onPress={() => confirmRemove(ur.user.email)} hitSlop={8} style={styles.removeBtn}>
                     <MaterialIcons name="close" size={20} color={t.neutral.textMuted} />
                   </PressableScale>
                 ) : null}

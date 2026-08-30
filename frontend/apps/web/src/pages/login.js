@@ -11,6 +11,7 @@ import {
 } from "@app/store/authSlice";
 import GoogleLoginBT from "@components/googleLoginBT";
 import { sendTokenToExtension } from "@utils/extensionLogin";
+import { Sentry } from "../config/sentry";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,6 +50,9 @@ function Login() {
 
     const errorMessage = searchParams.get("error");
     if (errorMessage) {
+      Sentry.captureMessage(`Google redirect login failed: ${errorMessage}`, {
+        tags: { authContext: "google-redirect" },
+      });
       setRedirectError(errorMessage);
     }
 

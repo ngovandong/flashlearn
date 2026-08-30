@@ -13,11 +13,9 @@ import { motion, useTokens } from "@/theme/tokens";
 interface Props {
   reminders: Reminder[];
   onPress: (reminder: Reminder) => void;
-  /** Render the first item as a tinted hero card. */
-  highlightFirst?: boolean;
 }
 
-export function ReminderList({ reminders, onPress, highlightFirst = true }: Props) {
+export function ReminderList({ reminders, onPress }: Props) {
   const t = useTokens();
   const known = reminders.filter((r) => REMINDER_META[r.type]);
 
@@ -28,21 +26,19 @@ export function ReminderList({ reminders, onPress, highlightFirst = true }: Prop
       {known.map((reminder, i) => {
         const meta = REMINDER_META[reminder.type];
         const iconName = reminderIconName(meta.icon);
-        const { fg, tint } = t.feature(iconName);
-        const hero = highlightFirst && i === 0;
+        const { fg } = t.feature(iconName);
 
         return (
           <FadeSlideIn key={reminder.type} delay={i * motion.stagger.list}>
             <AppCard
               onPress={() => onPress(reminder)}
-              style={
-                hero
-                  ? { backgroundColor: tint, borderColor: t.alpha(fg, 0.35) }
-                  : undefined
-              }
+              style={{
+                backgroundColor: t.tintSurface(fg, 0.07),
+                borderColor: t.alpha(fg, 0.22),
+              }}
             >
               <View style={styles.row}>
-                <FeatureTile icon={iconName} variant={hero ? "solid" : "soft"} />
+                <FeatureTile icon={iconName} variant="soft" />
                 <View style={styles.body}>
                   <Text
                     variant="titleMedium"

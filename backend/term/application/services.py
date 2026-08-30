@@ -1,5 +1,6 @@
 import json
 import re
+import uuid
 from typing import Any
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -12,6 +13,14 @@ from backend.term.infrastructure.repository import TermRepository
 
 _AI_STR_FIELDS = ("word_type", "pronunciation", "definition")
 _AI_LIST_FIELDS = ("synonyms", "antonyms", "examples", "word_forms", "word_family")
+
+# Sort keys the deck editor offers, mapped to the ORM ordering they mean.
+_SORT_ORDERINGS = {
+    "newest": "-created_at",
+    "oldest": "created_at",
+    "az": "name",
+    "za": "-name",
+}
 
 
 def _coerce_list(value: Any) -> list:
@@ -69,6 +78,11 @@ class TermService:
 
     def get_terms_from_deck_id(self, deck_id: int):
         return self._term_repo.filter_by_deck(deck_id)
+
+    def browse_terms(self, deck_id, query: str = "", sort: str = "newest"):
+        """Filtered + sorted terms for the deck editor. The view paginates the queryset."""
+        ordering = _SORT_ORDERINGS.get(sort, _SORT_ORDERINGS["newest"])
+        return self._term_repo.browse_in_deck(deck_id, (query or "").strip(), ordering)
 
     def get_learning_terms_for_deck(self, deck_id, user):
         return self._term_repo.get_terms_for_deck(deck_id, user)
@@ -150,6 +164,21 @@ class TermService:
                 image=item.get("image", ""),
                 **_extract_ai_fields(item),
             )
+
+    def delete_terms(self, deck, user, term_ids):
+        if not deck:
+            raise NotFoundError("Deck not found.")
+        if not DeckAccessPolicy.can_edit(deck, user):
+            raise PermissionDeniedError("You don't have permission to edit this deck.")
+        valid_ids = []
+        for term_id in term_ids or []:
+            try:
+                valid_ids.append(uuid.UUID(str(term_id)))
+            except (ValueError, AttributeError, TypeError):
+                continue
+        if not valid_ids:
+            raise ValidationError("Please select at least one term to delete.")
+        return self._term_repo.bulk_delete(deck.id, valid_ids)
 
     # term[i][<property>] keys passed straight through (coerced later by _extract_ai_fields)
     _PASSTHROUGH_PROPERTIES = ("id", "name", "meaning", "description", *_AI_STR_FIELDS, *_AI_LIST_FIELDS, "ai_filled")
