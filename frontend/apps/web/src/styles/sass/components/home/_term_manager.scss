@@ -1,0 +1,666 @@
+@use "../../base/shared" as *;
+
+/* Deck editor — step 2 "Add terms".
+   A dense, searchable list built to stay pleasant in decks with hundreds of
+   terms: a floating toolbar, quiet rows that come alive on hover, and the full
+   per-term editor in the `.term-editor` panel. */
+.term-manager {
+    @include enter_fade;
+
+    /* ── Toolbar ─────────────────────────────────────────────────────────── */
+    .term-manager__toolbar {
+        @include card;
+        position: sticky;
+        top: calc(#{$nav-height} + 0.5rem);
+        z-index: 6;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: $space-3;
+        padding: $space-3;
+        border-radius: $radius-xl;
+        box-shadow: var(--fl-card-shadow, #{$shadow-md});
+
+        .term-manager__search {
+            flex: 1 1 15rem;
+            min-width: 0;
+        }
+
+        .term-manager__sort {
+            width: 10.5rem;
+        }
+
+        .term-manager__add {
+            display: flex;
+            gap: $space-2;
+            margin-left: auto;
+        }
+    }
+
+    /* ── List header ─────────────────────────────────────────────────────── */
+    .term-manager__meta {
+        display: flex;
+        align-items: center;
+        gap: $space-2;
+        padding: $space-4 $space-2 $space-2;
+        font-size: 0.85rem;
+
+        .term-manager__count {
+            font-weight: 700;
+            color: $main-text-color;
+        }
+
+        .term-manager__page-label {
+            color: $gray-text-color;
+            font-weight: 500;
+        }
+
+        .term-manager__page-label--end {
+            margin-left: auto;
+        }
+    }
+
+    .term-manager__warning {
+        margin-top: $space-4;
+        border-radius: $radius-md;
+    }
+
+    /* ── Bulk selection bar ──────────────────────────────────────────────── */
+    .term-manager__selection {
+        @include enter_pop($dur-fast);
+        position: sticky;
+        top: calc(#{$nav-height} + 5.5rem);
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        gap: $space-3;
+        padding: $space-2 $space-3;
+        margin-bottom: $space-3;
+        border-radius: $radius-pill;
+        border: 1px solid rgba(var(--fl-primary-rgb), 0.35);
+        background-color: $surface;
+        box-shadow: $shadow-md;
+
+        .term-manager__selection-count {
+            flex-shrink: 0;
+            padding: 0.2rem 0.7rem;
+            border-radius: $radius-pill;
+            background: var(--fl-gradient);
+            color: $on-primary;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .term-manager__selection-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: $space-1;
+            margin-left: auto;
+        }
+    }
+
+    /* ── Rows ────────────────────────────────────────────────────────────── */
+    .term-manager__list {
+        @include card;
+        border-radius: $radius-lg;
+        overflow: hidden;
+        transition: opacity $dur-normal $ease;
+
+        &.term-manager__list--loading {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* Rows cascade in when the page, search or sort changes (the list is
+           re-keyed per query, so the animation replays). */
+        >.term-row {
+            animation: fl-fade-up $dur-normal $ease-out both;
+            @include stagger(12, 0.022s, 0.015s);
+        }
+    }
+
+    /* ── Empty state ─────────────────────────────────────────────────────── */
+    .term-manager__empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: $space-3;
+        padding: $space-8 $space-4;
+        text-align: center;
+
+        .term-manager__empty-icon {
+            display: grid;
+            place-items: center;
+            width: 3.5rem;
+            height: 3.5rem;
+            margin-bottom: $space-1;
+            border-radius: 50%;
+            background-color: rgba(var(--fl-primary-rgb), 0.1);
+            color: $main-purple;
+
+            svg {
+                font-size: 1.75rem;
+            }
+        }
+
+        h4 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: $main-text-color;
+        }
+
+        p {
+            max-width: 22rem;
+            color: $minor-text-color;
+            font-size: 0.9rem;
+        }
+    }
+
+    .term-manager__pagination {
+        display: flex;
+        justify-content: center;
+        padding: $space-5 0 $space-6;
+    }
+
+    .term-manager__progress-text {
+        margin-bottom: $space-3;
+        color: $minor-text-color;
+    }
+}
+
+/* A row reads left to right: pick · number · picture · word and meaning · actions.
+   The picture sits next to the number so every line shares one visual anchor
+   (the same rhythm as the deck-details thumbnail above it). */
+.term-row {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    padding: $space-2 $space-3 $space-2 $space-2;
+    min-height: 4.5rem;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid $border-subtle;
+    transition: background-color $dur-fast $ease, border-color $dur-fast $ease;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover,
+    &:focus-visible {
+        background-color: $surface-2;
+        outline: none;
+
+        .term-row__thumb {
+            border-color: rgba(var(--fl-primary-rgb), 0.45);
+            transform: scale(1.04);
+        }
+    }
+
+    &.term-row--selected {
+        border-left-color: $main-purple;
+        background-color: rgba(var(--fl-primary-rgb), 0.07);
+    }
+
+    .term-row__position {
+        width: 1.75rem;
+        flex-shrink: 0;
+        color: $gray-text-color;
+        font-size: 0.75rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+    }
+
+    .term-row__thumb {
+        width: 3.25rem;
+        height: 3.25rem;
+        flex-shrink: 0;
+        border-radius: $radius-md;
+        object-fit: cover;
+        background-color: $surface-2;
+        border: 1px solid $border-subtle;
+        transition: transform $dur-fast $ease, border-color $dur-fast $ease;
+    }
+
+    .term-row__thumb--empty {
+        display: grid;
+        place-items: center;
+        color: $gray-text-color;
+        border-style: dashed;
+        border-color: $border-color;
+    }
+
+    .term-row__text {
+        display: flex;
+        align-items: baseline;
+        gap: $space-4;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .term-row__title {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        flex: 0 0 34%;
+        min-width: 0;
+        font-size: 1rem;
+
+        .term-row__name {
+            min-width: 0;
+            font-weight: 600;
+            color: $main-text-color;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .term-row__ai {
+            flex-shrink: 0;
+            font-size: 0.95rem;
+            color: $yellow;
+        }
+    }
+
+    .term-row__meaning {
+        flex: 1 1 auto;
+        min-width: 0;
+        color: $minor-text-color;
+        font-size: 0.9rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        em {
+            color: $gray-text-color;
+            font-style: italic;
+        }
+    }
+
+    .term-row__buttons {
+        display: flex;
+        gap: 0.1rem;
+        flex-shrink: 0;
+        margin-left: auto;
+        transition: opacity $dur-fast $ease;
+    }
+
+    /* Keep the row calm until it's pointed at — but never hide the actions on
+       touch devices, where there is no hover. */
+    @media (hover: hover) {
+        .term-row__buttons {
+            opacity: 0;
+        }
+
+        &:hover .term-row__buttons,
+        &:focus-within .term-row__buttons {
+            opacity: 1;
+        }
+    }
+}
+
+/* ── Per-term editor: side panel on desktop, bottom sheet on phones ──────── */
+.term-editor {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .term-editor__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: $space-3;
+        padding: $space-5 $space-5 $space-4;
+        border-bottom: 1px solid $border-subtle;
+        background:
+            linear-gradient(180deg, rgba(var(--fl-primary-rgb), 0.08), transparent);
+
+        .term-editor__eyebrow {
+            display: block;
+            margin-bottom: 0.15rem;
+            color: $main-purple;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: $main-text-color;
+            overflow-wrap: anywhere;
+        }
+    }
+
+    .term-editor__body {
+        flex: 1;
+        overflow-y: auto;
+        padding: $space-4 $space-5 $space-5;
+        display: flex;
+        flex-direction: column;
+        gap: $space-5;
+    }
+
+    .term-editor__section {
+        display: flex;
+        flex-direction: column;
+        gap: $space-3;
+
+        .term-editor__section-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            h4 {
+                color: $gray-text-color;
+                font-size: 0.72rem;
+                font-weight: 800;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+        }
+
+        &+.term-editor__section {
+            padding-top: $space-4;
+            border-top: 1px solid $border-subtle;
+        }
+    }
+
+    .term-editor__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $space-2;
+
+        button {
+            border-radius: $radius-pill;
+            text-transform: none;
+            border-color: $border-color;
+            color: $main-text-color;
+        }
+    }
+
+    .term-editor__chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $space-1;
+    }
+
+    .term-editor__hint {
+        padding: $space-4;
+        border: 1px dashed $border-color;
+        border-radius: $radius-md;
+        color: $gray-text-color;
+        font-size: 0.85rem;
+        text-align: center;
+    }
+
+    .term-editor__preview {
+        position: relative;
+        align-self: flex-start;
+        max-width: 100%;
+
+        img {
+            display: block;
+            width: 100%;
+            max-height: 11rem;
+            object-fit: cover;
+            border-radius: $radius-md;
+            border: 1px solid $border-subtle;
+        }
+
+        .term-editor__preview-remove {
+            position: absolute;
+            top: $space-2;
+            right: $space-2;
+            background-color: rgba(15, 18, 28, 0.55);
+            color: white;
+
+            &:hover {
+                background-color: rgba(15, 18, 28, 0.75);
+            }
+        }
+    }
+
+    .term-editor__loading {
+        display: flex;
+        justify-content: center;
+        padding: $space-4;
+    }
+
+    .term-editor__results {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: $space-2;
+
+        button {
+            padding: 0;
+            border: 2px solid transparent;
+            border-radius: $radius-sm;
+            background: none;
+            cursor: pointer;
+            overflow: hidden;
+            transition: transform $dur-fast $ease, border-color $dur-fast $ease;
+
+            img {
+                display: block;
+                width: 100%;
+                height: 4.25rem;
+                object-fit: cover;
+            }
+
+            &:hover {
+                transform: translateY(-2px);
+                border-color: $yellow;
+            }
+
+            &.selected {
+                border-color: $main-purple;
+            }
+        }
+    }
+
+    .term-editor__upload {
+        input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: $space-2;
+            padding: $space-3;
+            border: 1px dashed $border-color;
+            border-radius: $radius-md;
+            color: $minor-text-color;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color $dur-fast $ease, color $dur-fast $ease,
+                background-color $dur-fast $ease;
+
+            &:hover {
+                border-color: $main-purple;
+                color: $main-purple;
+                background-color: rgba(var(--fl-primary-rgb), 0.06);
+            }
+        }
+    }
+
+    .term-editor__footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: $space-2;
+        padding: $space-3 $space-5;
+        padding-bottom: calc(#{$space-3} + env(safe-area-inset-bottom, 0px));
+        border-top: 1px solid $border-subtle;
+        background-color: $surface;
+
+        button {
+            text-transform: none;
+        }
+    }
+}
+
+/* ── Paste / bulk-text dialogs ───────────────────────────────────────────── */
+.bulk-dialog__hint {
+    margin-bottom: $space-3;
+    color: $minor-text-color;
+    font-size: 0.85rem;
+
+    code {
+        padding: 0.1rem 0.35rem;
+        border-radius: $radius-sm;
+        background-color: $surface-2;
+        font-size: 0.8rem;
+    }
+}
+
+.bulk-dialog__count {
+    margin-top: $space-3;
+    color: $gray-text-color;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* ── Phones ──────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .term-manager {
+        .term-manager__toolbar {
+            position: static;
+            gap: $space-2;
+            padding: $space-2;
+
+            .term-manager__search {
+                flex: 1 1 100%;
+            }
+
+            .term-manager__sort {
+                width: 100%;
+            }
+
+            .term-manager__add {
+                width: 100%;
+                margin-left: 0;
+
+                button {
+                    flex: 1;
+                    min-height: 2.75rem;
+                }
+            }
+        }
+
+        .term-manager__meta {
+            padding-top: $space-3;
+        }
+
+        .term-manager__selection {
+            position: sticky;
+            top: calc(#{$nav-height} + 0.5rem);
+            flex-direction: column;
+            align-items: stretch;
+            gap: $space-2;
+            border-radius: $radius-lg;
+
+            .term-manager__selection-count {
+                align-self: flex-start;
+            }
+
+            .term-manager__selection-actions {
+                margin-left: 0;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                scrollbar-width: none;
+                -webkit-overflow-scrolling: touch;
+
+                &::-webkit-scrollbar {
+                    display: none;
+                }
+
+                button {
+                    flex-shrink: 0;
+                    min-height: 2.5rem;
+                }
+            }
+        }
+    }
+
+    .term-row {
+        gap: $space-2;
+        padding: $space-2 $space-1 $space-2 0;
+        min-height: 4.25rem;
+
+        .term-row__position {
+            display: none;
+        }
+
+        .term-row__thumb {
+            width: 2.75rem;
+            height: 2.75rem;
+        }
+
+        .term-row__text {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.1rem;
+        }
+
+        .term-row__title {
+            flex: 0 0 auto;
+            max-width: 100%;
+            font-size: 0.95rem;
+        }
+
+        .term-row__meaning {
+            flex: 0 0 auto;
+            max-width: 100%;
+            font-size: 0.82rem;
+            white-space: normal;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .term-row__buttons {
+            gap: 0;
+
+            button {
+                width: 2.5rem;
+                height: 2.5rem;
+            }
+        }
+    }
+
+    .term-editor {
+        .term-editor__header {
+            padding: $space-4;
+        }
+
+        .term-editor__body {
+            padding: $space-4;
+            gap: $space-4;
+        }
+
+        .term-editor__results {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .term-editor__footer {
+            flex-wrap: wrap;
+            padding: $space-3 $space-4;
+
+            button {
+                flex: 1 1 7rem;
+                min-height: 2.75rem;
+            }
+        }
+    }
+}

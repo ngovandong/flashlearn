@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from backend.models import Deck, Term
 from backend.term.infrastructure.sql_queries import fetch_latest_learned_term_info, fetch_revise_terms
 
@@ -36,6 +38,13 @@ class TermRepository:
         return Term.objects.filter(deck_id=deck_id)
 
     @staticmethod
+    def browse_in_deck(deck_id, query="", ordering="-created_at"):
+        queryset = Term.objects.filter(deck_id=deck_id)
+        if query:
+            queryset = queryset.filter(Q(name__icontains=query) | Q(meaning__icontains=query))
+        return queryset.order_by(ordering)
+
+    @staticmethod
     def find_by_name_in_deck(deck_id, name):
         return Term.objects.filter(deck_id=deck_id, name__iexact=name).first()
 
@@ -60,6 +69,14 @@ class TermRepository:
     @staticmethod
     def delete(term):
         term.delete()
+
+    @staticmethod
+    def bulk_delete(deck_id, term_ids):
+        queryset = Term.objects.filter(deck_id=deck_id, id__in=term_ids)
+        # Counted up front because `.delete()` reports cascaded rows too.
+        deleted = queryset.count()
+        queryset.delete()
+        return deleted
 
     @staticmethod
     def get_deck_name(deck_id):

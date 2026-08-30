@@ -1,5 +1,6 @@
 import BaseService from "./baseService";
 import { AI_REQUEST_TIMEOUT } from "./httpRequest";
+import { TERM_EDIT_PAGE_SIZE } from "@constants/pageSize";
 
 // Fields that the AI populates; arrays are JSON-encoded inside FormData.
 const AI_STRING_FIELDS = ["word_type", "pronunciation", "definition"];
@@ -43,6 +44,23 @@ class TermService extends BaseService {
     return this.request.get(this.base, { params });
   }
 
+  // Numbered page of a deck's terms, optionally filtered by text and re-sorted.
+  browseTerms(deck_id, { q = "", sort = "newest", page = 1, pageSize } = {}) {
+    return this.request.get(this.action("browse"), {
+      params: {
+        deck_id,
+        q,
+        sort,
+        page,
+        page_size: pageSize ?? TERM_EDIT_PAGE_SIZE,
+      },
+    });
+  }
+
+  bulkDelete(deck_id, ids) {
+    return this.request.post(this.action("bulk_delete"), { deck_id, ids });
+  }
+
   addTermsToDeck(deck_id, terms) {
     const formData = new FormData();
     formData.append("deck_id", deck_id);
@@ -51,7 +69,7 @@ class TermService extends BaseService {
       const prefix = `terms[${index}]`;
       formData.append(`${prefix}[name]`, term.name);
       formData.append(`${prefix}[meaning]`, term.meaning ?? "");
-      formData.append(`${prefix}[image]`, term.image);
+      formData.append(`${prefix}[image]`, term.image ?? "");
       appendAiFields(formData, prefix, term);
     });
     return this.request.post(this.action("add_terms"), formData);
@@ -63,7 +81,7 @@ class TermService extends BaseService {
       formData.append(`${prefix}[id]`, term.id);
       formData.append(`${prefix}[name]`, term.name);
       formData.append(`${prefix}[meaning]`, term.meaning ?? "");
-      formData.append(`${prefix}[image]`, term.image);
+      formData.append(`${prefix}[image]`, term.image ?? "");
       appendAiFields(formData, prefix, term);
     });
     return this.request.put(this.action("update_terms"), formData);

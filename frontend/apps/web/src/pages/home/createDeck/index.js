@@ -29,7 +29,7 @@ function CreateDeck() {
       try {
         const res = await deckService.create(formData);
         if (!res.error) {
-          navigate(`/deck/${res.data.id}/edit?tab=1`);
+          navigate(`/deck/${res.data.id}/edit`);
         } else {
           const responseError = getFirstError(res.error);
           setError(responseError);

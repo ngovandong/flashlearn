@@ -2,13 +2,7 @@ import { deckService } from "@api-services/deckService";
 import { DeckPageSkeleton } from "@components/skeletons";
 import { getFirstError } from "@utils/errorHandler";
 import React, { useEffect, useState } from "react";
-import
-  {
-    Link,
-    useNavigate,
-    useParams,
-    useSearchParams,
-  } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
 import CollectionsBookmarkIcon from "@mui/icons-material/CollectionsBookmark";
@@ -17,12 +11,21 @@ import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import CircularProgressWithLabel from "@components/progress";
 import FooterBTNs from "./footerButtons";
 
-function MenuButton({ icon, text, link, isDisabled, tour })
+function MenuButton({ icon, text, link, isDisabled, disabledReason, tour })
 {
   const IconName = icon;
   return (
-    <div className={`menu-btn${isDisabled ? " lock" : ""}`} data-tour={tour}>
-      <Link to={link} className="menu-link">
+    <div
+      className={`menu-btn${isDisabled ? " lock" : ""}`}
+      data-tour={tour}
+      title={isDisabled ? disabledReason : undefined}
+    >
+      <Link
+        to={link}
+        className="menu-link"
+        aria-disabled={isDisabled || undefined}
+        tabIndex={isDisabled ? -1 : undefined}
+      >
         <IconName color={isDisabled ? "grey" : "purple"} />
         <span>{text}</span>
       </Link>
@@ -35,8 +38,6 @@ function DeckDetail()
   const [deck, setDeck] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const { deckID } = useParams();
-  const [searchParams] = useSearchParams();
-
   const navigate = useNavigate();
 
   const fetchDeck = async () =>
@@ -71,14 +72,14 @@ function DeckDetail()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deckID]);
 
-  useEffect(() =>
-  {
-    const notnavigate = searchParams.get("notnavigate");
-    if (!notnavigate && deck && deck.number_of_term === 0) {
-      navigate("edit?tab=1");
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deck]);
+  // Every study mode builds its questions from the deck's terms, so an empty
+  // deck locks them all — same treatment as a deck you may only read.
+  const isEmpty = deck?.number_of_term === 0;
+  const isStudyLocked = !deck?.my_permission || isEmpty;
+  const studyLockReason = isEmpty
+    ? "Add at least one term to start studying this deck."
+    : "You don't have permission to study this deck.";
+
   return isLoading ? (
     <DeckPageSkeleton />
   ) : (
@@ -87,41 +88,48 @@ function DeckDetail()
           <div className="deck-header">
             <h2>{deck.name}</h2>
           </div>
-          <div className="deck-menu">
-            {/* <div className="menu-btn lock">
-              <Link to="learn">
-                <LocalLibraryIcon
-                  color={deck.my_permission ? "purple" : "grey"}
-                />
-                <span>Learn</span>
+          {isEmpty && (
+            <div className="deck-empty-note">
+              <span>
+                This deck has no terms yet, so there is nothing to study. Add at
+                least one term to unlock Learn, Revise and the games.
+              </span>
+              <Link to="edit" className="deck-empty-note__cta">
+                Add terms
               </Link>
-            </div> */}
+            </div>
+          )}
+          <div className="deck-menu">
             <MenuButton
               link="learn"
               text="Learn"
               tour="deck-learn"
-              isDisabled={!deck.my_permission}
+              isDisabled={isStudyLocked}
+              disabledReason={studyLockReason}
               icon={LocalLibraryIcon}
             />
             <MenuButton
               link="revise"
               text="Revise"
               tour="deck-revise"
-              isDisabled={!deck.my_permission}
+              isDisabled={isStudyLocked}
+              disabledReason={studyLockReason}
               icon={CollectionsBookmarkIcon}
             />
             <MenuButton
               link="quick-revise"
               text="Quick Revise"
               tour="deck-quick-revise"
-              isDisabled={!deck.my_permission}
+              isDisabled={isStudyLocked}
+              disabledReason={studyLockReason}
               icon={TimerIcon}
             />
             <MenuButton
               link="competition"
               text="Competition"
               tour="deck-competition"
-              isDisabled={!deck.my_permission}
+              isDisabled={isStudyLocked}
+              disabledReason={studyLockReason}
               icon={SportsEsportsIcon}
             />
           </div>

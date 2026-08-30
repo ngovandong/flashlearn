@@ -1,0 +1,287 @@
+@use "../../base/shared" as *;
+
+/* Deck editor page — details panel + term manager on one screen.
+   The details panel is a quiet, collapsible summary so the term list (the
+   reason people open this page) stays the focus. */
+.deck-editor {
+    @include page_shell(81.25rem);
+    @include page_enter;
+
+    .deck-editor__back {
+        display: inline-flex;
+        align-items: center;
+        gap: $space-2;
+        min-height: 2.75rem;
+        color: $minor-text-color;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color $dur-fast $ease;
+
+        svg {
+            font-size: 0.75rem;
+        }
+
+        &:hover {
+            color: $main-purple;
+        }
+    }
+
+    .deck-editor__header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: $space-4;
+        margin-bottom: $space-5;
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: $main-text-color;
+        }
+
+        p {
+            max-width: 36rem;
+            margin-top: $space-1;
+            color: $minor-text-color;
+            font-size: 0.9rem;
+        }
+
+        .deck-editor__done {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            min-height: 2.75rem;
+            padding: 0 1.75rem;
+            border-radius: $radius-pill;
+            background: $brand-gradient;
+            color: $on-primary;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: box-shadow $dur-fast $ease, transform $dur-fast $ease;
+
+            &:hover {
+                transform: translateY($lift-sm);
+                box-shadow: $shadow-purple;
+            }
+        }
+    }
+}
+
+/* ── Collapsible deck details ────────────────────────────────────────────── */
+.deck-details {
+    @include card;
+    border-radius: $radius-xl;
+    overflow: hidden;
+    margin-bottom: $space-5;
+
+    .deck-details__head {
+        display: flex;
+        align-items: center;
+        gap: $space-3;
+        width: 100%;
+        padding: $space-3 $space-4;
+        border: none;
+        background: none;
+        text-align: left;
+        cursor: pointer;
+        transition: background-color $dur-fast $ease;
+
+        &:hover {
+            background-color: $surface-2;
+        }
+    }
+
+    .deck-details__thumb {
+        width: 3.25rem;
+        height: 3.25rem;
+        flex-shrink: 0;
+        border-radius: $radius-md;
+        object-fit: cover;
+        background-color: $surface-2;
+        border: 1px solid $border-subtle;
+    }
+
+    .deck-details__summary {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .deck-details__eyebrow {
+        color: $main-purple;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .deck-details__name {
+        color: $main-text-color;
+        font-size: 1rem;
+        font-weight: 700;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .deck-details__description {
+        color: $gray-text-color;
+        font-size: 0.82rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .deck-details__chip {
+        flex-shrink: 0;
+    }
+
+    .deck-details__dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background-color: $yellow;
+    }
+
+    .deck-details__chevron {
+        flex-shrink: 0;
+        color: $gray-text-color;
+        transition: transform $dur-normal $ease;
+    }
+
+    .deck-details__chevron--open {
+        transform: rotate(180deg);
+    }
+
+    .deck-details__body {
+        display: grid;
+        grid-template-columns: 15rem minmax(0, 1fr);
+        gap: $space-5;
+        padding: $space-4;
+        border-top: 1px solid $border-subtle;
+    }
+
+    .deck-details__cover {
+        display: flex;
+        flex-direction: column;
+        gap: $space-2;
+
+        img {
+            width: 100%;
+            height: 9rem;
+            object-fit: cover;
+            border-radius: $radius-md;
+            border: 1px solid $border-subtle;
+            background-color: $surface-2;
+        }
+
+        input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: $space-2;
+            min-height: 2.75rem;
+            padding: 0 $space-3;
+            border: 1px dashed $border-color;
+            border-radius: $radius-pill;
+            color: $minor-text-color;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color $dur-fast $ease, color $dur-fast $ease,
+                background-color $dur-fast $ease;
+
+            &:hover {
+                border-color: $main-purple;
+                color: $main-purple;
+                background-color: rgba(var(--fl-primary-rgb), 0.06);
+            }
+        }
+    }
+
+    .deck-details__fields {
+        display: flex;
+        flex-direction: column;
+        gap: $space-4;
+    }
+
+    .deck-details__footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: $space-3;
+        padding: $space-3 $space-4;
+        border-top: 1px solid $border-subtle;
+        background-color: $surface-2;
+
+        .deck-details__status {
+            display: inline-flex;
+            align-items: center;
+            gap: $space-1;
+            margin-right: auto;
+            color: $gray-text-color;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+    }
+}
+
+/* ── Phones ──────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .deck-editor {
+        .deck-editor__header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: $space-3;
+
+            .deck-editor__done {
+                justify-content: center;
+            }
+        }
+    }
+
+    .deck-details {
+        .deck-details__head {
+            padding: $space-3;
+            gap: $space-2;
+        }
+
+        .deck-details__chip {
+            display: none;
+        }
+
+        .deck-details__body {
+            grid-template-columns: 1fr;
+            gap: $space-4;
+            padding: $space-3;
+        }
+
+        .deck-details__footer {
+            flex-direction: column-reverse;
+            align-items: stretch;
+            padding: $space-3;
+
+            button {
+                width: 100%;
+                min-height: 2.75rem;
+            }
+
+            .deck-details__status {
+                margin-right: 0;
+                justify-content: center;
+            }
+        }
+    }
+}

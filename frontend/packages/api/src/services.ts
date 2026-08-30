@@ -1,5 +1,5 @@
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import { getFirstError } from "@flashlearn/core";
+import { getFirstError, TERM_EDIT_PAGE_SIZE } from "@flashlearn/core";
 import type {
   AuthUser,
   CourseDetail,
@@ -268,6 +268,23 @@ export function createTermApi(client: AxiosInstance, aiTimeout = 240000) {
       const params: Record<string, string> = { deck_id: deckId };
       if (cursor) params.cursor = cursor;
       return client.get("terms/", { params });
+    },
+    /** Numbered page of a deck's terms, optionally filtered by text and re-sorted. */
+    browseTerms(
+      deckId: string,
+      {
+        q = "",
+        sort = "newest",
+        page = 1,
+        pageSize = TERM_EDIT_PAGE_SIZE,
+      }: { q?: string; sort?: string; page?: number; pageSize?: number } = {}
+    ): Promise<any> {
+      return client.get("terms/browse/", {
+        params: { deck_id: deckId, q, sort, page, page_size: pageSize },
+      });
+    },
+    bulkDelete(deckId: string, ids: string[]): Promise<any> {
+      return client.post("terms/bulk_delete/", { deck_id: deckId, ids });
     },
     addTermsToDeck(deckId: string, terms: Term[]): Promise<any> {
       const formData = new FormData();

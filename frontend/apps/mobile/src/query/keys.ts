@@ -9,6 +9,9 @@ export const queryKeys = {
   },
   terms: {
     byDeck: (deckId: string, page: number) => ["terms", deckId, page] as const,
+    browse: (deckId: string, query: string, sort: string, page: number) =>
+      ["terms", deckId, "browse", query, sort, page] as const,
+    total: (deckId: string) => ["terms", deckId, "total"] as const,
   },
   learning: {
     reviseTerms: (deckId: string) => ["learning", "revise", deckId] as const,

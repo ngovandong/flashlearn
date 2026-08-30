@@ -379,20 +379,9 @@ function LearnPage()
     let timeoutId;
 
     if (currentTerm != null && currentState.isFlipped) {
-      // Set a timeout to call speakTerm after 1000 milliseconds (1 second)
-      timeoutId = setTimeout(() =>
-      {
         speakTerm();
-      }, 1500);
     }
 
-    // Cleanup function to clear the timeout if the component unmounts or the dependencies change
-    return () =>
-    {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
   }, [currentTerm, currentState.isFlipped, speakTerm]);
 
   useEffect(() =>

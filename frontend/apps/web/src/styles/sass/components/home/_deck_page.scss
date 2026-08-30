@@ -13,6 +13,52 @@
         }
     }
 
+    .deck-empty-note {
+        @include card;
+        display: flex;
+        align-items: center;
+        gap: $space-4;
+        margin-top: 1.5rem;
+        padding: $space-4;
+        border-color: rgba(var(--fl-primary-rgb), 0.25);
+        background: linear-gradient(135deg,
+                rgba(var(--fl-primary-rgb), 0.06),
+                rgba(var(--fl-accent-rgb), 0.06));
+        color: $minor-text-color;
+        font-size: 0.92rem;
+
+        .deck-empty-note__cta {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            min-height: 2.75rem;
+            padding: 0 1.5rem;
+            border-radius: $radius-pill;
+            background: $brand-gradient;
+            color: $on-primary;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: box-shadow $dur-fast $ease, transform $dur-fast $ease;
+
+            &:hover {
+                transform: translateY($lift-sm);
+                box-shadow: $shadow-purple;
+            }
+        }
+
+        @media (max-width: 600px) {
+            flex-direction: column;
+            align-items: stretch;
+            gap: $space-3;
+            text-align: center;
+
+            .deck-empty-note__cta {
+                justify-content: center;
+            }
+        }
+    }
+
     .deck-menu {
         margin-top: 1.5rem;
         display: flex;

@@ -157,8 +157,8 @@ export default function DeckDetailScreen() {
 
   const actions: ActionDef[] = [
     { key: "learn", label: "Learn", hint: "Flashcards & spaced study", icon: "school", route: `/library/${deckId}/learn`, locked: total === 0 },
-    { key: "revise", label: "Revise", hint: "Quiz yourself on the terms", icon: "auto-stories", route: `/library/${deckId}/revise`, locked: total < 4 },
-    { key: "quick", label: "Quick revise game", hint: "Fast-paced solo drill", icon: "bolt", route: `/library/${deckId}/revise/quick-revise`, locked: total < 4 },
+    { key: "revise", label: "Revise", hint: "Quiz yourself on the terms", icon: "auto-stories", route: `/library/${deckId}/revise`, locked: total === 0 },
+    { key: "quick", label: "Quick revise game", hint: "Fast-paced solo drill", icon: "bolt", route: `/library/${deckId}/revise/quick-revise`, locked: total === 0 },
     { key: "competition", label: "Competition", hint: "Beat bots & climb the board", icon: "emoji-events", route: `/library/${deckId}/competition`, locked: total < 4 },
   ];
 
