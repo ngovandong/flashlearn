@@ -11,6 +11,7 @@ import ShuffleIcon from "@mui/icons-material/Shuffle";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import { useCallback, useEffect, useRef, useState } from "react";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import LastPageIcon from "@mui/icons-material/LastPage";
 import { learningService } from "@api-services/learningService";
 import { termService } from "@api-services/termService";
 import { useNavigate, useParams } from "react-router-dom";
@@ -145,6 +146,14 @@ function LearnPage()
   const handleRestart = () =>
   {
     setCurrentState((pre) => ({ ...pre, position: 0, isFlipped: false }));
+  };
+  const handleGoToOldest = () =>
+  {
+    setCurrentState((pre) => ({
+      ...pre,
+      position: totalTerms - 1,
+      isFlipped: false,
+    }));
   };
 
   // Toggle between sequential (newest→oldest) and shuffled study order. When
@@ -503,8 +512,11 @@ function LearnPage()
                 <IconButton component="label" onClick={speakTerm}>
                   <VolumeUpIcon />
                 </IconButton>
-                <IconButton component="label" onClick={handleRestart}>
+                <IconButton component="label" onClick={handleRestart} title="Go to latest term">
                   <RestartAltIcon />
+                </IconButton>
+                <IconButton component="label" onClick={handleGoToOldest} title="Go to oldest term">
+                  <LastPageIcon />
                 </IconButton>
               </div>
               <div className="navigate-btns">
