@@ -99,6 +99,11 @@ export default function ListenAndType() {
   useEffect(() => {
     let active = true;
     setLoading(true);
+    // Route reuse keeps this instance mounted; reset index/summary for the new exercise.
+    setIdx(0);
+    setFinished(false);
+    setSelected(null);
+    audioRef.current?.pause();
     listeningService
       .getExercise(exerciseId)
       .then((res) => {
