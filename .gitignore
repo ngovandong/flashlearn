@@ -133,14 +133,27 @@ drive-token.json
 # Rust
 rust_backend/target/
 
-# graphify — local rebuild metadata (post-commit hook rewrites these every run)
+# Python tooling caches
+.ruff_cache/
+
+# Local Claude/Cursor machine settings
+.claude/settings.local.json
+
+# SQL dumps (local backups, not source)
+dump/
+
+# Generated TTS preview audio
+tts_previews/
+
+# Expo / React Native local cache
+**/.expo/
+
+# graphify — local rebuild metadata (rewritten on every run)
 graphify-out/cost.json
 graphify-out/cache/
-graphify-out/.graphify_root
 graphify-out/manifest.json
-graphify-out/.graphify_python
-graphify-out/.graphify_labels.json
-graphify-out/.graphify_semantic_new.json
+graphify-out/.graphify_*
+graphify-out/.rebuild.lock
 
 # Mac OS X #
 .DS_Store

@@ -1,16 +1,16 @@
-# Graph Report - flashlearn  (2026-08-30)
+# Graph Report - flashlearn  (2026-09-02)
 
 ## Corpus Check
-- 37464 files · ~27,287,412 words
+- 37464 files · ~27,287,531 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 33620 nodes · 43957 edges · 12548 communities (11264 shown, 1284 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 660 edges (avg confidence: 0.5)
+- 33580 nodes · 43957 edges · 12535 communities (11249 shown, 1286 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 718 edges (avg confidence: 0.5)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f37eace1`
+- Built from commit: `94e2136a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -136,7 +136,6 @@
 - [[_COMMUNITY_Community 121|Community 121]]
 - [[_COMMUNITY_Community 122|Community 122]]
 - [[_COMMUNITY_Community 123|Community 123]]
-- [[_COMMUNITY_Community 124|Community 124]]
 - [[_COMMUNITY_Community 125|Community 125]]
 - [[_COMMUNITY_Community 126|Community 126]]
 - [[_COMMUNITY_Community 127|Community 127]]
@@ -1017,7 +1016,6 @@
 - [[_COMMUNITY_Community 1007|Community 1007]]
 - [[_COMMUNITY_Community 1008|Community 1008]]
 - [[_COMMUNITY_Community 1009|Community 1009]]
-- [[_COMMUNITY_Community 1010|Community 1010]]
 - [[_COMMUNITY_Community 1011|Community 1011]]
 - [[_COMMUNITY_Community 1012|Community 1012]]
 - [[_COMMUNITY_Community 1013|Community 1013]]
@@ -1426,7 +1424,6 @@
 - [[_COMMUNITY_Community 1428|Community 1428]]
 - [[_COMMUNITY_Community 1429|Community 1429]]
 - [[_COMMUNITY_Community 1430|Community 1430]]
-- [[_COMMUNITY_Community 1431|Community 1431]]
 - [[_COMMUNITY_Community 1432|Community 1432]]
 - [[_COMMUNITY_Community 1436|Community 1436]]
 - [[_COMMUNITY_Community 1439|Community 1439]]
@@ -1501,9 +1498,7 @@
 - [[_COMMUNITY_Community 1527|Community 1527]]
 - [[_COMMUNITY_Community 1530|Community 1530]]
 - [[_COMMUNITY_Community 1533|Community 1533]]
-- [[_COMMUNITY_Community 1536|Community 1536]]
 - [[_COMMUNITY_Community 1537|Community 1537]]
-- [[_COMMUNITY_Community 1539|Community 1539]]
 - [[_COMMUNITY_Community 1540|Community 1540]]
 - [[_COMMUNITY_Community 1541|Community 1541]]
 - [[_COMMUNITY_Community 1542|Community 1542]]
@@ -1511,7 +1506,6 @@
 - [[_COMMUNITY_Community 1544|Community 1544]]
 - [[_COMMUNITY_Community 1545|Community 1545]]
 - [[_COMMUNITY_Community 1546|Community 1546]]
-- [[_COMMUNITY_Community 1547|Community 1547]]
 - [[_COMMUNITY_Community 1548|Community 1548]]
 - [[_COMMUNITY_Community 1556|Community 1556]]
 - [[_COMMUNITY_Community 1558|Community 1558]]
@@ -1564,13 +1558,7 @@
 - [[_COMMUNITY_Community 1629|Community 1629]]
 - [[_COMMUNITY_Community 1630|Community 1630]]
 - [[_COMMUNITY_Community 1632|Community 1632]]
-- [[_COMMUNITY_Community 1660|Community 1660]]
-- [[_COMMUNITY_Community 1686|Community 1686]]
-- [[_COMMUNITY_Community 1687|Community 1687]]
-- [[_COMMUNITY_Community 1689|Community 1689]]
-- [[_COMMUNITY_Community 1690|Community 1690]]
-- [[_COMMUNITY_Community 1691|Community 1691]]
-- [[_COMMUNITY_Community 1721|Community 1721]]
+- [[_COMMUNITY_Community 1666|Community 1666]]
 - [[_COMMUNITY_Community 1734|Community 1734]]
 - [[_COMMUNITY_Community 1905|Community 1905]]
 - [[_COMMUNITY_Community 1906|Community 1906]]
@@ -1584,7 +1572,6 @@
 - [[_COMMUNITY_Community 1915|Community 1915]]
 - [[_COMMUNITY_Community 1921|Community 1921]]
 - [[_COMMUNITY_Community 1922|Community 1922]]
-- [[_COMMUNITY_Community 1935|Community 1935]]
 - [[_COMMUNITY_Community 1954|Community 1954]]
 - [[_COMMUNITY_Community 1955|Community 1955]]
 - [[_COMMUNITY_Community 1956|Community 1956]]
@@ -1640,12 +1627,6 @@
 - [[_COMMUNITY_Community 2007|Community 2007]]
 - [[_COMMUNITY_Community 2009|Community 2009]]
 - [[_COMMUNITY_Community 2012|Community 2012]]
-- [[_COMMUNITY_Community 6727|Community 6727]]
-- [[_COMMUNITY_Community 6728|Community 6728]]
-- [[_COMMUNITY_Community 6739|Community 6739]]
-- [[_COMMUNITY_Community 6757|Community 6757]]
-- [[_COMMUNITY_Community 6758|Community 6758]]
-- [[_COMMUNITY_Community 11985|Community 11985]]
 - [[_COMMUNITY_Community 11994|Community 11994]]
 - [[_COMMUNITY_Community 11998|Community 11998]]
 - [[_COMMUNITY_Community 12001|Community 12001]]
@@ -1752,9 +1733,7 @@
 - [[_COMMUNITY_Community 12180|Community 12180]]
 - [[_COMMUNITY_Community 12181|Community 12181]]
 - [[_COMMUNITY_Community 12182|Community 12182]]
-- [[_COMMUNITY_Community 12183|Community 12183]]
 - [[_COMMUNITY_Community 12184|Community 12184]]
-- [[_COMMUNITY_Community 12185|Community 12185]]
 - [[_COMMUNITY_Community 12186|Community 12186]]
 - [[_COMMUNITY_Community 12187|Community 12187]]
 - [[_COMMUNITY_Community 12188|Community 12188]]
@@ -1790,6 +1769,7 @@
 - [[_COMMUNITY_Community 12218|Community 12218]]
 - [[_COMMUNITY_Community 12219|Community 12219]]
 - [[_COMMUNITY_Community 12220|Community 12220]]
+- [[_COMMUNITY_Community 12221|Community 12221]]
 - [[_COMMUNITY_Community 12222|Community 12222]]
 - [[_COMMUNITY_Community 12223|Community 12223]]
 - [[_COMMUNITY_Community 12224|Community 12224]]
@@ -1813,7 +1793,6 @@
 - [[_COMMUNITY_Community 12242|Community 12242]]
 - [[_COMMUNITY_Community 12243|Community 12243]]
 - [[_COMMUNITY_Community 12244|Community 12244]]
-- [[_COMMUNITY_Community 12245|Community 12245]]
 - [[_COMMUNITY_Community 12246|Community 12246]]
 - [[_COMMUNITY_Community 12247|Community 12247]]
 - [[_COMMUNITY_Community 12248|Community 12248]]
@@ -1915,6 +1894,7 @@
 - [[_COMMUNITY_Community 12344|Community 12344]]
 - [[_COMMUNITY_Community 12345|Community 12345]]
 - [[_COMMUNITY_Community 12346|Community 12346]]
+- [[_COMMUNITY_Community 12347|Community 12347]]
 - [[_COMMUNITY_Community 12348|Community 12348]]
 - [[_COMMUNITY_Community 12349|Community 12349]]
 - [[_COMMUNITY_Community 12350|Community 12350]]
@@ -1928,10 +1908,11 @@
 - [[_COMMUNITY_Community 12358|Community 12358]]
 - [[_COMMUNITY_Community 12359|Community 12359]]
 - [[_COMMUNITY_Community 12360|Community 12360]]
+- [[_COMMUNITY_Community 12361|Community 12361]]
 - [[_COMMUNITY_Community 12362|Community 12362]]
 - [[_COMMUNITY_Community 12363|Community 12363]]
+- [[_COMMUNITY_Community 12364|Community 12364]]
 - [[_COMMUNITY_Community 12365|Community 12365]]
-- [[_COMMUNITY_Community 12366|Community 12366]]
 - [[_COMMUNITY_Community 12367|Community 12367]]
 - [[_COMMUNITY_Community 12368|Community 12368]]
 - [[_COMMUNITY_Community 12369|Community 12369]]
@@ -1942,9 +1923,7 @@
 - [[_COMMUNITY_Community 12374|Community 12374]]
 - [[_COMMUNITY_Community 12375|Community 12375]]
 - [[_COMMUNITY_Community 12376|Community 12376]]
-- [[_COMMUNITY_Community 12377|Community 12377]]
 - [[_COMMUNITY_Community 12378|Community 12378]]
-- [[_COMMUNITY_Community 12379|Community 12379]]
 - [[_COMMUNITY_Community 12380|Community 12380]]
 - [[_COMMUNITY_Community 12381|Community 12381]]
 - [[_COMMUNITY_Community 12382|Community 12382]]
@@ -1953,7 +1932,6 @@
 - [[_COMMUNITY_Community 12385|Community 12385]]
 - [[_COMMUNITY_Community 12386|Community 12386]]
 - [[_COMMUNITY_Community 12387|Community 12387]]
-- [[_COMMUNITY_Community 12388|Community 12388]]
 - [[_COMMUNITY_Community 12389|Community 12389]]
 - [[_COMMUNITY_Community 12390|Community 12390]]
 - [[_COMMUNITY_Community 12391|Community 12391]]
@@ -1980,6 +1958,7 @@
 - [[_COMMUNITY_Community 12412|Community 12412]]
 - [[_COMMUNITY_Community 12413|Community 12413]]
 - [[_COMMUNITY_Community 12414|Community 12414]]
+- [[_COMMUNITY_Community 12415|Community 12415]]
 - [[_COMMUNITY_Community 12416|Community 12416]]
 - [[_COMMUNITY_Community 12417|Community 12417]]
 - [[_COMMUNITY_Community 12418|Community 12418]]
@@ -1995,6 +1974,7 @@
 - [[_COMMUNITY_Community 12428|Community 12428]]
 - [[_COMMUNITY_Community 12429|Community 12429]]
 - [[_COMMUNITY_Community 12431|Community 12431]]
+- [[_COMMUNITY_Community 12432|Community 12432]]
 - [[_COMMUNITY_Community 12433|Community 12433]]
 - [[_COMMUNITY_Community 12434|Community 12434]]
 - [[_COMMUNITY_Community 12435|Community 12435]]
@@ -2003,9 +1983,8 @@
 - [[_COMMUNITY_Community 12438|Community 12438]]
 - [[_COMMUNITY_Community 12439|Community 12439]]
 - [[_COMMUNITY_Community 12440|Community 12440]]
-- [[_COMMUNITY_Community 12442|Community 12442]]
+- [[_COMMUNITY_Community 12441|Community 12441]]
 - [[_COMMUNITY_Community 12443|Community 12443]]
-- [[_COMMUNITY_Community 12444|Community 12444]]
 - [[_COMMUNITY_Community 12445|Community 12445]]
 - [[_COMMUNITY_Community 12446|Community 12446]]
 - [[_COMMUNITY_Community 12447|Community 12447]]
@@ -2014,36 +1993,44 @@
 - [[_COMMUNITY_Community 12450|Community 12450]]
 - [[_COMMUNITY_Community 12451|Community 12451]]
 - [[_COMMUNITY_Community 12452|Community 12452]]
-- [[_COMMUNITY_Community 12453|Community 12453]]
 - [[_COMMUNITY_Community 12454|Community 12454]]
 - [[_COMMUNITY_Community 12455|Community 12455]]
+- [[_COMMUNITY_Community 12456|Community 12456]]
+- [[_COMMUNITY_Community 12457|Community 12457]]
 - [[_COMMUNITY_Community 12458|Community 12458]]
+- [[_COMMUNITY_Community 12459|Community 12459]]
 - [[_COMMUNITY_Community 12460|Community 12460]]
 - [[_COMMUNITY_Community 12461|Community 12461]]
+- [[_COMMUNITY_Community 12462|Community 12462]]
 - [[_COMMUNITY_Community 12463|Community 12463]]
 - [[_COMMUNITY_Community 12464|Community 12464]]
 - [[_COMMUNITY_Community 12465|Community 12465]]
 - [[_COMMUNITY_Community 12466|Community 12466]]
+- [[_COMMUNITY_Community 12467|Community 12467]]
 - [[_COMMUNITY_Community 12470|Community 12470]]
-- [[_COMMUNITY_Community 12472|Community 12472]]
+- [[_COMMUNITY_Community 12471|Community 12471]]
 - [[_COMMUNITY_Community 12473|Community 12473]]
 - [[_COMMUNITY_Community 12474|Community 12474]]
 - [[_COMMUNITY_Community 12475|Community 12475]]
-- [[_COMMUNITY_Community 12477|Community 12477]]
-- [[_COMMUNITY_Community 12478|Community 12478]]
-- [[_COMMUNITY_Community 12479|Community 12479]]
+- [[_COMMUNITY_Community 12476|Community 12476]]
 - [[_COMMUNITY_Community 12480|Community 12480]]
-- [[_COMMUNITY_Community 12481|Community 12481]]
 - [[_COMMUNITY_Community 12482|Community 12482]]
-- [[_COMMUNITY_Community 12506|Community 12506]]
+- [[_COMMUNITY_Community 12483|Community 12483]]
+- [[_COMMUNITY_Community 12484|Community 12484]]
+- [[_COMMUNITY_Community 12485|Community 12485]]
+- [[_COMMUNITY_Community 12487|Community 12487]]
+- [[_COMMUNITY_Community 12488|Community 12488]]
+- [[_COMMUNITY_Community 12489|Community 12489]]
+- [[_COMMUNITY_Community 12490|Community 12490]]
+- [[_COMMUNITY_Community 12511|Community 12511]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `GTMSessionFetcher` - 181 edges
-2. `GTMSessionUploadFetcher` - 94 edges
-3. `ValidationError` - 87 edges
-4. `around()` - 72 edges
-5. `facebook()` - 70 edges
-6. `NotFoundError` - 68 edges
+2. `ValidationError` - 95 edges
+3. `GTMSessionUploadFetcher` - 94 edges
+4. `NotFoundError` - 76 edges
+5. `around()` - 72 edges
+6. `facebook()` - 70 edges
 7. `GTMSessionFetcherService` - 61 edges
 8. `SentryClient` - 61 edges
 9. `SentryFileManager` - 57 edges
@@ -2058,33 +2045,33 @@
   backend/shared/infrastructure/sqlalchemy/tables.py → base/models/custom_model.py
 - `SQLAlchemyTableMixin` --uses--> `Return the first_name plus the last_name, with a space in between.`  [INFERRED]
   backend/shared/infrastructure/sqlalchemy/tables.py → base/models/custom_model.py
-- `TermRepository` --uses--> `TermRepository`  [INFERRED]
-  backend/term/application/services.py → backend/term/infrastructure/repository.py
+- `CustomTokenAuthentication` --uses--> `UserRepository`  [INFERRED]
+  core/authentication.py → backend/user/infrastructure/repository.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (12548 total, 1284 thin omitted)
+## Communities (12535 total, 1286 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.01
-Nodes (33): facebook(), facebook(), facebook(), facebook(), facebook(), facebook(), folly(), folly() (+25 more)
+Nodes (31): facebook(), facebook(), cdp(), facebook(), facebook(), facebook(), vm(), hermes() (+23 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.01
-Nodes (66): PodsDummy_AppAuth, PodsDummy_AppCheckCore, PodsDummy_EXApplication, PodsDummy_EXConstants, PodsDummy_EXJSONUtils, PodsDummy_EXManifests, PodsDummy_expo_dev_launcher, PodsDummy_expo_dev_menu (+58 more)
+Nodes (68): PodsDummy_AppAuth, PodsDummy_AppCheckCore, PodsDummy_EXApplication, PodsDummy_EXJSONUtils, PodsDummy_EXManifests, PodsDummy_expo_dev_launcher, PodsDummy_expo_dev_menu, PodsDummy_expo_dev_menu_interface (+60 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.05
-Nodes (39): CourseService, Course orchestration service.  Coordinates the course catalog/content (:class:`C, Per-line generated clips for a lesson: ``[{voice, text, audio, mime_type}]``., Score a role-play sentence-by-sentence and update lesson progress.          ``se, Add, update or remove a per-user noted highlight on a lesson., Persist a listen-and-type attempt so it can be replayed on revisit.          The, Delete the given courses' content before a fresh re-crawl. User         role-pla, Delete a single course (cascading its sections + lessons).          User role-pl (+31 more)
+Nodes (60): CourseService, Course orchestration service.  Coordinates the course catalog/content (:class:`C, Per-line generated clips for a lesson: ``[{voice, text, audio, mime_type}]``., Score a role-play sentence-by-sentence and update lesson progress.          ``se, Add, update or remove a per-user noted highlight on a lesson., Persist a listen-and-type attempt so it can be replayed on revisit.          The, Delete the given courses' content before a fresh re-crawl. User         role-pla, Delete a single course (cascading its sections + lessons).          User role-pl (+52 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.03
-Nodes (9): clip_hash(), CompetitionRepository, get_exercise(), get_progress(), Persistence for the Writing Coach feature.  All Django ORM access for writing se, record_attempt(), set_highlight(), upsert_exercise() (+1 more)
+Cohesion: 0.06
+Nodes (35): AiProviderError, _loads_object(), Shared HTTP/retry plumbing for AI providers.  Concrete providers (Gemini, DeepSe, POST ``payload`` and return the decoded JSON body, retrying transient errors., POST ``payload`` and return the raw response body (e.g. audio), with retries., Pace consecutive requests to stay under a per-minute quota., Sleep before a retry, honoring a server-specified delay when present., Recommended retry delay (seconds) from a Retry-After header, if any. (+27 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.03
-Nodes (32): folly(), folly(), folly(), from_time_t(), to_time_t(), construct(), folly(), Exception (+24 more)
+Nodes (40): folly(), folly(), folly(), from_time_t(), to_time_t(), construct(), folly(), Exception (+32 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.03
@@ -2103,8 +2090,8 @@ Cohesion: 0.05
 Nodes (44): stbi__clamp(), stbi__convert_16_to_8(), stbi__convert_8_to_16(), stbi__float_postprocess(), stbi__fopen(), stbi__gif_test(), stbi__gif_test_raw(), stbi__idct_block() (+36 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.08
-Nodes (43): AiResponseCache, Persistent cache of AI provider responses keyed by ``(context, request_hash)``., Course, CourseLesson, CourseSection, Meta, A unit of a course (a freeCodeCamp "block"), e.g. "Learn Greetings at the Office, A practiceable dialogue scene within a section.      Maps to a source "dialogue" (+35 more)
+Cohesion: 0.07
+Nodes (44): CompetitionScore, A player's best score for one competition mini-game on one deck.      Competitio, Course, CourseLesson, CourseSection, Meta, A unit of a course (a freeCodeCamp "block"), e.g. "Learn Greetings at the Office, A practiceable dialogue scene within a section.      Maps to a source "dialogue" (+36 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.01
@@ -2115,8 +2102,8 @@ Cohesion: 0.07
 Nodes (102): advance_to(), align(), append(), assign_pow10(), assume(), BaseFormatterTuple(), basic_memory_buffer(), bigint() (+94 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.33
-Nodes (20): cleanup(), contains(), elementsCapacity(), erase(), folly(), get(), getLocalCache(), getOrAllocate() (+12 more)
+Cohesion: 0.13
+Nodes (10): debugger(), hermes(), folly(), namespace(), Thread, decrementToValid(), folly(), incrementToValid() (+2 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.17
@@ -2127,16 +2114,16 @@ Cohesion: 0.02
 Nodes (94): GTMSessionUploadFetcher, -activeFetcher, -attachSendProgressBlockToChunkFetcher, -beginChunkFetcheroffset, -beginChunkFetches, -beginFetchForRetry, -beginFetchWithCompletionHandler, -beginUploadRetryTimer (+86 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.09
-Nodes (8): Command, BaseCommand, Command, Command, Command, Command, Command, Command
+Cohesion: 0.08
+Nodes (10): Command, BaseCommand, Command, Command, Command, Command, Command, Command (+2 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.16
 Nodes (93): cdpInteractionMetricsEnabled(), commonTestFlag(), cxxNativeAnimatedEnabled(), defaultTextToOverflowHidden(), disableEarlyViewCommandExecution(), disableImageViewPreallocationAndroid(), disableMountItemReorderingAndroid(), disableSubviewClippingAndroid() (+85 more)
 
 ### Community 20 - "Community 20"
-Cohesion: 0.09
-Nodes (17): benchmark_strategies(), BingImageSearchStrategy, BSCrawler, _fetch_batch(), _fetch_from_providers(), get_preview_images(), GetImagesUrlView, GoogleImageSearchStrategy (+9 more)
+Cohesion: 0.13
+Nodes (9): BSCrawler, GetImagesUrlView, SimpleTestCase, CrawlerStrategyBenchmarkTest, GoogleImageParserTest, Live network benchmark for all image providers.      Requires Playwright Chromiu, ImageServiceTest, _make_jpeg_bytes() (+1 more)
 
 ### Community 21 - "Community 21"
 Cohesion: 0.03
@@ -2532,10 +2519,6 @@ Nodes (16): call(), const_pow(), fill_array_int(), fill_array_int_impl(), fill_a
 ### Community 123 - "Community 123"
 Cohesion: 0.21
 Nodes (8): detail(), fallback(), folly(), FOLLY_ASSUME_FBVECTOR_COMPATIBLE_1(), size(), traits_detail(), traits_detail_IsEqualityComparable(), traits_detail_IsLessThanComparable()
-
-### Community 124 - "Community 124"
-Cohesion: 0.05
-Nodes (30): APITestCase, ValidationError, GoogleOAuthClient, _exercise_broken_items(), GrammarService, _normalize_item_text(), Grammar feature orchestration service.  Coordinates the book/section/unit/exerci, Grade a submitted attempt server-side, persist it and roll up the unit. (+22 more)
 
 ### Community 125 - "Community 125"
 Cohesion: 0.31
@@ -3130,10 +3113,6 @@ Nodes (6): equal(), find_iterator, increment(), make_find_iterator(), make_split
 Cohesion: 0.52
 Nodes (8): advance_to(), arg(), arg_index(), basic_printf_context(), bool(), detail(), operator(), printf_width_handler()
 
-### Community 325 - "Community 325"
-Cohesion: 0.27
-Nodes (60): asBigInt(), asNumber(), BigIntKind(), buffer(), byteLength(), byteOffset(), compare(), create() (+52 more)
-
 ### Community 326 - "Community 326"
 Cohesion: 0.17
 Nodes (11): GACAppCheck, -createRetrieveOrRefreshTokenPromiseForcingRefresh, -getCachedValidTokenForcingRefresh, -initWithServiceNameappCheckProviderstoragetokenRefreshersettingstokenDelegate, -initWithServiceNameresourceNameappCheckProvidersettingstokenDelegatekeychainAccessGroup, -limitedUseToken, -limitedUseTokenWithCompletion, -periodicTokenRefreshWithCompletion (+3 more)
@@ -3274,8 +3253,8 @@ Cohesion: 0.22
 Nodes (3): AiAssistant(), clamp(), nextId()
 
 ### Community 379 - "Community 379"
-Cohesion: 0.05
-Nodes (15): Composition root — wire concrete infrastructure into application services., LearningContextApi, Public API for user-related operations from other contexts., TermContextApi, UserContextApi, ReminderRepository, ReviseRepository, CompetitionService (+7 more)
+Cohesion: 0.27
+Nodes (6): bulkAiFill(), bulkClearImages(), bulkFindImages(), handleSaved(), refreshTerms(), runBulkEnrichment()
 
 ### Community 380 - "Community 380"
 Cohesion: 0.18
@@ -3985,10 +3964,6 @@ Nodes (6): SentryNSFileManagerSwizzling, -shared, -startWithOptionstracker, -sto
 Cohesion: 0.29
 Nodes (6): SentryDisplayLinkWrapper, -invalidate, -isRunning, -linkWithTargetselector, -targetTimestamp, -timestamp
 
-### Community 1010 - "Community 1010"
-Cohesion: 0.05
-Nodes (25): CustomTokenAuthentication, JWTAuthentication, add_user_to_deck(), adjust_priority(), clone_deck(), clone_deck_as(), create_default_deck(), DeckRepository (+17 more)
-
 ### Community 1011 - "Community 1011"
 Cohesion: 0.33
 Nodes (3): BaseUserManager, CustomUserManager, Create and save a user.py with the given email, and password.
@@ -4106,8 +4081,8 @@ Cohesion: 0.40
 Nodes (3): BaseEmailBackend, EmailBackend, SMTP backend that uses certifi's CA bundle.      Needed on macOS/environments wh
 
 ### Community 1351 - "Community 1351"
-Cohesion: 0.06
-Nodes (34): _assessment(), AssistantService, audio_clip_public_id(), _band(), _clean_actions(), _format_history(), _int(), is_elevenlabs_voice() (+26 more)
+Cohesion: 0.60
+Nodes (3): countSkippedTermLines(), parseLine(), parseTermLines()
 
 ### Community 1353 - "Community 1353"
 Cohesion: 0.70
@@ -4290,12 +4265,8 @@ Cohesion: 0.83
 Nodes (3): escapeRegExp(), highlightMainWord(), sanitizeExampleHtml()
 
 ### Community 1426 - "Community 1426"
-Cohesion: 0.05
-Nodes (13): _clip_keys(), delete_conversations(), get_clip(), hash_text(), owned_terms(), _prune_orphan_clips(), remember_response(), WritingRepository (+5 more)
-
-### Community 1431 - "Community 1431"
-Cohesion: 0.20
-Nodes (40): allocate_node(), BOOST_CATCH(), BOOST_NOEXCEPT(), BOOST_TRY(), check_invariant_(), clear_(), construct_value(), copy_construct_from() (+32 more)
+Cohesion: 0.83
+Nodes (3): generateFillQuestions(), generateQuestions(), generateQuizQuestions()
 
 ### Community 1440 - "Community 1440"
 Cohesion: 0.83
@@ -4393,741 +4364,697 @@ Nodes (3): _build_url(), get_connection(), get_engine()
 Cohesion: 0.83
 Nodes (3): clear_db_env(), database_url_from_env_builds_from_db_vars(), database_url_from_env_uses_database_url_when_set()
 
-### Community 1536 - "Community 1536"
+### Community 1666 - "Community 1666"
+Cohesion: 0.27
+Nodes (60): asBigInt(), asNumber(), BigIntKind(), buffer(), byteLength(), byteOffset(), compare(), create() (+52 more)
+
+### Community 12165 - "Community 12165"
+Cohesion: 0.05
+Nodes (25): CustomTokenAuthentication, JWTAuthentication, add_user_to_deck(), adjust_priority(), clone_deck(), clone_deck_as(), create_default_deck(), DeckRepository (+17 more)
+
+### Community 12166 - "Community 12166"
+Cohesion: 0.05
+Nodes (23): ABC, CursorPagination, DeckViewSet, FlexibleViewSet, LearningViewSet, PageNumberPagination, DeckPageNumberPagination, Numbered pages for the deck editor, so a 600-term deck is browsable by page. (+15 more)
+
+### Community 12167 - "Community 12167"
+Cohesion: 0.06
+Nodes (34): DeckRef, ReviseTermRow, ConflictError, DomainError, PermissionDeniedError, Base class for domain/application errors., _exercise_progress_payload(), GrammarCatalogSerializer (+26 more)
+
+### Community 12168 - "Community 12168"
+Cohesion: 0.06
+Nodes (26): can_edit(), can_view(), DeckAccessPolicy, get_user_role(), is_member(), Deck access rules — domain policy, independent of Django ORM., TermAccessPolicy, CourseViewSet (+18 more)
+
+### Community 12169 - "Community 12169"
+Cohesion: 0.05
+Nodes (18): APITestCase, GoogleOAuthClient, BodyLogoutContractTest, BodyRefreshRotationContractTest, EmailLoginBodyContractTest, GoogleAudienceValidationTest, GoogleInitBodyContractTest, Contract tests for the endpoints the native (Expo) app depends on.  The mobile c (+10 more)
+
+### Community 12170 - "Community 12170"
+Cohesion: 0.06
+Nodes (10): _coerce_bool(), _coerce_list(), _extract_ai_fields(), _meaning_of(), TermService, _EmptyRoles, FakeDeck, FakeTermRepository (+2 more)
+
+### Community 12171 - "Community 12171"
+Cohesion: 0.06
+Nodes (34): _assessment(), AssistantService, audio_clip_public_id(), _band(), _clean_actions(), _format_history(), _int(), is_elevenlabs_voice() (+26 more)
+
+### Community 12172 - "Community 12172"
+Cohesion: 0.06
+Nodes (16): Composition root — wire concrete infrastructure into application services., LearningContextApi, Public API for user-related operations from other contexts., TermContextApi, UserContextApi, CompetitionRepository, ReminderRepository, ReviseRepository (+8 more)
+
+### Community 12173 - "Community 12173"
+Cohesion: 0.20
+Nodes (40): allocate_node(), BOOST_CATCH(), BOOST_NOEXCEPT(), BOOST_TRY(), check_invariant_(), clear_(), construct_value(), copy_construct_from() (+32 more)
+
+### Community 12174 - "Community 12174"
 Cohesion: 0.09
 Nodes (46): stbi__addsizes_valid(), stbi__bitcount(), stbi__bmp_load(), stbi__compute_transparency(), stbi__compute_transparency16(), stbi__compute_y_16(), stbi__convert_format(), stbi__convert_format16() (+38 more)
 
-### Community 1539 - "Community 1539"
-Cohesion: 0.08
-Nodes (20): _clean_lines(), ListeningService, _looks_hosted(), Listening (dictation) orchestration service.  Coordinates the dictation catalog/, Persist a listen-and-type attempt and update completion state.          The fron, Auto-save the per-sentence answers checked so far.          Unlike :meth:`submit, Clear the saved per-sentence answers so the exercise starts fresh., Add, update or remove a per-user noted highlight on an exercise. (+12 more)
+### Community 12175 - "Community 12175"
+Cohesion: 0.07
+Nodes (25): AzureOpenAIProvider, _parse(), Azure OpenAI implementation of :class:`AiTextPort`.  Talks to an Azure OpenAI re, _assessment_header(), AzureSpeechProvider, _content_type(), Azure AI Speech — Pronunciation Assessment (REST short-audio API).  Unlike the t, Azure Speech pronunciation assessment over the REST short-audio API. (+17 more)
 
-### Community 1540 - "Community 1540"
+### Community 12176 - "Community 12176"
 Cohesion: 0.05
 Nodes (9): range, Int, SentryProfileLifecycle, manual, trace, SentryProfileOptions, SentryXcodeVersion, xcode16_4 (+1 more)
 
-### Community 1541 - "Community 1541"
+### Community 12177 - "Community 12177"
+Cohesion: 0.05
+Nodes (7): clip_hash(), get_exercise(), get_progress(), record_attempt(), set_highlight(), upsert_exercise(), upsert_section()
+
+### Community 12178 - "Community 12178"
 Cohesion: 0.05
 Nodes (19): SentryAppState, SentryClientReport, SentryDiscardedEvent, internalSerialize(), SentryFeedback, SentryFeedbackSource, custom, widget (+11 more)
 
-### Community 1548 - "Community 1548"
-Cohesion: 0.05
-Nodes (22): AI_LIST_FIELDS, AI_STRING_FIELDS, AssistantAction, AssistantApi, AssistantReply, AuthApi, CompetitionApi, CourseApi (+14 more)
-
-### Community 1660 - "Community 1660"
-Cohesion: 0.09
+### Community 12179 - "Community 12179"
+Cohesion: 0.08
 Nodes (17): SpeakingRepository, AI operations for the Speaking Coach feature.      ``ai`` handles text/JSON gene, SpeakingCoachService, _clean_active_voice(), _clean_playable_voice(), Speaking Coach orchestration service.  Coordinates the AI coach (:class:`Speakin, Run pronunciation analysis and return the raw camelCase result only.          Un, Synthesize one line (cache-first) with the selected tutor voice. (+9 more)
 
-### Community 1686 - "Community 1686"
+### Community 12180 - "Community 12180"
 Cohesion: 0.06
 Nodes (33): GTMSessionFetcherSessionDelegateDispatcher, -abandon, -description, -destroyDiscardTimer, -destroySessionAndTimer, -discardInterval, -discardTimer, -discardTimerFired (+25 more)
 
-### Community 1687 - "Community 1687"
-Cohesion: 0.07
-Nodes (14): ABC, DeckViewSet, FlexibleViewSet, LearningViewSet, RoleViewSet, build(), DeckSearchQuery, TermSearchQuery (+6 more)
-
-### Community 1689 - "Community 1689"
+### Community 12181 - "Community 12181"
 Cohesion: 0.06
 Nodes (32): __cancelIdleCallback(), __createShadowNodeReferenceCounter(), __createShadowNodeRevisionGetter(), __enqueueModalSizeUpdate(), __enqueueNativeEvent(), __enqueueScrollEvent(), __findPseudoElementShadowNodeByTag(), __getBorderWidth() (+24 more)
 
-### Community 1690 - "Community 1690"
+### Community 12182 - "Community 12182"
 Cohesion: 0.06
 Nodes (31): OIDAuthState, -accessToken, -accessTokenExpirationDate, -authStateByPresentingAuthorizationRequestexternalUserAgentcallback, -description, -didChangeState, -encodeWithCoder, -idToken (+23 more)
 
-### Community 1691 - "Community 1691"
-Cohesion: 0.11
-Nodes (18): POST ``payload`` and return the decoded JSON body, retrying transient errors., POST ``payload`` and return the raw response body (e.g. audio), with retries., Pace consecutive requests to stay under a per-minute quota., Sleep before a retry, honoring a server-specified delay when present., Recommended retry delay (seconds) from a Retry-After header, if any., Base class providing throttling + retry/backoff around a POST request., POST ``payload`` and return the raw 200 response, retrying transient errors., RetryingHttpProvider (+10 more)
+### Community 12184 - "Community 12184"
+Cohesion: 0.06
+Nodes (20): NSCopying, SentrySession, SentrySessionStatus, abnormal, crashed, exited, ok, SentryWeakBox (+12 more)
 
-### Community 1721 - "Community 1721"
-Cohesion: 0.09
-Nodes (5): _EmptyRoles, FakeDeck, FakeTermRepository, FakeUser, TermServiceUnitTest
-
-### Community 1935 - "Community 1935"
-Cohesion: 0.10
-Nodes (17): _exercise_progress_payload(), GrammarCatalogSerializer, GrammarExercisePublicSerializer, GrammarUnitDetailSerializer, GrammarViewSet, _public_item(), AI "explain" option: explain a rule, or why an answer is wrong.          Body: a, The book with sections → units and the user's progress counts. (+9 more)
-
-### Community 6727 - "Community 6727"
+### Community 12186 - "Community 12186"
 Cohesion: 0.14
 Nodes (20): ListeningExerciseSerializer, ListeningExerciseSummarySerializer, ListeningTopicDetailSerializer, ListeningTopicSummarySerializer, ListeningViewSet, _progress_payload(), _public_sentence(), Add, update or remove a per-user noted word/phrase on an exercise. (+12 more)
 
-### Community 6728 - "Community 6728"
-Cohesion: 0.10
-Nodes (12): SentryCrashReportSink, -filterReportsonCompletion, -handleConvertedEventreportsentReports, -initWithInAppLogiccrashWrapperdispatchQueue, -sendReportsonCompletion, SentryRequest, SentryStacktrace, SentryThread (+4 more)
-
-### Community 6739 - "Community 6739"
+### Community 12187 - "Community 12187"
 Cohesion: 0.12
 Nodes (29): stbi__at_eof(), stbi__bmp_info(), stbi__bmp_parse_header(), stbi__bmp_set_mask_defaults(), stbi__bmp_test(), stbi__bmp_test_raw(), stbi__copyval(), stbi__get16le() (+21 more)
 
-### Community 6757 - "Community 6757"
-Cohesion: 0.12
-Nodes (19): can_edit(), can_view(), DeckAccessPolicy, get_user_role(), is_member(), Deck access rules — domain policy, independent of Django ORM., TermAccessPolicy, Save a listen-and-type (dictation) attempt so it replays on revisit.          Bo (+11 more)
+### Community 12188 - "Community 12188"
+Cohesion: 0.09
+Nodes (8): owned_terms(), remember_response(), WritingRepository, Writing Coach orchestration service.  Coordinates the AI coach (:class:`WritingC, The user's own terms that appear in a session's text.          Accepts either an, Append the learner's message (with feedback) plus the tutor's reply., _session_texts(), WritingService
 
-### Community 6758 - "Community 6758"
+### Community 12189 - "Community 12189"
 Cohesion: 0.45
 Nodes (19): animating(), backgroundColor(), color(), drawerBackgroundColor(), drawerLockMode(), drawerWidth(), ModalHostViewAnimationType(), on() (+11 more)
 
-### Community 11985 - "Community 11985"
+### Community 12190 - "Community 12190"
 Cohesion: 0.07
 Nodes (27): SentryCrashDoctor, -backtraceFromThreadReport, -basicRegistersFromThreadReport, -cpuFamily, -crashedThreadReport, -crashReport, -diagnoseCrash, -doctor (+19 more)
 
-### Community 12165 - "Community 12165"
+### Community 12191 - "Community 12191"
+Cohesion: 0.11
+Nodes (4): _clean_lines(), ListeningService, _looks_hosted(), _sentence_public_id()
+
+### Community 12192 - "Community 12192"
+Cohesion: 0.13
+Nodes (20): DeckDetailSerializer, DeckSerializer, Meta, MyDeckSerializer, CreateLearningProgressSerializer, LearningStreakSerializer, Meta, ProgressSerializer (+12 more)
+
+### Community 12193 - "Community 12193"
 Cohesion: 0.08
 Nodes (18): Codable, CodingKeys, attributes, body, level, severityNumber, timestamp, traceId (+10 more)
 
-### Community 12166 - "Community 12166"
+### Community 12194 - "Community 12194"
+Cohesion: 0.11
+Nodes (9): SentryRequest, init(), SentryRequestDecodable, SentryStacktrace, SentryThread, SentryUseNSExceptionCallstackWrapper, -buildCrashStackToEntryMapper, -buildThreads (+1 more)
+
+### Community 12195 - "Community 12195"
 Cohesion: 0.24
 Nodes (19): bad_alloc(), BOOST_OVERRIDE(), BOOST_SYMBOL_VISIBLE, copy_from(), get_throw_location(), logic_error(), rethrow(), std::exception() (+11 more)
 
-### Community 12167 - "Community 12167"
+### Community 12196 - "Community 12196"
 Cohesion: 0.07
 Nodes (27): CodingKeys, breadcrumbs, context, debugMeta, dist, environment, eventId, exception (+19 more)
 
-### Community 12168 - "Community 12168"
-Cohesion: 0.14
-Nodes (9): Any, _coerce_bool(), _coerce_list(), _extract_ai_fields(), _meaning_of(), Pull AI-generated/override fields out of a request payload, coercing types., Filtered + sorted terms for the deck editor. The view paginates the queryset., TermService (+1 more)
-
-### Community 12169 - "Community 12169"
+### Community 12197 - "Community 12197"
 Cohesion: 0.30
 Nodes (22): append(), assign(), begin(), c_str(), cbegin(), cend(), cerase(), compare() (+14 more)
 
-### Community 12170 - "Community 12170"
+### Community 12198 - "Community 12198"
 Cohesion: 0.45
 Nodes (8): cursorColor(), getNonDefaultSubmitBehavior(), mostRecentEventCount(), multiline(), placeholderTextColor(), selectionColor(), selectionHandleColor(), underlineColorAndroid()
 
-### Community 12171 - "Community 12171"
+### Community 12199 - "Community 12199"
 Cohesion: 0.08
 Nodes (8): SentryDefaultViewRenderer, PreviewRenderer, SentryMaskingPreviewView, SentryUserFeedbackWidgetButtonMegaphoneIconView, SentryUserFeedbackWidgetButtonView, SentryViewRenderer, SentryViewRendererV2, UIView
 
-### Community 12172 - "Community 12172"
+### Community 12200 - "Community 12200"
 Cohesion: 0.16
 Nodes (25): stbi__bit_reverse(), stbi__bitreverse16(), stbi__build_fast_ac(), stbi__build_huffman(), stbi__compute_huffman_codes(), stbi__decode_jpeg_header(), stbi__decode_jpeg_image(), stbi__err() (+17 more)
 
-### Community 12173 - "Community 12173"
-Cohesion: 0.12
-Nodes (17): AbstractBaseUser, Char32UUIDField, CustomAbstractUser, DateTimeModel, DateTimeUUIDModel, Meta, Keep pre-Django 5 UUID columns compatible with MariaDB 10.7+., An abstract base class implementing a fully featured User model with     admin-c (+9 more)
-
-### Community 12174 - "Community 12174"
+### Community 12201 - "Community 12201"
 Cohesion: 0.10
 Nodes (5): AuthService, clone_starter_decks_for_user(), create_default_deck_for_user(), Revoke a refresh token on logout so it can't be reused for its full         30-d, UserService
 
-### Community 12175 - "Community 12175"
+### Community 12202 - "Community 12202"
+Cohesion: 0.33
+Nodes (20): cleanup(), contains(), elementsCapacity(), erase(), folly(), get(), getLocalCache(), getOrAllocate() (+12 more)
+
+### Community 12203 - "Community 12203"
 Cohesion: 0.10
-Nodes (10): CursorPagination, CoursePageNumberPagination, DeckPageNumberPagination, Numbered pages for the deck editor, so a 600-term deck is browsable by page., TermPageNumberPagination, PageNumberPagination, LatestlCursorPagination, Generate Oxford-style fields for a term without persisting them. (+2 more)
+Nodes (5): _clip_keys(), delete_conversations(), get_clip(), hash_text(), _prune_orphan_clips()
 
-### Community 12176 - "Community 12176"
-Cohesion: 0.11
-Nodes (12): CompetitionScore, Meta, A player's best score for one competition mini-game on one deck.      Competitio, Deck, default_background_path(), Meta, UserLearningProgress, Meta (+4 more)
-
-### Community 12177 - "Community 12177"
+### Community 12204 - "Community 12204"
 Cohesion: 0.09
 Nodes (23): SentryCrashReportConverter, -binaryImageForAddress, -convertBreadcrumbs, -convertExceptions, -convertReportToEvent, -convertThreads, -convertUser, -crashedThread (+15 more)
 
-### Community 12178 - "Community 12178"
+### Community 12205 - "Community 12205"
 Cohesion: 0.10
 Nodes (20): Frame, CodingKeys, columnNumber, contextLine, fileName, function, imageAddress, inApp (+12 more)
 
-### Community 12179 - "Community 12179"
+### Community 12206 - "Community 12206"
 Cohesion: 0.09
 Nodes (22): SentryNetworkTracker, -addBaggageHeadertraceHeadertoRequest, -addBreadcrumbForSessionTask, -addTraceWithoutTransactionToTask, -captureFailedRequests, -containsStatusCode, -disable, -enableCaptureFailedRequests (+14 more)
 
-### Community 12181 - "Community 12181"
+### Community 12208 - "Community 12208"
 Cohesion: 0.17
 Nodes (7): cache_factory(), _CacheNamespace, DeckTermsCache, LearningProgressCache, RESOURCE, cleanup_learning_cache(), Evict stale learning-progress cache entries.     Runs every hour.
 
-### Community 12182 - "Community 12182"
+### Community 12209 - "Community 12209"
 Cohesion: 0.13
 Nodes (13): active_account(), clear_refresh_cookie(), google_login(), init(), login(), logout(), Store the refresh token in an HttpOnly cookie so JS (incl. XSS) can't read     i, One token pair for a fresh session. Returns (refresh_token, body) where     body (+5 more)
 
-### Community 12183 - "Community 12183"
+### Community 12210 - "Community 12210"
 Cohesion: 0.32
 Nodes (17): assign(), back(), clear(), compare(), detail(), fmt(), front(), literals() (+9 more)
 
-### Community 12184 - "Community 12184"
-Cohesion: 0.10
-Nodes (13): SentryMessage, SentryNSError, CodingKeys, code, domain, init(), SentryNSErrorDecodable, SentryWatchdogTerminationTracker (+5 more)
+### Community 12211 - "Community 12211"
+Cohesion: 0.17
+Nodes (9): Command, humanize_block(), _lesson_key(), make_session(), Import the freeCodeCamp English-for-Developers courses into our Course models., Ordered list of lessons to import: each dialogue with its follow-up tasks., Ordered ``[(block_slug, [challenges])]`` preserving curriculum order., A pooled session that retries transient errors (incl. connection resets).      f (+1 more)
 
-### Community 12185 - "Community 12185"
-Cohesion: 0.16
-Nodes (6): debugger(), hermes(), folly(), namespace(), Thread, folly()
-
-### Community 12186 - "Community 12186"
+### Community 12212 - "Community 12212"
 Cohesion: 0.27
 Nodes (12): bool(), exception_wrapper(), _(), exception_ptr_ref(), exception_wrapper(), folly(), get_exception(), handle() (+4 more)
 
-### Community 12187 - "Community 12187"
+### Community 12213 - "Community 12213"
 Cohesion: 0.10
 Nodes (20): SentryFileIOTracker, -disable, -enable, -endTrackingFile, -finishTrackingNSDataspan, -ignoreFile, -initWithThreadInspectorprocessInfoWrapper, -mainThreadExtraInfo (+12 more)
 
-### Community 12188 - "Community 12188"
+### Community 12214 - "Community 12214"
 Cohesion: 0.14
 Nodes (20): stbi__check_png_header(), stbi__gif_info(), stbi__gif_info_raw(), stbi__hdr_gettoken(), stbi__hdr_info(), stbi__hdr_test(), stbi__hdr_test_core(), stbi__info_main() (+12 more)
 
-### Community 12189 - "Community 12189"
+### Community 12215 - "Community 12215"
 Cohesion: 0.43
 Nodes (15): align(), Alloc(), allocate(), blockGoodAllocSize(), canReuseExistingBlock(), clear(), folly(), freeBlocks() (+7 more)
 
-### Community 12190 - "Community 12190"
+### Community 12216 - "Community 12216"
 Cohesion: 0.11
 Nodes (10): GrammarCoachService, AI operations for the Grammar feature (the new AI Assistant option)., Explain a grammar rule, or why a learner's answer was wrong.          Any subset, Rewrite one unit's explanation + exercises for the web.          Given a unit di, Write one exercise-only practice lesson reviewing ``topics``.          Returns `, Convert raw extracted text from consecutive PDF pages into units.          Retur, Reconstruct readable units from noisy OCR of consecutive pages.          Unlike, Attach the unit's answer-key answers to its reconstructed items.          ``exer (+2 more)
 
-### Community 12191 - "Community 12191"
+### Community 12217 - "Community 12217"
 Cohesion: 0.11
-Nodes (6): Meta, Serializers for the Revise session.  A card is rendered *answer-free*: the clien, ReviseCard, User, Meta, WritingSessionSerializer
+Nodes (6): default_background_path(), UserLearningProgress, Meta, UserDeckRole, User, UUIDModel
 
-### Community 12192 - "Community 12192"
+### Community 12218 - "Community 12218"
 Cohesion: 0.12
-Nodes (13): CodingKey, Attribute, CodingKeys, type, value, SentryLog, SentryLog.Attribute, CodingKeys (+5 more)
+Nodes (15): CodingKey, Attribute, CodingKeys, type, value, SentryLog, SentryLog.Attribute, CodingKeys (+7 more)
 
-### Community 12193 - "Community 12193"
+### Community 12219 - "Community 12219"
 Cohesion: 0.29
 Nodes (11): check(), detail(), DtoaMode(), e(), estimateSpaceNeeded(), folly(), IntermediateType(), max() (+3 more)
 
-### Community 12195 - "Community 12195"
+### Community 12221 - "Community 12221"
 Cohesion: 0.11
 Nodes (10): NSObjectProtocol, SentryReplayVideoMaker, SentrySessionReplayDelegate, SentryUserFeedbackFormDelegate, ViewControllerWrapper, SentryUserFeedbackIntegrationDriverDelegate, UIView, SentryUIViewControllerDescriptor (+2 more)
 
-### Community 12196 - "Community 12196"
+### Community 12222 - "Community 12222"
 Cohesion: 0.11
 Nodes (9): SentryRedactOptions, DefaultValues, SentryReplayOptions, SentryReplayQuality, high, low, medium, DefaultValues (+1 more)
 
-### Community 12197 - "Community 12197"
-Cohesion: 0.15
-Nodes (12): AzureTextToSpeechProvider, Azure AI Speech — Text-to-Speech (REST synthesis API).  Synthesizes speech from, Azure Speech text-to-speech over the REST synthesis API., Synthesize ``text`` in ``voice``; return ``{"audio": base64, "mime_type"}``., _voice_lang(), AiProviderError, _loads_object(), Shared HTTP/retry plumbing for AI providers.  Concrete providers (Gemini, DeepSe (+4 more)
+### Community 12223 - "Community 12223"
+Cohesion: 0.18
+Nodes (13): AbstractBaseUser, Char32UUIDField, CustomAbstractUser, DateTimeModel, DateTimeUUIDModel, Meta, Keep pre-Django 5 UUID columns compatible with MariaDB 10.7+., An abstract base class implementing a fully featured User model with     admin-c (+5 more)
 
-### Community 12198 - "Community 12198"
-Cohesion: 0.12
-Nodes (6): SimpleTestCase, ImageServiceTest, _make_jpeg_bytes(), test_optimize_large_image_reduces_size(), QuickReviseGameTest, Char32UUIDFieldTest
+### Community 12225 - "Community 12225"
+Cohesion: 0.14
+Nodes (3): _exercise_broken_items(), GrammarService, _normalize_item_text()
 
-### Community 12200 - "Community 12200"
+### Community 12226 - "Community 12226"
 Cohesion: 0.37
 Nodes (14): clear(), contains_index(), contains_value(), data_(), erase_value(), folly(), forward_view(), index_of_value() (+6 more)
 
-### Community 12201 - "Community 12201"
+### Community 12227 - "Community 12227"
 Cohesion: 0.29
 Nodes (10): bitCount(), folly(), getNthLSBit(), getNthLSByte(), isLoopback(), isNonroutable(), mask(), std() (+2 more)
 
-### Community 12202 - "Community 12202"
+### Community 12228 - "Community 12228"
+Cohesion: 0.12
+Nodes (13): SentryMessage, CodingKeys, formatted, message, params, init(), SentryMessageDecodable, SentryWatchdogTerminationTracker (+5 more)
+
+### Community 12229 - "Community 12229"
 Cohesion: 0.12
 Nodes (11): SentryRRWebCustomEvent, SentryRRWebEvent, SentryRRWebMetaEvent, RRWebMoveEvent, RRWebTouchEvent, TouchEventPhase, end, move (+3 more)
 
-### Community 12203 - "Community 12203"
+### Community 12230 - "Community 12230"
 Cohesion: 0.12
 Nodes (6): InputError, validationError, SentryUserFeedbackFormViewModel, SentryUserFeedbackFormViewModelDelegate, UITextField, UITextView
 
-### Community 12205 - "Community 12205"
+### Community 12231 - "Community 12231"
 Cohesion: 0.14
 Nodes (18): load_jpeg_image(), stbi__blinn_8x8(), stbi__cleanup_jpeg(), stbi__compute_y(), stbi__cpuid3(), stbi__do_zlib(), stbi__free_jpeg_components(), stbi__jpeg_load() (+10 more)
 
-### Community 12206 - "Community 12206"
+### Community 12232 - "Community 12232"
 Cohesion: 0.18
 Nodes (12): _apply_to_name(), _chunks(), _as_str(), _as_str_list(), _normalize(), Application service that turns a bare term into Oxford-dictionary-style data.  I, Return generated term fields. Raises on provider/validation failure., Enrich several term names in a single AI request.          Returns a mapping of (+4 more)
 
-### Community 12207 - "Community 12207"
+### Community 12233 - "Community 12233"
 Cohesion: 0.18
 Nodes (10): Command, extract_js_object(), make_session(), Import DailyDictation listen-and-type exercises into our Listening models.  Each, Extract a balanced ``{...}`` object literal that follows ``marker`` in ``text``., Ordered, de-duplicated ``{slug}.{id}`` references for a topic (single page)., Parse one exercise's ``window.appGlobals`` into an upsert payload., Fetch a page, retrying rate-limits (429) and transient errors.          DailyDic (+2 more)
 
-### Community 12208 - "Community 12208"
-Cohesion: 0.25
-Nodes (12): DeckDetailSerializer, DeckSerializer, Meta, MyDeckSerializer, CreateLearningProgressSerializer, LearningStreakSerializer, ProgressSerializer, UserLearningProgressSerializer (+4 more)
+### Community 12234 - "Community 12234"
+Cohesion: 0.20
+Nodes (9): benchmark_strategies(), BingImageSearchStrategy, _fetch_batch(), _fetch_from_providers(), get_preview_images(), ImageSearchStrategy, _merge_results(), OpenverseImageSearchStrategy (+1 more)
 
-### Community 12209 - "Community 12209"
-Cohesion: 0.14
-Nodes (10): _env_float(), _get_redis(), _InProcessGate, Cross-process serialization + rate limiting for AI provider calls.  The original, Load the Lua scripts once; returns False if Redis is unavailable., Take the single in-flight slot; returns the lock token (None = timed out)., Read ``AI_GATE_<NAME>_<LABEL>`` then ``AI_GATE_<NAME>`` then ``default``., Return a shared Redis client, or ``None`` to fall back to in-process. (+2 more)
-
-### Community 12210 - "Community 12210"
-Cohesion: 0.12
-Nodes (5): DeckUserManagementTest, Regression tests guarding the DDD refactor against behavior changes.  These cove, add_user_to_deck / remove_user_from_deck end-to-end.      Guards both the unknow, RoleInviteErrorPathTest, TermErrorPathTest
-
-### Community 12211 - "Community 12211"
+### Community 12235 - "Community 12235"
 Cohesion: 0.22
 Nodes (4): color(), operator(), T(), vprint()
 
-### Community 12212 - "Community 12212"
+### Community 12236 - "Community 12236"
 Cohesion: 0.12
 Nodes (6): CustomStringConvertible, DispatchQueue, Promise, SentryReplayType, buffer, session
 
-### Community 12213 - "Community 12213"
+### Community 12237 - "Community 12237"
 Cohesion: 0.40
 Nodes (13): chunkAllocSize(), computeCapacity(), f14(), F14HashToken(), final(), folly(), if(), initializeChunks() (+5 more)
 
-### Community 12214 - "Community 12214"
+### Community 12238 - "Community 12238"
 Cohesion: 0.12
 Nodes (16): GACAppCheckBackoffOperationFailure, -init, -initWithFinishDateerrorbackoffTyperetryCount, -initWithFinishDateerrorbackoffTyperetryCountNS_DESIGNATED_INITIALIZER, -nextRetryFailureWithFailurefinishDateerrorbackoffType, _GACAppCheckBackoffWrapper, -applyBackoffToOperationerrorHandler, -currentDateProvider (+8 more)
 
-### Community 12215 - "Community 12215"
+### Community 12239 - "Community 12239"
 Cohesion: 0.12
 Nodes (16): SentryMetricProfiler, -clear, -clearNotThreadSafe, -copyMetricProfilerData, -dealloc, -initWithMode, -metricReadingForValue, -recordCPUsage (+8 more)
 
-### Community 12216 - "Community 12216"
+### Community 12240 - "Community 12240"
 Cohesion: 0.12
 Nodes (13): ExceptionType, fatalFullyBlocking, fatalNonFullyBlocking, fullyBlocking, nonFullyBlocking, unknown, SentryANRType, fatalFullyBlocking (+5 more)
 
-### Community 12217 - "Community 12217"
+### Community 12241 - "Community 12241"
 Cohesion: 0.12
 Nodes (17): GTMSessionCookieStorage, -cookieAcceptPolicy, -cookieMatchingCookie, -cookies, -cookiesForURL, -deleteCookie, -getCookiesForTaskcompletionHandler, -hasCookieExpired (+9 more)
 
-### Community 12218 - "Community 12218"
+### Community 12242 - "Community 12242"
 Cohesion: 0.53
 Nodes (7): animatedNodeTag(), childTag(), facebook(), nodeTag(), offset(), value(), viewTag()
 
-### Community 12220 - "Community 12220"
-Cohesion: 0.17
-Nodes (10): FailoverAiProvider, Failover across multiple AI providers.  Tries each provider in order; if one fai, _build(), build_named_provider(), build_tts_provider(), get_ai_provider(), _provider_chain(), Service layer entry point — prefer composition singletons for new code. (+2 more)
+### Community 12244 - "Community 12244"
+Cohesion: 0.13
+Nodes (3): bulk_delete(), create(), delete()
 
-### Community 12222 - "Community 12222"
+### Community 12246 - "Community 12246"
 Cohesion: 0.19
 Nodes (5): ExtractedTouchData, SentryTouchTracker, TouchEvent, TouchInfo, UITouch.Phase
 
-### Community 12225 - "Community 12225"
-Cohesion: 0.24
-Nodes (4): Command, Ordered list of lessons to import: each dialogue with its follow-up tasks., Ordered ``[(block_slug, [challenges])]`` preserving curriculum order., strip_html()
-
-### Community 12226 - "Community 12226"
+### Community 12249 - "Community 12249"
 Cohesion: 0.36
 Nodes (7): createInstance(), entryInstance(), folly(), get(), instance(), LeakySingleton(), make_mock()
 
-### Community 12227 - "Community 12227"
-Cohesion: 0.13
-Nodes (14): NSCopying, SentryWeakBox, -copyWithZone, -hash, -initWithKey, -isEqual, -key, SentryWeakMap (+6 more)
-
-### Community 12228 - "Community 12228"
+### Community 12250 - "Community 12250"
 Cohesion: 0.15
 Nodes (7): RootViewController, SentryUserFeedbackWidget, SentryUserFeedbackWidgetDelegate, Window, UIAdaptivePresentationControllerDelegate, UIViewController, UIWindow
 
-### Community 12229 - "Community 12229"
+### Community 12251 - "Community 12251"
 Cohesion: 0.13
 Nodes (9): Level, debug, error, fatal, info, trace, warn, SentryLog (+1 more)
 
-### Community 12230 - "Community 12230"
-Cohesion: 0.14
-Nodes (3): AI_LIST_FIELDS, AI_STRING_FIELDS, TermService
-
-### Community 12231 - "Community 12231"
+### Community 12252 - "Community 12252"
 Cohesion: 0.27
 Nodes (5): AsyncWebsocketConsumer, get_revise_terms(), get_user_and_deck(), QuickReviseConsumer, save_learning_progress()
 
-### Community 12232 - "Community 12232"
+### Community 12253 - "Community 12253"
+Cohesion: 0.14
+Nodes (9): Error, accessTokenEmptyForRequest, cannotAuthorizeRequest, CustomNSError, Equatable, PromiseError, timedOut, validationFailure (+1 more)
+
+### Community 12254 - "Community 12254"
+Cohesion: 0.20
+Nodes (7): CompetitionPoolSerializer, CompetitionViewSet, LeaderboardEntrySerializer, LeaderboardSerializer, Meta, Deck-scoped mini-games. Thin transport layer — the pool sampling,     scoring an, SubmitScoreSerializer
+
+### Community 12255 - "Community 12255"
 Cohesion: 0.49
 Nodes (5): facebook(), fromCSSShadow(), fromRawValue(), parseUnprocessedBoxShadowList(), parseUnprocessedBoxShadowString()
 
-### Community 12233 - "Community 12233"
-Cohesion: 0.14
-Nodes (6): styles, EMPTY_TERM, styles, SortKey, styles, TermPage
-
-### Community 12234 - "Community 12234"
+### Community 12256 - "Community 12256"
 Cohesion: 0.51
 Nodes (5): convertRawProp(), fontVariantFromCSSFontVariant(), fromRawValue(), toMapBuffer(), toString()
 
-### Community 12235 - "Community 12235"
+### Community 12257 - "Community 12257"
 Cohesion: 0.15
 Nodes (12): DebugMeta, CodingKeys, codeFile, debugID, imageAddress, imageSize, imageVmAddress, name (+4 more)
 
-### Community 12236 - "Community 12236"
+### Community 12258 - "Community 12258"
 Cohesion: 0.49
 Nodes (5): ImageResizeMode(), scale(), size(), toDynamic(), type()
 
-### Community 12237 - "Community 12237"
+### Community 12259 - "Community 12259"
 Cohesion: 0.14
 Nodes (13): SentryTransactionContext, -commonInitWithNamesourcesampleRatesampleRandparentSampledparentSampleRateparentSampleRand, -getThreadInfo, -initWithNamenameSourceoperationorigin, -initWithNamenameSourceoperationoriginsampledsampleRatesampleRand, -initWithNamenameSourceoperationorigintraceIdspanIdparentSpanIdparentSampledparentSampleRateparentSampleRand, -initWithNamenameSourceoperationorigintraceIdspanIdparentSpanIdsampledparentSampledsampleRateparentSampleRatesampleRandparentSampleRand, -initWithNameoperation (+5 more)
 
-### Community 12238 - "Community 12238"
+### Community 12260 - "Community 12260"
 Cohesion: 0.23
 Nodes (5): SentryApplication, NSApplication, PlaceholderSentryApplication, SentryApplication, UIApplication
 
-### Community 12239 - "Community 12239"
+### Community 12261 - "Community 12261"
 Cohesion: 0.14
 Nodes (11): ErrorCode, failedToConvertAuthSessionToData, failedToConvertRedirectURItoURL, failedToCreateResponseStringFromAuthSession, failedToDeletePassword, failedToDeletePasswordBecauseItemNotFound, failedToSetPassword, noService (+3 more)
 
-### Community 12240 - "Community 12240"
+### Community 12262 - "Community 12262"
 Cohesion: 0.16
 Nodes (4): SentryUserFeedbackFormController, SentryUserFeedbackFormViewModelDelegate, UITextFieldDelegate, UITextViewDelegate
 
-### Community 12241 - "Community 12241"
+### Community 12263 - "Community 12263"
 Cohesion: 0.21
 Nodes (3): SentryUserFeedbackFormDelegate, SentryUserFeedbackIntegrationDriver, SentryUserFeedbackWidgetDelegate
 
-### Community 12242 - "Community 12242"
-Cohesion: 0.19
-Nodes (8): AssetMirror, character_folder(), humanize_block(), _lesson_key(), make_session(), Import the freeCodeCamp English-for-Developers courses into our Course models., Mirrors freeCodeCamp character/background art into our Cloudinary once.      Thr, A pooled session that retries transient errors (incl. connection resets).      f
-
-### Community 12243 - "Community 12243"
+### Community 12264 - "Community 12264"
 Cohesion: 0.21
 Nodes (7): CourseDetailSerializer, CourseLessonSerializer, CourseSectionSerializer, CourseSummarySerializer, _LessonProgressField, The requesting user's progress for a lesson, pulled from serializer context., Catalog row: a course plus the user's passed/total lesson counts.
 
-### Community 12244 - "Community 12244"
-Cohesion: 0.21
-Nodes (4): DeckAccessPolicyTest, _Role, _Roles, _User
-
-### Community 12245 - "Community 12245"
+### Community 12265 - "Community 12265"
 Cohesion: 0.17
 Nodes (11): Breadcrumb, BreadcrumbDecodable, CodingKeys, category, data, level, message, origin (+3 more)
 
-### Community 12246 - "Community 12246"
+### Community 12266 - "Community 12266"
 Cohesion: 0.49
 Nodes (4): displayTypeFromYGDisplay(), if(), layoutMetricsFromYogaNode(), positionTypeFromYogaPositionType()
 
-### Community 12247 - "Community 12247"
+### Community 12267 - "Community 12267"
 Cohesion: 0.19
 Nodes (8): borderColor(), colorScheme(), disabled(), fromRawValue(), rippleRadius(), tabBarItemTitleLargeLabelFontSize(), toDynamic(), toString()
 
-### Community 12248 - "Community 12248"
+### Community 12268 - "Community 12268"
 Cohesion: 0.46
 Nodes (9): Compare(), cont_(), data(), folly(), get_container_for_direct_mutation(), m_(), sorted_vector_map(), sorted_vector_set() (+1 more)
 
-### Community 12249 - "Community 12249"
+### Community 12269 - "Community 12269"
 Cohesion: 0.46
 Nodes (9): bool(), folly(), lock(), release(), shared_mutex_detail(), std(), swap(), try_lock() (+1 more)
 
-### Community 12250 - "Community 12250"
+### Community 12270 - "Community 12270"
 Cohesion: 0.17
 Nodes (9): SentryLevel, debug, error, fatal, info, none, warning, SentryLevelHelper (+1 more)
 
-### Community 12252 - "Community 12252"
+### Community 12272 - "Community 12272"
 Cohesion: 0.18
 Nodes (7): SentryDefaultMaskRenderer, SentryDefaultMaskRenderer, UIGraphicsImageRendererContext, SentryMaskRenderer, SentryMaskRendererContext, SentryGraphicsImageRenderer.Context, SentryMaskRendererV2
 
-### Community 12253 - "Community 12253"
+### Community 12273 - "Community 12273"
 Cohesion: 0.17
 Nodes (11): Mechanism, CodingKeys, data, desc, handled, helpLink, meta, synthetic (+3 more)
 
-### Community 12254 - "Community 12254"
+### Community 12274 - "Community 12274"
 Cohesion: 0.17
 Nodes (11): CodingKeys, data, email, geo, ipAddress, name, segment, userId (+3 more)
 
-### Community 12255 - "Community 12255"
+### Community 12275 - "Community 12275"
 Cohesion: 0.41
 Nodes (3): checked(), facebook(), Role()
 
-### Community 12256 - "Community 12256"
+### Community 12276 - "Community 12276"
+Cohesion: 0.20
+Nodes (5): calculate_base_time(), calculate_leftover(), calculate_time_limit(), QuickReviseGame, QuickReviseGameTest
+
+### Community 12277 - "Community 12277"
 Cohesion: 0.23
 Nodes (6): _clamp_severity(), _distractor_meanings(), speaking_candidates(), _text_ref(), upsert_card(), vocab_candidates()
 
-### Community 12257 - "Community 12257"
-Cohesion: 0.24
-Nodes (6): CompetitionPoolSerializer, CompetitionViewSet, LeaderboardEntrySerializer, LeaderboardSerializer, Deck-scoped mini-games. Thin transport layer — the pool sampling,     scoring an, SubmitScoreSerializer
-
-### Community 12258 - "Community 12258"
+### Community 12278 - "Community 12278"
 Cohesion: 0.21
 Nodes (6): GeminiProvider, _parse(), _parse_audio(), Google Gemini implementation of :class:`AiTextPort`.  Uses the Generative Langua, Synthesize ``text`` to speech with a Gemini prebuilt voice.          Returns ``{, _resolve_verify()
 
-### Community 12260 - "Community 12260"
+### Community 12279 - "Community 12279"
 Cohesion: 0.18
 Nodes (5): Decodable, NSNumberDecodableWrapper, SentryEventDecodable, GraphQLRequest, URLSessionTaskHelper
 
-### Community 12261 - "Community 12261"
-Cohesion: 0.17
-Nodes (7): BulkEditDialog(), BULK_BTN_SX, GHOST_BTN_SX, PRIMARY_BTN_SX, ROUND_DIALOG_SLOT_PROPS, ROUND_FIELD_SX, SORT_OPTIONS
-
-### Community 12262 - "Community 12262"
+### Community 12280 - "Community 12280"
 Cohesion: 0.17
 Nodes (11): GTMSessionSyncMonitorInternal, -dealloc, -functionsHoldingSynchronizationOnObject, -initWithSynchronizationObjectallowRecursivefunctionName, GTMStandardUserAgentProvider, -initWithBundle, -userAgent, GTMUserAgentStringProvider (+3 more)
 
-### Community 12263 - "Community 12263"
+### Community 12281 - "Community 12281"
 Cohesion: 0.17
 Nodes (11): GTMSessionFetcher, -beginFetchForRetry, -completionHandlerWithTargetdidFinishSelector, -createSessionIdentifierWithMetadata, -invokeOnCallbackQueueafterUserStoppedblock, -parentUploadFetcher, -releaseCallbacks, -retryTimer (+3 more)
 
-### Community 12265 - "Community 12265"
+### Community 12283 - "Community 12283"
 Cohesion: 0.58
 Nodes (8): accessAllThreads(), Accessor(), folly(), get(), getWrapper(), getWrapperTL(), LocalLifetime(), try_get()
 
-### Community 12266 - "Community 12266"
+### Community 12284 - "Community 12284"
 Cohesion: 0.21
 Nodes (6): Reliability, reliable, unclear, unreliable, SentrySessionReplayEnvironmentChecker, SentrySessionReplayEnvironmentCheckerProvider
 
-### Community 12268 - "Community 12268"
-Cohesion: 0.18
-Nodes (10): CodingKeys, bodySize, cookies, fragment, headers, method, queryString, url (+2 more)
-
-### Community 12269 - "Community 12269"
+### Community 12286 - "Community 12286"
 Cohesion: 0.17
 Nodes (12): Error, failedToConvertAuthSessionToData, failedToConvertKeychainDataToAuthSession, failedToConvertRedirectURItoURL, failedToCreateResponseStringFromAuthSession, failedToDeletePassword, failedToDeletePasswordBecauseItemNotFound, failedToSetPassword (+4 more)
 
-### Community 12270 - "Community 12270"
+### Community 12287 - "Community 12287"
 Cohesion: 0.38
 Nodes (12): stbi__addints_valid(), stbi__extend_receive(), stbi__grow_buffer_unsafe(), stbi__jpeg_decode_block(), stbi__jpeg_decode_block_prog_ac(), stbi__jpeg_decode_block_prog_dc(), stbi__jpeg_get_bit(), stbi__jpeg_get_bits() (+4 more)
 
-### Community 12271 - "Community 12271"
+### Community 12288 - "Community 12288"
 Cohesion: 0.53
 Nodes (7): advancePastEmpty(), catch(), equal(), folly(), increment(), nullptr(), offset_()
 
-### Community 12272 - "Community 12272"
+### Community 12289 - "Community 12289"
 Cohesion: 0.24
 Nodes (3): AuthSessionStore, failedToConvertKeychainDataToAuthSession, KeychainStore
 
-### Community 12273 - "Community 12273"
-Cohesion: 0.24
-Nodes (6): _assessment_header(), AzureSpeechProvider, _content_type(), Azure AI Speech — Pronunciation Assessment (REST short-audio API).  Unlike the t, Azure Speech pronunciation assessment over the REST short-audio API., Return Azure's detailed pronunciation-assessment JSON for one utterance.
-
-### Community 12283 - "Community 12283"
+### Community 12299 - "Community 12299"
 Cohesion: 0.56
 Nodes (7): array_end(), array_size(), boost_range_silence_warning(), is_same_address(), is_same_object(), str_end(), str_size()
 
-### Community 12284 - "Community 12284"
+### Community 12300 - "Community 12300"
 Cohesion: 0.55
 Nodes (7): data(), decltype(), detail(), inSitu(), operator(), State(), throw_()
 
-### Community 12285 - "Community 12285"
+### Community 12301 - "Community 12301"
 Cohesion: 0.18
 Nodes (10): SentryCoreDataTracker, -addExtraInfoToSpanwithContext, -countEntities, -descriptionForOperationsinContext, -descriptionFromRequest, -groupEntitiesOperations, -initWithThreadInspectorprocessInfoWrapper, -managedObjectContextexecuteFetchRequesterrororiginalImp (+2 more)
 
-### Community 12287 - "Community 12287"
+### Community 12302 - "Community 12302"
+Cohesion: 0.20
+Nodes (6): SentryNSError, CodingKeys, code, domain, init(), SentryNSErrorDecodable
+
+### Community 12304 - "Community 12304"
 Cohesion: 0.24
 Nodes (9): getSentrySDKPackage(), getSentrySDKPackageName(), global(), SentryPackageManagerOption, carthage, cocoaPods, swiftPackageManager, unknown (+1 more)
 
-### Community 12288 - "Community 12288"
+### Community 12305 - "Community 12305"
 Cohesion: 0.20
 Nodes (9): CodingKeys, mechanism, module, stacktrace, threadId, type, value, ExceptionDecodable (+1 more)
 
-### Community 12289 - "Community 12289"
+### Community 12306 - "Community 12306"
 Cohesion: 0.20
 Nodes (9): CodingKeys, crashed, current, isMain, name, stacktrace, threadId, init() (+1 more)
 
-### Community 12291 - "Community 12291"
+### Community 12309 - "Community 12309"
+Cohesion: 0.24
+Nodes (5): AzureTextToSpeechProvider, Azure AI Speech — Text-to-Speech (REST synthesis API).  Synthesizes speech from, Azure Speech text-to-speech over the REST synthesis API., Synthesize ``text`` in ``voice``; return ``{"audio": base64, "mime_type"}``., _voice_lang()
+
+### Community 12310 - "Community 12310"
 Cohesion: 0.24
 Nodes (5): _encode_wav(), KokoroTtsProvider, Kokoro-82M — local, open-source text-to-speech (offline).  Runs the Apache-2.0 `, Local Kokoro-82M synthesis with the same interface as the cloud TTS providers., Synthesize ``text`` in ``voice``; return ``{"audio": base64 wav, "mime_type"}``.
 
-### Community 12294 - "Community 12294"
+### Community 12314 - "Community 12314"
 Cohesion: 0.20
 Nodes (9): CaseIterable, SentryScopeField, context, dist, environment, extras, fingerprint, tags (+1 more)
 
-### Community 12298 - "Community 12298"
-Cohesion: 0.29
-Nodes (7): BulkTermsSheet(), BulkAddDialog(), countSkippedTermLines(), ParsedTermLine, parseLine(), parseTermLines(), SEPARATORS
-
-### Community 12305 - "Community 12305"
+### Community 12324 - "Community 12324"
 Cohesion: 0.20
 Nodes (9): ArbitraryData, array, boolean, date, dict, int, null, number (+1 more)
 
-### Community 12337 - "Community 12337"
+### Community 12359 - "Community 12359"
 Cohesion: 0.58
 Nodes (6): BOOST_NOEXCEPT(), file_name(), function_name(), to_string(), uint_least32_t column(), uint_least32_t line()
 
-### Community 12338 - "Community 12338"
+### Community 12360 - "Community 12360"
 Cohesion: 0.56
 Nodes (6): folly(), hash(), operator(), std(), string(), string_view()
 
-### Community 12339 - "Community 12339"
+### Community 12361 - "Community 12361"
 Cohesion: 0.20
 Nodes (10): SentryANRTrackingIntegration, -anrDetectedWithType, -anrStoppedWithResult, -captureStoredAppHangEvent, -dealloc, -installWithOptions, -integrationOptions, -pauseAppHangTracking (+2 more)
 
-### Community 12340 - "Community 12340"
+### Community 12362 - "Community 12362"
 Cohesion: 0.31
 Nodes (3): AppCheckCoreProvider, AppCheckRecaptchaProvider, RecaptchaEnterpriseSDKLoader
 
-### Community 12341 - "Community 12341"
-Cohesion: 0.22
-Nodes (7): Error, accessTokenEmptyForRequest, cannotAuthorizeRequest, CustomNSError, PromiseError, timedOut, validationFailure
-
-### Community 12342 - "Community 12342"
-Cohesion: 0.33
-Nodes (3): _build_exercise(), Command, Seed ten short, practical English courses (5 A2, 4 B1, 1 B2) into the DB.  Unlik
-
-### Community 12343 - "Community 12343"
+### Community 12363 - "Community 12363"
 Cohesion: 0.22
 Nodes (5): ChangePasswordSerializer, GoogleCallbackSerializer, GoogleUserSerializer, Meta, SetPasswordSerializer
 
-### Community 12344 - "Community 12344"
+### Community 12364 - "Community 12364"
 Cohesion: 0.22
 Nodes (7): AddUserToDeckSerializer, InviteSerializer, Input serializer for the add_user_to_deck action.      Kept separate from AddUse, Ensure that the role is valid., RemoveUserSerializer, UpdateRoleSerializer, UserDeckRoleSerializer
 
-### Community 12345 - "Community 12345"
+### Community 12365 - "Community 12365"
 Cohesion: 0.28
 Nodes (3): MailService, send_template_mail(), SendMailThread
 
-### Community 12346 - "Community 12346"
-Cohesion: 0.28
-Nodes (5): LMStudioProvider, _parse(), LM Studio implementation of :class:`AiTextPort`.  LM Studio runs open-weight mod, Recursively convert a Gemini-style schema to standard JSON Schema., _to_json_schema()
-
-### Community 12348 - "Community 12348"
+### Community 12367 - "Community 12367"
 Cohesion: 0.56
 Nodes (5): context(), error_code(), folly(), index(), value()
 
-### Community 12349 - "Community 12349"
+### Community 12368 - "Community 12368"
 Cohesion: 0.39
 Nodes (7): CreateObjectRecord(), facebook(), llvh(), Method(), Record(), synthVersion(), type()
 
-### Community 12350 - "Community 12350"
+### Community 12369 - "Community 12369"
 Cohesion: 0.28
 Nodes (5): any(), asMaybe(), Maybe, error, value
 
-### Community 12351 - "Community 12351"
-Cohesion: 0.56
-Nodes (5): makeNotStarted(), makeRunning(), processGroupLeader_(), RV_NOT_STARTED(), state()
-
-### Community 12352 - "Community 12352"
+### Community 12370 - "Community 12370"
 Cohesion: 0.58
 Nodes (5): e_(), emplace(), folly(), operator(), throwIfFailed()
 
-### Community 12354 - "Community 12354"
+### Community 12372 - "Community 12372"
 Cohesion: 0.36
 Nodes (3): SentryLevelHelper, SentryReplayBreadcrumbConverter, SentrySRDefaultBreadcrumbConverter
 
-### Community 12355 - "Community 12355"
+### Community 12373 - "Community 12373"
 Cohesion: 0.25
 Nodes (7): Geo, CodingKeys, city, countryCode, region, GeoDecodable, init()
 
-### Community 12356 - "Community 12356"
+### Community 12374 - "Community 12374"
 Cohesion: 0.25
 Nodes (7): MechanismMeta, CodingKeys, error, machException, signal, init(), MechanismMetaDecodable
 
-### Community 12358 - "Community 12358"
+### Community 12375 - "Community 12375"
 Cohesion: 0.68
 Nodes (4): as_literal(), is_char_ptr(), length(), make_range()
 
-### Community 12359 - "Community 12359"
-Cohesion: 0.29
-Nodes (4): AzureOpenAIProvider, _parse(), Azure OpenAI implementation of :class:`AiTextPort`.  Talks to an Azure OpenAI re, RetryingHttpProvider
-
-### Community 12360 - "Community 12360"
+### Community 12378 - "Community 12378"
 Cohesion: 0.32
-Nodes (4): OpenRouterProvider, _parse(), OpenRouter implementation of :class:`AiTextPort`.  OpenRouter exposes an OpenAI-, _resolve_model()
+Nodes (3): AssetMirror, character_folder(), Mirrors freeCodeCamp character/background art into our Cloudinary once.      Thr
 
-### Community 12362 - "Community 12362"
-Cohesion: 0.29
-Nodes (3): ActionDef, styles, queryKeys
-
-### Community 12363 - "Community 12363"
-Cohesion: 0.61
-Nodes (4): decrementToValid(), folly(), incrementToValid(), release()
-
-### Community 12366 - "Community 12366"
+### Community 12381 - "Community 12381"
 Cohesion: 0.25
 Nodes (7): SentryTransactionNameSource, component, custom, route, sourceTask, url, view
 
-### Community 12367 - "Community 12367"
+### Community 12382 - "Community 12382"
 Cohesion: 0.25
 Nodes (3): MXMetricManagerSubscriber, SentryMXManager, SentryMXManagerDelegate
 
-### Community 12369 - "Community 12369"
+### Community 12384 - "Community 12384"
 Cohesion: 0.25
 Nodes (7): SentryOnDemandReplayError, cantCreatePixelBuffer, cantReadImage, cantReadVideoSize, cantReadVideoStartTime, errorRenderingVideo, indexOutOfBounds
 
-### Community 12370 - "Community 12370"
+### Community 12385 - "Community 12385"
 Cohesion: 0.29
 Nodes (6): CodingKeys, frames, registers, snapshot, init(), SentryStacktraceDecodable
 
-### Community 12372 - "Community 12372"
+### Community 12387 - "Community 12387"
 Cohesion: 0.32
 Nodes (4): Error, jsonConversionError, SentryURLRequestFactory, Swift.Error
 
-### Community 12373 - "Community 12373"
-Cohesion: 0.39
-Nodes (5): QUESTION_TYPES, ROLES, generateFillQuestions(), generateQuestions(), generateQuizQuestions()
-
-### Community 12374 - "Community 12374"
-Cohesion: 0.38
-Nodes (4): calculate_base_time(), calculate_leftover(), calculate_time_limit(), QuickReviseGame
-
-### Community 12375 - "Community 12375"
+### Community 12389 - "Community 12389"
 Cohesion: 0.38
 Nodes (3): Command, _process(), Mirror dictation sentence audio to our CDN (with a TTS fallback).  For every lis
 
-### Community 12376 - "Community 12376"
-Cohesion: 0.29
-Nodes (6): AddTermsToDeckSerializer, LearningTermSerializer, OnlyNameTermSerializer, ProgressTermSerializer, ReviseTermSerializer, TermNestInDeckSerializer
-
-### Community 12377 - "Community 12377"
+### Community 12390 - "Community 12390"
 Cohesion: 0.33
-Nodes (4): coverSrc(), DeckDetailsPanel(), SAVE_BTN_SX, EMPTY_DECK
+Nodes (4): _parse(), LM Studio implementation of :class:`AiTextPort`.  LM Studio runs open-weight mod, Recursively convert a Gemini-style schema to standard JSON Schema., _to_json_schema()
 
-### Community 12379 - "Community 12379"
+### Community 12392 - "Community 12392"
 Cohesion: 0.29
 Nodes (4): Attribute, accessGroup, useFileBasedKeychain, KeychainAttribute
 
-### Community 12380 - "Community 12380"
-Cohesion: 0.57
-Nodes (3): folly(), grow_capacity_by(), reserve_if_available()
-
-### Community 12381 - "Community 12381"
+### Community 12393 - "Community 12393"
 Cohesion: 0.57
 Nodes (3): double_num_digits(), parse_numbers_as_strings(), pretty_formatting_indent_width()
 
-### Community 12382 - "Community 12382"
+### Community 12394 - "Community 12394"
 Cohesion: 0.57
 Nodes (3): folly(), FOLLY_GFLAGS_NAMESPACE(), gflags()
 
-### Community 12386 - "Community 12386"
-Cohesion: 0.29
-Nodes (5): SentrySessionStatus, abnormal, crashed, exited, ok
-
-### Community 12387 - "Community 12387"
+### Community 12398 - "Community 12398"
 Cohesion: 0.29
 Nodes (7): SentryCrashDefaultMachineContextWrapper, -fillContextForCurrentThread, -getThreadCount, -getThreadNameandBufferandBufLength, -getThreadwithIndex, -isMainThread, -load
 
-### Community 12388 - "Community 12388"
+### Community 12399 - "Community 12399"
 Cohesion: 0.29
 Nodes (7): SentryThreadInspector, -getCurrentThreads, -getCurrentThreadsWithStackTrace, -getThreadName, -initWithOptions, -initWithStacktraceBuilderandMachineContextWrappersymbolicate, -stacktraceForCurrentThreadAsyncUnsafe
 
-### Community 12389 - "Community 12389"
+### Community 12400 - "Community 12400"
+Cohesion: 0.40
+Nodes (5): AiResponseCache, make_hash(), Meta, Persistent cache of AI provider responses keyed by ``(context, request_hash)``., remember()
+
+### Community 12401 - "Community 12401"
 Cohesion: 0.33
 Nodes (3): Meta, SpeakingAnalysisSerializer, SpeakingConversationSerializer
 
-### Community 12390 - "Community 12390"
+### Community 12402 - "Community 12402"
 Cohesion: 0.33
 Nodes (3): Meta, UserSetting, UserSettingSerializer
 
-### Community 12394 - "Community 12394"
+### Community 12403 - "Community 12403"
+Cohesion: 0.33
+Nodes (4): Meta, A Writing Coach practice session saved to a user's history.      One unified rec, WritingSession, WritingSessionSerializer
+
+### Community 12404 - "Community 12404"
+Cohesion: 0.40
+Nodes (4): Reflect a Django model's DB table into a SQLAlchemy Core Table.      Prefer ``Mo, Class-level descriptor backing ``Model.sa_table`` and ``Model.table``., SQLAlchemyTableDescriptor, table_for_model()
+
+### Community 12407 - "Community 12407"
+Cohesion: 0.53
+Nodes (3): GoogleImageSearchStrategy, _is_blocked(), _parse_images()
+
+### Community 12410 - "Community 12410"
 Cohesion: 0.47
 Nodes (3): decltype(), render(), string()
 
-### Community 12395 - "Community 12395"
+### Community 12411 - "Community 12411"
 Cohesion: 0.47
 Nodes (3): decltype(), render(), string()
 
-### Community 12398 - "Community 12398"
+### Community 12414 - "Community 12414"
+Cohesion: 0.33
+Nodes (5): SentryCrashReportSink, -filterReportsonCompletion, -handleConvertedEventreportsentReports, -initWithInAppLogiccrashWrapperdispatchQueue, -sendReportsonCompletion
+
+### Community 12415 - "Community 12415"
 Cohesion: 0.33
 Nodes (5): SentrySystemWrapper, -cpuEnergyUsageWithError, -cpuUsageWithError, -initWithProcessorCount, -memoryFootprintBytes
 
-### Community 12409 - "Community 12409"
+### Community 12424 - "Community 12424"
 Cohesion: 0.60
 Nodes (3): facebook(), hermes(), PauseReason()
 
-### Community 12410 - "Community 12410"
+### Community 12425 - "Community 12425"
 Cohesion: 0.70
 Nodes (4): decodeArbitraryData(), unwrapArbitraryArray(), unwrapArbitraryDict(), unwrapArbitraryValue()
 
-### Community 12411 - "Community 12411"
-Cohesion: 0.50
-Nodes (4): EMPTY_TERM, fieldSx, previewSrc(), TermEditorDrawer()
-
-### Community 12431 - "Community 12431"
+### Community 12443 - "Community 12443"
 Cohesion: 0.40
 Nodes (4): SentrySubClassFinder, -actOnSubclassesOfViewControllerInImageblock, -initWithDispatchQueueobjcRuntimeWrapperswizzleClassNameExcludes, -isClasssubClassOf
 
-### Community 12434 - "Community 12434"
+### Community 12446 - "Community 12446"
 Cohesion: 0.40
 Nodes (4): SentryInfoPlistError, keyNotFound, mainInfoPlistNotFound, unableToCastValue
 
-### Community 12440 - "Community 12440"
-Cohesion: 0.67
-Nodes (3): make_hash(), Meta, remember()
-
-### Community 12446 - "Community 12446"
+### Community 12459 - "Community 12459"
 Cohesion: 0.50
 Nodes (3): SentryInfoPlistKey, designRequiresCompatibility, xcodeVersion
 
-### Community 12447 - "Community 12447"
-Cohesion: 0.67
-Nodes (3): PlaceholderProcessInfoClass, ProcessInfo, SentryProcessInfoSource
-
 ## Knowledge Gaps
-- **2436 isolated node(s):** `SortKey`, `TermPage`, `styles`, `ActionDef`, `styles` (+2431 more)
+- **2388 isolated node(s):** `SKIP_REDIS`, `-retry`, `-onQueueretry`, `-attemptsretry`, `-onQueueattemptsretry` (+2383 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **1284 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **1286 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DomainError` connect `Community 2` to `Community 12257`, `Community 4`, `Community 9`, `Community 1935`, `Community 124`?**
+- **Why does `DomainError` connect `Community 12167` to `Community 2`, `Community 4`, `Community 12254`?**
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **Why does `Attribute` connect `Community 12218` to `Community 1`?**
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
+- **Why does `ValidationError` connect `Community 2` to `Community 12225`, `Community 12165`, `Community 12166`, `Community 12167`, `Community 12169`, `Community 12201`, `Community 12170`, `Community 12172`, `Community 12207`, `Community 12209`, `Community 12376`, `Community 12252`, `Community 12191`?**
   _High betweenness centrality (0.005) - this node is a cross-community bridge._
-- **Why does `Attribute` connect `Community 12192` to `Community 1`?**
-  _High betweenness centrality (0.004) - this node is a cross-community bridge._
-- **Why does `ValidationError` connect `Community 124` to `Community 2`, `Community 1539`, `Community 12231`, `Community 12174`, `Community 1010`, `Community 12180`, `Community 12182`, `Community 1687`, `Community 12342`, `Community 379`?**
-  _High betweenness centrality (0.003) - this node is a cross-community bridge._
-- **What connects `Numbered pages for the deck editor, so a 600-term deck is browsable by page.`, `Pull AI-generated/override fields out of a request payload, coercing types.`, `Filtered + sorted terms for the deck editor. The view paginates the queryset.` to the rest of the system?**
-  _2684 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `Run administrative tasks.`, `SKIP_REDIS`, `SMTP backend that uses certifi's CA bundle.      Needed on macOS/environments wh` to the rest of the system?**
+  _2627 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.009329286069523761 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.008778031733412833 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.013071895424836602 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.013422818791946308 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.05094905094905095 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05197594501718213 - nodes in this community are weakly interconnected._

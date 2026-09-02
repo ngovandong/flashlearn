@@ -20,6 +20,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # expo / react native
+.expo
 apps/mobile/.expo
 apps/mobile/android
 apps/mobile/ios
@@ -40,3 +41,6 @@ apps/mobile/ios
 # graphify local artifacts
 graphify-out/cost.json
 graphify-out/cache/
+graphify-out/manifest.json
+graphify-out/.graphify_*
+graphify-out/.rebuild.lock
