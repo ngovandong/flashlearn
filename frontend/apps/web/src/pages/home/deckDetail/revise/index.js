@@ -18,13 +18,20 @@ function Revise() {
   const timeoutRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [sessionKey, setSessionKey] = useState(0);
   const [currentState, setCurrentState] = useState({
     index: 0,
     showNext: false,
   });
   const navigate = useNavigate();
   const { deckID } = useParams();
-  const { data, isLoading: queryLoading, error } = useReviseTerms(deckID);
+  const {
+    data,
+    isLoading: queryLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useReviseTerms(deckID);
   const sounds = useStudySounds();
 
   const deckName = data?.deckName ?? "";
@@ -36,6 +43,7 @@ function Revise() {
     currentQuestion = terms[currentState.index];
     length = terms.length;
   }
+  const isLastQuestion = currentState.index === length - 1;
 
   useEffect(() => {
     if (error) {
@@ -50,12 +58,28 @@ function Revise() {
     }
   }, [data, deckID, navigate]);
 
+  const resetSession = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    setShowConfetti(false);
+    setCurrentState({ index: 0, showNext: false });
+    // Remounts Quiz/Fill/QuestionHeader so their answer state starts empty.
+    setSessionKey((pre) => pre + 1);
+  };
+
   const handleNextQuestionClick = () => {
     if (currentState.index < length - 1) {
       setCurrentState((pre) => ({ index: pre.index + 1, showNext: false }));
     } else {
+      resetSession();
       navigate(-1);
     }
+  };
+
+  const handleNewSessionClick = () => {
+    resetSession();
+    refetch();
   };
 
   const showNext = () => {
@@ -138,9 +162,10 @@ function Revise() {
     };
   }, [currentQuestion]);
 
-  const loading = queryLoading || isLoading;
+  const isFetchingQuestions = queryLoading || isFetching;
+  const loading = isFetchingQuestions || isLoading;
 
-  return terms ? (
+  return terms && !isFetchingQuestions ? (
     <div
       className="learn-wrapper"
       onTouchStart={handleTouchStart}
@@ -171,6 +196,7 @@ function Revise() {
         <div className="learn-container">
           {currentQuestion.type === QUESTION_TYPES.QUIZ ? (
             <Quiz
+              key={`${sessionKey}-${currentState.index}`}
               question={currentQuestion}
               speakTerm={speakTerm}
               handleCorrect={handleCorrect}
@@ -180,6 +206,7 @@ function Revise() {
             />
           ) : (
             <Fill
+              key={`${sessionKey}-${currentState.index}`}
               question={currentQuestion}
               speakTerm={speakTerm}
               handleCorrect={handleCorrect}
@@ -188,14 +215,21 @@ function Revise() {
               setIsLoading={setIsLoading}
             />
           )}
-          <button
-            className={`next-button${
-              currentState.showNext ? "" : " display-none"
-            }`}
-            onClick={handleNextQuestionClick}
-          >
-            {currentState.index === length - 1 ? "Finish" : "Next question"}
-          </button>
+          {currentState.showNext && (
+            <div className="next-button-group">
+              <button className="next-button" onClick={handleNextQuestionClick}>
+                {isLastQuestion ? "Finish" : "Next question"}
+              </button>
+              {isLastQuestion && (
+                <button
+                  className="next-button next-button--secondary"
+                  onClick={handleNewSessionClick}
+                >
+                  Next
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

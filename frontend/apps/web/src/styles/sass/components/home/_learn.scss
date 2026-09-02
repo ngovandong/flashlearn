@@ -727,6 +727,35 @@
     &:hover {
         background-color: $dark-purple;
     }
+
+    &--secondary {
+        background-color: transparent;
+        border: 1px solid $main-purple;
+        color: $main-purple;
+
+        &:hover {
+            background-color: rgba(var(--fl-primary-rgb), 0.12);
+        }
+    }
+}
+
+.next-button-group {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin: 20px auto;
+    width: 100%;
+    max-width: 20rem;
+
+    .next-button {
+        flex: 1;
+        margin: 0;
+        min-height: 44px;
+    }
+
+    @media (max-width: 480px) {
+        flex-direction: column;
+    }
 }
 
 

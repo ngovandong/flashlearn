@@ -19,5 +19,9 @@ export function useReviseTerms(deckID) {
       };
     },
     enabled: Boolean(deckID),
+    // A revise session is a freshly randomized question set: keeping it cached
+    // would render the previous session's questions before the refetch lands.
+    staleTime: 0,
+    gcTime: 0,
   });
 }
