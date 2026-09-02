@@ -1,30 +1,18 @@
-import React, { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Box, Button } from "@mui/material";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
 import DragonAvatar from "./dragonAvatar";
+import {
+  TOOLTIP_WIDTH,
+  placeTooltip,
+} from "./guideTourLayout";
 
-const TOOLTIP_WIDTH = 312;
-const SPOT_PAD = 10; // breathing room around the highlighted element
-const GAP = 22; // distance between the element and the tooltip card
+const MIN_ONSCREEN = 8;
 
-function measureRect(selector) {
-  if (typeof document === "undefined") return null;
-  const el = document.querySelector(selector);
-  if (!el) return null;
-  const r = el.getBoundingClientRect();
-  if (r.width === 0 && r.height === 0) return null;
-  return r;
-}
-
-/**
- * Whether an element is actually rendered on screen — present in the DOM AND
- * not hidden via display/visibility/opacity or collapsed to zero size. Steps
- * whose target isn't visible are skipped so the tour never points at nothing.
- */
-export function isElementVisible(el) {
+function isRendered(el) {
   if (!el || typeof window === "undefined") return false;
   if (!el.getClientRects().length) return false;
   const style = window.getComputedStyle(el);
@@ -40,21 +28,56 @@ export function isElementVisible(el) {
   return r.width > 0 || r.height > 0;
 }
 
+function intersectsViewport(el) {
+  const r = el.getBoundingClientRect();
+  const overlapW = Math.min(r.right, window.innerWidth) - Math.max(r.left, 0);
+  const overlapH = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
+  return overlapW >= MIN_ONSCREEN && overlapH >= MIN_ONSCREEN;
+}
+
+/**
+ * Whether an element is actually rendered — present in the DOM AND not hidden
+ * via display/visibility/opacity or collapsed to zero size. Used to pick the
+ * first matching target when the same selector exists twice (e.g. desktop +
+ * mobile nav).
+ */
+export function isElementVisible(el) {
+  return isRendered(el);
+}
+
+/** First matching element that is actually rendered (skips display:none copies). */
+export function queryVisibleElement(selector) {
+  if (typeof document === "undefined" || !selector) return null;
+  const nodes = document.querySelectorAll(selector);
+  for (const el of nodes) {
+    if (isRendered(el)) return el;
+  }
+  return null;
+}
+
+function measureRect(selector) {
+  const el = queryVisibleElement(selector);
+  if (!el) return null;
+  return el.getBoundingClientRect();
+}
+
 /** Whether a tour step's target currently exists and is visible on screen. */
 export function isStepVisible(step) {
   if (!step || typeof document === "undefined") return false;
-  return isElementVisible(document.querySelector(step.selector));
+  return queryVisibleElement(step.selector) != null;
 }
 
 function GuideTour({ open, onClose, onStepDone, onSkipAll, steps = [] }) {
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState(null);
+  const [tipSize, setTipSize] = useState({ w: TOOLTIP_WIDTH, h: 280 });
+  const tooltipRef = useRef(null);
 
   const step = steps[index];
 
   const sync = useCallback(() => {
     if (!step) return;
-    const el = document.querySelector(step.selector);
+    const el = queryVisibleElement(step.selector);
     if (el) {
       el.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }
@@ -67,10 +90,11 @@ function GuideTour({ open, onClose, onStepDone, onSkipAll, steps = [] }) {
     sync();
     // A second pass after smooth-scroll/layout settles.
     const t = setTimeout(sync, 360);
-    // If the target doesn't exist OR isn't visible on this page/role, skip the
-    // step rather than showing a confusing centered tooltip.
+    // If the target doesn't exist OR isn't on screen after scrolling, skip
+    // rather than leaving a tooltip that has nothing to point at.
     const skip = setTimeout(() => {
-      if (step && !isStepVisible(step)) {
+      const el = step && queryVisibleElement(step.selector);
+      if (step && (!el || !intersectsViewport(el))) {
         if (index >= steps.length - 1) finish();
         else setIndex((i) => i + 1);
       }
@@ -100,6 +124,14 @@ function GuideTour({ open, onClose, onStepDone, onSkipAll, steps = [] }) {
     if (open) setIndex(0);
   }, [open]);
 
+  useLayoutEffect(() => {
+    if (!open || !tooltipRef.current) return;
+    const r = tooltipRef.current.getBoundingClientRect();
+    if (Math.abs(r.width - tipSize.w) > 1 || Math.abs(r.height - tipSize.h) > 1) {
+      setTipSize({ w: r.width, h: r.height });
+    }
+  }, [open, index, step, rect, tipSize.w, tipSize.h]);
+
   const finish = () => {
     onClose?.();
     setTimeout(() => setIndex(0), 250);
@@ -124,34 +156,14 @@ function GuideTour({ open, onClose, onStepDone, onSkipAll, steps = [] }) {
   const isLast = index === steps.length - 1;
   const isFirst = index === 0;
 
-  // ---- geometry --------------------------------------------------------------
-  let spot = null;
-  let placeBelow = true;
-  let tooltipTop = vh / 2 - 90;
-  let tooltipLeft = vw / 2 - TOOLTIP_WIDTH / 2;
-  let arrowLeft = TOOLTIP_WIDTH / 2;
-
-  if (rect) {
-    spot = {
-      top: rect.top - SPOT_PAD,
-      left: rect.left - SPOT_PAD,
-      width: rect.width + SPOT_PAD * 2,
-      height: rect.height + SPOT_PAD * 2,
-    };
-    const centerX = rect.left + rect.width / 2;
-    placeBelow = rect.top + rect.height / 2 < vh / 2;
-    tooltipLeft = Math.min(
-      Math.max(12, centerX - TOOLTIP_WIDTH / 2),
-      vw - TOOLTIP_WIDTH - 12
-    );
-    tooltipTop = placeBelow
-      ? rect.bottom + GAP + 14
-      : rect.top - GAP - 14; // bottom-anchored; translateY(-100%) applied below
-    arrowLeft = Math.min(
-      Math.max(22, centerX - tooltipLeft),
-      TOOLTIP_WIDTH - 22
-    );
-  }
+  const layout = placeTooltip({
+    rect,
+    vw,
+    vh,
+    tooltipWidth: tipSize.w || TOOLTIP_WIDTH,
+    tooltipHeight: tipSize.h || 280,
+  });
+  const { spot, placeBelow, tooltipTop, tooltipLeft, arrowLeft } = layout;
 
   const overlay = (
     <Box
@@ -230,7 +242,9 @@ function GuideTour({ open, onClose, onStepDone, onSkipAll, steps = [] }) {
           sx={{
             position: "absolute",
             left: spot.left + spot.width / 2,
-            top: placeBelow ? spot.top + spot.height + 2 : spot.top - 40,
+            top: placeBelow
+              ? Math.min(vh - 44, spot.top + spot.height + 2)
+              : Math.max(0, spot.top - 40),
             color: "var(--fl-primary)",
             pointerEvents: "none",
             filter: "drop-shadow(0 4px 8px rgba(var(--fl-primary-rgb), 0.45))",
@@ -246,16 +260,18 @@ function GuideTour({ open, onClose, onStepDone, onSkipAll, steps = [] }) {
         </Box>
       )}
 
-      {/* Tooltip card */}
+      {/* Tooltip card — always fully inside the viewport so its buttons stay clickable. */}
       <Box
         key={index}
+        ref={tooltipRef}
         sx={{
           position: "absolute",
           top: tooltipTop,
           left: tooltipLeft,
           width: TOOLTIP_WIDTH,
           maxWidth: "calc(100vw - 24px)",
-          transform: rect && !placeBelow ? "translateY(-100%)" : "none",
+          maxHeight: "calc(100dvh - 24px)",
+          overflowY: "auto",
           pointerEvents: "auto",
           backgroundColor: "var(--fl-surface)",
           border: "1px solid var(--fl-border)",
@@ -266,7 +282,7 @@ function GuideTour({ open, onClose, onStepDone, onSkipAll, steps = [] }) {
         }}
       >
         {/* Pointer nub toward the element */}
-        {rect && (
+        {spot && (
           <Box
             sx={{
               position: "absolute",
@@ -300,6 +316,10 @@ function GuideTour({ open, onClose, onStepDone, onSkipAll, steps = [] }) {
               display: "flex",
               cursor: "pointer",
               color: "var(--fl-text-muted)",
+              minWidth: 44,
+              minHeight: 44,
+              alignItems: "center",
+              justifyContent: "flex-end",
               "&:hover": { color: "var(--fl-text-minor)" },
             }}
           >
@@ -335,7 +355,7 @@ function GuideTour({ open, onClose, onStepDone, onSkipAll, steps = [] }) {
           <Button
             size="small"
             onClick={finish}
-            sx={{ textTransform: "none", fontWeight: 600, color: "var(--fl-text-muted)" }}
+            sx={{ textTransform: "none", fontWeight: 600, color: "var(--fl-text-muted)", minHeight: 44 }}
           >
             Skip
           </Button>
@@ -344,7 +364,7 @@ function GuideTour({ open, onClose, onStepDone, onSkipAll, steps = [] }) {
               <Button
                 size="small"
                 onClick={back}
-                sx={{ textTransform: "none", fontWeight: 600, color: "var(--fl-text-minor)" }}
+                sx={{ textTransform: "none", fontWeight: 600, color: "var(--fl-text-minor)", minHeight: 44 }}
               >
                 Back
               </Button>
@@ -361,6 +381,7 @@ function GuideTour({ open, onClose, onStepDone, onSkipAll, steps = [] }) {
                 fontWeight: 700,
                 borderRadius: "0.55rem",
                 px: 2,
+                minHeight: 44,
                 "&:hover": { backgroundColor: "var(--fl-primary-dark)" },
               }}
             >

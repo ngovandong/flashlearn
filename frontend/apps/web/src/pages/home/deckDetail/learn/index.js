@@ -460,6 +460,7 @@ function LearnPage()
             {/* Flip Card */}
             <div
               className={`flip-card${currentState.isFlipped ? " flipped" : ""}`}
+              data-tour="learn-flip"
               onClick={handleClick}
             >
               <div className="flip-card-inner">
@@ -508,7 +509,7 @@ function LearnPage()
                   <LastPageIcon />
                 </IconButton>
               </div>
-              <div className="navigate-btns">
+              <div className="navigate-btns" data-tour="learn-navigate">
                 <CircleButton
                   size={60}
                   onClick={handleBack}
@@ -546,7 +547,7 @@ function LearnPage()
               </div>
             </div>
 
-            <div className="definition-card">
+            <div className="definition-card" data-tour="learn-ai">
               <div className="definition-header">
                 <h3>Definition</h3>
                 <div className="word-meta">
@@ -584,7 +585,7 @@ function LearnPage()
           </div>
 
           {/* --- Right Column --- */}
-          <div className="learn-right-col">
+          <div className="learn-right-col" data-tour="learn-extras">
             {/* Study Progress */}
             <div className="info-card">
               <h3>Study progress</h3>

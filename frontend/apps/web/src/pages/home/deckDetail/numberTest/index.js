@@ -390,7 +390,7 @@ function NumberTest() {
               {/* Difficulty range */}
               <div className="setting-section">
                 <label className="section-label">Number range difficulty</label>
-                <div className="modes-row">
+                <div className="modes-row" data-tour="nt-modes">
                   <button
                     className={`mode-option ${mode === "digits" ? "active" : ""}`}
                     onClick={() => setMode("digits")}
@@ -469,7 +469,7 @@ function NumberTest() {
               </div>
 
               {/* Round size, voice accent, rate, pitch */}
-              <div className="setting-section flex-row-settings">
+              <div className="setting-section flex-row-settings" data-tour="nt-settings">
                 <div className="setting-item">
                   <label>Round size</label>
                   <select value={roundSize} onChange={(e) => setRoundSize(parseInt(e.target.value))}>
@@ -533,7 +533,7 @@ function NumberTest() {
               </div>
             </div>
 
-            <button className="start-test-btn" onClick={startTest}>
+            <button className="start-test-btn" data-tour="nt-start" onClick={startTest}>
               <PlayArrowIcon />
               <span>Start practice</span>
             </button>

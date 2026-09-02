@@ -73,6 +73,12 @@ export const TOURS = [
         body: "Open Grammar to study Essential Grammar in Use — read each rule, then practise with auto-graded exercises and track your progress per unit.",
       },
       {
+        id: "home.revise",
+        selector: '[data-tour="revise"]',
+        title: "Mixed revise",
+        body: "Open Revise for a mixed round of things you slipped up on — words, grammar, listening, and speaking — so you can patch the weak spots.",
+      },
+      {
         id: "home.assistant",
         selector: '[data-tour="assistant"]',
         title: "Meet Dragon, your buddy",
@@ -142,25 +148,25 @@ export const TOURS = [
     steps: [
       {
         id: "learn.flip",
-        selector: ".flip-card",
+        selector: '[data-tour="learn-flip"]',
         title: "Flip the card",
         body: "Read the term, then tap the card to reveal its meaning. Try to recall it before flipping!",
       },
       {
         id: "learn.navigate",
-        selector: ".navigate-btns",
+        selector: '[data-tour="learn-navigate"]',
         title: "Move between cards",
         body: "Use the arrows to go back and forward — you can also swipe or use the left/right arrow keys. Tap the shuffle button in the middle to study the deck in random order.",
       },
       {
         id: "learn.ai",
-        selector: ".definition-card",
+        selector: '[data-tour="learn-ai"]',
         title: "Definitions & AI",
         body: "See the definition here, and tap “Fill with AI” to auto-enrich a term with examples, synonyms, and more.",
       },
       {
         id: "learn.extras",
-        selector: ".learn-right-col",
+        selector: '[data-tour="learn-extras"]',
         title: "Build out the word",
         body: "Add synonyms, antonyms, word forms, and example sentences to deepen your understanding.",
       },
@@ -172,14 +178,14 @@ export const TOURS = [
     match: (p) => /^\/deck\/[^/]+\/revise$/.test(p),
     steps: [
       {
-        id: "revise.answer",
-        selector: ".learn-container",
+        id: "deck-revise.answer",
+        selector: '[data-tour="revise-quiz"]',
         title: "Answer to revise",
         body: "Pick the correct option or type the word. Dragon reads the answer aloud so you learn the sound too.",
       },
       {
-        id: "revise.progress",
-        selector: ".center-header",
+        id: "deck-revise.progress",
+        selector: '[data-tour="revise-round"]',
         title: "Track your round",
         body: "Your position in the round shows here. Finish every question to complete the revision.",
       },
@@ -192,13 +198,13 @@ export const TOURS = [
     steps: [
       {
         id: "quick.timer",
-        selector: ".left-header",
+        selector: '[data-tour="quick-timer"]',
         title: "Beat the timer",
         body: "Each question is timed — the bar turns orange then red as time runs out. Answer fast to keep your streak!",
       },
       {
         id: "quick.answer",
-        selector: ".learn-container",
+        selector: '[data-tour="revise-quiz"]',
         title: "Answer quickly",
         body: "Choose the right answer to score a point. One wrong answer or a timeout ends the run.",
       },
@@ -323,19 +329,19 @@ export const TOURS = [
     steps: [
       {
         id: "nt.modes",
-        selector: ".modes-row",
+        selector: '[data-tour="nt-modes"]',
         title: "Pick a difficulty",
         body: "Choose what to practice — single digits, the tricky teens-vs-tens, big numbers, or phone/tax/ID sequences.",
       },
       {
         id: "nt.settings",
-        selector: ".flex-row-settings",
+        selector: '[data-tour="nt-settings"]',
         title: "Tune your round",
         body: "Set how many questions you want and choose a voice accent. You can also adjust speed and pitch below.",
       },
       {
         id: "nt.start",
-        selector: ".start-test-btn",
+        selector: '[data-tour="nt-start"]',
         title: "Start practising",
         body: "Hit Start practice — Dragon will read a number aloud and you type what you hear. Good luck!",
       },
@@ -539,7 +545,7 @@ export const TOURS = [
       },
       {
         id: "settings.save",
-        selector: ".settings-footer",
+        selector: '[data-tour="settings-save"]',
         title: "Save your changes",
         body: "Adjust notifications above, then hit Save to keep your preferences.",
       },
@@ -552,7 +558,7 @@ export const TOURS = [
     steps: [
       {
         id: "cd.form",
-        selector: ".create-deck__tab",
+        selector: '[data-tour="cd-form"]',
         title: "Describe your deck",
         body: "Give your deck a name and description, optionally a cover image, then continue to add terms.",
       },

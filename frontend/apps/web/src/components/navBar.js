@@ -360,6 +360,7 @@ function ResponsiveAppBar()
             return (
               <NavLink
                 key={link.link}
+                data-tour={link.tour}
                 end={link.link === ""}
                 className={({ isActive }) =>
                   isActive ? "nav-chip nav-chip--active" : "nav-chip"

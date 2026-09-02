@@ -33,7 +33,7 @@ const Quiz = ({
     setSelectedAnswer("");
   }, [question]);
   return (
-    <div className="quiz-container">
+    <div className="quiz-container" data-tour="revise-quiz">
       <QuestionHeader
         name={question.answer}
         id={question.progressId}

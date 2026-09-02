@@ -274,7 +274,7 @@ function QuickRevise()
                 />
             )}
             <div className="learn-header">
-                <div className="left-header" style={{ width: '100%', paddingRight: '20px' }}>
+                <div className="left-header" data-tour="quick-timer" style={{ width: '100%', paddingRight: '20px' }}>
                     <Box sx={{ width: '100%' }}>
                         <LinearProgress
                             variant="determinate"

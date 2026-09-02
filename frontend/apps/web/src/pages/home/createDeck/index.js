@@ -65,7 +65,7 @@ function CreateDeck() {
           <h2>Create a new study deck</h2>
         </div>
         <DeckWizardSteps active={0} />
-        <div className="create-deck__tab next" start={0}>
+        <div className="create-deck__tab next" start={0} data-tour="cd-form">
           <CreateDeckTab
             deck={deck}
             setDeck={setDeck}

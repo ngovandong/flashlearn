@@ -40,6 +40,10 @@ export function TourProvider({ children }) {
   const autoShownRef = useRef(new Set());
 
   useEffect(() => {
+    // Drop any leftover overlay when the route changes — a clipped tooltip
+    // from the previous page would otherwise keep capturing clicks.
+    setOpen(false);
+
     // The user has opted out of all auto-popups ("skip all").
     if (areToursDisabled()) return undefined;
 

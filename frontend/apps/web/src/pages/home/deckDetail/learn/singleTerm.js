@@ -111,7 +111,7 @@ function SingleTermLearn() {
             width: "100%",
           }}
         >
-          <div className="definition-card">
+          <div className="definition-card" data-tour="learn-ai">
             <div className="definition-header">
               <h3>{term.name}</h3>
               <div className="word-meta">

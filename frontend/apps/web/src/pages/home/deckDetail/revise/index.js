@@ -180,7 +180,7 @@ function Revise() {
       )}
       <div className="learn-header">
         <div className="left-header"></div>
-        <div className="center-header">
+        <div className="center-header" data-tour="revise-round">
           <div>{deckName}</div>
           <span>{`${currentState.index + 1}/${terms.length}`}</span>
         </div>

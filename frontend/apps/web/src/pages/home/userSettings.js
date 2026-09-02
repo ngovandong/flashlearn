@@ -85,7 +85,7 @@ function UserSettings() {
         </div>
       </div>
 
-      <div className="settings-footer">
+      <div className="settings-footer" data-tour="settings-save">
         <div className={`main-btn${isSaving ? " disabled" : ""}`} onClick={!isSaving ? handleSave : undefined}>
           Save
         </div>
