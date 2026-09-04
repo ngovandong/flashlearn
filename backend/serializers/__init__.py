@@ -16,6 +16,7 @@ from .learning_progress import (
     ProgressSerializer,
     UserLearningProgressSerializer,
 )
+from .note import NoteSerializer
 from .role import (
     AddUserSerializer,
     AddUserToDeckSerializer,

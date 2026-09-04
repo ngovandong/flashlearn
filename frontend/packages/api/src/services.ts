@@ -8,6 +8,9 @@ import type {
   DeckDetail,
   LearningStreak,
   LoginPayload,
+  Note,
+  NoteDoc,
+  NoteTargetType,
   PaginatedResponse,
   Reminder,
   ReviseAnswerResult,
@@ -784,3 +787,60 @@ export function createTranslateApi(client: AxiosInstance) {
 }
 
 export type TranslateApi = ReturnType<typeof createTranslateApi>;
+
+// ── Notes (cross-feature study notes) ─────────────────────────────────────
+
+/**
+ * What a note image can be uploaded from: browser bytes, the URL of a picture
+ * copied off a web page, or React Native's file descriptor for a picked asset.
+ */
+export type NoteImageSource = Blob | string | { uri: string; name: string; type: string };
+
+export function createNoteApi(client: AxiosInstance) {
+  return {
+    /** The note for one target, or `{ note: null }` when nothing is written. */
+    forTarget(
+      targetType: NoteTargetType,
+      targetKey: string
+    ): Promise<AxiosResponse<{ note: Note | null }>> {
+      return client.get("notes/for_target/", {
+        params: { target_type: targetType, target_key: targetKey },
+      });
+    },
+    /** Upsert the note for a target. An empty document deletes it. */
+    save(
+      targetType: NoteTargetType,
+      targetKey: string,
+      payload: { content: NoteDoc; title?: string; targetUrl?: string }
+    ): Promise<AxiosResponse<{ note: Note | null }>> {
+      return client.post("notes/", {
+        target_type: targetType,
+        target_key: targetKey,
+        content: payload.content,
+        title: payload.title ?? "",
+        target_url: payload.targetUrl ?? "",
+      });
+    },
+    remove(id: string): Promise<AxiosResponse<void>> {
+      return client.delete(`notes/${id}/`);
+    },
+    /**
+     * Host an image on our CDN and return its URL.
+     *
+     * Notes only store images we host, so an editor uploads first and inserts
+     * the returned URL. Pass a `File`/`Blob` for pasted, dropped or picked
+     * pictures, or a string for one copied from a web page — the server
+     * re-hosts remote addresses so they cannot break or track the reader.
+     */
+    uploadImage(source: NoteImageSource): Promise<AxiosResponse<{ url: string }>> {
+      if (typeof source === "string") {
+        return client.post("notes/image/", { source_url: source });
+      }
+      const formData = new FormData();
+      formData.append("image", source as unknown as Blob);
+      return client.post("notes/image/", formData);
+    },
+  };
+}
+
+export type NoteApi = ReturnType<typeof createNoteApi>;

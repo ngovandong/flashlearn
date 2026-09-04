@@ -1,0 +1,422 @@
+@use "../../base/shared" as *;
+
+// Study notes — the collapsible rich-text panel mounted on course lessons,
+// listening exercises, speaking/writing sessions and grammar units, plus the
+// notes hub. Note text/highlight colors come from `--fl-note-*`, which
+// themeController derives from the shared palette in @flashlearn/core.
+
+$note-colors: "red", "orange", "green", "blue", "purple", "gray";
+
+/* ---------- Panel shell ---------- */
+.note-panel {
+    @include card;
+    overflow: hidden;
+    margin-top: $space-4;
+
+    &--open {
+        border-color: rgba(var(--fl-primary-rgb), 0.35);
+    }
+}
+
+.note-panel__head {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+    width: 100%;
+    // Comfortably above the 44px tap target minimum on a phone.
+    min-height: 52px;
+    padding: $space-3 $space-4;
+    border: none;
+    background: transparent;
+    color: $main-text-color;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+        background: $surface-2;
+    }
+}
+
+.note-panel__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $minor-text-color;
+
+    svg {
+        color: $main-purple;
+    }
+}
+
+.note-panel__preview {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
+    color: $gray-text-color;
+}
+
+.note-panel__status {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    color: $gray-text-color;
+
+    &--error {
+        color: $error-red;
+    }
+}
+
+.note-panel__chevron {
+    flex-shrink: 0;
+    color: $gray-text-color;
+    transition: transform $dur-normal $ease;
+
+    .note-panel--open & {
+        transform: rotate(180deg);
+    }
+}
+
+.note-panel__body {
+    padding: 0 $space-4 $space-3;
+}
+
+.note-panel__loading {
+    margin: 0;
+    padding: $space-4 0;
+    font-size: 0.85rem;
+    color: $gray-text-color;
+}
+
+.note-panel__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $space-3;
+    flex-wrap: wrap;
+    margin-top: $space-2;
+}
+
+.note-panel__hint {
+    font-size: 0.72rem;
+    color: $gray-text-color;
+}
+
+.note-panel__delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.5rem;
+    border: none;
+    border-radius: $radius-sm;
+    background: transparent;
+    color: $gray-text-color;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+        color: $error-red;
+    }
+}
+
+/* ---------- Toolbar ---------- */
+.note-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    // Scrolls rather than wraps so the editor body keeps its position on a phone.
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: $space-2 0;
+    border-bottom: 1px solid $border-subtle;
+    background: $surface;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.note-toolbar__divider {
+    flex-shrink: 0;
+    width: 1px;
+    height: 18px;
+    margin: 0 0.25rem;
+    background: $border-subtle;
+}
+
+.note-toolbar__btn {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: $radius-sm;
+    background: transparent;
+    color: $minor-text-color;
+    cursor: pointer;
+    transition: background $dur-fast $ease, color $dur-fast $ease;
+
+    &:hover {
+        background: $surface-2;
+        color: $main-text-color;
+    }
+
+    &--active {
+        background: rgba(var(--fl-primary-rgb), 0.14);
+        color: $main-purple;
+    }
+}
+
+/* ---------- Color swatches ---------- */
+.note-swatches {
+    display: flex;
+    gap: 0.35rem;
+    padding: 0.45rem;
+}
+
+.note-swatch {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform $dur-fast $ease;
+
+    &--text {
+        background: var(--note-swatch);
+    }
+
+    &--highlight {
+        background: transparent;
+        box-shadow: inset 0 0 0 20px var(--note-swatch);
+        opacity: 0.55;
+    }
+
+    &--none {
+        display: grid;
+        place-items: center;
+        background: $surface-2;
+        color: $gray-text-color;
+        font-size: 0.9rem;
+    }
+
+    &--on {
+        border-color: $main-text-color;
+    }
+
+    &:hover {
+        transform: scale(1.12);
+    }
+}
+
+/* ---------- Editor surface ---------- */
+.note-editor__body {
+    min-height: 120px;
+    max-height: 420px;
+    overflow-y: auto;
+    padding: $space-3 0;
+    color: $main-text-color;
+    font-size: 0.92rem;
+    line-height: 1.6;
+
+    &:focus {
+        outline: none;
+    }
+
+    > * + * {
+        margin-top: 0.5rem;
+    }
+
+    // Levels 1-6 are all reachable from the mobile app's toolbar.
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        margin: $space-3 0 0.25rem;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+
+    h1 {
+        font-size: 1.2rem;
+    }
+
+    h2 {
+        font-size: 1.05rem;
+    }
+
+    h3 {
+        font-size: 0.96rem;
+    }
+
+    h4,
+    h5,
+    h6 {
+        font-size: 0.92rem;
+    }
+
+    ul,
+    ol {
+        padding-left: 1.35rem;
+    }
+
+    li > p {
+        margin: 0;
+    }
+
+    blockquote {
+        margin: 0;
+        padding-left: $space-3;
+        border-left: 3px solid $border-color;
+        color: $minor-text-color;
+    }
+
+    code {
+        padding: 0.1rem 0.3rem;
+        border-radius: 0.3rem;
+        background: $surface-2;
+        font-size: 0.88em;
+    }
+
+    pre {
+        padding: $space-3;
+        border-radius: $radius-sm;
+        background: $surface-2;
+        overflow-x: auto;
+
+        code {
+            padding: 0;
+            background: none;
+        }
+    }
+
+    a {
+        color: $main-purple;
+        text-decoration: underline;
+    }
+
+    img {
+        display: block;
+        // Never wider than the note, and never taller than a screenful — a
+        // pasted phone screenshot must not bury the rest of the note.
+        max-width: 100%;
+        max-height: 60vh;
+        height: auto;
+        margin: $space-2 0;
+        border: 1px solid $border-color;
+        border-radius: $radius-sm;
+        object-fit: contain;
+
+        // While the upload is in flight the src is a local blob; dimming it
+        // tells the reader the picture is not saved yet.
+        &[src^="blob:"],
+        &[src^="data:"] {
+            opacity: 0.55;
+        }
+    }
+
+    .ProseMirror-selectednode {
+        outline: 2px solid $main-purple;
+        outline-offset: 2px;
+    }
+
+    hr {
+        border: none;
+        border-top: 1px solid $border-subtle;
+    }
+
+    // Checklists
+    ul[data-type="taskList"] {
+        padding-left: 0;
+        list-style: none;
+
+        li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        input[type="checkbox"] {
+            margin-top: 0.32rem;
+            accent-color: $main-purple;
+            // Keep the box tappable on touch without enlarging the text line.
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        li[data-checked="true"] > div {
+            color: $gray-text-color;
+            text-decoration: line-through;
+        }
+    }
+
+    // TipTap's placeholder, shown only while the note is untouched and empty.
+    p.is-editor-empty:first-child::before {
+        content: attr(data-placeholder);
+        float: left;
+        height: 0;
+        pointer-events: none;
+        color: $gray-text-color;
+    }
+}
+
+/* ---------- Note palette (names resolve per theme) ---------- */
+@each $name in $note-colors {
+    .note-color--#{$name} {
+        color: var(--fl-note-#{$name});
+    }
+
+    .note-mark--#{$name} {
+        background-color: var(--fl-note-#{$name}-wash);
+        border-radius: 0.2rem;
+        padding: 0.05em 0.1em;
+    }
+}
+
+.note-mark {
+    color: inherit;
+}
+
+@media (max-width: 600px) {
+    .note-panel__head {
+        padding: $space-3;
+        gap: $space-2;
+    }
+
+    // The one-line preview and the save status compete for a narrow row; the
+    // title plus chevron are enough to act on.
+    .note-panel__preview,
+    .note-panel__status {
+        display: none;
+    }
+
+    .note-panel__body {
+        padding: 0 $space-3 $space-3;
+    }
+
+    .note-toolbar__btn {
+        width: 38px;
+        height: 38px;
+    }
+
+    .note-editor__body {
+        max-height: none;
+    }
+}

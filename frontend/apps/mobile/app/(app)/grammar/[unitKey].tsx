@@ -10,6 +10,7 @@ import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
 import { PressableScale } from "@/components/PressableScale";
+import { NotePanel } from "@/components/note/NotePanel";
 import { AppCard } from "@/components/ui/AppCard";
 import { FeatureTile } from "@/components/ui/FeatureTile";
 import { GradientButton } from "@/components/ui/GradientButton";
@@ -552,6 +553,13 @@ export default function GrammarUnitScreen() {
           ))}
         </View>
       ) : null}
+
+      <NotePanel
+        targetType="grammar_unit"
+        targetKey={unitKey}
+        title={data?.title}
+        targetUrl={`/grammar/${unitKey}`}
+      />
 
       {exercises.length > 0 ? (
         <View style={styles.practiceHead}>

@@ -11,6 +11,7 @@ import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
 import { FadeSlideIn } from "@/components/FadeSlideIn";
 import { PressableScale } from "@/components/PressableScale";
+import { NotePanel } from "@/components/note/NotePanel";
 import { AppCard } from "@/components/ui/AppCard";
 import { GradientButton } from "@/components/ui/GradientButton";
 import { ProgressRing } from "@/components/ui/ProgressRing";
@@ -108,6 +109,7 @@ export default function ListeningExerciseScreen() {
     queryFn: async () =>
       unwrap<{
         sentences: ListeningSentence[];
+        key?: string;
         title?: string;
         progress?: ExerciseProgress;
       }>(await listeningApi.getExercise(exerciseId!)),
@@ -561,6 +563,14 @@ export default function ListeningExerciseScreen() {
           </View>
         </AppCard>
       ) : null}
+
+      <NotePanel
+        targetType="listening_exercise"
+        targetKey={data?.key}
+        title={data?.title}
+        targetUrl={`/listening/exercise/${exerciseId}`}
+        label="Exercise notes"
+      />
 
       <Text variant="bodySmall" style={{ color: t.neutral.textMuted, marginTop: 16, textAlign: "center" }}>
         Progress auto-saves after each checked sentence.

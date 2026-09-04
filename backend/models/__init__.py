@@ -17,6 +17,7 @@ from .grammar import (
 )
 from .learning_progress import UserLearningProgress
 from .listening import ListeningExercise, ListeningProgress, ListeningTopic
+from .note import Note
 from .revise import ReviseCard
 from .role import UserDeckRole
 from .speaking import SpeakingAnalysis, SpeakingAudioClip, SpeakingConversation

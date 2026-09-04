@@ -11,6 +11,7 @@ from .views import (
     GrammarViewSet,
     LearningViewSet,
     ListeningViewSet,
+    NoteViewSet,
     ReminderViewSet,
     ReviseViewSet,
     RoleViewSet,
@@ -32,6 +33,7 @@ router.register(r"writing", WritingViewSet, basename="writing")
 router.register(r"courses", CourseViewSet, basename="course")
 router.register(r"listening", ListeningViewSet, basename="listening")
 router.register(r"grammar", GrammarViewSet, basename="grammar")
+router.register(r"notes", NoteViewSet, basename="note")
 router.register(r"reminders", ReminderViewSet, basename="reminder")
 router.register(r"revise", ReviseViewSet, basename="revise")
 router.register(r"assistant", AssistantViewSet, basename="assistant")

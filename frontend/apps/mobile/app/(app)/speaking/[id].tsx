@@ -13,6 +13,7 @@ import { FadeSlideIn } from "@/components/FadeSlideIn";
 import { PressableScale } from "@/components/PressableScale";
 import { MarkedText, type TextMark } from "@/components/MarkedText";
 import VocabModal, { type VocabSelection, type TermMatch } from "@/components/VocabModal";
+import { NotePanel } from "@/components/note/NotePanel";
 import { AppCard } from "@/components/ui/AppCard";
 import { FeatureTile } from "@/components/ui/FeatureTile";
 import { GradientButton } from "@/components/ui/GradientButton";
@@ -759,6 +760,13 @@ export default function SpeakingConversationScreen() {
             setSnack("Could not remove the term.");
           }
         }}
+      />
+
+      <NotePanel
+        targetType="speaking_session"
+        targetKey={id}
+        title={data?.topic}
+        targetUrl={`/speaking/${id}`}
       />
 
       <Snackbar visible={!!snack} onDismiss={() => setSnack(null)} duration={3000}>

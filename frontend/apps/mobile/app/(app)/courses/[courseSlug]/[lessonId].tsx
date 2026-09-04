@@ -16,6 +16,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { courseApi, speakingApi, termApi } from "@/api/services";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
+import { NotePanel } from "@/components/note/NotePanel";
 import { AppCard } from "@/components/ui/AppCard";
 import { PressableScale } from "@/components/PressableScale";
 import { useTokens } from "@/theme/tokens";
@@ -93,6 +94,8 @@ interface LessonExercise {
 
 interface CourseLesson {
   id: string;
+  /** Stable natural key — what per-user data (progress, notes) is filed under. */
+  key?: string;
   title?: string;
   description?: string;
   lines?: LessonLine[];
@@ -1230,6 +1233,13 @@ export default function CourseLessonScreen() {
             : null}
         </AppCard>
       ) : null}
+
+      <NotePanel
+        targetType="course_lesson"
+        targetKey={lesson.key}
+        title={lesson.title}
+        targetUrl={`/courses/${courseSlug}/${lessonId}`}
+      />
 
       {/* Per-sentence role-play breakdown */}
       {sessions.length > 0 && !rpActive && !dictationOn ? (

@@ -13,6 +13,7 @@ import { grammarService } from "@api-services/grammarService";
 import { termService } from "@api-services/termService";
 import Exercise from "./exercise";
 import VocabPopup from "./vocabPopup";
+import NotePanel from "@components/note/notePanel";
 import { renderWithHighlights } from "./grammarMarks";
 
 // Speak text with the browser's speech synthesis (no backend TTS needed here).
@@ -273,6 +274,13 @@ export default function UnitView({ unitKey }) {
         )}
       </section>
       )}
+
+      <NotePanel
+        targetType="grammar_unit"
+        targetKey={unit.key}
+        title={unit.title}
+        targetUrl={`/grammar/${unit.key}`}
+      />
 
       {total > 0 && (
         <div className="gr-ex-list__head">

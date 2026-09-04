@@ -1,5 +1,10 @@
 import { createTheme } from "@mui/material";
 import {
+  NOTE_COLORS,
+  resolveNoteColor,
+  resolveNoteHighlight,
+} from "@flashlearn/core";
+import {
   DEFAULT_MODE,
   DEFAULT_PALETTE,
   DEFAULT_SURFACE,
@@ -58,6 +63,24 @@ function glassVars(resolved) {
   };
 }
 
+/**
+ * Text/highlight colors for study notes, keyed by palette name.
+ *
+ * Notes store a color *name* rather than a CSS value so the same document reads
+ * correctly in both modes; the hues themselves live in `@flashlearn/core` so the
+ * Expo app resolves the identical set.
+ */
+function noteVars(resolved) {
+  return NOTE_COLORS.reduce(
+    (vars, color) => ({
+      ...vars,
+      [`--fl-note-${color}`]: resolveNoteColor(color, resolved),
+      [`--fl-note-${color}-wash`]: resolveNoteHighlight(color, resolved),
+    }),
+    {}
+  );
+}
+
 /** Compute the full set of CSS custom property values for a theme selection. */
 export function computeVars(mode, paletteId, surface) {
   const resolved = resolveMode(mode);
@@ -97,6 +120,8 @@ export function computeVars(mode, paletteId, surface) {
       // Solid defaults for the glass-aware card vars; overridden below in glass.
       "--fl-glass-backdrop": "none",
       "--fl-card-shadow": FLAT_CARD_SHADOW,
+
+      ...noteVars(resolved),
   };
 
   const vars = glass ? { ...base, ...glassVars(resolved) } : base;

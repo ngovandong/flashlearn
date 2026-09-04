@@ -23,6 +23,7 @@ import { COURSE_PAGE_SIZE } from "@constants/pageSize";
 import { courseService } from "@api-services/courseService";
 import { speakingService } from "@api-services/speakingService";
 import { termService } from "@api-services/termService";
+import NotePanel from "@components/note/notePanel";
 import SessionAnalysis from "./sessionAnalysis";
 import VocabModal from "./vocabModal";
 import { renderMarkedText } from "./vocabMarks";
@@ -1478,6 +1479,13 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
             ))}
           </details>
         )}
+
+        <NotePanel
+          targetType="course_lesson"
+          targetKey={lesson.key}
+          title={lesson.title}
+          targetUrl={`${basePath}/${course?.slug || routeCourseId}/${lesson.id}`}
+        />
 
         {/* Per-sentence pronunciation breakdown (replayed on revisit) */}
         {sessions.length > 0 && !rpActive && !dictationOn && (

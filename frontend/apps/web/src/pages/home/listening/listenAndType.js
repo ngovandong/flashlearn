@@ -22,6 +22,7 @@ import { listeningService } from "@api-services/listeningService";
 import { speakingService } from "@api-services/speakingService";
 import { termService } from "@api-services/termService";
 import VocabModal from "@pages/home/deckDetail/speakingCoach/vocabModal";
+import NotePanel from "@components/note/notePanel";
 import PronunciationText from "./pronunciation";
 import { evaluateDictation, normalizeWord, overallScore, tokenDisplay } from "./evaluate";
 
@@ -666,7 +667,7 @@ export default function ListenAndType() {
             <div className="lt-helper">
               <div className="lt-helper__head">
                 <span className="sc-section-label sc-section-label--row">
-                  <StickyNote2Icon fontSize="inherit" /> Note
+                  <StickyNote2Icon fontSize="inherit" /> Sentence note
                 </span>
               </div>
               {editingNote ? (
@@ -716,6 +717,14 @@ export default function ListenAndType() {
             </div>
           </div>
         )}
+
+        <NotePanel
+          targetType="listening_exercise"
+          targetKey={exercise.key}
+          title={exercise.title}
+          targetUrl={`/listening/exercise/${exercise.id}/listen-and-type`}
+          label="Exercise notes"
+        />
 
         {isRevealed && current && (
           <div className="lt-reveal" data-tour="lt-reveal">

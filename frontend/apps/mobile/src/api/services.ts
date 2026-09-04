@@ -7,6 +7,7 @@ import {
   createImageApi,
   createLearningApi,
   createListeningApi,
+  createNoteApi,
   createReminderApi,
   createReviseApi,
   createRoleApi,
@@ -32,6 +33,7 @@ export const learningApi = createLearningApi(request);
 export const competitionApi = createCompetitionApi(request);
 export const courseApi = createCourseApi(request, aiTimeout);
 export const listeningApi = createListeningApi(request);
+export const noteApi = createNoteApi(request);
 export const grammarApi = createGrammarApi(request, aiTimeout);
 export const speakingApi = createSpeakingApi(request, aiTimeout);
 export const writingApi = createWritingApi(request, aiTimeout);

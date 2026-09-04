@@ -312,13 +312,19 @@ export const TOURS = [
         id: "lt.helpers",
         selector: '[data-tour="lt-helpers"]',
         title: "Translate & take notes",
-        body: "Translate the sentence into your language (tap Edit to fix it), or jot a personal note. After you check a sentence, tap any word in the answer to hear its UK/US pronunciation and see the IPA.",
+        body: "Translate the sentence into your language (tap Edit to fix it), or jot a note about this one sentence. After you check a sentence, tap any word in the answer to hear its UK/US pronunciation and see the IPA.",
       },
       {
         id: "lt.reveal",
         selector: '[data-tour="lt-progress"]',
         title: "Track every sentence",
         body: "Each dot is a sentence — green, amber or red shows how you did. Your progress saves automatically, so you can stop and finish a long exercise later. Tap a dot to jump around, or use Restart all to start over.",
+      },
+      {
+        id: "lt.notes",
+        selector: '[data-tour="note-panel"]',
+        title: "Keep your own notes",
+        body: "Below the sentence helpers is a notebook for the whole exercise — a good place for the words and spellings that keep catching you out. Formatting and checklists are supported, you can paste in an image, and it saves as you type.",
       },
     ],
   },
@@ -376,6 +382,12 @@ export const TOURS = [
         title: "Listen & type",
         body: "Turn this on to hide the script and type each line as you hear it. Play the dialogue (optionally on repeat), then Check to see the words you missed and your accuracy — your result is saved for later revision.",
       },
+      {
+        id: "course.notes",
+        selector: '[data-tour="note-panel"]',
+        title: "Keep your own notes",
+        body: "Every lesson has its own notebook below the transcript. Write down the rules, phrases and mistakes you want to remember — bold, colours, bullet lists, checkboxes and pasted images all work, and it saves as you type.",
+      },
     ],
   },
   {
@@ -431,6 +443,12 @@ export const TOURS = [
         title: "Follow a guided course",
         body: "Open Course to work through structured dialogues organized by level. Listen, study the transcript, then pass each lesson with a Live Role-play scored by Dragon.",
       },
+      {
+        id: "sc.notes",
+        selector: '[data-tour="note-panel"]',
+        title: "Keep your own notes",
+        body: "Each conversation gets its own notebook under the lines. Jot the phrases you want to reuse or the sounds you keep missing — formatting and checklists are supported, and it saves as you type.",
+      },
     ],
   },
   {
@@ -474,6 +492,12 @@ export const TOURS = [
         title: "Review your history",
         body: "Switch to History to revisit past sessions, star favorites, or restart a topic to write an even better version.",
       },
+      {
+        id: "wc.notes",
+        selector: '[data-tour="note-panel"]',
+        title: "Keep your own notes",
+        body: "Every session has a notebook at the bottom for the corrections worth remembering. Bold, colours, bullet lists, checkboxes and pasted images all work, and it saves as you type.",
+      },
     ],
   },
   {
@@ -510,6 +534,12 @@ export const TOURS = [
         selector: '[data-tour="grammar-exercises"]',
         title: "Practise with instant feedback",
         body: "Fill blanks, choose, rewrite, match or reorder, then tap Check to grade instantly. Got one wrong? Tap “Why?” and Dragon explains it.",
+      },
+      {
+        id: "grammar.notes",
+        selector: '[data-tour="note-panel"]',
+        title: "Keep your own notes",
+        body: "Between the rule and the practice there is a notebook for this unit — write the rule in your own words, list the exceptions you keep forgetting, or paste in an example. It saves as you type.",
       },
     ],
   },

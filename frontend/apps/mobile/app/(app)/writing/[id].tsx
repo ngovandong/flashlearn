@@ -13,6 +13,7 @@ import { FeatureTile } from "@/components/ui/FeatureTile";
 import { GradientSurface } from "@/components/ui/GradientSurface";
 import { PressableScale } from "@/components/PressableScale";
 import { MarkedText, type TextMark } from "@/components/MarkedText";
+import { NotePanel } from "@/components/note/NotePanel";
 import VocabModal, { type VocabSelection } from "@/components/VocabModal";
 import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
 import { speakText } from "@/utils/audio";
@@ -323,6 +324,14 @@ export default function WritingSessionScreen() {
         showsVerticalScrollIndicator={false}
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: true })}
         renderItem={renderBubble}
+        ListHeaderComponent={
+          <NotePanel
+            targetType="writing_session"
+            targetKey={id}
+            title={data?.topic}
+            targetUrl={`/writing/${id}`}
+          />
+        }
         ListFooterComponent={
           sendMutation.isPending ? (
             <View style={{ alignItems: "flex-start" }}>

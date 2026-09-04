@@ -29,6 +29,7 @@ import { userSettingService } from "@api-services/userSettingService";
 import LineAnalysis from "./lineAnalysis";
 import SessionAnalysis from "./sessionAnalysis";
 import CoursePanel from "./coursePanel";
+import NotePanel from "@components/note/notePanel";
 import VocabModal from "./vocabModal";
 import { renderMarkedText } from "./vocabMarks";
 import { blobToWav } from "./audioWav";
@@ -1466,6 +1467,13 @@ export default function SpeakingCoach() {
                     );
                   })}
                 </div>
+
+                <NotePanel
+                  targetType="speaking_session"
+                  targetKey={conversation.id}
+                  title={conversation.topic || "Speaking session"}
+                  targetUrl={`/speaking-coach/${conversation.id}`}
+                />
 
                 {analyzing && (
                   <div className="sc-analyzing">

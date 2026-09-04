@@ -1,5 +1,7 @@
 """Composition root — wire concrete infrastructure into application services."""
 
+from django.conf import settings
+
 from backend.assistant.application.services import AssistantService
 from backend.competition.application.services import CompetitionService
 from backend.competition.infrastructure.repository import CompetitionRepository
@@ -18,6 +20,8 @@ from backend.learning.infrastructure.cache import learning_progress_cache
 from backend.learning.infrastructure.repository import LearningRepository
 from backend.listening.application.listening_service import ListeningService
 from backend.listening.infrastructure.repository import ListeningRepository
+from backend.note.application.note_service import NoteService
+from backend.note.infrastructure.repository import NoteRepository
 from backend.reminders.application.services import ReminderService
 from backend.reminders.infrastructure.repository import ReminderRepository
 from backend.revise.application.services import ReviseService
@@ -106,6 +110,14 @@ listening_service = ListeningService(
     ai=default_ai_provider,
 )
 reminder_service = ReminderService(repo=ReminderRepository)
+# Study notes: one rich-text document per lesson/exercise/session, shared by
+# every feature. Self-contained — it only needs its own repository because a
+# note is addressed by target type + key, never by joining to the target row.
+note_service = NoteService(
+    repo=NoteRepository,
+    image_storage=default_image_storage,
+    image_url_prefixes=(settings.BASE_CLOUDINARY_URL,),
+)
 # Revise: a mixed, priority-ordered review session that pulls the learner's
 # past mistakes across vocab, grammar, listening and speaking. It writes vocab
 # results back through the learning service and grades spoken answers with the

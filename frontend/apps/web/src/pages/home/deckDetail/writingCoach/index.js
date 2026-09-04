@@ -16,6 +16,7 @@ import HighlightAltIcon from "@mui/icons-material/HighlightAlt";
 import { writingService } from "@api-services/writingService";
 import { termService } from "@api-services/termService";
 import { renderMarkedText } from "./writingMarks";
+import NotePanel from "@components/note/notePanel";
 import ChatPanel from "./chatPanel";
 import FreeFormPanel from "./freeFormPanel";
 import VocabModal from "./vocabModal";
@@ -647,6 +648,15 @@ export default function WritingCoach() {
           onLookup={lookupWord}
         />
       )}
+
+      {session?.id ? (
+        <NotePanel
+          targetType="writing_session"
+          targetKey={session.id}
+          title={session.topic || "Writing session"}
+          targetUrl={`/writing-coach/${session.id}`}
+        />
+      ) : null}
 
       <VocabModal
         selected={selected}
