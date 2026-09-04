@@ -9,6 +9,7 @@ import type { Highlight, Term, WritingMessage, WritingSession } from "@flashlear
 import { termApi, writingApi } from "@/api/services";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
+import { FeedbackReport, type WritingFeedback } from "./index";
 import { FeatureTile } from "@/components/ui/FeatureTile";
 import { GradientSurface } from "@/components/ui/GradientSurface";
 import { PressableScale } from "@/components/PressableScale";
@@ -219,6 +220,66 @@ export default function WritingSessionScreen() {
 
   if (isLoading) return <LoadingView />;
   if (isError || !data) return <ErrorView message="Could not load session" onRetry={() => refetch()} />;
+
+  // Free-form sessions store a draft + IELTS-style band feedback, not a chat
+  // transcript — reopening one must show that report, not the (empty) chat UI.
+  if (data.mode === "freeform") {
+    const feedback = (data.feedback as WritingFeedback | undefined) ?? null;
+    const marks: TextMark[] = [
+      ...((feedback?.corrections as { text?: string }[] | undefined) ?? []).map((c) => ({
+        text: c.text || "",
+        color: t.mode === "dark" ? "#f87171" : "#d32f2f",
+        tint: t.alpha("#d32f2f", 0.14),
+      })),
+      ...highlights.map((h) => ({ text: h.text, color: t.neutral.text, tint: t.primaryAlpha(0.16) })),
+    ];
+    return (
+      <View style={[styles.flex, { backgroundColor: t.neutral.bg }]}>
+        <View style={[styles.header, { borderBottomColor: t.neutral.border }]}>
+          <FeatureTile icon="edit-note" size={40} variant="solid" />
+          <View style={{ flex: 1 }}>
+            <Text variant="titleMedium" numberOfLines={1} style={{ color: t.neutral.text, fontWeight: "800" }}>
+              {data.topic ?? "Writing session"}
+            </Text>
+            {data.level ? (
+              <Text variant="bodySmall" style={{ color: t.neutral.textMinor }}>
+                {data.level}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+        <ScrollView contentContainerStyle={[styles.list, { paddingBottom: tabBarHeight }]} showsVerticalScrollIndicator={false}>
+          {feedback ? (
+            <FeedbackReport
+              feedback={feedback}
+              draft={data.draft || ""}
+              draftMarks={marks}
+              activeCorrection={null}
+              onWordPress={(w) => openVocab(w, data.draft)}
+              t={t}
+            />
+          ) : (
+            <Text style={{ color: t.neutral.textMinor }}>No feedback saved for this session.</Text>
+          )}
+        </ScrollView>
+        <VocabModal
+          selected={selected}
+          highlighted={selected ? isHighlighted(selected.text) : false}
+          noteDraft={noteDraft}
+          onNoteChange={setNoteDraft}
+          showHighlightControls
+          onClose={() => setSelected(null)}
+          onRetry={() => selected && openVocab(selected.text, selected.context)}
+          onListen={(text) => speakText(text)}
+          onToggleHighlight={(remove) =>
+            selected && highlightMutation.mutate({ text: selected.text, note: noteDraft, remove })
+          }
+          onSaveTerm={() => saveTermMutation.mutate()}
+          saving={saveTermMutation.isPending}
+        />
+      </View>
+    );
+  }
 
   const messages = data.messages ?? [];
   const canSend = input.trim().length > 0 && !sendMutation.isPending;

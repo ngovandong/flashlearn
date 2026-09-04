@@ -66,6 +66,11 @@ interface AnalysisResult {
   wordAnalysis?: WordAnalysis[];
 }
 
+// Speaker name used for the learner's own lines. Not persisted on the
+// conversation (matches the web app's assumption when reopening by URL) —
+// the generator defaults to "Me" unless the setup screen overrides it.
+const USER_SPEAKER = "Me";
+
 const wordStatusColor = (status: string) =>
   status === "correct" ? "#10b981" : status === "incorrect" ? "#ef4444" : "#f59e0b";
 
@@ -98,8 +103,10 @@ export default function SpeakingConversationScreen() {
   const [noteDraft, setNoteDraft] = useState("");
   const [savedWords, setSavedWords] = useState<Record<string, boolean>>({});
   const [snack, setSnack] = useState<string | null>(null);
+  const [fullPlaying, setFullPlaying] = useState(false);
   const recorder = useRef(new AudioRecorder());
   const audioCache = useRef(new Map<string, { audio_url?: string; audio?: string; mime_type?: string }>());
+  const cancelFullRef = useRef(false);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.speaking.detail(id!),
@@ -122,6 +129,7 @@ export default function SpeakingConversationScreen() {
   // never stays "hot" and a stray recorder instance doesn't leak.
   useEffect(
     () => () => {
+      cancelFullRef.current = true;
       stopPlayback();
       if (recorder.current.isRecording) recorder.current.cancel().catch(() => {});
     },
@@ -147,7 +155,8 @@ export default function SpeakingConversationScreen() {
   const analyzeMutation = useMutation({
     mutationFn: async (payload: { targetText: string; audio: string; mimeType: string }) => {
       const res = await speakingApi.analyze({ ...payload, conversationId: id, kind: "single" });
-      return unwrap<AnalysisResult>(res);
+      const data = unwrap<{ result?: AnalysisResult }>(res);
+      return data.result ?? {};
     },
     onSuccess: (res) => {
       setAnalysis(res);
@@ -200,7 +209,6 @@ export default function SpeakingConversationScreen() {
 
   const lines = data?.lines ?? [];
   const current: SpeakingLine | undefined = lines[lineIndex];
-  const meRole = lines[0]?.role;
   const starred = !!(data as { starred?: boolean } | undefined)?.starred;
 
   const isHighlighted = (text: string) =>
@@ -274,6 +282,28 @@ export default function SpeakingConversationScreen() {
     }
   };
 
+  // Plays every line back-to-back, e.g. so the learner can hear the full
+  // conversation before practicing individual lines.
+  const playFull = async () => {
+    if (!lines.length || fullPlaying) return;
+    cancelFullRef.current = false;
+    setFullPlaying(true);
+    for (let i = 0; i < lines.length; i++) {
+      if (cancelFullRef.current) break;
+      setLineIndex(i);
+      await playLine(lines[i], `full-${i}`);
+    }
+    cancelFullRef.current = false;
+    setFullPlaying(false);
+  };
+
+  const stopFullPlaying = () => {
+    cancelFullRef.current = true;
+    stopPlayback();
+    setFullPlaying(false);
+    setPlayingKey(null);
+  };
+
   const playMyRecording = async () => {
     if (!lastRecordingUri) return;
     setPlayingMine(true);
@@ -295,15 +325,23 @@ export default function SpeakingConversationScreen() {
   };
 
   const stopAndAnalyze = async () => {
-    const recorded = await recorder.current.stop();
-    setRpRecording(false);
-    if (!recorded || !current?.text) return;
-    setLastRecordingUri(recorded.uri);
-    analyzeMutation.mutate({
-      targetText: current.text,
-      audio: recorded.base64,
-      mimeType: recorded.mimeType,
-    });
+    try {
+      const recorded = await recorder.current.stop();
+      if (!recorded || !current?.text) {
+        if (!recorded) setPlaybackError("The microphone didn't capture any sound. Please try again.");
+        return;
+      }
+      setLastRecordingUri(recorded.uri);
+      analyzeMutation.mutate({
+        targetText: current.text,
+        audio: recorded.base64,
+        mimeType: recorded.mimeType,
+      });
+    } catch (e) {
+      setPlaybackError(e instanceof Error ? e.message : "Could not save that recording.");
+    } finally {
+      setRpRecording(false);
+    }
   };
 
   if (isLoading) return <LoadingView />;
@@ -339,6 +377,23 @@ export default function SpeakingConversationScreen() {
             </View>
           </View>
           <View style={styles.actionRow}>
+            <PressableScale
+              onPress={fullPlaying ? stopFullPlaying : playFull}
+              style={[
+                styles.playFullBtn,
+                { backgroundColor: t.primaryAlpha(0.12), borderRadius: t.radii.pill },
+              ]}
+            >
+              <MaterialIcons
+                name={fullPlaying ? "stop" : "play-arrow"}
+                size={18}
+                color={t.palette.primary}
+              />
+              <Text style={{ color: t.palette.primary, fontWeight: "800" }}>
+                {fullPlaying ? "Stop" : "Play conversation"}
+              </Text>
+            </PressableScale>
+            <View style={{ flex: 1 }} />
             <PressableScale
               onPress={() => starMutation.mutate(!starred)}
               hitSlop={8}
@@ -394,7 +449,7 @@ export default function SpeakingConversationScreen() {
 
       <View style={styles.transcript}>
         {lines.map((line, i) => {
-          const isMe = line.role === meRole;
+          const isMe = line.speaker === USER_SPEAKER;
           const active = i === lineIndex;
           const key = `${i}`;
           const playing = playingKey === key;
@@ -411,7 +466,7 @@ export default function SpeakingConversationScreen() {
                     marginHorizontal: 6,
                   }}
                 >
-                  {(line.role ?? (isMe ? "Me" : "Coach")).toUpperCase()}
+                  {(line.speaker || (isMe ? "Me" : "Coach")).toUpperCase()}
                 </Text>
 
                 {isMe ? (
@@ -782,7 +837,14 @@ const styles = StyleSheet.create({
   heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   metaRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 8 },
   metaChip: { paddingHorizontal: 10, paddingVertical: 4 },
-  actionRow: { flexDirection: "row", justifyContent: "flex-end", gap: 10, marginTop: 12 },
+  actionRow: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 12 },
+  playFullBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    height: 40,
+    paddingHorizontal: 14,
+  },
   iconBtn: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
   progressHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   tip: { flexDirection: "row", alignItems: "center", gap: 8, padding: 12 },

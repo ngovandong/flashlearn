@@ -1,19 +1,21 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, Pressable, StyleSheet, View } from "react-native";
-import { Text } from "react-native-paper";
+import { Alert, Animated, Pressable, StyleSheet, View } from "react-native";
+import { Snackbar, Text } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { motion, useTokens } from "@/theme/tokens";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Term } from "@flashlearn/core";
-import { deckApi, learningApi } from "@/api/services";
+import { LEARNING_TERM_PAGE_SIZE } from "@flashlearn/core";
+import { deckApi, learningApi, termApi } from "@/api/services";
 import { TermCard } from "@/components/TermCard";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
 import { PressableScale } from "@/components/PressableScale";
 import { GradientButton } from "@/components/ui/GradientButton";
 import { AnimatedBar } from "@/components/ui/AnimatedBar";
+import TermEditorSheet from "@/components/TermEditorSheet";
 import { queryKeys } from "@/query/keys";
 import { unwrap } from "@/utils/apiError";
 import { speakText } from "@/utils/audio";
@@ -38,6 +40,7 @@ export default function LearnScreen() {
   const t = useTokens();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [pos, setPos] = useState(0);
   const [terms, setTerms] = useState<Term[]>([]);
@@ -45,12 +48,36 @@ export default function LearnScreen() {
   const [shuffled, setShuffled] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [starred, setStarred] = useState<Set<string>>(new Set());
+  const resumedRef = useRef(false);
+  const [resumePos, setResumePos] = useState<number | null>(null);
+  // Lets a deck editor fix a mistake (wrong meaning, image, etc.) or remove a
+  // bad term without leaving the study flow.
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [snack, setSnack] = useState<string | null>(null);
 
   const deckQuery = useQuery({
     queryKey: queryKeys.decks.detail(deckId!),
     queryFn: async () => unwrap(await deckApi.retrieve(deckId!)),
     enabled: !!deckId,
   });
+
+  // Resume at the last-learned card, matching web's Learn page. Pages load
+  // sequentially from 1 (see `loadMoreIfNeeded`), so rather than jumping the
+  // `page` cursor (which would leave a gap `goBack` can't recover from), we
+  // just remember the target index and keep paging forward until it's loaded.
+  useEffect(() => {
+    if (!deckId || resumedRef.current) return;
+    resumedRef.current = true;
+    learningApi
+      .getLatestLearnedTerm(deckId)
+      .then((res) => {
+        const info = unwrap<{ last_learned_index?: number }>(res);
+        if (info.last_learned_index) setResumePos(info.last_learned_index);
+      })
+      .catch(() => {
+        /* fall back to starting at the first card */
+      });
+  }, [deckId]);
 
   const termsQuery = useQuery({
     queryKey: queryKeys.learning.terms(deckId!, page),
@@ -84,6 +111,21 @@ export default function LearnScreen() {
 
   const total = (deckQuery.data as { number_of_term?: number })?.number_of_term ?? terms.length;
   const isStarred = current?.id ? starred.has(current.id) : false;
+  const myPermission = (deckQuery.data as { my_permission?: string } | undefined)?.my_permission;
+  const canEditTerms = myPermission === "O" || myPermission === "E";
+
+  useEffect(() => {
+    if (resumePos == null || terms.length === 0) return;
+    if (terms.length > resumePos) {
+      setPos(Math.min(resumePos, terms.length - 1));
+      setResumePos(null);
+    } else if (terms.length < total) {
+      setPage((p) => p + 1);
+    } else {
+      // Reached the end of the deck without finding the position — give up quietly.
+      setResumePos(null);
+    }
+  }, [terms.length, resumePos, total]);
 
   // Fade + slide the card in whenever the visible term changes.
   const cardAnim = useRef(new Animated.Value(1)).current;
@@ -153,10 +195,62 @@ export default function LearnScreen() {
     });
   }, [current]);
 
+  // Re-fetch the page holding the current card from the server, so edits made
+  // in the editor sheet (which doesn't return the saved term) show up right away.
+  const reloadCurrentTermPage = useCallback(async () => {
+    const absoluteIndex = order[pos];
+    if (absoluteIndex == null || !deckId) return;
+    const targetPage = Math.floor(absoluteIndex / LEARNING_TERM_PAGE_SIZE) + 1;
+    try {
+      const res = unwrap<{ results: Term[] }>(await learningApi.getLearningTerms(deckId, targetPage));
+      const start = (targetPage - 1) * LEARNING_TERM_PAGE_SIZE;
+      setTerms((prev) => {
+        const next = [...prev];
+        res.results.forEach((term, i) => {
+          next[start + i] = term;
+        });
+        return next;
+      });
+    } catch (error) {
+      // Ignore — the card just keeps showing the pre-edit data.
+    }
+  }, [deckId, order, pos]);
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => termApi.bulkDelete(deckId!, [id]),
+    onSuccess: () => {
+      const newTotal = Math.max(0, total - 1);
+      if (newTotal === 0) {
+        router.back();
+        return;
+      }
+      const removedIndex = order[pos];
+      setTerms((prev) => prev.filter((_, i) => i !== removedIndex));
+      setOrder(identityOrder(newTotal));
+      setShuffled(false);
+      setPos((p) => Math.min(p, newTotal - 1));
+      queryClient.setQueryData(queryKeys.decks.detail(deckId!), (old: unknown) =>
+        old ? { ...(old as object), number_of_term: newTotal } : old
+      );
+      setSnack("Term deleted");
+    },
+    onError: () => setSnack("Couldn't delete. Please try again."),
+  });
+
+  const confirmDelete = () => {
+    if (!current?.id) return;
+    Alert.alert(`Delete "${current.name}"?`, "This can't be undone — saved learning progress goes too.", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", style: "destructive", onPress: () => deleteMutation.mutate(current.id!) },
+    ]);
+  };
+
   const mark = useCallback(
     async (remember: boolean) => {
       if (current?.learning_progress_id) {
-        if (remember) await learningApi.remember(current.learning_progress_id);
+        // `remember` toggles a "skip" flag, not recall correctness — the SRS
+        // score needs `correct`/`incorrect`.
+        if (remember) await learningApi.correct(current.learning_progress_id);
         else await learningApi.incorrect(current.learning_progress_id);
       }
       if (pos + 1 >= terms.length && terms.length >= total) {
@@ -203,9 +297,21 @@ export default function LearnScreen() {
           Card {pos + 1} of {total}
           {shuffled ? " · Shuffled" : ""}
         </Text>
-        <PressableScale onPress={() => speakText(current.name ?? "")} hitSlop={8} style={[styles.iconBtn, { backgroundColor: t.neutral.surface2, borderRadius: t.radii.pill }]}>
-          <MaterialIcons name="volume-up" size={22} color={t.palette.primary} />
-        </PressableScale>
+        <View style={styles.headerActions}>
+          {canEditTerms && (
+            <>
+              <PressableScale onPress={() => setEditorOpen(true)} hitSlop={8} style={[styles.iconBtn, { backgroundColor: t.neutral.surface2, borderRadius: t.radii.pill }]}>
+                <MaterialIcons name="edit" size={20} color={t.neutral.text} />
+              </PressableScale>
+              <PressableScale onPress={confirmDelete} hitSlop={8} style={[styles.iconBtn, { backgroundColor: t.neutral.surface2, borderRadius: t.radii.pill }]}>
+                <MaterialIcons name="delete-outline" size={20} color={t.neutral.text} />
+              </PressableScale>
+            </>
+          )}
+          <PressableScale onPress={() => speakText(current.name ?? "")} hitSlop={8} style={[styles.iconBtn, { backgroundColor: t.neutral.surface2, borderRadius: t.radii.pill }]}>
+            <MaterialIcons name="volume-up" size={22} color={t.palette.primary} />
+          </PressableScale>
+        </View>
       </View>
 
       <AnimatedBar progress={progress} color={t.palette.primary} trackColor={t.neutral.surface2} style={styles.progress} />
@@ -261,6 +367,23 @@ export default function LearnScreen() {
         </PressableScale>
         <GradientButton label="Got it" icon="check" onPress={() => mark(true)} style={styles.gotBtn} />
       </View>
+
+      <TermEditorSheet
+        visible={editorOpen}
+        deckId={deckId!}
+        term={current}
+        onClose={() => setEditorOpen(false)}
+        onSaved={(message) => {
+          setEditorOpen(false);
+          setSnack(message);
+          reloadCurrentTermPage();
+        }}
+        onError={setSnack}
+      />
+
+      <Snackbar visible={snack != null} onDismiss={() => setSnack(null)} duration={2500}>
+        {snack}
+      </Snackbar>
     </View>
   );
 }
@@ -269,6 +392,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 8 },
   iconBtn: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: 8 },
   progress: { marginHorizontal: 16 },
   cardWrap: { flex: 1, padding: 16, justifyContent: "center" },
   star: { position: "absolute", top: 8, right: 8, zIndex: 2 },

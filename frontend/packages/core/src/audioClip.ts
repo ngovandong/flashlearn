@@ -29,6 +29,62 @@ function writeAscii(view: DataView, offset: number, text: string): void {
   }
 }
 
+/** Concatenate byte chunks without relying on `Blob`. */
+export function concatBytes(parts: Uint8Array[]): Uint8Array {
+  const total = parts.reduce((n, part) => n + part.byteLength, 0);
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.byteLength;
+  }
+  return out;
+}
+
+/**
+ * Linear-interpolation resample of mono signed 16-bit little-endian PCM.
+ * Used to match Azure Speech's 16 kHz short-audio requirement.
+ */
+export function resamplePcm16Mono(
+  pcm: Uint8Array,
+  fromRate: number,
+  toRate: number
+): Uint8Array {
+  if (fromRate === toRate || fromRate <= 0 || toRate <= 0) return pcm;
+  const srcSamples = Math.floor(pcm.byteLength / 2);
+  if (srcSamples <= 1) return pcm;
+  const destSamples = Math.max(1, Math.round((srcSamples * toRate) / fromRate));
+  const srcView = new DataView(pcm.buffer, pcm.byteOffset, srcSamples * 2);
+  const out = new Uint8Array(destSamples * 2);
+  const outView = new DataView(out.buffer);
+  if (destSamples === 1) {
+    outView.setInt16(0, srcView.getInt16(0, true), true);
+    return out;
+  }
+  const ratio = (srcSamples - 1) / (destSamples - 1);
+  for (let i = 0; i < destSamples; i++) {
+    const srcPos = i * ratio;
+    const i0 = Math.floor(srcPos);
+    const i1 = Math.min(i0 + 1, srcSamples - 1);
+    const frac = srcPos - i0;
+    const s0 = srcView.getInt16(i0 * 2, true);
+    const s1 = srcView.getInt16(i1 * 2, true);
+    outView.setInt16(i * 2, Math.round(s0 + (s1 - s0) * frac), true);
+  }
+  return out;
+}
+
+/** True when the buffer contains at least one sample above `threshold`. */
+export function pcm16HasSignal(pcm: Uint8Array, threshold = 256): boolean {
+  const usable = pcm.byteLength - (pcm.byteLength % 2);
+  if (usable < 2) return false;
+  const view = new DataView(pcm.buffer, pcm.byteOffset, usable);
+  for (let i = 0; i < usable; i += 2) {
+    if (Math.abs(view.getInt16(i, true)) >= threshold) return true;
+  }
+  return false;
+}
+
 /**
  * Wrap raw signed 16-bit little-endian PCM in a mono WAV container.
  * `pcm` length is truncated to an even byte count.

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Button, Text, TextInput, useTheme } from "react-native-paper";
 import { checkAnswer, diffAnswer } from "@flashlearn/core";
@@ -15,6 +15,15 @@ export function FillQuestion({ question, onAnswer, disabled }: Props) {
   const [value, setValue] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<ReturnType<typeof checkAnswer> | null>(null);
+
+  // The parent mounts a single FillQuestion for the whole session (no `key`
+  // per question), so state must be reset explicitly when the question
+  // changes or a second FILL in a row reuses the previous answer/result.
+  useEffect(() => {
+    setValue("");
+    setSubmitted(false);
+    setResult(null);
+  }, [question]);
 
   const submit = () => {
     if (disabled || submitted) return;

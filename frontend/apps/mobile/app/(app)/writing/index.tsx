@@ -59,7 +59,7 @@ interface Correction {
   issue?: string;
 }
 
-interface WritingFeedback {
+export interface WritingFeedback {
   overallBand?: number;
   bands?: Record<string, number>;
   summary?: string;
@@ -413,7 +413,7 @@ export default function WritingScreen() {
   );
 }
 
-function FeedbackReport({
+export function FeedbackReport({
   feedback,
   draft,
   draftMarks,

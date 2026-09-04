@@ -141,7 +141,10 @@ export interface CourseLesson {
   slug?: string;
   title: string;
   order?: number;
-  passed?: boolean;
+  progress?: {
+    status?: string;
+    best_score?: number;
+  };
 }
 
 export interface CourseSection {
@@ -238,7 +241,8 @@ export interface SpeakingConversation {
 }
 
 export interface SpeakingLine {
-  role?: string;
+  id?: string;
+  speaker?: string;
   text?: string;
   voice?: string;
 }

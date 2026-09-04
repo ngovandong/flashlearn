@@ -100,7 +100,9 @@ class AzureSpeechProvider:
         mime = (mime_type or "").lower()
         if "ogg" in mime or "opus" in mime:
             return "audio/ogg; codecs=opus"
-        return "audio/wav; codecs=audio/pcm; samplerate=16000"
+        if "wav" in mime or "pcm" in mime or "l16" in mime:
+            return "audio/wav; codecs=audio/pcm; samplerate=16000"
+        raise AiProviderError(f"Azure Speech does not support mime type {mime_type!r}; expected WAV/PCM or OGG/Opus")
 
     @staticmethod
     def _assessment_header(reference_text: str) -> str:

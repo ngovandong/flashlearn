@@ -95,8 +95,9 @@ export function createUserSettingsApi(client: AxiosInstance) {
       );
     },
     async updateSettings(data: Partial<UserSettings>): Promise<UserSettings> {
-      const res = await client.patch<UserSettings>("users/my_settings/", data);
-      return res.data;
+      return unwrapResponse<UserSettings>(
+        await client.patch<UserSettings>("users/my_settings/", data)
+      );
     },
     async getLearningStreak(): Promise<LearningStreak> {
       return unwrapResponse<LearningStreak>(

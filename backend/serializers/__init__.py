@@ -32,6 +32,7 @@ from .term import (
     ReviseTermSerializer,
     TermNestInDeckSerializer,
     TermSerializer,
+    TermWithProgressSerializer,
 )
 from .token import ActiveAccountSerializer, CustomTokenObtainPairSerializer
 from .user import (

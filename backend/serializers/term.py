@@ -23,6 +23,17 @@ class TermSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "meaning", "image", "deck", "total_revisions", *AI_FIELDS)
 
 
+class TermWithProgressSerializer(TermSerializer):
+    """`TermSerializer` plus the viewing user's progress row id, so Learn-mode
+    "Got it" / "Still learning" actions have an id to PUT correct/incorrect
+    against. Only `get_terms_for_deck(..., user=...)` annotates this field."""
+
+    learning_progress_id = serializers.UUIDField(read_only=True, allow_null=True)
+
+    class Meta(TermSerializer.Meta):
+        fields = (*TermSerializer.Meta.fields, "learning_progress_id")
+
+
 class TermNestInDeckSerializer(serializers.ModelSerializer):
     image = serializers.URLField(allow_blank=True)
 

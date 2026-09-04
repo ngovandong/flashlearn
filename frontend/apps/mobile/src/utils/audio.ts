@@ -6,17 +6,27 @@ import {
   setAudioModeAsync,
   type AudioPlayer,
   type AudioRecorder as NativeAudioRecorder,
+  type AudioStreamBuffer,
 } from "expo-audio";
 import * as Speech from "expo-speech";
 import { Platform } from "react-native";
 import { EncodingType, File, Paths } from "expo-file-system";
-import { prepareSpeechClip, encodeBase64, type SpeechClipInput } from "@flashlearn/core";
+import {
+  concatBytes,
+  encodeBase64,
+  encodeWavFromPcm16,
+  pcm16HasSignal,
+  prepareSpeechClip,
+  resamplePcm16Mono,
+  type SpeechClipInput,
+} from "@flashlearn/core";
 
-// RecordingPresets.HIGH_QUALITY records an MPEG-4/AAC container on iOS &
-// Android ('.m4a') but WebM/Opus in the browser — "audio/m4a" isn't a MIME
-// type the Gemini audio-understanding API recognizes, so it silently fails
-// to decode the bytes and reports back that no speech was heard.
-const RECORDING_MIME_TYPE = Platform.OS === "web" ? "audio/webm" : "audio/mp4";
+// Azure Speech's short-audio REST API only accepts 16 kHz mono PCM WAV (or
+// OGG/Opus). Native HIGH_QUALITY recordings are AAC in an .m4a container;
+// sending those as "audio/mp4" makes Azure (and often Gemini) hear silence
+// and report that the microphone didn't pick up any voice.
+const AZURE_WAV_RATE = 16000;
+const WEB_RECORDING_MIME_TYPE = "audio/webm";
 
 export type PlaybackResult = { ok: true } | { ok: false; error: string };
 
@@ -157,38 +167,124 @@ export async function playBase64Audio(
   return playSpeechClip({ audio: base64, mime_type: mimeType });
 }
 
+async function setPlaybackAudioMode(): Promise<void> {
+  await setAudioModeAsync({
+    allowsRecording: false,
+    playsInSilentMode: true,
+    interruptionMode: "mixWithOthers",
+    shouldRouteThroughEarpiece: false,
+  });
+}
+
+function copyPcmChunk(data: AudioStreamBuffer["data"]): Uint8Array {
+  const src = data instanceof Uint8Array ? data : new Uint8Array(data);
+  return new Uint8Array(src);
+}
+
 export class AudioRecorder {
   private recording: NativeAudioRecorder | null = null;
+  private stream: InstanceType<typeof AudioModule.AudioStream> | null = null;
+  private streamSub: { remove: () => void } | null = null;
+  private chunks: Uint8Array[] = [];
+  private streamRate = AZURE_WAV_RATE;
 
   async start(): Promise<void> {
+    stopPlayback();
     const permission = await requestRecordingPermissionsAsync();
     if (!permission.granted) {
       throw new Error("Microphone permission was denied.");
     }
-    await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
-    const recording = new AudioModule.AudioRecorder(RecordingPresets.HIGH_QUALITY);
-    await recording.prepareToRecordAsync();
-    recording.record();
-    this.recording = recording;
+    await setAudioModeAsync({
+      allowsRecording: true,
+      playsInSilentMode: true,
+      interruptionMode: "doNotMix",
+      shouldRouteThroughEarpiece: false,
+    });
+
+    if (Platform.OS === "web") {
+      try {
+        const recording = new AudioModule.AudioRecorder(RecordingPresets.HIGH_QUALITY);
+        await recording.prepareToRecordAsync();
+        recording.record();
+        this.recording = recording;
+      } catch (e) {
+        await setPlaybackAudioMode();
+        throw e;
+      }
+      return;
+    }
+
+    this.chunks = [];
+    this.streamRate = AZURE_WAV_RATE;
+    const stream = new AudioModule.AudioStream({
+      sampleRate: AZURE_WAV_RATE,
+      channels: 1,
+      encoding: "int16",
+    });
+    this.streamSub = stream.addListener("audioStreamBuffer", (buffer: AudioStreamBuffer) => {
+      this.streamRate = buffer.sampleRate || AZURE_WAV_RATE;
+      this.chunks.push(copyPcmChunk(buffer.data));
+    });
+    try {
+      await stream.start();
+    } catch (e) {
+      this.streamSub.remove();
+      this.streamSub = null;
+      await setPlaybackAudioMode();
+      throw e;
+    }
+    this.stream = stream;
   }
 
   async stop(): Promise<{ uri: string; base64: string; mimeType: string } | null> {
-    if (!this.recording) return null;
-    await this.recording.stop();
-    const uri = this.recording.uri;
-    this.recording = null;
-    if (!uri) return null;
-    const base64 = await new File(uri).base64();
-    return { uri, base64, mimeType: RECORDING_MIME_TYPE };
+    try {
+      if (this.recording) {
+        await this.recording.stop();
+        const uri = this.recording.uri;
+        this.recording = null;
+        if (!uri) return null;
+        const base64 = await new File(uri).base64();
+        return { uri, base64, mimeType: WEB_RECORDING_MIME_TYPE };
+      }
+
+      if (!this.stream) return null;
+      this.stream.stop();
+      this.streamSub?.remove();
+      this.streamSub = null;
+      this.stream = null;
+      const chunks = this.chunks;
+      const rate = this.streamRate;
+      this.chunks = [];
+
+      const pcm = concatBytes(chunks);
+      if (!pcm16HasSignal(pcm)) return null;
+      const pcm16k = rate === AZURE_WAV_RATE ? pcm : resamplePcm16Mono(pcm, rate, AZURE_WAV_RATE);
+      const wav = encodeWavFromPcm16(pcm16k, AZURE_WAV_RATE, 1);
+      const base64 = encodeBase64(wav);
+      const file = new File(Paths.cache, `recording-${Date.now()}.wav`);
+      file.write(base64, { encoding: EncodingType.Base64 });
+      return { uri: file.uri, base64, mimeType: "audio/wav" };
+    } finally {
+      await setPlaybackAudioMode();
+    }
   }
 
   async cancel(): Promise<void> {
-    if (!this.recording) return;
-    await this.recording.stop();
-    this.recording = null;
+    if (this.recording) {
+      await this.recording.stop();
+      this.recording = null;
+    }
+    if (this.stream) {
+      this.stream.stop();
+      this.streamSub?.remove();
+      this.streamSub = null;
+      this.stream = null;
+      this.chunks = [];
+    }
+    await setPlaybackAudioMode();
   }
 
   get isRecording(): boolean {
-    return !!this.recording;
+    return !!this.recording || !!this.stream;
   }
 }

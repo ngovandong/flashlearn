@@ -1,10 +1,13 @@
 import {
+  concatBytes,
   decodeBase64,
   encodeBase64,
   encodeWavFromPcm16,
   extensionForMime,
   isPcmMime,
+  pcm16HasSignal,
   prepareSpeechClip,
+  resamplePcm16Mono,
   sampleRateFromMime,
 } from "@flashlearn/core";
 
@@ -76,5 +79,30 @@ describe("audioClip", () => {
   it("round-trips base64 decode", () => {
     const bytes = new Uint8Array([10, 20, 30, 40]);
     expect(decodeBase64(encodeBase64(bytes))).toEqual(bytes);
+  });
+
+  it("concatenates PCM chunks", () => {
+    expect(concatBytes([new Uint8Array([1, 2]), new Uint8Array([3])])).toEqual(
+      new Uint8Array([1, 2, 3])
+    );
+  });
+
+  it("detects silence vs a real PCM sample", () => {
+    expect(pcm16HasSignal(new Uint8Array([0, 0, 0, 0]))).toBe(false);
+    const loud = new Uint8Array(2);
+    new DataView(loud.buffer).setInt16(0, 1200, true);
+    expect(pcm16HasSignal(loud)).toBe(true);
+  });
+
+  it("resamples mono PCM16 to a different rate", () => {
+    const src = new Uint8Array(8);
+    const view = new DataView(src.buffer);
+    view.setInt16(0, 0, true);
+    view.setInt16(2, 1000, true);
+    view.setInt16(4, 0, true);
+    view.setInt16(6, -1000, true);
+    const dest = resamplePcm16Mono(src, 8000, 16000);
+    expect(dest.byteLength).toBe(16);
+    expect(new DataView(dest.buffer).getInt16(0, true)).toBe(0);
   });
 });

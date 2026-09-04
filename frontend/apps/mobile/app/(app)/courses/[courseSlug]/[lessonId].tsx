@@ -28,6 +28,7 @@ import {
   type PlaybackResult,
 } from "@/utils/audio";
 import { unwrap } from "@/utils/apiError";
+import { queryKeys } from "@/query/keys";
 import { MarkedText, type TextMark } from "@/components/MarkedText";
 import VocabModal, { type VocabSelection, type TermMatch } from "@/components/VocabModal";
 import { useFloatingTabBarHeight } from "@/components/ui/FloatingTabBar";
@@ -373,7 +374,9 @@ export default function CourseLessonScreen() {
   const [vocabSnack, setVocabSnack] = useState<string | null>(null);
 
   const courseQuery = useQuery({
-    queryKey: ["course", courseSlug],
+    // Shared with the course-detail (lesson list) screen so a role-play/dictation
+    // save here is reflected there without a stale re-fetch.
+    queryKey: queryKeys.courses.detail(courseSlug!),
     queryFn: async () => unwrap<{ sections?: { lessons?: CourseLesson[] }[] }>(await courseApi.getCourse(courseSlug!)),
     enabled: !!courseSlug,
   });
@@ -543,6 +546,11 @@ export default function CourseLessonScreen() {
     setScenePlaying(false);
     setSceneIndex(null);
     stopPlayback();
+    // stopPlayback() interrupts the native player without resolving the
+    // "didJustFinish" listener playLine() is awaiting, so that promise may
+    // never settle — clear the Listen/Stop indicator here instead of relying
+    // on it.
+    setPlayingLine(null);
   }, []);
 
   const playScene = async () => {
@@ -613,6 +621,7 @@ export default function CourseLessonScreen() {
   const cancelRolePlay = async () => {
     rpRef.current = false;
     stopPlayback();
+    setPlayingLine(null);
     if (recorder.current.isRecording) await recorder.current.cancel();
     setRpActive(false);
     setRpIndex(null);
@@ -630,15 +639,24 @@ export default function CourseLessonScreen() {
   };
 
   const stopRecording = async () => {
-    const recorded = await recorder.current.stop();
-    setRpRecording(false);
-    const idx = rpIndexRef.current;
-    if (idx == null) return;
-    const line = lines[idx];
-    if (recorded && line?.text) {
-      turnsRef.current.push({ target_text: line.text, audio: recorded.base64, mime_type: recorded.mimeType });
+    try {
+      const recorded = await recorder.current.stop();
+      const idx = rpIndexRef.current;
+      if (idx == null) return;
+      if (!recorded) {
+        setPlaybackError("The microphone didn't capture any sound. Please try again.");
+        return;
+      }
+      const line = lines[idx];
+      if (line?.text) {
+        turnsRef.current.push({ target_text: line.text, audio: recorded.base64, mime_type: recorded.mimeType });
+      }
+      runRolePlayFrom(idx + 1, rpCharacterRef.current || rpCharacter || "");
+    } catch (e) {
+      setPlaybackError(e instanceof Error ? e.message : "Could not save that recording.");
+    } finally {
+      setRpRecording(false);
     }
-    runRolePlayFrom(idx + 1, rpCharacterRef.current || rpCharacter || "");
   };
 
   // ── Per-line pronunciation practice ────────────────────────────────────
@@ -661,6 +679,7 @@ export default function CourseLessonScreen() {
 
   const startLineRecording = async (index: number) => {
     try {
+      stopScene();
       await lineRecorder.current.start();
       setLineRecordingIndex(index);
     } catch (e) {
@@ -669,15 +688,24 @@ export default function CourseLessonScreen() {
   };
 
   const stopLineRecording = async (index: number, text: string) => {
-    const recorded = await lineRecorder.current.stop();
-    setLineRecordingIndex(null);
-    if (!recorded || !text) return;
-    analyzeLineMutation.mutate({
-      index,
-      targetText: text,
-      audio: recorded.base64,
-      mimeType: recorded.mimeType,
-    });
+    try {
+      const recorded = await lineRecorder.current.stop();
+      if (!recorded) {
+        setPlaybackError("The microphone didn't capture any sound. Please try again.");
+        return;
+      }
+      if (!text) return;
+      analyzeLineMutation.mutate({
+        index,
+        targetText: text,
+        audio: recorded.base64,
+        mimeType: recorded.mimeType,
+      });
+    } catch (e) {
+      setPlaybackError(e instanceof Error ? e.message : "Could not save that recording.");
+    } finally {
+      setLineRecordingIndex(null);
+    }
   };
 
   // ── Listen & type ─────────────────────────────────────────────────────
@@ -690,6 +718,7 @@ export default function CourseLessonScreen() {
     setDictationPlaying(false);
     setDictationIndex(null);
     stopPlayback();
+    setPlayingLine(null);
   }, []);
 
   const enterDictation = () => {
@@ -766,6 +795,11 @@ export default function CourseLessonScreen() {
   const dictationMutation = useMutation({
     mutationFn: async (payload: { score: number; lines: DictationSavedLine[] }) =>
       unwrap(await courseApi.submitDictation({ lessonId: lessonId!, ...payload })),
+    onSuccess: () => {
+      // Refresh so `lesson.progress.last_dictation` (the "Last X%" badge) and a
+      // re-entered dictation both reflect the just-saved score immediately.
+      courseQuery.refetch();
+    },
   });
 
   const checkDictation = () => {
@@ -1101,7 +1135,14 @@ export default function CourseLessonScreen() {
                       compact
                       icon={playingLine === line.text ? "stop" : "volume-high"}
                       disabled={!hasAudio}
-                      onPress={() => (playingLine === line.text ? stopPlayback() : playLine(line))}
+                      onPress={() => {
+                        if (playingLine === line.text) {
+                          stopPlayback();
+                          setPlayingLine(null);
+                        } else {
+                          playLine(line);
+                        }
+                      }}
                       style={styles.linePlay}
                     >
                       {playingLine === line.text ? "Stop" : "Listen"}

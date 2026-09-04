@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Image, ScrollView, StyleSheet, View } from "react-native";
-import { Text, TextInput } from "react-native-paper";
+import { Snackbar, Text, TextInput } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -81,6 +81,8 @@ export default function MixedReviseScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useFloatingTabBarHeight();
   const [cards, setCards] = useState<ReviseCard[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const [snack, setSnack] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
   const [result, setResult] = useState<{ correct: boolean; answer?: unknown; blanks?: boolean[]; score?: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -97,12 +99,16 @@ export default function MixedReviseScreen() {
   const loadSession = useCallback(() => {
     let active = true;
     setCards(null);
+    setLoadError(false);
     reviseApi.buildSession(SESSION_SIZE).then((res) => {
       if (!active) return;
       try {
         const data = unwrap<{ cards: ReviseCard[] }>(res);
         setCards(data.cards ?? []);
       } catch {
+        // Distinguish "request failed" from "nothing to revise" so the retry
+        // button actually retries instead of just going back.
+        setLoadError(true);
         setCards([]);
       }
     });
@@ -155,9 +161,10 @@ export default function MixedReviseScreen() {
         } else {
           setStreak(0);
         }
-      } catch {
-        setResult({ correct: false });
-        setStreak(0);
+      } catch (e) {
+        // A failed request is not a wrong answer — leave the card unanswered
+        // so the user can retry instead of silently losing their streak/score.
+        setSnack(e instanceof Error ? e.message : "Could not check that answer.");
       }
     },
     [submitting, result, card]
@@ -195,7 +202,13 @@ export default function MixedReviseScreen() {
   };
 
   if (cards === null) return <LoadingView />;
-  if (cards.length === 0) return <ErrorView message="Nothing to revise right now" onRetry={() => router.back()} />;
+  if (cards.length === 0) {
+    return loadError ? (
+      <ErrorView message="Could not load your revise session" onRetry={loadSession} />
+    ) : (
+      <ErrorView message="Nothing to revise right now" onRetry={() => router.back()} />
+    );
+  }
 
   if (done) {
     const pct = total ? Math.round((score / total) * 100) : 0;
@@ -466,6 +479,10 @@ export default function MixedReviseScreen() {
           <GradientButton label={index + 1 >= total ? "Finish" : "Continue"} icon="arrow-forward" onPress={advance} />
         </View>
       ) : null}
+
+      <Snackbar visible={!!snack} onDismiss={() => setSnack(null)} duration={3000}>
+        {snack}
+      </Snackbar>
     </View>
   );
 }

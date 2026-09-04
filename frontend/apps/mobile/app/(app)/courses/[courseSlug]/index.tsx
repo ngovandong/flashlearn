@@ -66,7 +66,7 @@ export default function CourseDetailScreen() {
               subtitle={item.sectionTitle}
               onPress={() => router.push(`/courses/${courseSlug}/${item.id}`)}
               trailing={
-                item.passed ? (
+                item.progress?.status === "passed" ? (
                   <MaterialIcons name="check-circle" size={24} color={SUCCESS_GREEN} />
                 ) : undefined
               }

@@ -37,6 +37,10 @@ export default function DeckReviseScreen() {
         await learningApi.getReviseTerms(deckId!)
       ),
     enabled: !!deckId,
+    // Each revise session should get a fresh shuffle/question set (matches
+    // web's `useReviseTerms`), not the deck's default 60s cache.
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const questions: Question[] = useMemo(() => {

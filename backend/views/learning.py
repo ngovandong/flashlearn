@@ -13,7 +13,7 @@ from ..permissions import EditableLearningProgress
 from ..serializers import (
     CreateLearningProgressSerializer,
     ReviseTermSerializer,
-    TermSerializer,
+    TermWithProgressSerializer,
     UserLearningProgressSerializer,
 )
 from ..services import learning_service, term_service
@@ -34,7 +34,7 @@ class LearningViewSet(FlexibleViewSet):
     }
 
     serializer_map = {
-        "get_learning_terms": TermSerializer,
+        "get_learning_terms": TermWithProgressSerializer,
         "get_revise_terms": ReviseTermSerializer,
         "create": CreateLearningProgressSerializer,
     }

@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { Text, TextInput } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { evaluateDictation, overallDictationScore, tokenDisplay } from "@flashlearn/core";
 import type { Highlight, ListeningSentence } from "@flashlearn/core";
 import { listeningApi } from "@/api/services";
@@ -88,6 +88,7 @@ function scoreColor(score: number): string {
 export default function ListeningExerciseScreen() {
   const { exerciseId } = useLocalSearchParams<{ exerciseId: string }>();
   const t = useTokens();
+  const qc = useQueryClient();
   const tabBarHeight = useFloatingTabBarHeight();
   const [index, setIndex] = useState(0);
   const [inputs, setInputs] = useState<string[]>([]);
@@ -152,6 +153,15 @@ export default function ListeningExerciseScreen() {
   const currentResult = results[index] ?? null;
   const isRevealed = !!revealed[index];
 
+  // Reset the note/translation drafts whenever the active sentence changes so
+  // edits (or a Save) never leak onto a different sentence's saved meta.
+  useEffect(() => {
+    setNoteDraft(currentMeta?.note ?? "");
+    setTranslationDraft(currentMeta?.translation ?? "");
+    setSelectedWord(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, exerciseId]);
+
   const saveProgressMutation = useMutation({
     mutationFn: (payload: LineResult[]) =>
       listeningApi.saveProgress({ exerciseId: exerciseId!, lines: payload }),
@@ -162,6 +172,11 @@ export default function ListeningExerciseScreen() {
       unwrap<{ progress?: { best_score?: number } }>(
         await listeningApi.submit({ exerciseId: exerciseId!, ...payload })
       ),
+    onSuccess: () => {
+      // Refresh the topic catalog / progress so the completion badge and
+      // best-score don't stay stale for a full staleTime window.
+      qc.invalidateQueries({ queryKey: ["listening"] });
+    },
   });
 
   const resetMutation = useMutation({
@@ -264,13 +279,19 @@ export default function ListeningExerciseScreen() {
 
   const finish = async () => {
     stopPlayback();
-    const finalResults = sentences.map((s, i) => results[i] ?? {
-      position: s.position,
-      target: s.text ?? "",
-      typed: inputs[i] || "",
-      correct: 0,
-      total: s.tokens?.length ?? 0,
-      tokens_correct: [],
+    // Any sentence the learner typed but never explicitly Checked/Revealed
+    // should still be graded against their typed answer, not scored as 0.
+    const finalResults = sentences.map((s, i) => {
+      if (results[i]) return results[i]!;
+      const evalResult = evaluateDictation(s.tokens ?? [], inputs[i] || "");
+      return {
+        position: s.position,
+        target: s.text ?? "",
+        typed: inputs[i] || "",
+        correct: evalResult.correct,
+        total: evalResult.total,
+        tokens_correct: evalResult.tokensCorrect,
+      };
     });
     setResults(finalResults);
     setRevealed(sentences.map(() => true));
@@ -318,12 +339,13 @@ export default function ListeningExerciseScreen() {
 
   const saveSentenceNote = () => {
     if (!current) return;
+    // Send the trimmed draft as-is (including "") so clearing a note or
+    // translation actually clears it server-side instead of being ignored.
     metaMutation.mutate({
       position: current.position,
-      note: noteDraft || undefined,
-      translation: translationDraft || undefined,
+      note: noteDraft.trim(),
+      translation: translationDraft.trim(),
     });
-    setNoteDraft("");
   };
 
   if (isLoading) return <LoadingView />;

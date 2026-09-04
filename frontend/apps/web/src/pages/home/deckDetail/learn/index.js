@@ -1,9 +1,19 @@
-import { Button, Chip, IconButton } from "@mui/material";
+import {
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import EditNoteIcon from "@mui/icons-material/EditNote";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineRounded";
 import CircleButton from "@components/circleButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -21,7 +31,13 @@ import { LocalLoadingWrapper } from "@components/loading";
 import { speak } from "@api-services/voiceService";
 import { deckService } from "@api-services/deckService";
 import { LEARNING_TERM_PAGE_SIZE } from "@constants/pageSize";
+import { COLORS } from "@constants/colors";
 import { highlightMainWord } from "@utils/exampleText";
+import TermEditorDrawer from "../editDeck/termEditorDrawer";
+
+const ROUND_DIALOG_SLOT_PROPS = {
+  paper: { sx: { borderRadius: "1rem", minWidth: { sm: "24rem" } } },
+};
 
 // Fisher–Yates shuffle over [0, n) — produces a random visiting order of the
 // deck's absolute term indices.
@@ -63,8 +79,14 @@ function LearnPage()
     isFlipped: false,
     latest_id: "",
   });
+  // Lets a deck editor fix a mistake (wrong meaning, image, etc.) or remove a
+  // bad term without leaving the study flow.
+  const [editingTerm, setEditingTerm] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const totalTerms = deck?.number_of_term ?? 0;
+  const canEditTerms = deck?.my_permission === "O" || deck?.my_permission === "E";
   const absoluteIndex =
     order && order.length > 0 ? order[currentState.position] : null;
 
@@ -338,6 +360,58 @@ function LearnPage()
     }
   };
 
+  // Re-fetch the page holding the current card from the server, so edits made
+  // in the editor drawer (which doesn't return the saved term) show up right away.
+  const reloadCurrentPage = async () =>
+  {
+    if (absoluteIndex == null) return;
+    const page = Math.floor(absoluteIndex / LEARNING_TERM_PAGE_SIZE) + 1;
+    try {
+      const res = await learningService.getLearningTerms(deckID, page);
+      if (!res.error) {
+        setTermsByPage((pre) => ({ ...pre, [page]: res.data.results }));
+      }
+    } catch (error) {
+      // Ignore — the card just keeps showing the pre-edit data.
+    }
+  };
+
+  const handleDeleteTerm = async () =>
+  {
+    if (!currentTerm) return;
+    setDeleting(true);
+    try {
+      const res = await termService.bulkDelete(deckID, [currentTerm.id]);
+      if (res.error) {
+        toast.error(getFirstError(res.error));
+        return;
+      }
+      setPendingDelete(false);
+      toast.success("Term deleted");
+      const newTotal = Math.max(0, totalTerms - 1);
+      if (newTotal === 0) {
+        navigate(-1);
+        return;
+      }
+      // The absolute indices shift after a delete — simplest correct fix is to
+      // drop every cached page and rebuild a fresh sequential order.
+      setTermsByPage({});
+      lastTermRef.current = null;
+      setIsShuffled(false);
+      setOrder(Array.from({ length: newTotal }, (_, i) => i));
+      setDeck((pre) => (pre ? { ...pre, number_of_term: newTotal } : pre));
+      setCurrentState((pre) => ({
+        ...pre,
+        position: Math.min(pre.position, newTotal - 1),
+        isFlipped: false,
+      }));
+    } catch (error) {
+      toast.error("Failed to delete term");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   useEffect(() =>
   {
     // A fresh mount / deep-link resumes sequentially from the resolved index.
@@ -431,6 +505,24 @@ function LearnPage()
           }`}</span> */}
         </div>
         <div className="right-header">
+          {canEditTerms && (
+            <>
+              <IconButton
+                component="label"
+                title="Edit this term"
+                onClick={() => setEditingTerm(currentTerm)}
+              >
+                <EditNoteIcon />
+              </IconButton>
+              <IconButton
+                component="label"
+                title="Delete this term"
+                onClick={() => setPendingDelete(true)}
+              >
+                <DeleteOutlineIcon />
+              </IconButton>
+            </>
+          )}
           <div className="close-btn">
             <IconButton component="label" onClick={() => navigate(-1)}>
               <CloseIcon />
@@ -779,6 +871,50 @@ function LearnPage()
           </div>
         </div>
       </div>
+
+      <TermEditorDrawer
+        open={editingTerm != null}
+        deckID={deckID}
+        term={editingTerm}
+        onClose={() => setEditingTerm(null)}
+        onSaved={(message) => {
+          toast.success(message);
+          setEditingTerm(null);
+          reloadCurrentPage();
+        }}
+        onError={(message) => toast.error(message)}
+      />
+
+      <Dialog
+        open={pendingDelete}
+        onClose={() => setPendingDelete(false)}
+        slotProps={ROUND_DIALOG_SLOT_PROPS}
+      >
+        <DialogTitle>Delete "{currentTerm?.name}"?</DialogTitle>
+        <DialogContent>
+          This can't be undone — the learning progress saved for this term goes
+          with it.
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPendingDelete(false)} color="inherit" disabled={deleting}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            sx={{
+              borderRadius: "999px",
+              paddingInline: "1.5rem",
+              textTransform: "none",
+              backgroundColor: COLORS.ERROR_RED,
+            }}
+            onClick={handleDeleteTerm}
+            disabled={deleting}
+          >
+            {deleting ? "Deleting…" : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <LocalLoadingWrapper open={isLoading} />
     </div>
   ) : (

@@ -56,6 +56,8 @@ interface UnitDetail {
   progress?: { highlights?: Highlight[] };
 }
 
+const PASS_THRESHOLD = 80;
+
 // The explanation blocks carry light HTML (`<b>` etc.). React Native has no HTML
 // renderer, so flatten to plain text for display and for the highlight helper.
 function stripHtml(html?: string): string {
@@ -381,6 +383,10 @@ export default function GrammarUnitScreen() {
   const [noteDraft, setNoteDraft] = useState("");
   const [clearing, setClearing] = useState(false);
   const [snack, setSnack] = useState<string | null>(null);
+  // Bumped after a successful clear to force-remount every ExerciseCard —
+  // they keep local given/order/result state that a query invalidation alone
+  // won't reset (mirrors web's `resetNonce`).
+  const [resetNonce, setResetNonce] = useState(0);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.grammar.unit(unitKey!),
@@ -455,6 +461,7 @@ export default function GrammarUnitScreen() {
           try {
             unwrap(await grammarApi.clearUnitProgress(unitKey));
             await queryClient.invalidateQueries({ queryKey: ["grammar"] });
+            setResetNonce((n) => n + 1);
             setSnack("Lesson results cleared.");
           } catch {
             setSnack("Could not clear results.");
@@ -472,7 +479,10 @@ export default function GrammarUnitScreen() {
   const exercises = data?.exercises ?? [];
   const blocks = data?.explanation ?? [];
   const hasResults = exercises.some(
-    (e: any) => e.progress?.status === "completed" || (e.progress?.best_score || 0) > 0
+    (e: any) =>
+      e.progress?.status === "completed" ||
+      (e.progress?.best_score || 0) > 0 ||
+      (e.progress?.last_result?.results || []).length > 0
   );
 
   return (
@@ -537,19 +547,17 @@ export default function GrammarUnitScreen() {
       {highlights.length > 0 ? (
         <View style={styles.chips}>
           {highlights.map((h) => (
-            <PressableScale
+            <View
               key={h.text}
-              onPress={() => openVocab(h.text)}
               style={[styles.wordChip, { backgroundColor: t.feature("spellcheck").tint, borderRadius: t.radii.pill }]}
             >
-              <Text style={{ color: t.feature("spellcheck").fg, fontWeight: "700", fontSize: 13 }}>{h.text}</Text>
-              <MaterialIcons
-                name="close"
-                size={15}
-                color={t.feature("spellcheck").fg}
-                onPress={() => highlightMutation.mutate({ text: h.text, remove: true })}
-              />
-            </PressableScale>
+              <PressableScale onPress={() => openVocab(h.text)}>
+                <Text style={{ color: t.feature("spellcheck").fg, fontWeight: "700", fontSize: 13 }}>{h.text}</Text>
+              </PressableScale>
+              <PressableScale onPress={() => highlightMutation.mutate({ text: h.text, remove: true })} hitSlop={6}>
+                <MaterialIcons name="close" size={15} color={t.feature("spellcheck").fg} />
+              </PressableScale>
+            </View>
           ))}
         </View>
       ) : null}
@@ -582,7 +590,7 @@ export default function GrammarUnitScreen() {
       ) : null}
 
       {exercises.map((exercise, i) => (
-        <FadeSlideIn key={exercise.key} delay={40 + i * 30} style={{ marginTop: 12 }}>
+        <FadeSlideIn key={`${exercise.key}:${resetNonce}`} delay={40 + i * 30} style={{ marginTop: 12 }}>
           <ExerciseCard exercise={exercise} unitTitle={data?.title ?? ""} />
         </FadeSlideIn>
       ))}
@@ -620,15 +628,35 @@ function ExerciseCard({ exercise, unitTitle }: { exercise: GrammarExercise; unit
   const kind = exercise.kind ?? "fill_blank";
   const items = (exercise.items ?? []) as ExerciseItem[];
   const exerciseOptions = exercise.options ?? [];
+  const progress = exercise.progress as { status?: string; last_result?: GradeResult } | undefined;
+  const savedResults = progress?.last_result?.results;
 
   const initGiven = () =>
-    items.map((item) => (kind === "fill_blank" ? Array(item.blanks || 1).fill("") : [""]));
+    items.map((item, i) => {
+      const prev = Array.isArray(savedResults) ? savedResults[i]?.given : undefined;
+      if (kind === "fill_blank") {
+        const n = item.blanks || 1;
+        return Array.from({ length: n }, (_, k) => (Array.isArray(prev) ? prev[k] ?? "" : ""));
+      }
+      return [Array.isArray(prev) ? prev[0] ?? "" : ""];
+    });
   const initOrder = (): ReorderState[] =>
     items.map((item) => ({ bank: [...(item.tokens ?? [])], line: [] }));
+  // Replay the last saved attempt so a revisited unit shows the prior score
+  // and per-item right/wrong state instead of a blank exercise (matches web).
+  const initResult = (): GradeResult | null => {
+    if (!Array.isArray(savedResults) || !savedResults.length) return null;
+    const score = progress?.last_result?.score || 0;
+    return {
+      score,
+      results: savedResults,
+      completed: progress?.status === "completed" || score >= PASS_THRESHOLD,
+    };
+  };
 
   const [given, setGiven] = useState<string[][]>(initGiven);
   const [order, setOrder] = useState<ReorderState[]>(initOrder);
-  const [result, setResult] = useState<GradeResult | null>(null);
+  const [result, setResult] = useState<GradeResult | null>(initResult);
   const [explain, setExplain] = useState<Record<number, { answer?: string; examples?: string[]; tip?: string } | { error: string } | { loading: true }>>({});
 
   const submitMutation = useMutation({

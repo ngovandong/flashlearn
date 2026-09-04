@@ -14,12 +14,13 @@ class TermManager(Manager):
         if user is not None:
             from ..models import UserLearningProgress
 
-            revisions_subquery = UserLearningProgress.objects.filter(
+            progress = UserLearningProgress.objects.filter(
                 term_id=OuterRef("pk"),
                 user_id=user.id,
-            ).values("total_revisions")[:1]
+            )
             qs = qs.annotate(
-                total_revisions=Coalesce(Subquery(revisions_subquery), 0),
+                total_revisions=Coalesce(Subquery(progress.values("total_revisions")[:1]), 0),
+                learning_progress_id=Subquery(progress.values("id")[:1]),
             )
         return qs
 
