@@ -1024,10 +1024,18 @@ export default function SpeakingCoach() {
   // Load a conversation straight from the URL (/speaking-coach/:id) when
   // navigating between conversations after the initial load (the first load is
   // handled by the bootstrap effect). Restores the accent and voice it was
-  // generated with so the setup reflects the saved conversation.
+  // generated with so the setup reflects the saved conversation. Leaving the
+  // session URL (Practice tab) clears the loaded dialogue so the generate form
+  // is the only thing on screen.
   useEffect(() => {
     if (!bootstrappedRef.current) return;
-    if (!routeId) return;
+    if (!routeId) {
+      if (conversationRef.current) {
+        resetPracticeState();
+        setConversation(null);
+      }
+      return;
+    }
     if (conversationRef.current?.id === routeId) return;
     let active = true;
     speakingService.getConversation(routeId).then((res) => {
@@ -1118,6 +1126,10 @@ export default function SpeakingCoach() {
 
         {!initializing && view === "practice" && (
           <div className="sc-practice">
+            {/* Revising a saved session (/speaking-coach/:id) should show the
+                dialogue, not the generate form. Practice tab (no id) is how
+                you start a new conversation. */}
+            {!routeId && (
             <section className="sc-setup" data-tour="sc-setup">
               <div className="sc-mode-toggle">
                 <button
@@ -1305,6 +1317,7 @@ export default function SpeakingCoach() {
                 {loading ? "Assembling dialogue…" : "Generate conversation"}
               </button>
             </section>
+            )}
 
             {conversation && (
               <section className="sc-conversation">

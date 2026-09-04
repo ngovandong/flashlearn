@@ -536,8 +536,11 @@ $sc-low: $error-red;
 }
 
 /* ---------- Conversation ---------- */
-.sc-conversation {
+.sc-setup + .sc-conversation {
     margin-top: $space-5;
+}
+
+.sc-conversation {
     display: flex;
     flex-direction: column;
     gap: $space-4;

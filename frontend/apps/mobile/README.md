@@ -235,6 +235,10 @@ cd android
 ./gradlew assembleRelease
 ```
 
+Behind a TLS-inspecting VPN (Zscaler), Gradle may fail to download Maven/JitPack
+artifacts until the Zscaler root CA is in the JDK truststore — see
+**Common issues** below.
+
 The APK lands at `apps/mobile/android/app/build/outputs/apk/release/app-release.apk`.
 Without a configured release keystore, Gradle signs it with the default Expo
 debug keystore — fine for sideloading/internal testing, not for the Play Store.
@@ -277,3 +281,22 @@ so the build doesn't fail; crash reporting itself still works without it.
   package/bundle identifiers, and OAuth consent-screen settings.
 - **Workspace packages do not resolve:** install from `frontend/`, not from
   `apps/mobile/`; Metro is configured to resolve the hoisted workspace modules.
+- **Gradle fails with `PKIX path building failed` / SSL handshake (Zscaler VPN):**
+  Homebrew OpenJDK 17 does not trust the Zscaler root CA, so Maven downloads
+  fail (often first seen on `:10play_tentap-editor`). Import the PEM into the
+  JDK truststore (repeat after `brew upgrade openjdk@17`), stop the Gradle
+  daemon so it reloads the store, then rebuild. If the next error is
+  `No route to host` talking to JitPack, prefer IPv4:
+
+```bash
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+keytool -importcert -noprompt \
+  -alias zscaler-root-ca \
+  -file /path/to/Zscaler-root-ca.pem \
+  -keystore "$JAVA_HOME/libexec/openjdk.jdk/Contents/Home/lib/security/cacerts" \
+  -storepass changeit
+cd android
+./gradlew --stop
+export GRADLE_OPTS="-Djava.net.preferIPv4Stack=true"
+./gradlew assembleRelease
+```
