@@ -29,6 +29,7 @@ import VocabModal from "./vocabModal";
 import { renderMarkedText } from "./vocabMarks";
 import { blobToWav } from "./audioWav";
 import { evaluateDictation, hydrateDictation } from "./dictationDiff";
+import { sameSpeaker, avatarStyle, initials } from "./speakerRoles";
 
 // A dictation is treated as a good listening pass at this % of words heard
 // correctly (label + colour only — it never affects the lesson's role-play pass).
@@ -88,18 +89,6 @@ async function clipBytes(entry) {
 // sentence (different voices) get their own clip.
 function lineKey(line) {
   return `${line?.voice || ""}|${line?.text || ""}`;
-}
-
-// Deterministic avatar tint from a character name (uses the brand hue range so
-// it always reads on-theme in light and dark mode).
-function avatarStyle(name) {
-  let hash = 0;
-  for (let i = 0; i < (name || "").length; i++) hash = (hash * 31 + name.charCodeAt(i)) % 360;
-  return { background: `hsl(${hash}, 55%, 55%)` };
-}
-
-function initials(name) {
-  return (name || "?").trim().slice(0, 1).toUpperCase();
 }
 
 // Character art + backgrounds are mirrored to our own Cloudinary at crawl time
@@ -220,6 +209,11 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
   // One { line, blob } per spoken turn so each can be scored + replayed on its own.
   const sessionTurnsRef = useRef([]);
   const rpIndexRef = useRef(null);
+  const rpActiveRef = useRef(false);
+  const rpCharacterRef = useRef(null);
+  // Bumped whenever scene/role-play/dictation playback is superseded so a
+  // stale AudioBufferSource onended cannot keep walking the transcript.
+  const playGenRef = useRef(0);
 
   // ── Vocabulary coach + highlighting (inherited from the Speaking Coach) ──
   const [selected, setSelected] = useState(null); // vocab popup
@@ -382,6 +376,8 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
       setHighlights([]);
       setTermMatches([]);
       setRpActive(false);
+      rpActiveRef.current = false;
+      playGenRef.current += 1;
       scenePlayingRef.current = false;
       setScenePlaying(false);
       setSceneIndex(null);
@@ -426,6 +422,8 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
     buffersRef.current.clear();
     setSelected(null);
     setRpActive(false);
+    rpActiveRef.current = false;
+    playGenRef.current += 1;
     setLesson(found);
 
     // Replay the last saved role-play breakdown + re-highlight noted words, so
@@ -691,15 +689,28 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
   // ── Role-play flow ────────────────────────────────────────────────────
   const beginRolePlay = (characterName) => {
     if (!lesson?.lines?.length) return;
+    // Kill scene/dictation audio so their onended callbacks cannot keep
+    // walking the whole dialogue after the learner picks a character.
+    scenePlayingRef.current = false;
+    setScenePlaying(false);
+    setSceneIndex(null);
+    dictationPlayingRef.current = false;
+    setDictationPlaying(false);
+    stopSource();
+    const gen = ++playGenRef.current;
     setResult(null);
     setSessions([]);
+    rpCharacterRef.current = characterName;
+    rpActiveRef.current = true;
     setRpCharacter(characterName);
     setRpActive(true);
     sessionTurnsRef.current = [];
-    stepRolePlay(0, characterName);
+    stepRolePlay(0, characterName, gen);
   };
 
   const cancelRolePlay = () => {
+    rpActiveRef.current = false;
+    playGenRef.current += 1;
     stopSource();
     const rec = recorderRef.current;
     if (rec && rec.state !== "inactive") {
@@ -713,12 +724,14 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
     }
     recorderRef.current = null;
     rpIndexRef.current = null;
+    rpCharacterRef.current = null;
     setRpActive(false);
     setRpIndex(null);
     setRpRecording(false);
   };
 
-  const stepRolePlay = (index, characterName = rpCharacter) => {
+  const stepRolePlay = (index, characterName = rpCharacterRef.current, gen = playGenRef.current) => {
+    if (!rpActiveRef.current || gen !== playGenRef.current) return;
     const lines = lesson.lines;
     if (index >= lines.length) {
       finishRolePlay();
@@ -727,11 +740,11 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
     rpIndexRef.current = index;
     setRpIndex(index);
     const line = lines[index];
-    if (line.speaker === characterName) {
+    if (sameSpeaker(line.speaker, characterName)) {
       // The learner speaks this line — wait for them to record.
       return;
     }
-    playLine(line, () => stepRolePlay(index + 1, characterName));
+    playLine(line, () => stepRolePlay(index + 1, characterName, gen));
   };
 
   const startRecording = async () => {
@@ -763,6 +776,7 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
   };
 
   const finishRolePlay = async () => {
+    rpActiveRef.current = false;
     setRpActive(false);
     setRpIndex(null);
     rpIndexRef.current = null;
@@ -823,13 +837,14 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
   // ── Scene playback: step through lines in sync with the dialogue audio ──
   const stopScene = useCallback(() => {
     scenePlayingRef.current = false;
+    playGenRef.current += 1;
     setScenePlaying(false);
     setSceneIndex(null);
     stopSource();
   }, [stopSource]);
 
-  const stepScene = (index) => {
-    if (!scenePlayingRef.current) return;
+  const stepScene = (index, gen = playGenRef.current) => {
+    if (!scenePlayingRef.current || gen !== playGenRef.current) return;
     const lines = lesson.lines;
     if (index >= lines.length) {
       stopScene();
@@ -837,7 +852,7 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
     }
     setSceneIndex(index);
     playLine(lines[index], () => {
-      if (scenePlayingRef.current) stepScene(index + 1);
+      if (scenePlayingRef.current && gen === playGenRef.current) stepScene(index + 1, gen);
     });
   };
 
@@ -848,9 +863,10 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
     }
     if (!lesson?.lines?.length || !lesson.has_audio) return;
     setResult(null);
+    const gen = ++playGenRef.current;
     scenePlayingRef.current = true;
     setScenePlaying(true);
-    stepScene(0);
+    stepScene(0, gen);
   };
 
   // ── Listen & type (dictation) ─────────────────────────────────────────
@@ -1343,7 +1359,7 @@ export default function CoursePanel({ basePath = "/speaking-coach/course" }) {
         )}
         <div className="sc-course-transcript">
           {lesson.lines.map((line, i) => {
-            const isMine = rpActive && line.speaker === rpCharacter;
+            const isMine = rpActive && sameSpeaker(line.speaker, rpCharacter);
             const isCurrent = rpActive && rpIndex === i;
             const isListening = dictationOn && dictationIndex === i;
             const lineDiff = dictationOn ? dictationResult?.lines?.[i] : null;

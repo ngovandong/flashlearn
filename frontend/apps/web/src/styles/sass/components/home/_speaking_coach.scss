@@ -673,58 +673,58 @@ $sc-low: $error-red;
 
 .sc-line {
     display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
     transition: opacity 0.2s $ease;
 
-    &--them {
-        justify-content: flex-start;
-    }
-
-    &--me {
-        justify-content: flex-end;
+    &.is-right {
+        flex-direction: row-reverse;
     }
 
     &:not(.sc-line--active) {
         opacity: 0.78;
     }
 
+    &__avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-weight: 800;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+
     &__bubble {
-        max-width: 85%;
-        padding: 1rem 1.1rem;
-        border-radius: $radius-lg;
+        max-width: 78%;
+        padding: 0.55rem 0.8rem;
+        border-radius: $radius-md;
         border: 1px solid $border-subtle;
         background: $surface;
     }
 
-    &--me &__bubble {
-        background: $main-purple;
-        border-color: $main-purple;
-        color: $on-primary;
-        border-bottom-right-radius: $radius-sm - 0.25rem;
-    }
-
-    &--them &__bubble {
-        border-bottom-left-radius: $radius-sm - 0.25rem;
-    }
-
     &--active &__bubble {
-        box-shadow: 0 0 0 3px rgba(var(--fl-primary-rgb), 0.28);
+        border-color: $main-purple;
+        box-shadow: 0 0 0 2px rgba(var(--fl-primary-rgb), 0.25);
     }
 
     &__speaker {
         display: block;
-        font-size: 0.65rem;
+        font-size: 0.72rem;
         font-weight: 800;
+        color: $minor-text-color;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
-        opacity: 0.7;
-        margin-bottom: 0.3rem;
+        letter-spacing: 0.03em;
+        margin-bottom: 0.15rem;
     }
 
     &__text {
-        margin: 0;
+        margin: 0.15rem 0 0;
         font-size: 0.92rem;
         font-weight: 600;
-        line-height: 1.55;
+        line-height: 1.45;
         cursor: text;
     }
 
@@ -735,10 +735,6 @@ $sc-low: $error-red;
         margin-top: 0.7rem;
         padding-top: 0.7rem;
         border-top: 1px dashed $border-subtle;
-    }
-
-    &--me &__actions {
-        border-top-color: rgba(255, 255, 255, 0.25);
     }
 }
 
@@ -786,15 +782,6 @@ $sc-low: $error-red;
 
     &:hover {
         background: rgba($sc-mid, 0.5);
-    }
-}
-
-// Keep term underlines legible inside the purple "me" bubble.
-.sc-line--me .sc-hl--term {
-    text-decoration-color: rgba(255, 255, 255, 0.85);
-
-    &:hover {
-        background: rgba(255, 255, 255, 0.2);
     }
 }
 
@@ -2145,7 +2132,7 @@ $sc-low: $error-red;
     }
 
     .sc-line__bubble {
-        max-width: 92%;
+        max-width: 88%;
     }
 
     .sc-segmented {

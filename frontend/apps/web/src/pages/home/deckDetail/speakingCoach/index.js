@@ -13,7 +13,6 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
 import MicIcon from "@mui/icons-material/Mic";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
@@ -34,6 +33,13 @@ import VocabModal from "./vocabModal";
 import { renderMarkedText } from "./vocabMarks";
 import { blobToWav } from "./audioWav";
 import { markSpeakingCoachPracticed } from "@utils/practiceBanner";
+import {
+  sameSpeaker,
+  uniqueSpeakers,
+  speakerAlign,
+  avatarStyle,
+  initials,
+} from "./speakerRoles";
 
 const ACCENTS = [
   { id: "US", label: "American (US)", lang: "en-US" },
@@ -190,6 +196,7 @@ export default function SpeakingCoach() {
   const [speakingLineId, setSpeakingLineId] = useState(null);
   const [fullPlayState, setFullPlayState] = useState("stopped"); // stopped | playing
   const [rolePlayIndex, setRolePlayIndex] = useState(null);
+  const [rpCharacter, setRpCharacter] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
@@ -209,6 +216,8 @@ export default function SpeakingCoach() {
   const sessionChunksRef = useRef([]);
   const cancelFullRef = useRef(false);
   const rolePlayRef = useRef(null);
+  const rpCharacterRef = useRef(null);
+  const playGenRef = useRef(0);
   const audioContextRef = useRef(null);
   const activeSourceRef = useRef(null);
   const audioCacheRef = useRef(new Map());
@@ -528,11 +537,14 @@ export default function SpeakingCoach() {
   };
 
   function resetPracticeState() {
+    playGenRef.current += 1;
     stopSpeaking();
     cancelFullRef.current = true;
     setFullPlayState("stopped");
     setRolePlayIndex(null);
     rolePlayRef.current = null;
+    rpCharacterRef.current = null;
+    setRpCharacter(null);
     sessionChunksRef.current = [];
     if (mediaRecorderRef.current && isRecording) {
       try {
@@ -560,6 +572,7 @@ export default function SpeakingCoach() {
   // ---- Full conversation playback ----
   const playFull = async () => {
     if (!conversation) return;
+    playGenRef.current += 1;
     cancelFullRef.current = false;
     setFullPlayState("playing");
     const lines = conversation.lines;
@@ -577,21 +590,49 @@ export default function SpeakingCoach() {
 
   const stopFull = () => {
     cancelFullRef.current = true;
+    playGenRef.current += 1;
     stopSpeaking();
     setFullPlayState("stopped");
     setActiveLineId(null);
   };
 
   // ---- Role play ----
-  const startRolePlay = () => {
+  const startRolePlay = (characterName) => {
     if (!conversation) return;
+    cancelFullRef.current = true;
+    stopSpeaking();
+    setFullPlayState("stopped");
+    const gen = ++playGenRef.current;
     sessionChunksRef.current = [];
     setAnalysisResult(null);
     setSessionAnalyses([]);
-    stepRolePlay(0);
+    rpCharacterRef.current = characterName;
+    setRpCharacter(characterName);
+    stepRolePlay(0, characterName, gen);
   };
 
-  const stepRolePlay = (index) => {
+  const cancelRolePlay = () => {
+    playGenRef.current += 1;
+    stopSpeaking();
+    setRolePlayIndex(null);
+    rolePlayRef.current = null;
+    rpCharacterRef.current = null;
+    setRpCharacter(null);
+    setActiveLineId(null);
+    if (mediaRecorderRef.current && isRecording) {
+      try {
+        mediaRecorderRef.current.onstop = null;
+        mediaRecorderRef.current.stop();
+        mediaRecorderRef.current.stream?.getTracks().forEach((t) => t.stop());
+      } catch {
+        /* ignore */
+      }
+    }
+    setIsRecording(false);
+  };
+
+  const stepRolePlay = (index, characterName = rpCharacterRef.current, gen = playGenRef.current) => {
+    if (gen !== playGenRef.current) return;
     if (!conversation || index >= conversation.lines.length) {
       finishRolePlay();
       return;
@@ -600,7 +641,7 @@ export default function SpeakingCoach() {
     setRolePlayIndex(index);
     const line = conversation.lines[index];
     setActiveLineId(line.id);
-    if (line.speaker === userName) {
+    if (sameSpeaker(line.speaker, characterName)) {
       // wait for the user to record their line
       return;
     }
@@ -608,13 +649,16 @@ export default function SpeakingCoach() {
     // recorded, not synthesized, so skip them).
     const nextSpoken = conversation.lines
       .slice(index + 1)
-      .find((l) => l.speaker !== userName);
-    playLine(line, () => stepRolePlay(index + 1), () => prefetchLine(nextSpoken?.text));
+      .find((l) => !sameSpeaker(l.speaker, characterName));
+    playLine(line, () => stepRolePlay(index + 1, characterName, gen), () => prefetchLine(nextSpoken?.text));
   };
 
   const finishRolePlay = async () => {
+    playGenRef.current += 1;
     setRolePlayIndex(null);
     rolePlayRef.current = null;
+    rpCharacterRef.current = null;
+    setRpCharacter(null);
     setActiveLineId(null);
     const turns = sessionChunksRef.current;
     if (!turns.length || !conversation) return;
@@ -869,11 +913,6 @@ export default function SpeakingCoach() {
     if (line) saveSentence(line.text);
   };
 
-  const swapRoles = () => {
-    setUserName(partnerName);
-    setPartnerName(userName);
-  };
-
   // Load history whenever the History tab becomes active (it's now a URL view).
   useEffect(() => {
     if (view !== "history") return;
@@ -1075,6 +1114,10 @@ export default function SpeakingCoach() {
   }, [ttsVoices, selectedVoice, legacyVoiceMap, accent]);
 
   const busy = rolePlayIndex !== null || fullPlayState !== "stopped";
+  const convoSpeakers = useMemo(
+    () => uniqueSpeakers(conversation?.lines),
+    [conversation]
+  );
 
   return (
     <div className="sc-wrapper">
@@ -1350,14 +1393,30 @@ export default function SpeakingCoach() {
                         <PlayArrowIcon fontSize="small" /> Listen to full
                       </button>
                     )}
-                    <button
-                      className="sc-btn sc-btn--primary"
-                      onClick={startRolePlay}
-                      disabled={busy}
-                    >
-                      <MicIcon fontSize="small" />
-                      {rolePlayIndex !== null ? "Role-playing…" : "Live role play"}
-                    </button>
+                    {rolePlayIndex !== null ? (
+                      <button className="sc-btn sc-btn--danger" onClick={cancelRolePlay}>
+                        <StopIcon fontSize="small" /> Stop role play
+                      </button>
+                    ) : convoSpeakers.length ? (
+                      convoSpeakers.map((name) => (
+                        <button
+                          key={name}
+                          className="sc-btn sc-btn--primary"
+                          onClick={() => startRolePlay(name)}
+                          disabled={busy}
+                        >
+                          <MicIcon fontSize="small" /> Play {name}
+                        </button>
+                      ))
+                    ) : (
+                      <button
+                        className="sc-btn sc-btn--primary"
+                        onClick={() => startRolePlay(userName)}
+                        disabled={busy}
+                      >
+                        <MicIcon fontSize="small" /> Live role play
+                      </button>
+                    )}
                   </div>
                   <div className="sc-action-group">
                     <div className="sc-speed">
@@ -1372,14 +1431,6 @@ export default function SpeakingCoach() {
                       />
                       <span className="sc-speed__val">{speed.toFixed(1)}x</span>
                     </div>
-                    <button
-                      className="sc-icon-btn"
-                      onClick={swapRoles}
-                      disabled={busy}
-                      title="Swap roles"
-                    >
-                      <SwapHorizIcon fontSize="small" />
-                    </button>
                     <button
                       className="sc-icon-btn sc-icon-btn--danger"
                       onClick={resetPracticeState}
@@ -1403,15 +1454,19 @@ export default function SpeakingCoach() {
 
                 <div className="sc-lines">
                   {conversation.lines.map((line) => {
-                    const isMe = line.speaker === userName;
+                    const isRight = speakerAlign(line.speaker, convoSpeakers) === "right";
+                    const isMine = rpCharacter && sameSpeaker(line.speaker, rpCharacter);
                     const isActive = activeLineId === line.id;
                     return (
                       <div
                         key={line.id}
-                        className={`sc-line ${isMe ? "sc-line--me" : "sc-line--them"} ${
+                        className={`sc-line ${isRight ? "is-right" : ""} ${
                           isActive ? "sc-line--active" : ""
                         }`}
                       >
+                        <span className="sc-line__avatar" style={avatarStyle(line.speaker)}>
+                          {initials(line.speaker)}
+                        </span>
                         <div className="sc-line__bubble">
                           <span className="sc-line__speaker">{line.speaker}</span>
                           <p
@@ -1455,7 +1510,7 @@ export default function SpeakingCoach() {
                             </div>
                           ) : (
                             isActive &&
-                            isMe && (
+                            isMine && (
                               <div className="sc-line__roleplay">
                                 {isRecording ? (
                                   <button
@@ -1480,6 +1535,15 @@ export default function SpeakingCoach() {
                     );
                   })}
                 </div>
+
+                {rolePlayIndex !== null && (
+                  <div className="sc-course-roleplay-bar">
+                    <span>Role-play as {rpCharacter}</span>
+                    <button type="button" onClick={cancelRolePlay}>
+                      Cancel
+                    </button>
+                  </div>
+                )}
 
                 <NotePanel
                   targetType="speaking_session"

@@ -423,7 +423,7 @@ export const TOURS = [
         id: "sc.actions",
         selector: '[data-tour="sc-actions"]',
         title: "Listen & role-play",
-        body: "Play the whole dialogue, or start Live role play to record your lines and get a pronunciation score.",
+        body: "Play the whole dialogue, or pick a character to Live role-play — the other speakers play, then it stops on your line so you can record. Pick the other name to practise their lines instead.",
       },
       {
         id: "sc.vocab",
