@@ -2128,7 +2128,11 @@ $sc-low: $error-red;
 
     .sc-action-group {
         width: 100%;
-        justify-content: space-between;
+        justify-content: flex-start;
+
+        .sc-btn {
+            min-height: 44px;
+        }
     }
 
     .sc-line__bubble {
@@ -2170,6 +2174,10 @@ $sc-low: $error-red;
 
     .sc-course-roleplay-setup__pick {
         flex-wrap: wrap;
+
+        button {
+            min-height: 44px;
+        }
     }
 
     // Stack the dictation controls and let each button take a full row so nothing
