@@ -43,6 +43,15 @@
       [
         "expo-build-properties",
         {
+          "android": {
+            "buildArchs": ["arm64-v8a", "armeabi-v7a"],
+            "useLegacyPackaging": true,
+            "enableBundleCompression": true,
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "networkInspector": false,
+            "extraProguardRules": "-keep class com.facebook.hermes.unicode.** { *; }\n-keep class com.facebook.jni.** { *; }"
+          },
           "ios": {
             "extraPods": [
               {
