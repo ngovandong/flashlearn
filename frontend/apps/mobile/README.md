@@ -203,6 +203,205 @@ npm test
 
 
 
+## Building & running iOS (Simulator and Physical iPhone)
+
+Because FlashLearn uses custom native modules (`@10play/tentap-editor`, `expo-audio`,
+`@react-native-google-signin/google-signin`, `expo-gl`), standard Expo Go cannot
+run the full app. You must build a **development client** or compile the native
+project with Xcode.
+
+### 1. One-time macOS setup
+
+1. **Install full Xcode:**
+   - From the Mac App Store, or download the `.xip` directly from
+     [developer.apple.com/download/all/](https://developer.apple.com/download/all/)
+     (useful on MDM-managed Macs where App Store is blocked).
+   - If using the CLI, `xcodes` (`brew install --cask xcodes-app` or the standalone
+     binary) can download and extract Xcode without the App Store:
+     ```bash
+     xcodes install 16.2
+     ```
+2. **Configure Command Line Tools & accept license:**
+   ```bash
+   sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+   sudo xcodebuild -license accept
+   sudo xcodebuild -runFirstLaunch
+   ```
+3. **Install CocoaPods:**
+   ```bash
+   brew install cocoapods
+   ```
+4. **Install an iOS Simulator Runtime:**
+   Xcode does not bundle an iOS runtime by default. If `xcrun simctl list devices available`
+   shows no devices (or `CommandError: No iOS devices available in Simulator.app`),
+   download the iOS platform runtime:
+   ```bash
+   xcodebuild -downloadPlatform iOS
+   ```
+   *(Alternatively: open Xcode > **Settings** > **Platforms** / **Components** and click **Get** next to the latest iOS Simulator).*
+
+---
+
+### 2. Environment configuration (`.env.local`)
+
+In `frontend/apps/mobile/`:
+```bash
+cp .env.sample .env.local
+```
+
+Configure `EXPO_PUBLIC_API_BASE_URL` and `EXPO_PUBLIC_WS_BASE_URL` depending on your target:
+
+| Target | `EXPO_PUBLIC_API_BASE_URL` | `EXPO_PUBLIC_WS_BASE_URL` |
+|---|---|---|
+| **iOS Simulator** | `http://127.0.0.1:8005/api/` | `ws://127.0.0.1:8005/ws` |
+| **Physical iPhone** | `http://<YOUR-MAC-LAN-IP>:8005/api/` | `ws://<YOUR-MAC-LAN-IP>:8005/ws` |
+
+> **Note for Physical Devices:** Find your Mac's LAN IP via `ipconfig getifaddr en0`. Both your Mac and iPhone must be on the same Wi-Fi network and port 8005 must be open through the firewall.
+
+---
+
+### 3. Running on the iOS Simulator (macOS)
+
+From `frontend/apps/mobile/`:
+```bash
+npx expo run:ios
+```
+Or from the `frontend/` monorepo root:
+```bash
+npm run ios -w @flashlearn/mobile
+```
+
+**What this does:**
+1. Launches Simulator.app (defaulting to the latest iPhone runtime).
+2. Compiles native pods and Swift/Objective-C code via `xcodebuild`.
+3. Installs the development app on the simulator.
+4. Starts the Metro bundler with fast refresh and hot-reloading.
+
+**Targeting a specific simulator model:**
+```bash
+# List available simulators
+xcrun simctl list devices available
+
+# Boot and run on a specific model
+npx expo run:ios --simulator="iPhone 16 Pro"
+```
+
+---
+
+### 4. Running on a Physical iPhone
+
+Testing on a real iPhone requires enabling Developer Mode, setting up free code signing in Xcode, and installing the app over USB or Wi-Fi.
+
+#### Step 1: Enable Developer Mode on iPhone
+1. On your iPhone running iOS 16+, open **Settings** > **Privacy & Security**.
+2. Scroll to the bottom and tap **Developer Mode**.
+3. Toggle it **ON** and reboot your device when prompted.
+4. After restarting, unlock your device and tap **Turn On** to confirm.
+
+#### Step 2: Configure Code Signing in Xcode
+1. Connect your iPhone to your Mac via USB cable (tap **Trust This Computer** on your iPhone).
+2. Open the Xcode workspace:
+   ```bash
+   open ios/FlashLearn.xcworkspace
+   ```
+3. In Xcode's left sidebar, click the top-level **FlashLearn** project.
+4. Select the **FlashLearn** target under "Targets", then open the **Signing & Capabilities** tab.
+5. Check **Automatically manage signing**.
+6. Under **Team**, select your Apple Account (Personal Team). Any free personal Apple ID works.
+7. *If Xcode reports a Bundle Identifier conflict:* adjust the **Bundle Identifier** temporarily (e.g. `site.ngovandong.flashlearn.dev`) in the Signing tab.
+
+#### Step 3: Build and install
+
+**Option A — Via Expo CLI:**
+```bash
+cd frontend/apps/mobile
+
+# Debug build (streams JS dynamically from Mac Metro bundler):
+npx expo run:ios --device
+
+# Standalone Release build (embeds JS bundle directly on device):
+npx expo run:ios --configuration Release --device "Hachanndayy" --no-bundler
+```
+Select your connected iPhone from the interactive prompt (or pass the exact device name with `--device "<Device Name>"`).
+
+**Option B — Directly in Xcode:**
+1. In Xcode's top toolbar, click the device selector next to the **FlashLearn** scheme.
+2. Select your connected physical iPhone (instead of a simulator).
+3. Press **Run (⌘R)** or click the **Play** button. Xcode builds and installs the app onto your phone.
+
+#### Step 4: Trust the Developer Certificate on iPhone
+The first time you install an app signed with a free personal Apple ID, iOS blocks launch:
+1. On your iPhone, open **Settings** > **General** > **VPN & Device Management**.
+2. Under **Developer App**, tap your Apple ID.
+3. Tap **Trust "[Your Apple ID]"** and confirm.
+4. Open the **FlashLearn** app from your home screen.
+
+---
+
+### 5. Running Standalone on iPhone (Cable Unplugged & MacBook Turned Off)
+
+By default, `npx expo run:ios --device` builds in **Debug** mode, which loads the JavaScript bundle live from the Metro bundler on your Mac and launches into the Expo Dev Launcher. If you close your laptop or unplug, the app will fail with "No dev server found".
+
+To install FlashLearn as a fully standalone, offline app that boots directly to the Login screen:
+
+1. **Point `.env.local` to a live/staging backend:**
+   ```dotenv
+   EXPO_PUBLIC_API_BASE_URL=https://flashlearnapi.dongkiemem.site/api/
+   EXPO_PUBLIC_WS_BASE_URL=wss://flashlearnapi.dongkiemem.site/ws
+   ```
+
+2. **Build and install via CLI (fastest, no Xcode UI required):**
+   ```bash
+   cd frontend/apps/mobile
+
+   # On physical iPhone:
+   npx expo run:ios --configuration Release --device --no-bundler
+
+   # Or specify the exact device name:
+   npx expo run:ios --configuration Release --device "Hachanndayy" --no-bundler
+
+   # On iOS Simulator:
+   npx expo run:ios --configuration Release --simulator "iPhone 17" --no-bundler
+   ```
+   **What each flag does:**
+   - `--configuration Release`: Bundles and embeds all JavaScript code + assets directly into the binary, removing the Expo Dev Launcher and Metro dependency.
+   - `--device [name]`: Targets your connected physical iPhone.
+   - `--no-bundler`: Skips starting the local Metro server because the app has everything embedded.
+
+3. **Alternative: Build via Xcode UI:**
+   - Open `ios/FlashLearn.xcworkspace` in Xcode.
+   - Go to menu **Product** > **Scheme** > **Edit Scheme...** (or press `⌘<`).
+   - Select **Run** in the left column.
+   - Under the **Info** tab, change **Build Configuration** from `Debug` to **`Release`**.
+   - Uncheck **Debug executable** and click **Close**.
+   - Select your physical iPhone in the top toolbar and press **Run (`⌘R`)**.
+
+4. **Unplug & Go:**
+   - You can stop Xcode / CLI, unplug the USB cable, and turn off your MacBook. FlashLearn will run like any standard App Store application.
+
+> **Note on Free Apple ID Certificate Expiration:**
+> Apple allows free Personal Team certificates to run on physical devices for **7 days**. After 7 days, iOS will display *"FlashLearn is no longer available"*. Simply plug your phone back in and re-run the build command or hit **`⌘R`** in Xcode to refresh the signature for another 7 days (all user data and logins are preserved). Paid Apple Developer accounts ($99/yr) stay valid for 1 year or 90 days via TestFlight.
+
+---
+
+### 6. Alternative: Cloud Builds via EAS (No local Xcode required)
+
+If you cannot install Xcode locally or need to share test builds:
+1. **Simulator Build (free, no Apple Developer Account needed):**
+   ```bash
+   cd frontend/apps/mobile
+   npx eas-cli build -p ios --profile preview
+   ```
+   Download the resulting `.tar.gz`, extract the `FlashLearn.app` bundle, and drag it onto the iOS Simulator window.
+2. **Internal Distribution for Real Device:**
+   Requires a paid Apple Developer account ($99/year) to register device UDIDs and manage ad-hoc provisioning:
+   ```bash
+   npx eas-cli device:create
+   npx eas-cli build -p ios --profile preview
+   ```
+
+---
+
 ## Building a release APK locally
 
 `android/` and `ios/` are git-ignored (see `frontend/.gitignore`) — they are

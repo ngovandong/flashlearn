@@ -4,6 +4,7 @@
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
+    "postinstall": "node -e \"const fs=require('fs'); if(!fs.existsSync('node_modules')) fs.symlinkSync('../../node_modules', 'node_modules', 'junction');\"",
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
