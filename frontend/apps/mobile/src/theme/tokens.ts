@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Easing, type EasingFunction, type ViewStyle } from "react-native";
+import { Easing, Platform, type EasingFunction, type ViewStyle } from "react-native";
 import { getPalette, hexToRgb, NEUTRALS, rgbTriplet, type Neutral, type Palette } from "@flashlearn/core";
 import { useAppTheme } from "@/theme/ThemeProvider";
 
@@ -117,6 +117,16 @@ export interface Tokens {
 
 function makeShadow(mode: "light" | "dark", strong: boolean): ViewStyle {
   const opacity = mode === "dark" ? (strong ? 0.5 : 0.35) : strong ? 0.16 : 0.08;
+  if (Platform.OS === "android") {
+    return {
+      boxShadow: [{
+        offsetX: 0,
+        offsetY: strong ? 10 : 6,
+        blurRadius: strong ? 22 : 14,
+        color: `rgba(11, 16, 32, ${opacity})`,
+      }],
+    };
+  }
   return {
     shadowColor: "#0b1020",
     shadowOffset: { width: 0, height: strong ? 10 : 6 },

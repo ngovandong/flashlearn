@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Animated, Platform, Pressable, StyleSheet, View } from "react-native";
+import { Animated, Pressable, StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
 import { BlurView } from "expo-blur";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -68,17 +68,9 @@ export function FloatingTabBar({ state, navigation, insets }: BottomTabBarProps)
           t.shadowStrong,
           {
             borderColor: border,
-            // Re-assert after `t.shadowStrong` (elevation: 8), which would
-            // otherwise win the style-array merge and undercut this value.
-            ...Platform.select({ android: { elevation: 14 }, default: {} }),
           },
         ]}
       >
-        {/* Translucent fill lives on this clipped child, not on `bar`. On
-            Android, pairing `elevation` with a partially-transparent
-            backgroundColor on the same view forces an opaque compositing
-            plate for the shadow layer, which shows through as a mismatched
-            rectangle wherever child content doesn't fully cover it. */}
         <View style={[styles.clip, { borderRadius: BAR_RADIUS, backgroundColor: surface }]}>
           {glass ? (
             <>
@@ -190,15 +182,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: "center",
     zIndex: 20,
-    // Must exceed any scrollable content's elevation (cards use up to 8 via
-    // `shadowStrong`), or Android may paint that content over this pill.
-    ...Platform.select({ android: { elevation: 20 }, default: {} }),
   },
   bar: {
     width: "100%",
     borderRadius: BAR_RADIUS,
     borderWidth: StyleSheet.hairlineWidth,
-    ...Platform.select({ android: { elevation: 14 }, default: {} }),
   },
   clip: {
     overflow: "hidden",
