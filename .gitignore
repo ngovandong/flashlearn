@@ -125,6 +125,8 @@ GitHub.sublime-settings
 
 # docker env
 .env.docker
+.env.docker.prod
+.env.prod
 
 # Google Drive OAuth credentials (never commit these)
 drive-credentials.json

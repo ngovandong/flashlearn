@@ -1020,9 +1020,9 @@ flowchart LR
 |------|-----|
 | `docker-compose.yml` | Production — db, redis, backend, worker, frontend |
 | `docker-compose.dev.yml` | Dev hot‑reload (mounts local code) |
-| `docker-compose.dockerhub.*.selfservice.yml` | Run pre‑built Hub images (ARM64/AMD64) |
+| `docker-compose.prod.yml` | Production — pre‑built multi‑arch Hub images (amd64/arm64), deployed with `deploy.sh` |
 
-Build & push with `DOCKER=podman ./build.sh [--platform linux/arm64]`.
+Build & push with `./build.sh [--service ...] [--platform ...] [--tag ...]`.
 Production backend and worker images install the locked runtime set with
 `uv sync --frozen --no-dev`. Development-only grammar PDF/OCR tooling and
 optional crawler/Kokoro groups are therefore not present unless explicitly

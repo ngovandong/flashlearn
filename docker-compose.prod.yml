@@ -1,4 +1,57 @@
+# Production stack from pre-built multi-arch Docker Hub images (Ubuntu amd64 or Armbian arm64).
+# Run via ./deploy.sh (or: docker compose --env-file .env.docker.prod -f docker-compose.prod.yml up -d)
+name: flashlearn
+
 services:
-  frontend:
+  redis:
+    image: redis:6-alpine
+    container_name: flashlearn_redis
+    restart: unless-stopped
+    networks:
+      - flashlearn_net
+
+  backend:
+    image: ngovandong/flashlearn_backend:latest
+    pull_policy: always
+    container_name: flashlearn_backend
+    restart: unless-stopped
+    env_file:
+      - .env.docker.prod
     ports:
-      - "3000:80"
+      - "8005:8005"
+    networks:
+      - flashlearn_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+
+  worker:
+    image: ngovandong/flashlearn_worker:latest
+    pull_policy: always
+    container_name: flashlearn_worker
+    restart: unless-stopped
+    env_file:
+      - .env.docker.prod
+    networks:
+      - flashlearn_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - backend
+
+  frontend:
+    image: ngovandong/flashlearn_frontend:latest
+    pull_policy: always
+    container_name: flashlearn_frontend
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+    networks:
+      - flashlearn_net
+    depends_on:
+      - backend
+
+networks:
+  flashlearn_net:
+    driver: bridge

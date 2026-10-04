@@ -8,5 +8,5 @@ if [ "$IS_DEBUG" = "true" ]; then
     docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 else
     echo "Starting in PRODUCTION mode (Minimal)..."
-    docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build
+    docker compose --env-file .env.docker.prod -f docker-compose.prod.yml up -d
 fi

@@ -48,7 +48,7 @@ repos:
         files: '(Dockerfile|dockerfile)(\..+)?$'
         pass_filenames: true
 
-  # Shell script linter — covers build.sh, run_docker.sh (requires: brew install shellcheck)
+  # Shell script linter — covers build.sh, deploy.sh, run_docker.sh (requires: brew install shellcheck)
   - repo: local
     hooks:
       - id: shellcheck

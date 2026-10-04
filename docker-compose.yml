@@ -1,59 +1,46 @@
-
 services:
-  db:
-    image: mysql:8.0
-    container_name: flashlearn_db
-    env_file:
-      - .env.docker
-    volumes:
-      - db_data:/var/lib/mysql
-      - ./dump:/docker-entrypoint-initdb.d
-    ports:
-      - "3307:3306"
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
-
   redis:
     image: redis:6-alpine
     container_name: flashlearn_redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
+    networks:
+      - flashlearn_net
 
   backend:
     build:
       context: .
+      dockerfile: Dockerfile
       target: backend
     container_name: flashlearn_backend
-    # Uses CMD from Dockerfile (daphne)
+    restart: unless-stopped
     env_file:
       - .env.docker
-    environment:
-      - DEBUG=False
-      - CORS_ALLOW_ALL_ORIGINS=False
     ports:
       - "8005:8005"
+    networks:
+      - flashlearn_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
+      - redis
 
   worker:
     build:
       context: .
+      dockerfile: Dockerfile
       target: worker
     container_name: flashlearn_worker
+    restart: unless-stopped
     env_file:
       - .env.docker
-    environment:
-      - DEBUG=False
+    networks:
+      - flashlearn_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
+      - backend
 
   frontend:
     build:
@@ -68,9 +55,14 @@ services:
         VITE_CLOUD_NAME: "${VITE_CLOUD_NAME:-}"
         VITE_UPLOAD_PRESET: "${VITE_UPLOAD_PRESET:-}"
     container_name: flashlearn_frontend
-    # Uses default Nginx CMD
+    restart: unless-stopped
+    ports:
+      - "3001:80"
+    networks:
+      - flashlearn_net
     depends_on:
       - backend
 
-volumes:
-  db_data:
+networks:
+  flashlearn_net:
+    driver: bridge

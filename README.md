@@ -340,47 +340,70 @@ uv run python manage.py rqstats
 
 ---
 
-## Building & Publishing Docker Images
+## Building & Deploying Docker Images
 
-Use `build.sh` to build and push images to Docker Hub.
+Production runs pre-built **multi-arch** images (`linux/amd64` + `linux/arm64`) from Docker Hub, so the same
+compose file works on an Ubuntu amd64 server and an Armbian arm64 server — no `platform:` setting needed.
 
-### Prerequisites
-- [Podman](https://podman.io/) or Docker installed
-- Logged in to Docker Hub (`podman login docker.io` or `docker login`)
+### Environment files
 
-### Usage
+| File | Used for |
+|---|---|
+| `.env.docker.prod` | Production Docker stack: backend/worker env + `VITE_*` values baked into the frontend image |
+| `.env.prod` | Production env for running Django directly on a host (no Docker) |
+| `frontend/apps/web/.env.prod` | Production env for building the web app directly |
+
+All are git-ignored. Create them from `.env.docker.sample`, `.env.sample` and `frontend/apps/web/.env.sample`.
+
+### 1. Build & push (on your dev machine)
+
+Requires Docker with buildx and `docker login`.
 
 ```bash
-# Default build (linux/amd64, tagged :latest)
-DOCKER=podman ./build.sh
-
-# ARM64 build (tagged :arm64)
-DOCKER=podman ./build.sh --platform linux/arm64
+./build.sh                                   # all images, amd64+arm64, tag :latest
+./build.sh --service backend                 # a single service (backend | worker | frontend | all)
+./build.sh --platform linux/amd64            # single platform
+./build.sh --service frontend --tag v1.2.0   # custom tag
 ```
 
-The `DOCKER` environment variable selects the container CLI (`docker` by default, override with `podman`).
+| Argument | Values | Default | Description |
+|---|---|---|---|
+| `--service` | `backend`, `worker`, `frontend`, `all` | `all` | Which image to build and push |
+| `--platform` | comma-separated buildx platforms, e.g. `linux/amd64,linux/arm64` | `linux/amd64,linux/arm64` | Target architectures (multi-arch manifest) |
+| `--tag` | any image tag | `latest` | Tag pushed to Docker Hub |
+| `--env-file` | path | `.env.docker.prod` | File read for the frontend `VITE_*` build values |
+| `-h`, `--help` | | | Print usage |
 
-| Platform flag | Image tag |
-|---|---|
-| *(none)* | `latest` |
-| `--platform linux/arm64` | `arm64` |
+Images: `ngovandong/flashlearn_{backend,worker,frontend}:<tag>`.
 
-Images pushed:
-- `ngovandong/flashlearn_backend:<tag>`
-- `ngovandong/flashlearn_frontend:<tag>`
+> The frontend bundle bakes in `VITE_*` at build time — rebuild the frontend image after changing them.
 
-### Running from Docker Hub (self-service)
+### 2. Deploy (on the server)
 
-Copy `.env.docker.sample` to `.env.docker`, fill in the values, then:
+Copy `deploy.sh`, `docker-compose.prod.yml` and `.env.docker.prod` to the server (MySQL must run on the host,
+reachable via `host.docker.internal`), then:
+
+**Deploy everything** (takes no arguments) — removes any existing `flashlearn_*` containers, pulls the latest
+images, and starts the stack (frontend on port `3001`, API on `8005`):
 
 ```bash
-# ARM64 host using pre-built Docker Hub images
-docker compose --env-file .env.docker \
-  -f docker-compose.dockerhub.arm.selfservice.yml up -d
+./deploy.sh
+```
 
-# Build the self-service stack locally
-docker compose --env-file .env.docker \
-  -f docker-compose.selfservice.yml up -d --build
+**Deploy a single service** (e.g. backend after `./build.sh --service backend`) — pull and replace only that container:
+
+```bash
+docker compose --env-file .env.docker.prod -f docker-compose.prod.yml pull backend
+docker compose --env-file .env.docker.prod -f docker-compose.prod.yml up -d --force-recreate --no-deps backend
+```
+
+Service names: `redis`, `backend`, `worker`, `frontend`. If you changed code used by both the API and the
+background jobs, rebuild and redeploy `backend` and `worker` together.
+
+### Local build (no Docker Hub)
+
+```bash
+docker compose --env-file .env.docker up -d --build   # uses docker-compose.yml
 ```
 
 ---
@@ -396,7 +419,7 @@ Pre-commit hooks run automatically on every `git commit`. They cover:
 | `bandit` | Python | Security scan (hardcoded secrets, unsafe calls) |
 | `eslint --fix` | JS/JSX | React linting with auto-fix |
 | `hadolint` | Dockerfile | Dockerfile best-practice checks |
-| `shellcheck` | Shell | Shell script linting (`build.sh`, `run_docker.sh`) |
+| `shellcheck` | Shell | Shell script linting (`build.sh`, `deploy.sh`, `run_docker.sh`) |
 | `check-json/yaml/toml` | Config files | Syntax validation |
 | `detect-private-key` | All | Blocks PEM private keys from being committed |
 

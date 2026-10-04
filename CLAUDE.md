@@ -151,23 +151,19 @@ built Vite bundle.
 
 ### Building & Pushing Images to Docker Hub
 ```bash
-# Default build (linux/amd64, tagged :latest)
-DOCKER=podman ./build.sh
-
-# ARM64 build (tagged :arm64)
-DOCKER=podman ./build.sh --platform linux/arm64
+./build.sh                                  # all images, multi-arch (amd64+arm64), :latest
+./build.sh --service backend --tag v1.2.0   # one service / custom tag
+./build.sh --platform linux/amd64           # single platform
 ```
 
-The `DOCKER` env var selects the CLI (`docker` by default). Use `DOCKER=podman` when aliasing docker to podman.
-Images: `ngovandong/flashlearn_backend:<tag>` and `ngovandong/flashlearn_frontend:<tag>`.
+Options: `--service backend|worker|frontend|all`, `--platform`, `--tag`, `--env-file` (default `.env.docker.prod`, supplies `VITE_*`).
+Images: `ngovandong/flashlearn_{backend,worker,frontend}:<tag>`.
 
-### Running from Docker Hub (self-service, no local build)
+### Deploying on the server (pulls Docker Hub images, replaces running containers)
 ```bash
-# Uses pre-built images from Docker Hub
-docker compose --env-file .env.docker \
-  -f docker-compose.dockerhub.arm.selfservice.yml up -d
+./deploy.sh   # uses docker-compose.prod.yml + .env.docker.prod
 ```
-Requires `.env.docker`. The selfservice compose file targets ARM64 (`platform: linux/arm64`, tag `:arm64`).
+Images are multi-arch, so the same compose file runs on Ubuntu amd64 and Armbian arm64.
 
 ## Architecture
 
