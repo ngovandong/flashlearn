@@ -70,6 +70,14 @@ the graph:
 python3 -c "from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code(Path('.'))"
 ```
 
+### 6. Dependencies and generated files — `.cursor/rules/generated-file-exclusions.mdc`
+Applies repo-wide. Whenever any `.gitignore` changes, MUST review and update
+`.graphifyignore` with corresponding exclusions; verify existing coverage when
+no additional pattern is needed. When adding a folder, package, or subapp,
+ensure its installed dependencies, build output, and caches are excluded from
+both Git tracking and Graphify scanning. Keep authored source and lockfiles
+eligible for inclusion, and verify representative generated and source paths.
+
 ## When you add a new rule
 
 1. Add the detailed rule as `.cursor/rules/<name>.mdc` (with frontmatter:

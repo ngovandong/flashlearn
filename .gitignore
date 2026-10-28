@@ -34,7 +34,8 @@ atlassian-ide-plugin.xml
 *$py.class
 
 # Distribution / packaging
-.Python build/
+.Python
+build/
 develop-eggs/
 dist/
 downloads/
@@ -149,6 +150,14 @@ tts_previews/
 
 # Expo / React Native local cache
 **/.expo/
+
+# Installed dependencies, native build artifacts, and test output
+node_modules/
+Pods/
+*.xcframework/
+DerivedData/
+.gradle/
+coverage/
 
 # graphify — local rebuild metadata (rewritten on every run)
 graphify-out/cost.json

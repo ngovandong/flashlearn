@@ -1,0 +1,41 @@
+# Graphify does not read .gitignore. Keep generated files out of the graph,
+# including when scanning frontend/ or a workspace on its own.
+
+# Installed dependencies and generated Expo native projects
+node_modules/
+.venv/
+venv/
+env/
+ENV/
+site-packages/
+*.egg-info/
+Pods/
+ios/
+android/
+*.xcframework/
+.expo/
+.gradle/
+DerivedData/
+
+# Build output and tooling caches
+build/
+dist/
+target/
+out/
+coverage/
+htmlcov/
+__pycache__/
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.eggs/
+
+# Graphify output must not become input to the next scan
+graphify-out/
+
+# Local runtime data and generated previews
+media/uploads/
+dump/
+tts_previews/
